@@ -168,7 +168,7 @@ int main(int argc, const char* argv[]) {
     return - 1;
   L.reserve(step);
   for(int i = 0; i < step; i ++)
-    L.emplace_back(SimpleMatrix<num_t>(size * size * 2, size * size * 2 + 1).O());
+    L.emplace_back(SimpleMatrix<num_t>(size * size, size * size * 2 + 1).O());
   std::random_device rd;
   std::ranlux48 rde(rd());
   std::normal_distribution<num_t> rng(num_t(0), num_t(1));
@@ -218,7 +218,7 @@ int main(int argc, const char* argv[]) {
         for(int nn = L.size() - 1; 0 <= nn; nn --) {
           auto mpi(makeProgramInvariant<num_t>(vwork));
           vwork = move(mpi.first) * pow(mpi.second, ceil(- log(orig.epsilon()) ));
-          vwork -= L[nn].projectionPt(vwork);
+          vwork = L[nn].subMatrix(0, 0, size * size, size * size).solve(- L[nn].subMatrix(0, size * size, size * size, size * size + 1) * vwork.subVector(size * size, size * size + 1));
           SimpleVector<num_t> work(size * size * 2);
           work.O();
           for(int m = 0; m < size * size; m ++)
@@ -236,7 +236,7 @@ int main(int argc, const char* argv[]) {
     for(int k = 0; k < outr[i].rows(); k ++)
       for(int kk = 0; kk < outr[i].cols(); kk ++)
         outr[i](k, kk) /= outc[i](k, kk);
-  if(! savep2or3<num_t>(argv[4], out, true, 65535))
+  if(! savep2or3<num_t>(argv[4], outr, true, 65535))
     return - 2;
   return 0;
 }
