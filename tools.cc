@@ -229,9 +229,11 @@ int main(int argc, const char* argv[]) {
           for(int n = 0; n < orig.rows(); n ++)
             vwork.setVector(n * orig.cols(), orig.row(n));
           const auto n2(sqrt(vwork.dot(vwork) / num_t(int(size * size))));
-          for(int nn = 0; nn < L.size(); nn ++)
+          for(int nn = 0; nn < L.size(); nn ++) {
+            vwork /= sqrt(vwork.dot(vwork));
             for(int n = 0; n < vwork.size(); n ++)
               vwork[n] += rng(rde);
+          }
           for(int nn = L.size() - 1; 0 <= nn; nn --) {
             vwork[vwork.size() - 1] = num_t(int(0));
             vwork  = L[nn] * makeProgramInvariant<num_t>(vwork).first;
