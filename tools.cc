@@ -197,16 +197,19 @@ int main(int argc, const char* argv[]) {
               }
               for(int mm = 0; mm < L.size(); mm ++)
                 for(int mmm = 0; mmm < vwork.rows(); mmm ++) {
+                  auto mpi(makeProgramInvariant<num_t>(vwork.row(mmm) /= sqrt(vwork.row(mmm).dot(vwork.row(mmm))) ));
+                  L[mm].row(mmm) += move(mpi.first) * pow(mpi.second, ceil(- log(orig.epsilon()) ));
                   vwork(mmm, vwork.cols() - 1) = - vwork(mmm, mmm);
                   for(int n = 0; n < vwork.cols() - 1; n ++)
                     vwork(mmm, n) += rng(rde);
-                  auto mpi(makeProgramInvariant<num_t>(vwork.row(mmm) /= sqrt(vwork.row(mmm).dot(vwork.row(mmm))) ));
-                  L[mm].row(mmm) += move(mpi.first) * pow(mpi.second, ceil(- log(orig.epsilon()) ));
                 }
             }
           }
        }
     }
+    for(int n = 0; n < L.size(); n ++)
+      for(int nn = 0; nn < L[n].rows(); nn ++)
+        L[n].row(nn) /= L[n](nn, L[n].cols() - 1);
     for(int i = 0; i < L.size(); i ++) std::cout << L[i] << std::endl;
   }
   auto outc(out);
