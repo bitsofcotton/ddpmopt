@@ -30,6 +30,7 @@ using std::vector;
 using std::sort;
 using std::binary_search;
 using std::make_pair;
+using std::istringstream;
 
 #include <stdlib.h>
 
@@ -219,7 +220,7 @@ int main(int argc, const char* argv[]) {
   SimpleMatrix<num_t> one(size, size);
   one.O(num_t(int(1)));
   for(int j = 0; j < out.size(); j ++)
-    for(int k = 0; k < out[j].rows() - size; k ++) {
+    for(int k = 0; k < out[j].rows() - size; k ++ ) {
       std::cerr << k << " / " << out[j].rows() - size << ", " << j << " / " << out.size() << std::endl;
       for(int rc = 0; rc < recur; rc ++)
         for(int kk = 0; kk < out[j].cols() - size; kk ++) {
@@ -234,9 +235,13 @@ int main(int argc, const char* argv[]) {
             for(int n = 0; n < vwork.size(); n ++)
               vwork[n] += rng(rde);
           }
+          vwork /= sqrt(vwork.dot(vwork));
           for(int nn = L.size() - 1; 0 <= nn; nn --) {
-            vwork[vwork.size() - 1] = num_t(int(0));
-            vwork  = L[nn] * makeProgramInvariant<num_t>(vwork).first;
+            vwork[vwork.size() - 1] = - num_t(int(1));
+            auto mpi(makeProgramInvariant<num_t>(vwork));
+            vwork  = L[nn] * move(mpi.first);
+            for(int nnn = 0; nnn < vwork.size(); nnn ++)
+              vwork[nnn] = revertProgramInvariant<num_t>(make_pair(vwork[nnn], mpi.second));
             vwork /= sqrt(vwork.dot(vwork));
             for(int nnn = 0; nnn < vwork.size(); nnn ++) {
               // N.B. this is reduced in large number of rand().
