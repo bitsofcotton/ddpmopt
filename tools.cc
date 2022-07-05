@@ -210,7 +210,11 @@ int main(int argc, const char* argv[]) {
     }
     for(int n = 0; n < L.size(); n ++)
       for(int nn = 0; nn < L[n].rows(); nn ++)
-        L[n].row(nn) /= L[n](nn, L[n].cols() - 1);
+        for(int nnn = 0; nnn < L[n].cols(); nnn ++)
+          L[n](nn, nnn) -= L[n](nn, L[n].cols() - 1) / num_t(int(2));
+    for(int n = 0; n < L.size(); n ++)
+      for(int nn = 0; nn < L[n].rows(); nn ++)
+        L[n].row(nn) /= num_t(L[n](nn, L[n].cols() - 2));
     for(int i = 0; i < L.size(); i ++) std::cout << L[i] << std::endl;
   }
   auto outc(out);
@@ -220,7 +224,7 @@ int main(int argc, const char* argv[]) {
   SimpleMatrix<num_t> one(size, size);
   one.O(num_t(int(1)));
   for(int j = 0; j < out.size(); j ++)
-    for(int k = 0; k < out[j].rows() - size; k ++ ) {
+    for(int k = 0; k < out[j].rows() - size; k ++) {
       std::cerr << k << " / " << out[j].rows() - size << ", " << j << " / " << out.size() << std::endl;
       for(int rc = 0; rc < recur; rc ++)
         for(int kk = 0; kk < out[j].cols() - size; kk ++) {
