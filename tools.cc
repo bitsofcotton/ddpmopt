@@ -238,9 +238,9 @@ int main(int argc, const char* argv[]) {
               vwork[n] += rng(rde);
           for(int nn = L.size() - 1; 0 <= nn; nn --) {
             for(int nnn = 0; nnn < vwork.size(); nnn ++)
-              if(! isfinite(vwork[nnn] =
-                  max(- num_t(int(1)), min(num_t(int(1)), vwork[nnn])) ) )
-                vwork[nnn] = num_t(int(1)) / num_t(int(8));
+              vwork[nnn] = isfinite(vwork[nnn])
+                ? max(- num_t(int(1)), min(num_t(int(1)), vwork[nnn]))
+                : vwork[nnn] = num_t(int(1)) / num_t(int(8));
             vwork[vwork.size() - 1] = - num_t(int(1));
             auto mpi(makeProgramInvariant<num_t>(vwork));
             vwork  = L[nn] * move(mpi.first);
@@ -249,9 +249,9 @@ int main(int argc, const char* argv[]) {
             vwork = SimpleVector<num_t>(size * size + 1).O().setVector(0, vwork);
           }
           for(int nnn = 0; nnn < vwork.size(); nnn ++)
-            if(! isfinite(vwork[nnn] =
-                max(num_t(int(0)), min(num_t(int(1)), vwork[nnn] * num_t(int(4)) )) ) )
-              vwork[nnn] = num_t(int(1)) / num_t(int(8));
+            vwork[nnn] = isfinite(vwork[nnn])
+              ? max(num_t(int(0)), min(num_t(int(1)), vwork[nnn] * num_t(int(4)) ))
+              : vwork[nnn] = num_t(int(1)) / num_t(int(2));
           SimpleMatrix<num_t> temp(size, size);
           for(int n = 0; n < temp.rows(); n ++)
             temp.row(n) = vwork.subVector(n * size, size);
