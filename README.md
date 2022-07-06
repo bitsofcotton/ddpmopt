@@ -8,6 +8,3 @@ There exists Denoising Diffusion Probabilistic Models (DDPM; Ho et al. 2020). So
     ./tools <step-size> <block-size> <recursion-size> <meaning-less-overwrited.ppm> <in0.ppm> ... > cache.txt
     ./tools -<step-size> <block-size> <recursion-size> <meaning-less-overwrited.ppm> < cache.txt
 
-# Tips on XXX:
-This returns blurred result on block size with a little extended details in low accuracy condition.
-
