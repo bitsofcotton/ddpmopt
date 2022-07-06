@@ -210,10 +210,6 @@ int main(int argc, const char* argv[]) {
     }
     for(int n = 0; n < L.size(); n ++)
       for(int nn = 0; nn < L[n].rows(); nn ++)
-        for(int nnn = 0; nnn < L[n].cols(); nnn ++)
-          L[n](nn, nnn) -= L[n](nn, L[n].cols() - 1) / num_t(int(2));
-    for(int n = 0; n < L.size(); n ++)
-      for(int nn = 0; nn < L[n].rows(); nn ++)
         L[n].row(nn) /= num_t(L[n](nn, L[n].cols() - 2));
     for(int i = 0; i < L.size(); i ++) std::cout << L[i] << std::endl;
   }
@@ -245,7 +241,7 @@ int main(int argc, const char* argv[]) {
             auto mpi(makeProgramInvariant<num_t>(vwork));
             vwork = L[nn] * move(mpi.first);
             for(int nnn = 0; nnn < vwork.size(); nnn ++)
-              vwork[nnn] = revertProgramInvariant<num_t>(make_pair(vwork[nnn], mpi.second));
+              vwork[nnn] = revertProgramInvariant<num_t>(make_pair(vwork[nnn], mpi.second)) / pow(mpi.second, ceil(- log(orig.epsilon()) ));
             vwork = SimpleVector<num_t>(size * size + 1).O().setVector(0, vwork);
           }
           SimpleMatrix<num_t> temp(size, size);
@@ -259,19 +255,19 @@ int main(int argc, const char* argv[]) {
     for(int k = 0; k < outr[i].rows(); k ++)
       for(int kk = 0; kk < outr[i].cols(); kk ++)
         if(outc[i](k, kk) != num_t(int(0))) outr[i](k, kk) /= outc[i](k, kk);
-  auto M(outc[0](0, 0));
+  auto M(outr[0](0, 0));
   auto m(M);
   for(int i = 0; i < outr.size(); i ++)
     for(int k = 0; k < outr[i].rows(); k ++)
       for(int kk = 0; kk < outr[i].cols(); kk ++) {
-        M = max(M, outc[i](k, kk));
-        m = min(m, outc[i](k, kk));
+        M = max(M, outr[i](k, kk));
+        m = min(m, outr[i](k, kk));
       }
   if(M == m) M += num_t(int(1));
   for(int i = 0; i < outr.size(); i ++)
     for(int k = 0; k < outr[i].rows(); k ++)
       for(int kk = 0; kk < outr[i].cols(); kk ++)
-        outc[i](k, kk) = (outc[i](k, kk) - m) / (M - m);
+        outr[i](k, kk) = (outr[i](k, kk) - m) / (M - m);
   if(! savep2or3<num_t>(argv[4], outr, false, 65535))
     return - 2;
   return 0;
