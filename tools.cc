@@ -243,15 +243,11 @@ int main(int argc, const char* argv[]) {
                 : vwork[nnn] = num_t(int(1)) / num_t(int(8));
             vwork[vwork.size() - 1] = - num_t(int(1));
             auto mpi(makeProgramInvariant<num_t>(vwork));
-            vwork  = L[nn] * move(mpi.first);
+            vwork = L[nn] * move(mpi.first);
             for(int nnn = 0; nnn < vwork.size(); nnn ++)
               vwork[nnn] = revertProgramInvariant<num_t>(make_pair(vwork[nnn], mpi.second));
             vwork = SimpleVector<num_t>(size * size + 1).O().setVector(0, vwork);
           }
-          for(int nnn = 0; nnn < vwork.size(); nnn ++)
-            vwork[nnn] = isfinite(vwork[nnn])
-              ? max(num_t(int(0)), min(num_t(int(1)), vwork[nnn] * num_t(int(4)) ))
-              : vwork[nnn] = num_t(int(1)) / num_t(int(2));
           SimpleMatrix<num_t> temp(size, size);
           for(int n = 0; n < temp.rows(); n ++)
             temp.row(n) = vwork.subVector(n * size, size);
@@ -263,6 +259,19 @@ int main(int argc, const char* argv[]) {
     for(int k = 0; k < outr[i].rows(); k ++)
       for(int kk = 0; kk < outr[i].cols(); kk ++)
         if(outc[i](k, kk) != num_t(int(0))) outr[i](k, kk) /= outc[i](k, kk);
+  auto M(outc[0](0, 0));
+  auto m(M);
+  for(int i = 0; i < outr.size(); i ++)
+    for(int k = 0; k < outr[i].rows(); k ++)
+      for(int kk = 0; kk < outr[i].cols(); kk ++) {
+        M = max(M, outc[i](k, kk));
+        m = min(m, outc[i](k, kk));
+      }
+  if(M == m) M += num_t(int(1));
+  for(int i = 0; i < outr.size(); i ++)
+    for(int k = 0; k < outr[i].rows(); k ++)
+      for(int kk = 0; kk < outr[i].cols(); kk ++)
+        outc[i](k, kk) = (outc[i](k, kk) - m) / (M - m);
   if(! savep2or3<num_t>(argv[4], outr, false, 65535))
     return - 2;
   return 0;
