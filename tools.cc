@@ -198,7 +198,7 @@ int main(int argc, const char* argv[]) {
               }
               for(int mm = 0; mm < L.size(); mm ++)
                 for(int mmm = 0; mmm < vwork.rows(); mmm ++) {
-                  auto mpi(makeProgramInvariant<num_t>(vwork.row(mmm) /= sqrt(vwork.row(mmm).dot(vwork.row(mmm))) ));
+                  auto mpi(makeProgramInvariant<num_t>(vwork.row(mmm) ));
                   L[mm].row(mmm) += move(mpi.first) * pow(mpi.second, ceil(- log(orig.epsilon()) ));
                   vwork(mmm, vwork.cols() - 1) = - vwork(mmm, mmm);
                   for(int n = 0; n < vwork.cols() - 1; n ++)
@@ -233,34 +233,29 @@ int main(int argc, const char* argv[]) {
           vwork.O();
           for(int n = 0; n < orig.rows(); n ++)
             vwork.setVector(n * orig.cols(), orig.row(n));
-          const auto n2(sqrt(vwork.dot(vwork) / num_t(int(size * size))));
-          for(int nn = 0; nn < L.size(); nn ++) {
-            vwork /= sqrt(vwork.dot(vwork));
+          for(int nn = 0; nn < L.size(); nn ++)
             for(int n = 0; n < vwork.size(); n ++)
               vwork[n] += rng(rde);
-          }
-          vwork /= sqrt(vwork.dot(vwork));
           for(int nn = L.size() - 1; 0 <= nn; nn --) {
+            for(int nnn = 0; nnn < vwork.size(); nnn ++) {
+              vwork[nnn] = max(- num_t(int(1)), min(num_t(int(1)), vwork[nnn]));
+              if(! isfinite(vwork[nnn])) vwork[nnn] = num_t(int(1)) / num_t(int(8));
+            }
             vwork[vwork.size() - 1] = - num_t(int(1));
             auto mpi(makeProgramInvariant<num_t>(vwork));
             vwork  = L[nn] * move(mpi.first);
             for(int nnn = 0; nnn < vwork.size(); nnn ++)
-              vwork[nnn] = revertProgramInvariant<num_t>(make_pair(vwork[nnn], mpi.second));
-            vwork /= sqrt(vwork.dot(vwork));
-            for(int nnn = 0; nnn < vwork.size(); nnn ++) {
-              // N.B. this is reduced in large number of rand().
-              // if(L[nn](nnn, L[nn].cols() - 1) != num_t(int(0)) )
-              //   vwork[nnn] /= L[nn](nnn, L[nn].cols() - 1);
-              // vwork[nnn] = vwork[nnn] / pow(mpi.second, ceil(- log(orig.epsilon()) ));
-              vwork[nnn] = max(num_t(int(0)), min(num_t(int(1)), vwork[nnn]));
-              if(! isfinite(vwork[nnn])) vwork[nnn] = num_t(int(1)) / num_t(int(8));
-            }
+              vwork[nnn] = revertProgramInvariant<num_t>(make_pair(vwork[nnn], mpi.second)) / pow(mpi.second, ceil(- log(orig.epsilon()) ));
             vwork = SimpleVector<num_t>(size * size + 1).O().setVector(0, vwork);
+          }
+          for(int nnn = 0; nnn < vwork.size(); nnn ++) {
+            vwork[nnn] = max(num_t(int(0)), min(num_t(int(1)), vwork[nnn]));
+            if(! isfinite(vwork[nnn])) vwork[nnn] = num_t(int(1)) / num_t(int(8));
           }
           SimpleMatrix<num_t> temp(size, size);
           for(int n = 0; n < temp.rows(); n ++)
             temp.row(n) = vwork.subVector(n * size, size);
-          outr[j].setMatrix(k, kk, outr[j].subMatrix(k, kk, size, size) + temp * n2);
+          outr[j].setMatrix(k, kk, outr[j].subMatrix(k, kk, size, size) + temp);
           outc[j].setMatrix(k, kk, outc[j].subMatrix(k, kk, size, size) + one);
         }
       }
