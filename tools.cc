@@ -162,7 +162,8 @@ int main(int argc, const char* argv[]) {
 #define int int32_t
   vector<SimpleMatrix<num_t> > L;
   const auto step(std::atoi(argv[1]));
-  const auto size(std::atoi(argv[2]));
+  const auto size0(std::atoi(argv[2]));
+  const auto size(abs(size0));
   const auto recur(std::atoi(argv[3]));
   vector<SimpleMatrix<num_t> > out;
   if(! loadp2or3<num_t>(out, argv[4]))
@@ -186,11 +187,11 @@ int main(int argc, const char* argv[]) {
       if(! loadp2or3<num_t>(work, argv[i])) continue;
       for(int j = 0; j < work.size(); j ++)
         for(int k = 0; k < work[j].rows() - size; k ++) {
-          std::cerr << k << " / " << work[j].rows() - size << ", " << j << " / " << work.size() << " over " << i - 5 << " / " << argc - 5 << std::endl;
+          std::cerr << k + j * work[j].rows() << " / " << work.size() * work[j].rows() << " over " << i - 5 << " / " << argc - 5 << std::endl;
           for(int kk = 0; kk < work[j].cols() - size; kk ++) {
             auto orig(work[j].subMatrix(k, kk, size, size) / num_t(int(4)));
+            SimpleMatrix<num_t> vwork(size * size, size * size + 1);
             for(int kkk = 0; kkk < recur; kkk ++) {
-              SimpleMatrix<num_t> vwork(size * size, size * size + 1);
               for(int nnn = 0; nnn < vwork.rows(); nnn ++) {
                 for(int n = 0; n < size * size; n ++)
                   vwork(nnn, n) = orig(n / size, n % size) + rng(rde);
@@ -220,18 +221,21 @@ int main(int argc, const char* argv[]) {
   SimpleMatrix<num_t> one(size, size);
   one.O(num_t(int(1)));
   for(int j = 0; j < out.size(); j ++)
-    for(int k = 0; k < out[j].rows() - size; k ++) {
-      std::cerr << k << " / " << out[j].rows() - size << ", " << j << " / " << out.size() << std::endl;
-      for(int rc = 0; rc < recur; rc ++)
+    for(int rc = 0; rc < (size0 < 0 ? 1 : recur); rc ++) {
+      std::cerr << rc << " / " << recur << ", " << j << " / " << out.size() << std::endl;
+      auto rin(out[j] / num_t(int(4)));
+      if(0 < size0)
+        for(int n = 0; n < rin.rows(); n ++)
+          for(int nn = 0; nn < rin.cols(); nn ++)
+            for(int nnn = 0; nnn < L.size() - 1; nnn ++)
+              rin(n, nn) += rng(rde);
+      for(int k = 0; k < out[j].rows() - size; k ++) {
         for(int kk = 0; kk < out[j].cols() - size; kk ++) {
-          auto orig(out[j].subMatrix(k, kk, size, size) / num_t(int(4)));
+          auto orig(rin.subMatrix(k, kk, size, size));
           SimpleVector<num_t> vwork(size * size + 1);
           vwork.O();
           for(int n = 0; n < orig.rows(); n ++)
             vwork.setVector(n * orig.cols(), orig.row(n));
-          for(int nn = 0; nn < L.size(); nn ++)
-            for(int n = 0; n < vwork.size(); n ++)
-              vwork[n] += rng(rde);
           for(int nn = L.size() - 1; 0 <= nn; nn --) {
             for(int nnn = 0; nnn < vwork.size(); nnn ++)
               vwork[nnn] = isfinite(vwork[nnn])
@@ -251,6 +255,7 @@ int main(int argc, const char* argv[]) {
           outc[j].setMatrix(k, kk, outc[j].subMatrix(k, kk, size, size) + one);
         }
       }
+    }
   for(int i = 0; i < outr.size(); i ++)
     for(int k = 0; k < outr[i].rows(); k ++)
       for(int kk = 0; kk < outr[i].cols(); kk ++)
