@@ -163,11 +163,11 @@ int main(int argc, const char* argv[]) {
   vector<SimpleMatrix<num_t> > L;
   const auto step(std::atoi(argv[1]));
   const auto size0(std::atoi(argv[2]));
+  const auto recur0(std::atoi(argv[3]));
   const auto size(abs(size0));
-  const auto recur(std::atoi(argv[3]));
+  const auto recur(abs(recur0));
   vector<SimpleMatrix<num_t> > out;
-  if(! loadp2or3<num_t>(out, argv[4]))
-    return - 1;
+  if(! loadp2or3<num_t>(out, argv[4])) return - 1;
   std::random_device rd;
   std::ranlux48 rde(rd());
   std::uniform_real_distribution<num_t> rng(- num_t(1) / num_t(4 * int(abs(step) + 1)), num_t(1) / num_t(4 * int(abs(step) + 1)) );
@@ -176,8 +176,10 @@ int main(int argc, const char* argv[]) {
     for(int i = 0; i < - step; i ++) {
       SimpleMatrix<num_t> wL;
       std::cin >> wL;
+      assert(wL.rows() == size * size && wL.cols() == size * size + 2);
       L.emplace_back(wL);
     }
+    assert(L.size() == - step);
   } else {
     L.reserve(step);
     for(int i = 0; i < step; i ++)
@@ -207,31 +209,34 @@ int main(int argc, const char* argv[]) {
                 }
             }
           }
-       }
+        }
     }
-    for(int n = 0; n < L.size(); n ++)
+    for(int n = 0; n < L.size(); n ++) {
       for(int nn = 0; nn < L[n].rows(); nn ++)
         L[n].row(nn) /= num_t(L[n](nn, L[n].cols() - 2));
-    for(int i = 0; i < L.size(); i ++) std::cout << L[i] << std::endl;
+      std::cout << L[n] << std::endl;
+    }
   }
   auto outc(out);
-  auto outr(out);
   for(int i = 0; i < outc.size(); i ++) outc[i].O();
-  for(int i = 0; i < outr.size(); i ++) outr[i].O();
+  auto outr(outc);
   SimpleMatrix<num_t> one(size, size);
   one.O(num_t(int(1)));
-  for(int j = 0; j < out.size(); j ++)
-    for(int rc = 0; rc < (size0 < 0 ? 1 : recur); rc ++) {
-      std::cerr << rc << " / " << recur << ", " << j << " / " << out.size() << std::endl;
-      auto rin(out[j] / num_t(int(4)));
-      if(0 < size0)
-        for(int n = 0; n < rin.rows(); n ++)
-          for(int nn = 0; nn < rin.cols(); nn ++)
-            for(int nnn = 0; nnn < L.size() - 1; nnn ++)
-              rin(n, nn) += rng(rde);
-      for(int k = 0; k < out[j].rows() - size; k ++) {
+  if(recur0 < 0) for(int i = 0; i < out.size(); i ++) out[i].O();
+  for(int rc = 0; rc < (size0 < 0 ? 1 : recur); rc ++) {
+    std::cerr << rc << " / " << recur << std::endl;
+    auto rin(out[0]);
+    rin.O();
+    if(0 < size0)
+      for(int n = 0; n < rin.rows(); n ++)
+        for(int nn = 0; nn < rin.cols(); nn ++)
+          for(int nnn = 0; nnn < L.size() - 1; nnn ++)
+            rin(n, nn) += rng(rde);
+    for(int j = 0; j < out.size(); j ++)
+      for(int k = 0; k < out[j].rows() - size; k ++)
         for(int kk = 0; kk < out[j].cols() - size; kk ++) {
-          auto orig(rin.subMatrix(k, kk, size, size));
+          auto orig(out[j].subMatrix(k, kk, size, size) / num_t(int(4)) +
+                    rin.subMatrix(k, kk, size, size));
           SimpleVector<num_t> vwork(size * size + 1);
           vwork.O();
           for(int n = 0; n < orig.rows(); n ++)
@@ -254,8 +259,7 @@ int main(int argc, const char* argv[]) {
           outr[j].setMatrix(k, kk, outr[j].subMatrix(k, kk, size, size) + temp);
           outc[j].setMatrix(k, kk, outc[j].subMatrix(k, kk, size, size) + one);
         }
-      }
-    }
+  }
   for(int i = 0; i < outr.size(); i ++)
     for(int k = 0; k < outr[i].rows(); k ++)
       for(int kk = 0; kk < outr[i].cols(); kk ++)
@@ -273,8 +277,7 @@ int main(int argc, const char* argv[]) {
     for(int k = 0; k < outr[i].rows(); k ++)
       for(int kk = 0; kk < outr[i].cols(); kk ++)
         outr[i](k, kk) = (outr[i](k, kk) - m) / (M - m);
-  if(! savep2or3<num_t>(argv[4], outr, false, 65535))
-    return - 2;
+  if(! savep2or3<num_t>(argv[4], outr, false, 65535)) return - 2;
   return 0;
 }
 
