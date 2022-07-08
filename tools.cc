@@ -156,6 +156,18 @@ template <typename T> bool savep2or3(const char* filename, const vector<SimpleMa
   return true;
 }
 
+#if defined(_FLOAT_BITS_)
+num_t edge(0);
+static inline num_t rng(std::ranlux48& rde) {
+  myuint res(0);
+  for(int i = 0; i < _FLOAT_BITS_ / sizeof(uint32_t) / 8; i ++) {
+    res <<= sizeof(uint32_t) * 8;
+    res  |= uint32_t(rde());
+  }
+  return num_t(res) / num_t(~ myuint(0)) * edge;
+}
+#endif
+
 #undef int
 int main(int argc, const char* argv[]) {
 //#define int int64_t
@@ -170,7 +182,11 @@ int main(int argc, const char* argv[]) {
   if(! loadp2or3<num_t>(out, argv[4])) return - 1;
   std::random_device rd;
   std::ranlux48 rde(rd());
+#if defined(_FLOAT_BITS_)
+  edge = num_t(2) / num_t(4 * int(abs(step) + 1));
+#else
   std::uniform_real_distribution<num_t> rng(- num_t(1) / num_t(4 * int(abs(step) + 1)), num_t(1) / num_t(4 * int(abs(step) + 1)) );
+#endif
   if(step < 0) {
     L.reserve(- step);
     for(int i = 0; i < - step; i ++) {
@@ -187,27 +203,36 @@ int main(int argc, const char* argv[]) {
     for(int i = 5; i < argc; i ++) {
       vector<SimpleMatrix<num_t> > work;
       if(! loadp2or3<num_t>(work, argv[i])) continue;
-      for(int j = 0; j < work.size(); j ++)
-        for(int k = 0; k < work[j].rows() - size; k ++) {
-          std::cerr << k + j * work[j].rows() << " / " << work.size() * work[j].rows() << " over " << i - 5 << " / " << argc - 5 << std::endl;
-          for(int kk = 0; kk < work[j].cols() - size; kk ++) {
-            auto orig(work[j].subMatrix(k, kk, size, size) / num_t(int(4)));
-            SimpleMatrix<num_t> vwork(size * size, size * size + 1);
-            for(int kkk = 0; kkk < recur; kkk ++) {
-              for(int nnn = 0; nnn < vwork.rows(); nnn ++) {
-                for(int n = 0; n < size * size; n ++)
-                  vwork(nnn, n) = orig(n / size, n % size) + rng(rde);
-                vwork(nnn, size * size) = - orig(nnn / size, nnn % size);
-              }
-              for(int mm = 0; mm < L.size(); mm ++)
-                for(int mmm = 0; mmm < vwork.rows(); mmm ++) {
-                  auto mpi(makeProgramInvariant<num_t>(vwork.row(mmm) ));
-                  L[mm].row(mmm) += move(mpi.first) * pow(mpi.second, ceil(- log(orig.epsilon()) ));
-                  vwork(mmm, vwork.cols() - 1) = - vwork(mmm, mmm);
-                  for(int n = 0; n < vwork.cols() - 1; n ++)
-                    vwork(mmm, n) += rng(rde);
+      for(int kkk = 0; kkk < recur; kkk ++)
+        for(int j = 0; j < work.size(); j ++) {
+          cerr << kkk * work.size() + j << " / " << recur * work.size() << " over " << i - 5 << " / " << argc - 5 << std::endl;
+          auto rin(work[j]);
+          rin.O();
+          for(int mm = 0; mm < L.size(); mm ++) {
+            auto rin0(rin);
+            for(int n = 0; n < rin.rows(); n ++)
+              for(int nn = 0; nn < rin.cols(); nn ++)
+                rin(n, nn) += rng(rde);
+            for(int k = 0; k < work[j].rows() - size; k ++)
+              for(int kk = 0; kk < work[j].cols() - size; kk ++) {
+                auto orig(work[j].subMatrix(k, kk, size, size) / num_t(int(4)) +
+                          rin.subMatrix(k, kk, size, size));
+                for(int mmm = 0; mmm < L[mm].rows(); mmm ++) {
+                  SimpleVector<num_t> vwork(size * size + 1);
+                  for(int n = 0; n < orig.rows(); n ++)
+                    vwork.setVector(n * orig.cols(), orig.row(n));
+                  vwork[size * size] =
+                    - (work[j](k + (mmm / size), kk + (mmm % size)) +
+                       rin0(k + (mmm / size), kk + (mmm % size)) );
+                  for(int nnn = 0; nnn < vwork.size(); nnn ++)
+                    vwork[nnn] = isfinite(vwork[nnn])
+                      ? max(- num_t(int(1)), min(num_t(int(1)), vwork[nnn]))
+                      : vwork[nnn] = num_t(int(1)) / num_t(int(8));
+                  auto mpi(makeProgramInvariant<num_t>(vwork));
+                  L[mm].row(mmm) += move(mpi.first) *
+                    pow(mpi.second, ceil(- log(orig.epsilon()) ));
                 }
-            }
+              }
           }
         }
     }
@@ -224,7 +249,7 @@ int main(int argc, const char* argv[]) {
   one.O(num_t(int(1)));
   if(recur0 < 0) for(int i = 0; i < out.size(); i ++) out[i].O();
   for(int rc = 0; rc < (size0 < 0 ? 1 : recur); rc ++) {
-    std::cerr << rc << " / " << recur << std::endl;
+    cerr << rc << " / " << recur << std::endl;
     auto rin(out[0]);
     rin.O();
     if(0 < size0)

@@ -9,14 +9,16 @@ CXXFLAGS+=	-std=c++11
 LDFLAGS+=	-lc++ -L/usr/local/lib
 #LDFLAGS+=	-lestdc++ -L/usr/local/lib
 
-CLEANFILES= *.o ddpmopt ddpmoptO0 ddpmopt64
+CLEANFILES= *.o ddpmopt ddpmopt32
 
 clean:
 	@rm -rf ${CLEANFILES}
 
-all:	ddpmopt
+all:	ddpmopt ddpmopt32
 ddpmopt:
 	${CXX} ${CXXFLAGS} -static -o ddpmopt tools.cc
-ddpmoptO0:
-	${CXX} ${CXXFLAGS} -static -O0 -o ddpmoptO0 tools.cc
+ddpmopt32:
+	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=32 -o ddpmopt32 tools.cc
+ddpmopt64:
+	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=64 -o ddpmopt64 tools.cc
 
