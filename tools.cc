@@ -201,6 +201,10 @@ int main(int argc, const char* argv[]) {
     for(int i = 0; i < step; i ++)
       L.emplace_back(SimpleMatrix<num_t>(size * size, size * size + 2).O());
     for(int i = 5; i < argc; i ++) {
+      for(int k = 0; k < L.size(); k ++) cerr << L[k] << std::endl;
+      cerr << "remains: ";
+      for(int k = i; k < argc; k ++) cerr << "\"" << argv[k] << "\" ";
+      cerr << std::endl;
       vector<SimpleMatrix<num_t> > work;
       if(! loadp2or3<num_t>(work, argv[i])) continue;
       for(int kkk = 0; kkk < recur; kkk ++)
