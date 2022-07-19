@@ -230,6 +230,7 @@ int main(int argc, const char* argv[]) {
   SimpleMatrix<num_t> mask;
   if(! loadp2or3<num_t>(out, argv[4])) return - 1;
   mask = out[0];
+  const auto mask0(mask);
   out = vector<SimpleMatrix<num_t> >();
   if(! loadp2or3<num_t>(out, argv[3])) return - 1;
   L.reserve(step);
@@ -256,7 +257,8 @@ int main(int argc, const char* argv[]) {
   out = normalize<num_t>(autoLevel<num_t>(out, (out[0].rows() + out[0].cols()) * 3));
   for(int i = 0; i < mask.rows(); i ++)
     for(int j = 0; j < mask.cols(); j ++)
-      if(mask(i, j) < num_t(int(1)) / num_t(int(2)))
+      if(mask0(i, j) < num_t(int(1)) / num_t(int(2)) &&
+                       num_t(int(1)) / num_t(int(2)) <= mask(i, j))
         for(int k = 0; k < out.size(); k ++) out[k](i, j) = num_t(int(1)) / num_t(int(2));
   while(1) {
     bool cont(true);
