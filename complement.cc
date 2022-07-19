@@ -264,10 +264,11 @@ int main(int argc, const char* argv[]) {
     bool cont(true);
     for(int i = 0; i < mask.rows(); i ++)
       for(int j = 0; j < mask.cols(); j ++)
-        if(mask(i, j) < num_t(int(1)) / num_t(int(2))) {
-          cont = false;
+        if(mask0(i, j) < num_t(int(1)) / num_t(int(2)) &&
+                         num_t(int(1)) / num_t(int(2)) <= mask(i, j))
           for(int k = 0; k < out.size(); k ++)out[k](i, j) = outr[k](i, j);
-        }
+        else if(mask0(i, j) < num_t(int(1)) / num_t(int(2)) )
+          cont = false;
     if(cont) break;
     for(int i = 0; i < outc.size(); i ++) outc[i].O();
     for(int i = 0; i < outr.size(); i ++) outr[i].O();
