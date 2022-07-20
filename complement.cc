@@ -245,9 +245,9 @@ int main(int argc, const char* argv[]) {
   std::random_device rd;
   std::ranlux48 rde(rd());
 #if defined(_FLOAT_BITS_)
-  edge = num_t(2) / num_t(4 * int(abs(step) + 1));
+  edge = num_t(8) / num_t(4 * int(abs(step) + 1));
 #else
-  std::uniform_real_distribution<num_t> rng(- num_t(1) / num_t(4 * int(abs(step) + 1)), num_t(1) / num_t(4 * int(abs(step) + 1)) );
+  std::uniform_real_distribution<num_t> rng(- num_t(4) / num_t(4 * int(abs(step) + 1)), num_t(4) / num_t(4 * int(abs(step) + 1)) );
 #endif
   auto outc(out);
   for(int i = 0; i < outc.size(); i ++) outc[i].O();
@@ -255,11 +255,6 @@ int main(int argc, const char* argv[]) {
   SimpleMatrix<num_t> one(size, size);
   one.O(num_t(int(1)));
   out = normalize<num_t>(autoLevel<num_t>(out, (out[0].rows() + out[0].cols()) * 3));
-  for(int i = 0; i < mask.rows(); i ++)
-    for(int j = 0; j < mask.cols(); j ++)
-      if(mask0(i, j) < num_t(int(1)) / num_t(int(2)) &&
-                       num_t(int(1)) / num_t(int(2)) <= mask(i, j))
-        for(int k = 0; k < out.size(); k ++) out[k](i, j) = num_t(int(1)) / num_t(int(2));
   while(1) {
     bool cont(true);
     for(int i = 0; i < mask.rows(); i ++)
@@ -274,6 +269,11 @@ int main(int argc, const char* argv[]) {
     for(int i = 0; i < outr.size(); i ++) outr[i].O();
     for(int rc = 0; rc < recur; rc ++) {
       cerr << rc << " / " << recur << std::endl;
+      for(int i = 0; i < mask.rows(); i ++)
+        for(int j = 0; j < mask.cols(); j ++)
+          if(max(mask(i, j), mask0(i, j)) < num_t(int(1)) / num_t(int(2)))
+            for(int k = 0; k < out.size(); k ++)
+              out[k](i, j) = num_t(int(rde() & 0xff)) / num_t(int(0xff));
       auto rin(out[0]);
       rin.O();
       for(int n = 0; n < rin.rows(); n ++)

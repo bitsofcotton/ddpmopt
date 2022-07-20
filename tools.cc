@@ -183,9 +183,9 @@ int main(int argc, const char* argv[]) {
   std::random_device rd;
   std::ranlux48 rde(rd());
 #if defined(_FLOAT_BITS_)
-  edge = num_t(2) / num_t(4 * int(abs(step) + 1));
+  edge = num_t(8) / num_t(4 * int(abs(step) + 1));
 #else
-  std::uniform_real_distribution<num_t> rng(- num_t(1) / num_t(4 * int(abs(step) + 1)), num_t(1) / num_t(4 * int(abs(step) + 1)) );
+  std::uniform_real_distribution<num_t> rng(- num_t(4) / num_t(4 * int(abs(step) + 1)), num_t(4) / num_t(4 * int(abs(step) + 1)) );
 #endif
   if(step < 0) {
     L.reserve(- step);
@@ -261,6 +261,11 @@ int main(int argc, const char* argv[]) {
         for(int nn = 0; nn < rin.cols(); nn ++)
           for(int nnn = 0; nnn < L.size() - 1; nnn ++)
             rin(n, nn) += rng(rde);
+/*
+    vector<SimpleMatrix<num_t> > buf;
+    for(int i = 0; i < out.size(); i ++) buf.emplace_back(out[i] / num_t(int(4)) + rin);
+    savep2or3<num_t>((std::string(argv[4]) + std::string("-in-") + std::to_string(rc) + std::string(".ppm")).c_str(), buf, false, 65535);
+*/
     for(int j = 0; j < out.size(); j ++)
       for(int k = 0; k < out[j].rows() - size; k ++)
         for(int kk = 0; kk < out[j].cols() - size; kk ++) {
