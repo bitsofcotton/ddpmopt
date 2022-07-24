@@ -156,6 +156,56 @@ template <typename T> bool savep2or3(const char* filename, const vector<SimpleMa
   return true;
 }
 
+template <typename T> vector<SimpleMatrix<T> > normalize(const vector<SimpleMatrix<T> >& data, const T& upper = T(1)) {
+  T MM(0), mm(0);
+  bool fixed(false);
+  for(int k = 0; k < data.size(); k ++)
+    for(int i = 0; i < data[k].rows(); i ++)
+      for(int j = 0; j < data[k].cols(); j ++)
+        if(! fixed || (isfinite(data[k](i, j)) && ! isinf(data[k](i, j)) && ! isnan(data[k](i, j)))) {
+          if(! fixed)
+            MM = mm = data[k](i, j);
+          else {
+            MM = max(MM, data[k](i, j));
+            mm = min(mm, data[k](i, j));
+          }
+          fixed = true;
+        }
+  if(MM == mm || ! fixed)
+    return data;
+  auto result(data);
+  for(int k = 0; k < data.size(); k ++)
+    for(int i = 0; i < data[k].rows(); i ++)
+      for(int j = 0; j < data[k].cols(); j ++) {
+        if(isfinite(result[k](i, j)) && ! isinf(data[k](i, j)) && ! isnan(result[k](i, j)))
+          result[k](i, j) -= mm;
+        else
+          result[k](i, j)  = T(0);
+        assert(T(0) <= result[k](i, j) && result[k](i, j) <= MM - mm);
+        result[k](i, j) *= upper / (MM - mm);
+      }
+  return result;
+}
+
+template <typename T> vector<SimpleMatrix<T> > autoLevel(const vector<SimpleMatrix<T> >& data, const int& count = 0) {
+  vector<T> res;
+  res.reserve(data[0].rows() * data[0].cols() * data.size());
+  for(int k = 0; k < data.size(); k ++)
+    for(int i = 0; i < data[k].rows(); i ++)
+      for(int j = 0; j < data[k].cols(); j ++)
+        res.emplace_back(data[k](i, j));
+  sort(res.begin(), res.end());
+  auto result(data);
+#if defined(_OPENMP)
+#pragma omp parallel for schedule(static, 1)
+#endif
+  for(int k = 0; k < data.size(); k ++)
+    for(int i = 0; i < data[k].rows(); i ++)
+      for(int j = 0; j < data[k].cols(); j ++)
+        result[k](i, j) = max(min(data[k](i, j), res[res.size() - count - 1]), res[count]);
+  return result;
+}
+
 #if defined(_FLOAT_BITS_)
 num_t edge(0);
 static inline num_t rng(std::ranlux48& rde) {
@@ -298,20 +348,7 @@ int main(int argc, const char* argv[]) {
     for(int k = 0; k < outr[i].rows(); k ++)
       for(int kk = 0; kk < outr[i].cols(); kk ++)
         if(outc[i](k, kk) != num_t(int(0))) outr[i](k, kk) /= outc[i](k, kk);
-  auto M(outr[0](0, 0));
-  auto m(M);
-  for(int i = 0; i < outr.size(); i ++)
-    for(int k = 0; k < outr[i].rows(); k ++)
-      for(int kk = 0; kk < outr[i].cols(); kk ++) {
-        M = max(M, outr[i](k, kk));
-        m = min(m, outr[i](k, kk));
-      }
-  if(M == m) M += num_t(int(1));
-  for(int i = 0; i < outr.size(); i ++)
-    for(int k = 0; k < outr[i].rows(); k ++)
-      for(int kk = 0; kk < outr[i].cols(); kk ++)
-        outr[i](k, kk) = (outr[i](k, kk) - m) / (M - m);
-  if(! savep2or3<num_t>(argv[4], outr, false, 65535)) return - 2;
+  if(! savep2or3<num_t>(argv[4], normalize<num_t>(autoLevel<num_t>(outr, (outr[0].rows() + outr[0].cols()) * 3)), false, 65535)) return - 2;
   return 0;
 }
 
