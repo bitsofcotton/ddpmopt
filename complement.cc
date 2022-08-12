@@ -262,7 +262,7 @@ int main(int argc, const char* argv[]) {
         if(mask0(i, j) < num_t(int(1)) / num_t(int(2)) &&
                          num_t(int(1)) / num_t(int(2)) <= mask(i, j))
           for(int k = 0; k < out.size(); k ++)out[k](i, j) = outr[k](i, j);
-        else if(mask0(i, j) < num_t(int(1)) / num_t(int(2)) )
+        else if(mask(i, j) < num_t(int(1)) / num_t(int(2)) )
           cont = false;
     if(cont) break;
     for(int i = 0; i < outc.size(); i ++) outc[i].O();
@@ -271,7 +271,7 @@ int main(int argc, const char* argv[]) {
       cerr << rc << " / " << recur << std::endl;
       for(int i = 0; i < mask.rows(); i ++)
         for(int j = 0; j < mask.cols(); j ++)
-          if(max(mask(i, j), mask0(i, j)) < num_t(int(1)) / num_t(int(2)))
+          if(mask(i, j) < num_t(int(1)) / num_t(int(2)))
             for(int k = 0; k < out.size(); k ++)
               out[k](i, j) = num_t(int(rde() & 0xff)) / num_t(int(0xff));
       auto rin(out[0]);
@@ -321,8 +321,8 @@ int main(int argc, const char* argv[]) {
         if(num_t(int(1)) / num_t(int(2)) <= mask(i, j))
           mask2(max(0, i - 1), j) =
             mask2(i, max(0, j - 1)) =
-            mask2(min(i, mask2.rows() - 1), j) =
-            mask2(i, min(j, mask2.cols() - 1)) = num_t(int(1));
+            mask2(min(i + 1, mask2.rows() - 1), j) =
+            mask2(i, min(j + 1, mask2.cols() - 1)) = num_t(int(1));
     mask = mask2;
   }
   if(! savep2or3<num_t>(argv[4], outr, false, 65535)) return - 2;
