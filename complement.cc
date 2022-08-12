@@ -206,17 +206,19 @@ template <typename T> vector<SimpleMatrix<T> > autoLevel(const vector<SimpleMatr
   return result;
 }
 
-#if defined(_FLOAT_BITS_)
 num_t edge(0);
-static inline num_t rng(std::ranlux48& rde) {
+static inline num_t rng() {
   myuint res(0);
+#if defined(_FLOAT_BITS_)
   for(int i = 0; i < _FLOAT_BITS_ / sizeof(uint32_t) / 8; i ++) {
+#else
+  for(int i = 0; i < 2; i ++) {
+#endif
     res <<= sizeof(uint32_t) * 8;
-    res  |= uint32_t(rde());
+    res  |= uint32_t(arc4random());
   }
   return num_t(res) / num_t(~ myuint(0)) * edge;
 }
-#endif
 
 #undef int
 int main(int argc, const char* argv[]) {
@@ -244,11 +246,7 @@ int main(int argc, const char* argv[]) {
   assert(L.size() == step);
   std::random_device rd;
   std::ranlux48 rde(rd());
-#if defined(_FLOAT_BITS_)
   edge = num_t(8) / num_t(4 * int(abs(step) + 1));
-#else
-  std::uniform_real_distribution<num_t> rng(- num_t(4) / num_t(4 * int(abs(step) + 1)), num_t(4) / num_t(4 * int(abs(step) + 1)) );
-#endif
   auto outc(out);
   for(int i = 0; i < outc.size(); i ++) outc[i].O();
   auto outr(outc);
@@ -279,7 +277,7 @@ int main(int argc, const char* argv[]) {
       for(int n = 0; n < rin.rows(); n ++)
         for(int nn = 0; nn < rin.cols(); nn ++)
           for(int nnn = 0; nnn < L.size() - 1; nnn ++)
-            rin(n, nn) += rng(rde);
+            rin(n, nn) += rng();
       for(int j = 0; j < out.size(); j ++)
         for(int k = 0; k < out[j].rows() - size; k ++)
           for(int kk = 0; kk < out[j].cols() - size; kk ++) {
