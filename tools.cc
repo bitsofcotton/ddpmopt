@@ -280,6 +280,12 @@ int main(int argc, const char* argv[]) {
                       ? max(- num_t(int(1)), min(num_t(int(1)), vwork[nnn]))
                       : vwork[nnn] = num_t(int(1)) / num_t(int(8));
                   auto mpi(makeProgramInvariant<num_t>(vwork));
+  // XXX: invariant summation cuses average invariant.
+  //      we need p1 or catg for linear ones,
+  //      otherwise we need multiplication and reduce method
+  //      described in randtools.
+  //      it is recommended to use latter one because of mem usage and so on.
+  //      however, p1 and extreme accuracy condition should also work.
                   L[mm].row(mmm) += move(mpi.first) *
                     pow(mpi.second, ceil(- log(orig.epsilon()) ));
                 }
