@@ -287,10 +287,9 @@ template <typename T> SimpleMatrix<T> integrate(const SimpleMatrix<T>& m, const 
   //    ...
   SimpleMatrix<T> factorial(m.rows(), m.cols());
   factorial.O();
-  factorial(0, idx) = T(int(1));
-  for(int i = 1; i < factorial.rows(); i ++)
-    factorial(i, idx) = factorial(i - 1, idx) / T(int(i + 1));
-  if(stage == m.rows() - 1) return factorial;
+  for(int i = 0; i < factorial.rows(); i ++)
+    factorial(i, idx) = T(int(1)) / T(int(i + 1));
+  if(stage == m.rows() - 1) return factorial * m(m.rows() - 1, idx);
   return concat(m, factorial.setMatrix(stage + 1, 0, integrate(diff(m, idx), idx, stage + 1)), true);
 }
 
