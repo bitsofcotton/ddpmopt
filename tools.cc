@@ -421,13 +421,15 @@ int main(int argc, const char* argv[]) {
             vwork[vwork.size() - 1] = - num_t(int(1));
             auto mpi(makeProgramInvariant<num_t>(vwork));
             vwork = L[nn] * move(mpi.first);
-            for(int nnn = 0; nnn < vwork.size(); nnn ++)
-              vwork[nnn] = revertProgramInvariant<num_t>(make_pair(vwork[nnn] / num_t(int(vwork.size())), mpi.second));
+            vwork /= num_t(int(vwork.size())) * num_t(int(L.size()));
+            // std::cerr << vwork << std::endl;
+            for(int nnn = 0; nnn < vwork.size(); nnn ++) 
+              vwork[nnn] = revertProgramInvariant<num_t>(make_pair(vwork[nnn], mpi.second));
             vwork = SimpleVector<num_t>(size * size + 1).O().setVector(0, vwork);
           }
           for(int nnn = 0; nnn < vwork.size(); nnn ++)
             vwork[nnn] = isfinite(vwork[nnn])
-              ? max(num_t(int(0)), min(num_t(int(1)), vwork[nnn]))
+              ? max(num_t(int(0)), min(num_t(int(1)), abs(vwork[nnn])))
               : num_t(int(1)) / num_t(int(8));
           SimpleMatrix<num_t> temp(size, size);
           for(int n = 0; n < temp.rows(); n ++)
