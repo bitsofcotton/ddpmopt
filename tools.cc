@@ -422,7 +422,7 @@ int main(int argc, const char* argv[]) {
             auto mpi(makeProgramInvariant<num_t>(vwork));
             vwork = L[nn] * move(mpi.first);
             for(int nnn = 0; nnn < vwork.size(); nnn ++)
-              vwork[nnn] = revertProgramInvariant<num_t>(make_pair(vwork[nnn], mpi.second));
+              vwork[nnn] = revertProgramInvariant<num_t>(make_pair(vwork[nnn] / num_t(int(vwork.size())), mpi.second));
             vwork = SimpleVector<num_t>(size * size + 1).O().setVector(0, vwork);
           }
           for(int nnn = 0; nnn < vwork.size(); nnn ++)
