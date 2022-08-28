@@ -253,6 +253,13 @@ int main(int argc, const char* argv[]) {
   SimpleMatrix<num_t> one(size, size);
   one.O(num_t(int(1)));
   out = normalize<num_t>(autoLevel<num_t>(out, (out[0].rows() + out[0].cols()) * 3));
+  SimpleVector<num_t> normL(L.size());
+  for(int i = 0; i < normL.size(); i ++) {
+    normL[i] = num_t(int(0));
+    for(int j = 0; j < L[i].rows(); j ++)
+      normL[i] += L[i].row(j).dot(L[i].row(j));
+   normL[i] = sqrt(normL[i] /= num_t(int(L[i].rows())) ) * num_t(int(2));
+  }
   while(1) {
     bool cont(true);
     for(int i = 0; i < mask.rows(); i ++)
@@ -291,17 +298,22 @@ int main(int argc, const char* argv[]) {
               for(int nnn = 0; nnn < vwork.size(); nnn ++)
                 vwork[nnn] = isfinite(vwork[nnn])
                   ? max(- num_t(int(1)), min(num_t(int(1)), vwork[nnn]))
-                  : vwork[nnn] = num_t(int(1)) / num_t(int(8));
+                  : num_t(int(1)) / num_t(int(8));
               vwork[vwork.size() - 1] = - num_t(int(1));
               auto mpi(makeProgramInvariant<num_t>(vwork));
-              vwork = L[nn] * move(mpi.first);
+              vwork  = L[nn] * move(mpi.first);
+              vwork /= normL[nn];
               for(int nnn = 0; nnn < vwork.size(); nnn ++)
-                vwork[nnn] = revertProgramInvariant<num_t>(make_pair(vwork[nnn], mpi.second)) / pow(mpi.second, ceil(- log(orig.epsilon()) ));
+                vwork[nnn] = revertProgramInvariant<num_t>(make_pair(vwork[nnn], num_t(int(1)) ));
               vwork = SimpleVector<num_t>(size * size + 1).O().setVector(0, vwork);
             }
             SimpleMatrix<num_t> temp(size, size);
             for(int n = 0; n < temp.rows(); n ++)
               temp.row(n) = vwork.subVector(n * size, size);
+            for(int nnn = 0; nnn < vwork.size(); nnn ++)
+              vwork[nnn] = isfinite(vwork[nnn])
+                ? max(num_t(int(0)), min(num_t(int(1)), abs(vwork[nnn])))
+                : num_t(int(1)) / num_t(int(2));
             outr[j].setMatrix(k, kk, outr[j].subMatrix(k, kk, size, size) + temp);
             outc[j].setMatrix(k, kk, outc[j].subMatrix(k, kk, size, size) + one);
           }
@@ -312,7 +324,7 @@ int main(int argc, const char* argv[]) {
           if(outc[i](k, kk) != num_t(int(0))) outr[i](k, kk) /= outc[i](k, kk);
           outr[i](k, kk) = max(num_t(int(0)), min(num_t(int(1)), outr[i](k, kk)));
         }
-    outr = normalize<num_t>(autoLevel<num_t>(outr, (outr[0].rows() + outr[0].cols()) * 3));
+    outr = normalize<num_t>(autoLevel<num_t>(outr, (outr[0].rows() + outr[0].cols()) * 16));
     auto mask2(mask);
     for(int i = 0; i < mask.rows(); i ++)
       for(int j = 0; j < mask.cols(); j ++)
