@@ -219,6 +219,13 @@ static inline num_t rng() {
   return num_t(res) / num_t(~ myuint(0)) * edge;
 }
 
+// XXX: Invariant integration meets gulf on finding regularity class and
+//      applying them into data class.
+//      This is avoidable if we can calculate each of 2 possible operands as
+//      the same operation. Otherwise, from somehow, it is learning itself on
+//      possible existance causes re-calculate has glitches to the first
+//      calculation, 3 or more possible calculation methods divided in some
+//      of the operand groups needs non-flat data integrity itself.
 template <typename T> SimpleMatrix<T> concat(const SimpleMatrix<T>& m0, const SimpleMatrix<T>& m1) {
   // det diag result = det diag m0 + det diag m1
   // [1 x x^reverse 1]
@@ -332,6 +339,12 @@ int main(int argc, const char* argv[]) {
     L.reserve(step);
     for(int i = 0; i < step; i ++)
       L.emplace_back(SimpleMatrix<num_t>(size * size, size * size + 2).O());
+    vector<vector<vector<SimpleVector<num_t> > > > cache;
+    {
+      vector<vector<SimpleVector<num_t> > > work;
+      work.resize(L[0].rows());
+      cache.resize(L.size(), work);
+    }
     for(int i = 5; i < argc; i ++) {
       for(int k = 0; k < L.size(); k ++) cerr << L[k] << std::endl;
       cerr << "remains: ";
@@ -365,22 +378,37 @@ int main(int argc, const char* argv[]) {
                       ? max(- num_t(int(1)), min(num_t(int(1)), vwork[nnn]))
                       : num_t(int(1)) / num_t(int(8));
                   auto mpi(makeProgramInvariant<num_t>(vwork));
-  // XXX: invariant summation cuses average invariant.
-  //      we need p1 or catg for linear ones,
-  //      otherwise we need multiplication and reduce method
+  // XXX: Invariant summation causes average invariant.
+  //      We need p1 or catg for linear ones,
+  //      Otherwise we need multiplication and reduce method
   //      described in randtools.
-  //      it is recommended to use latter one because of mem usage and so on.
-  //      however, p1 and extreme accuracy condition should also work.
-                  L[mm].row(mmm) += move(mpi.first) *
-                    pow(mpi.second, ceil(- log(orig.epsilon()) ));
+  //      It is recommended to use latter one because of accuracy
+  //      but they needs huge calculation time.
+  //      Also, p1 and extreme accuracy condition should work but this needs
+  //      huge memory usage.
+                  cache[mm][mmm].emplace_back(move(mpi.first) *
+                    pow(mpi.second, ceil(- log(orig.epsilon()) )) );
+                  // L[mm].row(mmm) += move(mpi.first) *
+                  //  pow(mpi.second, ceil(- log(orig.epsilon()) ));
                 }
               }
           }
         }
     }
     for(int n = 0; n < L.size(); n ++) {
-      for(int nn = 0; nn < L[n].rows(); nn ++)
-        L[n].row(nn) /= num_t(L[n](nn, L[n].cols() - 2));
+      num_t normL(int(0));
+      for(int nn = 0; nn < L[n].rows(); nn ++) {
+        SimpleMatrix<num_t> work(cache[n][nn].size(), cache[n][nn][0].size());
+        for(int nnn = 0; nnn < work.rows(); nnn ++)
+          work.row(nnn) = move(cache[n][nn][nnn]);
+        L[n].row(nn)  = linearInvariant(work);
+        L[n].row(nn) /= - num_t(L[n](nn, L[n].cols() - 2));
+        L[n](nn, L[n].cols() - 2) = num_t(int(0));
+        normL += L[n].row(nn).dot(L[n].row(nn));
+        cache[n][nn].resize(0);
+      }
+      // XXX: don't know why, but *= 2 scales well on revert.
+      L[n] /= sqrt(normL /= num_t(int(L[n].rows()))) * num_t(int(2));
       std::cout << L[n] << std::endl;
     }
   }
@@ -390,14 +418,6 @@ int main(int argc, const char* argv[]) {
   SimpleMatrix<num_t> one(size, size);
   one.O(num_t(int(1)));
   if(recur0 < 0) for(int i = 0; i < out.size(); i ++) out[i].O();
-  SimpleVector<num_t> normL(L.size());
-  for(int i = 0; i < normL.size(); i ++) {
-    normL[i] = num_t(int(0));
-    for(int j = 0; j < L[i].rows(); j ++)
-      normL[i] += L[i].row(j).dot(L[i].row(j));
-    // XXX: don't know why, but *= 2 scales well on revert.
-    normL[i] = sqrt(normL[i] /= num_t(int(L[i].rows()))) * num_t(int(2));
-  }
   for(int rc = 0; rc < (size0 < 0 ? 1 : recur); rc ++) {
     cerr << rc << " / " << recur << std::endl;
     auto rin(out[0]);
@@ -428,17 +448,17 @@ int main(int argc, const char* argv[]) {
                 : num_t(int(1)) / num_t(int(8));
             vwork[vwork.size() - 1] = - num_t(int(1));
             auto mpi(makeProgramInvariant<num_t>(vwork));
-            vwork  = L[nn] * move(mpi.first);
-            vwork /= normL[nn];
+            vwork = L[nn] * move(mpi.first);
             for(int nnn = 0; nnn < vwork.size(); nnn ++) 
-              // XXX: mpi.second));
-              vwork[nnn] = revertProgramInvariant<num_t>(make_pair(vwork[nnn], num_t(int(1)) ));
+              // XXX: don't know why this needs + 1,
+              //      but pair.second must be 1 because of scaling.
+              vwork[nnn] = revertProgramInvariant<num_t>(make_pair(vwork[nnn] + num_t(int(1)), num_t(int(1)) ));
             vwork = SimpleVector<num_t>(size * size + 1).O().setVector(0, vwork);
           }
           for(int nnn = 0; nnn < vwork.size(); nnn ++)
             vwork[nnn] = isfinite(vwork[nnn])
               ? max(num_t(int(0)), min(num_t(int(1)), abs(vwork[nnn])))
-              : num_t(int(1)) / num_t(int(8));
+              : num_t(int(1)) / num_t(int(2));
           SimpleMatrix<num_t> temp(size, size);
           for(int n = 0; n < temp.rows(); n ++)
             temp.row(n) = vwork.subVector(n * size, size);
@@ -450,7 +470,7 @@ int main(int argc, const char* argv[]) {
     for(int k = 0; k < outr[i].rows(); k ++)
       for(int kk = 0; kk < outr[i].cols(); kk ++)
         if(outc[i](k, kk) != num_t(int(0))) outr[i](k, kk) /= outc[i](k, kk);
-  if(! savep2or3<num_t>(argv[4], normalize<num_t>(autoLevel<num_t>(outr, (outr[0].rows() + outr[0].cols()) * 16)), false, 65535)) return - 2;
+  if(! savep2or3<num_t>(argv[4], normalize<num_t>(autoLevel<num_t>(outr, (outr[0].rows() + outr[0].cols()) * 9)), false, 65535)) return - 2;
   return 0;
 }
 
