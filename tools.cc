@@ -390,6 +390,14 @@ int main(int argc, const char* argv[]) {
   SimpleMatrix<num_t> one(size, size);
   one.O(num_t(int(1)));
   if(recur0 < 0) for(int i = 0; i < out.size(); i ++) out[i].O();
+  SimpleVector<num_t> normL(L.size());
+  for(int i = 0; i < normL.size(); i ++) {
+    normL[i] = num_t(int(0));
+    for(int j = 0; j < L[i].rows(); j ++)
+      normL[i] += L[i].row(j).dot(L[i].row(j));
+    // XXX: don't know why, but *= 2 scales well on revert.
+    normL[i] = sqrt(normL[i] /= num_t(int(L[i].rows()))) * num_t(int(2));
+  }
   for(int rc = 0; rc < (size0 < 0 ? 1 : recur); rc ++) {
     cerr << rc << " / " << recur << std::endl;
     auto rin(out[0]);
@@ -420,11 +428,11 @@ int main(int argc, const char* argv[]) {
                 : num_t(int(1)) / num_t(int(8));
             vwork[vwork.size() - 1] = - num_t(int(1));
             auto mpi(makeProgramInvariant<num_t>(vwork));
-            vwork = L[nn] * move(mpi.first);
-            vwork /= num_t(int(vwork.size())) * num_t(int(L.size()));
-            // std::cerr << vwork << std::endl;
+            vwork  = L[nn] * move(mpi.first);
+            vwork /= normL[nn];
             for(int nnn = 0; nnn < vwork.size(); nnn ++) 
-              vwork[nnn] = revertProgramInvariant<num_t>(make_pair(vwork[nnn], mpi.second));
+              // XXX: mpi.second));
+              vwork[nnn] = revertProgramInvariant<num_t>(make_pair(vwork[nnn], num_t(int(1)) ));
             vwork = SimpleVector<num_t>(size * size + 1).O().setVector(0, vwork);
           }
           for(int nnn = 0; nnn < vwork.size(); nnn ++)
@@ -442,7 +450,7 @@ int main(int argc, const char* argv[]) {
     for(int k = 0; k < outr[i].rows(); k ++)
       for(int kk = 0; kk < outr[i].cols(); kk ++)
         if(outc[i](k, kk) != num_t(int(0))) outr[i](k, kk) /= outc[i](k, kk);
-  if(! savep2or3<num_t>(argv[4], normalize<num_t>(autoLevel<num_t>(outr, (outr[0].rows() + outr[0].cols()) * 3)), false, 65535)) return - 2;
+  if(! savep2or3<num_t>(argv[4], normalize<num_t>(autoLevel<num_t>(outr, (outr[0].rows() + outr[0].cols()) * 16)), false, 65535)) return - 2;
   return 0;
 }
 
