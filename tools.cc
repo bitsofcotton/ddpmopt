@@ -294,9 +294,8 @@ template <typename T> SimpleMatrix<T> integrate(const SimpleMatrix<T>& m, const 
   //    ...
   SimpleMatrix<T> factorial(m.rows(), m.cols());
   factorial.O();
-  factorial(0, idx) = T(int(1));
-  for(int i = 1; i < factorial.rows(); i ++)
-    factorial(i, idx) = factorial(i - 1, idx) / T(int(i + 1));
+  for(int i = 0; i < factorial.rows(); i ++)
+    factorial(i, idx) = T(int(1)) / T(int(i + 1));
   if(stage == m.rows() - 1) return factorial * m(m.rows() - 1, idx);
   return concat(m, factorial.setMatrix(stage + 1, 0, integrate(diff(m, idx), idx, stage + 1)), true);
 }
@@ -345,6 +344,7 @@ int main(int argc, const char* argv[]) {
       work.resize(L[0].rows());
       cache.resize(L.size(), work);
     }
+    auto cache2(cache);
     for(int i = 5; i < argc; i ++) {
       for(int k = 0; k < L.size(); k ++) cerr << L[k] << std::endl;
       cerr << "remains: ";
@@ -393,22 +393,33 @@ int main(int argc, const char* argv[]) {
                 }
               }
           }
+          for(int n = 0; n < L.size(); n ++) {
+            num_t normL(int(0));
+            for(int nn = 0; nn < L[n].rows(); nn ++) {
+              SimpleMatrix<num_t> work(cache[n][nn].size(), cache[n][nn][0].size());
+              for(int nnn = 0; nnn < work.rows(); nnn ++)
+                work.row(nnn) = move(cache[n][nn][nnn]);
+              cache2[n][nn].emplace_back(linearInvariant(work));
+              cache[n][nn].resize(0);
+            }
+          }
         }
     }
     for(int n = 0; n < L.size(); n ++) {
       num_t normL(int(0));
       for(int nn = 0; nn < L[n].rows(); nn ++) {
-        SimpleMatrix<num_t> work(cache[n][nn].size(), cache[n][nn][0].size());
+        SimpleMatrix<num_t> work(cache2[n][nn].size(), cache2[n][nn][0].size());
         for(int nnn = 0; nnn < work.rows(); nnn ++)
-          work.row(nnn) = move(cache[n][nn][nnn]);
+          work.row(nnn) = move(cache2[n][nn][nnn]);
         L[n].row(nn)  = linearInvariant(work);
         L[n].row(nn) /= - num_t(L[n](nn, L[n].cols() - 2));
         L[n](nn, L[n].cols() - 2) = num_t(int(0));
         normL += L[n].row(nn).dot(L[n].row(nn));
-        cache[n][nn].resize(0);
+        cache2[n][nn].resize(0);
       }
       // XXX: don't know why, but *= 2 scales well on revert.
-      L[n] /= sqrt(normL /= num_t(int(L[n].rows()))) * num_t(int(2));
+      //L[n] /= sqrt(normL /= num_t(int(L[n].rows()))) * num_t(int(2));
+      L[n] /= sqrt(normL /= num_t(int(L[n].rows())));
       std::cout << L[n] << std::endl;
     }
   }
@@ -452,7 +463,8 @@ int main(int argc, const char* argv[]) {
             for(int nnn = 0; nnn < vwork.size(); nnn ++) 
               // XXX: don't know why this needs + 1,
               //      but pair.second must be 1 because of scaling.
-              vwork[nnn] = revertProgramInvariant<num_t>(make_pair(vwork[nnn] + num_t(int(1)), num_t(int(1)) ));
+              // vwork[nnn] = revertProgramInvariant<num_t>(make_pair(vwork[nnn] + num_t(int(1)), num_t(int(1)) ));
+              vwork[nnn] = revertProgramInvariant<num_t>(make_pair(vwork[nnn], num_t(int(1)) ));
             vwork = SimpleVector<num_t>(size * size + 1).O().setVector(0, vwork);
           }
           for(int nnn = 0; nnn < vwork.size(); nnn ++)
