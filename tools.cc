@@ -418,8 +418,8 @@ int main(int argc, const char* argv[]) {
         cache2[n][nn].resize(0);
       }
       // XXX: don't know why, but *= 2 scales well on revert.
-      //L[n] /= sqrt(normL /= num_t(int(L[n].rows()))) * num_t(int(2));
-      L[n] /= sqrt(normL /= num_t(int(L[n].rows())));
+      L[n] /= sqrt(normL /= num_t(int(L[n].rows()))) * num_t(int(2));
+      //L[n] /= sqrt(normL /= num_t(int(L[n].rows())));
       std::cout << L[n] << std::endl;
     }
   }
@@ -463,8 +463,8 @@ int main(int argc, const char* argv[]) {
             for(int nnn = 0; nnn < vwork.size(); nnn ++) 
               // XXX: don't know why this needs + 1,
               //      but pair.second must be 1 because of scaling.
-              // vwork[nnn] = revertProgramInvariant<num_t>(make_pair(vwork[nnn] + num_t(int(1)), num_t(int(1)) ));
-              vwork[nnn] = revertProgramInvariant<num_t>(make_pair(vwork[nnn], num_t(int(1)) ));
+              vwork[nnn] = revertProgramInvariant<num_t>(make_pair(vwork[nnn] + num_t(int(1)), num_t(int(1)) ));
+              // vwork[nnn] = revertProgramInvariant<num_t>(make_pair(vwork[nnn], num_t(int(1)) ));
             vwork = SimpleVector<num_t>(size * size + 1).O().setVector(0, vwork);
           }
           for(int nnn = 0; nnn < vwork.size(); nnn ++)
