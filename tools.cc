@@ -412,8 +412,8 @@ int main(int argc, const char* argv[]) {
         normL += L[n].row(nn).dot(L[n].row(nn));
         cache2[n][nn].resize(0);
       }
-      // XXX: vwork[nnn] below depends on * 2 here.
-      L[n] /= sqrt(normL /= num_t(int(L[n].rows()))) * num_t(int(2));
+      // N.B. sqrt(L[n].rows()) multiply is needed because of scaling whiteout.
+      L[n] /= sqrt(normL);
       std::cout << L[n] << std::endl;
     }
   }
@@ -451,13 +451,11 @@ int main(int argc, const char* argv[]) {
               vwork[nnn] = isfinite(vwork[nnn])
                 ? max(- num_t(int(1)), min(num_t(int(1)), vwork[nnn]))
                 : num_t(int(1)) / num_t(int(8));
-            vwork[vwork.size() - 1] = - num_t(int(1));
-            auto mpi(makeProgramInvariant<num_t>(vwork));
-            vwork = L[nn] * move(mpi.first);
+            vwork[vwork.size() - 1] = num_t(int(0));
+            vwork = L[nn] * makeProgramInvariant<num_t>(vwork).first;
             for(int nnn = 0; nnn < vwork.size(); nnn ++) 
               // N.B. pair.second must be 1 because of scaling.
-              // XXX don't know why we need to add 1 into vwork[nnn].
-              vwork[nnn] = revertProgramInvariant<num_t>(make_pair(vwork[nnn] + num_t(int(1)), num_t(int(1)) ));
+              vwork[nnn] = revertProgramInvariant<num_t>(make_pair(vwork[nnn], num_t(int(1)) ));
             vwork = SimpleVector<num_t>(size * size + 1).O().setVector(0, vwork);
           }
           for(int nnn = 0; nnn < vwork.size(); nnn ++)
