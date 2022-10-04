@@ -346,8 +346,6 @@ int main(int argc, const char* argv[]) {
     }
     auto cache2(cache);
     for(int i = 5; i < argc; i ++) {
-      for(int k = 0; k < L.size(); k ++) cerr << L[k] << std::endl;
-      cerr << "remains: ";
       for(int k = i; k < argc; k ++) cerr << "\"" << argv[k] << "\" ";
       cerr << std::endl;
       vector<SimpleMatrix<num_t> > work;
@@ -391,16 +389,15 @@ int main(int argc, const char* argv[]) {
                 }
               }
           }
-          for(int n = 0; n < L.size(); n ++) {
-            num_t normL(int(0));
+          for(int n = 0; n < L.size(); n ++)
             for(int nn = 0; nn < L[n].rows(); nn ++) {
               SimpleMatrix<num_t> work(cache[n][nn].size(), cache[n][nn][0].size());
               for(int nnn = 0; nnn < work.rows(); nnn ++)
                 work.row(nnn) = move(cache[n][nn][nnn]);
               cache2[n][nn].emplace_back(linearInvariant(work));
+              cerr << cache2[n][nn][cache2[n][nn].size() - 1] << std::endl;
               cache[n][nn].resize(0);
             }
-          }
         }
     }
     for(int n = 0; n < L.size(); n ++) {
@@ -415,7 +412,8 @@ int main(int argc, const char* argv[]) {
         normL += L[n].row(nn).dot(L[n].row(nn));
         cache2[n][nn].resize(0);
       }
-      L[n] /= sqrt(normL /= num_t(int(L[n].rows())));
+      // XXX: vwork[nnn] below depends on * 2 here.
+      L[n] /= sqrt(normL /= num_t(int(L[n].rows()))) * num_t(int(2));
       std::cout << L[n] << std::endl;
     }
   }
@@ -458,7 +456,8 @@ int main(int argc, const char* argv[]) {
             vwork = L[nn] * move(mpi.first);
             for(int nnn = 0; nnn < vwork.size(); nnn ++) 
               // N.B. pair.second must be 1 because of scaling.
-              vwork[nnn] = revertProgramInvariant<num_t>(make_pair(vwork[nnn], num_t(int(1)) ));
+              // XXX don't know why we need to add 1 into vwork[nnn].
+              vwork[nnn] = revertProgramInvariant<num_t>(make_pair(vwork[nnn] + num_t(int(1)), num_t(int(1)) ));
             vwork = SimpleVector<num_t>(size * size + 1).O().setVector(0, vwork);
           }
           for(int nnn = 0; nnn < vwork.size(); nnn ++)
