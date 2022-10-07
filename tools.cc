@@ -473,7 +473,7 @@ int main(int argc, const char* argv[]) {
     for(int k = 0; k < outr[i].rows(); k ++)
       for(int kk = 0; kk < outr[i].cols(); kk ++)
         if(outc[i](k, kk) != num_t(int(0))) outr[i](k, kk) /= outc[i](k, kk);
-  if(! savep2or3<num_t>(argv[4], normalize<num_t>(autoLevel<num_t>(outr, (outr[0].rows() + outr[0].cols()) * 9)), false, 65535)) return - 2;
+  if(! savep2or3<num_t>(argv[4], normalize<num_t>(autoLevel<num_t>(outr, (outr[0].rows() + outr[0].cols()) * size * 3)), false, 65535)) return - 2;
   return 0;
 }
 
