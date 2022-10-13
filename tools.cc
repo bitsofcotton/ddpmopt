@@ -314,7 +314,7 @@ template <typename T> SimpleVector<T> reduce(const SimpleMatrix<T> m) {
 int main(int argc, const char* argv[]) {
 //#define int int64_t
 #define int int32_t
-  vector<SimpleMatrix<num_t> > L;
+  vector<vector<SimpleMatrix<num_t> > > L;
   const auto step(std::atoi(argv[1]));
   const auto size0(std::atoi(argv[2]));
   const auto recur0(std::atoi(argv[3]));
@@ -326,22 +326,30 @@ int main(int argc, const char* argv[]) {
   std::mt19937_64 rde(rd());
   edge = num_t(8) / num_t(4 * int(abs(step) + 1));
   if(step < 0) {
-    L.reserve(- step);
-    for(int i = 0; i < - step; i ++) {
-      SimpleMatrix<num_t> wL;
-      std::cin >> wL;
-      assert(wL.rows() == size * size && wL.cols() == size * size + 2);
-      L.emplace_back(wL);
+    L.resize(3);
+    for(int j = 0; j < L.size(); j ++) {
+      L[j].reserve(- step);
+      for(int i = 0; i < - step; i ++) {
+        SimpleMatrix<num_t> wL;
+        std::cin >> wL;
+        assert(wL.rows() == size * size && wL.cols() == size * size + 2);
+        L[j].emplace_back(wL);
+      }
+      assert(L[j].size() == - step);
     }
-    assert(L.size() == - step);
   } else {
-    L.reserve(step);
-    for(int i = 0; i < step; i ++)
-      L.emplace_back(SimpleMatrix<num_t>(size * size, size * size + 2).O());
-    vector<vector<vector<SimpleVector<num_t> > > > cache;
+    L.resize(3);
+    for(int j = 0; j < L.size(); j ++) {
+      L[j].reserve(step);
+      for(int i = 0; i < step; i ++)
+        L[j].emplace_back(SimpleMatrix<num_t>(size * size, size * size + 2).O());
+    }
+    vector<vector<vector<vector<SimpleVector<num_t> > > > > cache;
     {
-      vector<vector<SimpleVector<num_t> > > work;
-      work.resize(L[0].rows());
+      vector<vector<vector<SimpleVector<num_t> > > > work;
+      vector<vector<SimpleVector<num_t> > > work2;
+      work2.resize(L[0][0].rows());
+      work.resize(L[0].size(), work2);
       cache.resize(L.size(), work);
     }
     auto cache2(cache);
@@ -350,12 +358,12 @@ int main(int argc, const char* argv[]) {
       cerr << std::endl;
       vector<SimpleMatrix<num_t> > work;
       if(! loadp2or3<num_t>(work, argv[i])) continue;
-      for(int kkk = 0; kkk < recur; kkk ++)
-        for(int j = 0; j < work.size(); j ++) {
+      for(int j = 0; j < work.size(); j ++)
+        for(int kkk = 0; kkk < recur; kkk ++) {
           cerr << kkk * work.size() + j << " / " << recur * work.size() << " over " << i - 5 << " / " << argc - 5 << std::endl;
           auto rin(work[j]);
           rin.O();
-          for(int mm = 0; mm < L.size(); mm ++) {
+          for(int mm = 0; mm < L[j].size(); mm ++) {
             auto rin0(rin);
             for(int n = 0; n < rin.rows(); n ++)
               for(int nn = 0; nn < rin.cols(); nn ++)
@@ -364,7 +372,7 @@ int main(int argc, const char* argv[]) {
               for(int kk = 0; kk < work[j].cols() - size; kk ++) {
                 auto orig(work[j].subMatrix(k, kk, size, size) / num_t(int(4)) +
                           rin.subMatrix(k, kk, size, size));
-                for(int mmm = 0; mmm < L[mm].rows(); mmm ++) {
+                for(int mmm = 0; mmm < L[j][mm].rows(); mmm ++) {
                   SimpleVector<num_t> vwork(size * size + 1);
                   for(int n = 0; n < orig.rows(); n ++)
                     vwork.setVector(n * orig.cols(), orig.row(n));
@@ -384,45 +392,47 @@ int main(int argc, const char* argv[]) {
   //      but they needs huge calculation time.
   //      Also, p1 and extreme accuracy condition should work but this needs
   //      huge memory usage.
-                  cache[mm][mmm].emplace_back(move(mpi.first) *
+                  cache[j][mm][mmm].emplace_back(move(mpi.first) *
                     pow(mpi.second, ceil(- log(orig.epsilon()) )) );
                 }
               }
           }
-          for(int n = 0; n < L.size(); n ++)
-            for(int nn = 0; nn < L[n].rows(); nn ++) {
-              SimpleMatrix<num_t> work(cache[n][nn].size(), cache[n][nn][0].size());
+          for(int n = 0; n < L[j].size(); n ++)
+            for(int nn = 0; nn < L[j][n].rows(); nn ++) {
+              SimpleMatrix<num_t> work(cache[j][n][nn].size(), cache[j][n][nn][0].size());
               for(int nnn = 0; nnn < work.rows(); nnn ++)
-                work.row(nnn) = move(cache[n][nn][nnn]);
-              cache2[n][nn].emplace_back(linearInvariant(work));
-              cerr << cache2[n][nn][cache2[n][nn].size() - 1] << std::endl;
-              cache[n][nn].resize(0);
+                work.row(nnn) = move(cache[j][n][nn][nnn]);
+              cache2[j][n][nn].emplace_back(linearInvariant(work));
+              if(recur0 < 0)
+                cerr << cache2[j][n][nn][cache2[j][n][nn].size() - 1];
+              cache[j][n][nn].resize(0);
             }
         }
     }
-    for(int n = 0; n < L.size(); n ++) {
-      num_t normL(int(0));
-      for(int nn = 0; nn < L[n].rows(); nn ++) {
-        SimpleMatrix<num_t> work(cache2[n][nn].size(), cache2[n][nn][0].size());
-        for(int nnn = 0; nnn < work.rows(); nnn ++)
-          work.row(nnn) = move(cache2[n][nn][nnn]);
-        L[n].row(nn)  = linearInvariant(work);
-        L[n].row(nn) /= - num_t(L[n](nn, L[n].cols() - 2));
-        L[n](nn, L[n].cols() - 2) = num_t(int(0));
-        normL += L[n].row(nn).dot(L[n].row(nn));
-        cache2[n][nn].resize(0);
+    for(int n0 = 0; n0 < L.size(); n0 ++)
+      for(int n = 0; n < L[n0].size(); n ++) {
+        num_t normL(int(0));
+        for(int nn = 0; nn < L[n0][n].rows(); nn ++) {
+          SimpleMatrix<num_t> work(cache2[n0][n][nn].size(), cache2[n0][n][nn][0].size());
+          for(int nnn = 0; nnn < work.rows(); nnn ++)
+            work.row(nnn) = move(cache2[n0][n][nn][nnn]);
+          L[n0][n].row(nn)  = linearInvariant(work);
+          L[n0][n].row(nn) /= - num_t(L[n0][n](nn, L[n0][n].cols() - 2));
+          L[n0][n](nn, L[n0][n].cols() - 2) = num_t(int(0));
+          normL += L[n0][n].row(nn).dot(L[n0][n].row(nn));
+          cache2[n0][n][nn].resize(0);
+        }
+        // N.B. sqrt(L[n].rows()) multiply is needed because of scaling whiteout.
+        L[n0][n] /= sqrt(normL);
+        std::cout << L[n0][n] << std::endl;
       }
-      // N.B. sqrt(L[n].rows()) multiply is needed because of scaling whiteout.
-      L[n] /= sqrt(normL);
-      std::cout << L[n] << std::endl;
-    }
   }
   auto outc(out);
   for(int i = 0; i < outc.size(); i ++) outc[i].O();
   auto outr(outc);
   SimpleMatrix<num_t> one(size, size);
   one.O(num_t(int(1)));
-  if(recur0 < 0) for(int i = 0; i < out.size(); i ++) out[i].O();
+  if(size0 < 0 && recur0 < 0) for(int i = 0; i < out.size(); i ++) out[i].O();
   for(int rc = 0; rc < (size0 < 0 ? 1 : recur); rc ++) {
     cerr << rc << " / " << recur << std::endl;
     auto rin(out[0]);
@@ -446,13 +456,13 @@ int main(int argc, const char* argv[]) {
           vwork.O();
           for(int n = 0; n < orig.rows(); n ++)
             vwork.setVector(n * orig.cols(), orig.row(n));
-          for(int nn = L.size() - 1; 0 <= nn; nn --) {
+          for(int nn = L[j].size() - 1; 0 <= nn; nn --) {
             for(int nnn = 0; nnn < vwork.size(); nnn ++)
               vwork[nnn] = isfinite(vwork[nnn])
                 ? max(- num_t(int(1)), min(num_t(int(1)), vwork[nnn]))
                 : num_t(int(1)) / num_t(int(8));
             vwork[vwork.size() - 1] = num_t(int(0));
-            vwork = L[nn] * makeProgramInvariant<num_t>(vwork).first;
+            vwork = L[j][nn] * makeProgramInvariant<num_t>(vwork).first;
             for(int nnn = 0; nnn < vwork.size(); nnn ++) 
               // N.B. pair.second must be 1 because of scaling.
               vwork[nnn] = revertProgramInvariant<num_t>(make_pair(vwork[nnn], num_t(int(1)) ));
