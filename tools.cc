@@ -440,7 +440,7 @@ int main(int argc, const char* argv[]) {
     if(0 < size0)
       for(int n = 0; n < rin.rows(); n ++)
         for(int nn = 0; nn < rin.cols(); nn ++)
-          for(int nnn = 0; nnn < L.size() - 1; nnn ++)
+          for(int nnn = 0; nnn < L[0].size() - 1; nnn ++)
             rin(n, nn) += rng();
     if(! rc) {
       vector<SimpleMatrix<num_t> > buf;
