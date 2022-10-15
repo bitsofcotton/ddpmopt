@@ -360,7 +360,7 @@ int main(int argc, const char* argv[]) {
       if(! loadp2or3<num_t>(work, argv[i])) continue;
       for(int j = 0; j < work.size(); j ++)
         for(int kkk = 0; kkk < recur; kkk ++) {
-          cerr << kkk * work.size() + j << " / " << recur * work.size() << " over " << i - 5 << " / " << argc - 5 << std::endl;
+          cerr << kkk + j * recur << " / " << recur * work.size() << " over " << i - 5 << " / " << argc - 5 << std::endl;
           auto rin(work[j]);
           rin.O();
           for(int mm = 0; mm < L[j].size(); mm ++) {
@@ -409,9 +409,9 @@ int main(int argc, const char* argv[]) {
             }
         }
     }
-    for(int n0 = 0; n0 < L.size(); n0 ++)
-      for(int n = 0; n < L[n0].size(); n ++) {
-        num_t normL(int(0));
+    for(int n = 0; n < L[0].size(); n ++) {
+      num_t normL(int(0));
+      for(int n0 = 0; n0 < L.size(); n0 ++) {
         for(int nn = 0; nn < L[n0][n].rows(); nn ++) {
           SimpleMatrix<num_t> work(cache2[n0][n][nn].size(), cache2[n0][n][nn][0].size());
           for(int nnn = 0; nnn < work.rows(); nnn ++)
@@ -422,17 +422,21 @@ int main(int argc, const char* argv[]) {
           normL += L[n0][n].row(nn).dot(L[n0][n].row(nn));
           cache2[n0][n][nn].resize(0);
         }
+      }
+      normL /= num_t(int(L.size()));
+      for(int n0 = 0; n0 < L.size(); n0 ++) {
         // N.B. sqrt(L[n].rows()) multiply is needed because of scaling whiteout.
         L[n0][n] /= sqrt(normL);
         std::cout << L[n0][n] << std::endl;
       }
+    }
   }
   auto outc(out);
   for(int i = 0; i < outc.size(); i ++) outc[i].O();
   auto outr(outc);
   SimpleMatrix<num_t> one(size, size);
   one.O(num_t(int(1)));
-  if(size0 < 0 && recur0 < 0) for(int i = 0; i < out.size(); i ++) out[i].O();
+  if(0 < step || 0 < recur0) for(int i = 0; i < out.size(); i ++) out[i].O();
   for(int rc = 0; rc < (size0 < 0 ? 1 : recur); rc ++) {
     cerr << rc << " / " << recur << std::endl;
     auto rin(out[0]);
@@ -483,7 +487,7 @@ int main(int argc, const char* argv[]) {
     for(int k = 0; k < outr[i].rows(); k ++)
       for(int kk = 0; kk < outr[i].cols(); kk ++)
         if(outc[i](k, kk) != num_t(int(0))) outr[i](k, kk) /= outc[i](k, kk);
-  if(! savep2or3<num_t>(argv[4], normalize<num_t>(autoLevel<num_t>(outr, (outr[0].rows() + outr[0].cols()) * size * 3 * 3)), false, 65535)) return - 2;
+  if(! savep2or3<num_t>(argv[4], normalize<num_t>(autoLevel<num_t>(outr, (outr[0].rows() + outr[0].cols()) * size * 6) ), false, 65535) ) return - 2;
   return 0;
 }
 
