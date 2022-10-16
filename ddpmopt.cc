@@ -301,10 +301,17 @@ int main(int argc, const char* argv[]) {
   if(epoch0 < 0) {
     vector<SimpleMatrix<num_t> > L;
     L.reserve(3);
+    int rows(0);
+    std::cin >> rows;
+    assert(0 < rows);
     for(int j = 0; j < 3; j ++) {
-      SimpleMatrix<num_t> wL;
-      std::cin >> wL;
-      L.emplace_back(move(wL));
+      num_t normL(int(0));
+      SimpleMatrix<num_t> wL(rows, rows + 2);
+      for(int i = 0; i < rows; i ++) {
+        std::cin >> wL.row(i);
+        normL += wL.row(i).dot(wL.row(i));
+      }
+      L.emplace_back(move(wL) /= sqrt(normL));
       assert(L[0].rows() == L[j].rows() && L[0].cols() == L[j].cols());
       assert(L[j].rows() + 2 == L[j].cols());
     }
@@ -333,38 +340,35 @@ int main(int argc, const char* argv[]) {
         std::cerr << "failed to save." << std::endl;
     }
   } else {
-    vector<SimpleMatrix<num_t> > in;
-    if(! loadp2or3<num_t>(in, argv[2])) return - 1;
-    assert(in[0].rows() == in[0].cols());
-    vector<vector<vector<SimpleVector<num_t> > > > cache;
-    cache.resize(in.size());
-    for(int i = 0; i < cache.size(); i ++) {
-      cache[i].resize(in[0].rows() * in[0].cols());
-      for(int j = 0; j < cache[i].size(); j ++)
-        cache[i][j].reserve(epoch * (argc - 2));
-    }
+    vector<vector<SimpleMatrix<num_t> > > in;
+    vector<vector<SimpleMatrix<num_t> > > noise;
+    in.resize(argc - 2);
+    noise.resize(in.size());
     for(int i = 2; i < argc; i ++) {
-      for(int k = i; k < argc; k ++) cerr << "\"" << argv[k] << "\" ";
-      cerr << std::endl;
-      if(2 < i) {
-        if(! loadp2or3<num_t>(in, argv[i])) continue;
-        assert(in[0].rows() * in[0].cols() == cache[0].size());
+      if(! loadp2or3<num_t>(in[i - 2], argv[i])) continue;
+      assert(in[0][0].rows() == in[i - 2][0].rows() &&
+             in[0][0].cols() == in[i - 2][0].cols());
+      assert(in[i - 2][0].rows() == in[i - 2][0].cols());
+      noise[i - 2].resize(epoch);
+      for(int j = 0; j < epoch; j ++) {
+        noise[i - 2][j] = in[i - 2][0];
+        noise[i - 2][j].O();
+        for(int n = 0; n < noise[i - 2][j].rows(); n ++)
+          for(int nn = 0; nn < noise[i - 2][j].cols(); nn ++)
+            noise[i - 2][j](n, nn) += rng();
       }
-      for(int k = 0; k < epoch; k ++) {
-        auto rin(in[0]);
-        rin.O();
-        for(int n = 0; n < rin.rows(); n ++)
-          for(int nn = 0; nn < rin.cols(); nn ++)
-            rin(n, nn) += rng();
-        for(int j = 0; j < in.size(); j ++) {
-          cerr << k * in.size() + j << " / " << epoch * in.size() << " over " << i - 2 << " / " << argc - 2 << std::endl;
-          SimpleVector<num_t> vwork0(in[j].rows() * in[j].cols() + 1);
-          for(int n = 0; n < in[j].rows(); n ++)
-            vwork0.setVector(n * in[j].cols(), (in[j].row(n) + rin.row(n)) / num_t(int(2)) );
-          for(int m = 0; m < vwork0.size() - 1; m ++) {
-            auto vwork(vwork0);
-            vwork[vwork.size() - 1] = in[j](m / in[j].cols(), m % in[j].cols());
-            auto mpi(makeProgramInvariant<num_t>(vwork));
+    }
+    std::cout << in[0][0].rows() * in[0][0].cols() << std::endl;
+    for(int j = 0; j < in[0].size(); j ++)
+      for(int m = 0; m < in[0][0].rows() * in[0][0].cols(); m ++) {
+        cerr << j * in[0][0].rows() * in[0][0].cols() + m << " / " << in[0][0].rows() * in[0][0].cols() * in[0].size() << std::endl;
+        SimpleMatrix<num_t> work(epoch * in.size(), in[0][0].rows() * in[0][0].cols() + 2);
+        for(int i = 0; i < in.size(); i ++)
+          for(int jj = 0; jj < noise[i].size(); jj ++) {
+            SimpleVector<num_t> vwork(in[i][j].rows() * in[i][j].cols() + 1);
+            for(int n = 0; n < in[i][j].rows(); n ++)
+              vwork.setVector(n * in[i][j].cols(), (in[i][j].row(n) + noise[i][jj].row(n)) / num_t(int(2)) );
+            vwork[vwork.size() - 1] = in[i][j](m / in[i][j].cols(), m % in[i][j].cols());
   // XXX: Invariant summation causes average invariant.
   //      We need p1 or catg for linear ones,
   //      Otherwise we need multiplication and reduce method
@@ -375,27 +379,16 @@ int main(int argc, const char* argv[]) {
   //      huge memory usage.
   // XXX: in the both case, we need to treat different corresponding as
   //      different vectors. Otherwise, we get spoiled result.
-            cache[j][m].emplace_back(move(mpi.first) *
-              pow(mpi.second, ceil(- log(rin.epsilon()) )) );
+            auto mpi(makeProgramInvariant<num_t>(vwork));
+            work.row(i * epoch + jj)  = move(mpi.first);
+            work.row(i * epoch + jj) *=
+              pow(mpi.second, ceil(- log(in[0][0].epsilon()) ));
           }
-        }
+        auto vwork(linearInvariant(work));
+        vwork /= - num_t(vwork[vwork.size() - 2]);
+        vwork[vwork.size() - 2] = num_t(int(0));
+        std::cout << vwork;
       }
-    }
-    for(int j = 0; j < cache.size(); j ++) {
-      SimpleMatrix<num_t> lL(cache[j].size(), cache[j][0][0].size());
-      lL.O();
-      num_t normL(int(0));
-      for(int m = 0; m < cache[j].size(); m ++) {
-        SimpleMatrix<num_t> work(cache[j][m].size(), cache[j][m][0].size());
-        for(int n = 0; n < work.rows(); n ++)
-          work.row(n) = move(cache[j][m][n]);
-        lL.row(m)  = linearInvariant(work);
-        lL.row(m) /= - num_t(lL(m, lL.cols() - 2));
-        lL(m, lL.cols() - 2) = num_t(int(0));
-        normL += lL.row(m).dot(lL.row(m));
-      }
-      std::cout << (lL /= sqrt(normL));
-    }
   }
   return 0;
 }
