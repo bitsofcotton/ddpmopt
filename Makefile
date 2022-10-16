@@ -16,9 +16,9 @@ clean:
 
 all:	ddpmopt ddpmopt32
 ddpmopt:
-	${CXX} ${CXXFLAGS} -static -o ddpmopt tools.cc
+	${CXX} ${CXXFLAGS} -static -o ddpmopt ddpmopt.cc
 ddpmopt32:
-	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=32 -o ddpmopt32 tools.cc
+	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=32 -o ddpmopt32 ddpmopt.cc
 ddpmopt64:
-	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=64 -o ddpmopt64 tools.cc
+	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=64 -o ddpmopt64 ddpmopt.cc
 
