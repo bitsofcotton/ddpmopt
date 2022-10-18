@@ -296,25 +296,30 @@ int main(int argc, const char* argv[]) {
 #define int int32_t
   const auto epoch0(std::atoi(argv[1]));
   const auto epoch(abs(epoch0));
-  std::random_device rd;
-  std::mt19937_64 rde(rd());
   if(epoch0 < 0) {
     vector<SimpleMatrix<num_t> > L;
     L.reserve(3);
     int rows(0);
     std::cin >> rows;
     assert(0 < rows);
+    num_t normL(int(0));
+    num_t maxL(int(0));
     for(int j = 0; j < 3; j ++) {
-      num_t normL(int(0));
       SimpleMatrix<num_t> wL(rows, rows + 2);
       for(int i = 0; i < rows; i ++) {
         std::cin >> wL.row(i);
         normL += wL.row(i).dot(wL.row(i));
+        for(int k = 0; k < wL.cols(); k ++)
+          maxL = max(maxL, abs(wL(i, k)));
       }
-      L.emplace_back(move(wL) /= sqrt(normL));
+      L.emplace_back(move(wL));
       assert(L[0].rows() == L[j].rows() && L[0].cols() == L[j].cols());
       assert(L[j].rows() + 2 == L[j].cols());
     }
+    normL /= num_t(int(3));
+    normL  = max(maxL, sqrt(normL));
+    for(int j = 0; j < L.size(); j ++)
+      L[j] /= normL;
     for(int i = 2; i < argc; i ++) {
       vector<SimpleMatrix<num_t> > out;
       if(! loadp2or3<num_t>(out, argv[i])) return - 1;
