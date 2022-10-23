@@ -307,12 +307,17 @@ int main(int argc, const char* argv[]) {
     for(int j = 0; j < 3; j ++) {
       SimpleMatrix<num_t> wL(rows, rows + 2);
       for(int i = 0; i < rows; i ++) {
+        // XXX: clang++13 causes SimpleFloat ... operator >> while loop
+        //      illegaly omitted causes zero vector for each.
+        //      however, this can be only the clang binary set I got had be
+        //      infected condition.
         std::cin >> wL.row(i);
         normL += wL.row(i).dot(wL.row(i));
         for(int k = 0; k < wL.cols(); k ++)
           maxL = max(maxL, abs(wL(i, k)));
       }
-      L.emplace_back(move(wL));
+      // L.emplace_back(move(wL));
+      L.emplace_back(wL);
       assert(L[0].rows() == L[j].rows() && L[0].cols() == L[j].cols());
       assert(L[j].rows() + 2 == L[j].cols());
     }
