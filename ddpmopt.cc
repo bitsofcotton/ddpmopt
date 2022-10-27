@@ -196,7 +196,7 @@ static inline num_t rng() {
     res <<= sizeof(uint32_t) * 8;
     res  |= uint32_t(arc4random());
   }
-  return (num_t(res) / num_t(~ myuint(0)) - num_t(int(1)) / num_t(int(2))) * num_t(int(2));
+  return max(- num_t(int(1)), min(num_t(int(1)), (num_t(res) / num_t(~ myuint(0)) - num_t(int(1)) / num_t(int(2))) * num_t(int(2)) ));
 }
 
 // XXX: Invariant integration meets gulf on finding regularity class and
@@ -295,7 +295,7 @@ int main(int argc, const char* argv[]) {
 //#define int int64_t
 #define int int32_t
   const auto epoch0(std::atoi(argv[1]));
-  const auto epoch(abs(epoch0));
+        auto epoch(abs(epoch0));
   if(epoch0 < 0) {
     vector<SimpleMatrix<num_t> > L;
     L.reserve(3);
@@ -325,6 +325,7 @@ int main(int argc, const char* argv[]) {
     normL  = max(maxL, sqrt(normL));
     for(int j = 0; j < L.size(); j ++)
       L[j] /= normL;
+    epoch *= L[0].rows();
     for(int i = 2; i < argc; i ++) {
       vector<SimpleMatrix<num_t> > out;
       if(! loadp2or3<num_t>(out, argv[i])) return - 1;
@@ -341,6 +342,8 @@ int main(int argc, const char* argv[]) {
           for(int n = 0; n < out[j].rows(); n ++)
             vwork.setVector(n * out[j].cols(), (out[j].row(n) + rin.row(n)) / num_t(int(2)) );
           vwork[vwork.size() - 1] = num_t(int(0));
+          for(int n = 0; n < vwork.size(); n ++)
+            vwork[n] = max(- num_t(int(1)), min(num_t(int(1)), vwork[n]));
           auto outwork(L[j] * makeProgramInvariant<num_t>(vwork).first);
           for(int n = 0; n < out[j].rows(); n ++)
             out[j].row(n) = outwork.subVector(n * out[j].cols(), out[j].cols());
@@ -359,6 +362,7 @@ int main(int argc, const char* argv[]) {
       assert(in[0][0].rows() == in[i - 2][0].rows() &&
              in[0][0].cols() == in[i - 2][0].cols());
       assert(in[i - 2][0].rows() == in[i - 2][0].cols());
+      if(i == 2) epoch *= max(1, in[0][0].rows() * in[0][0].cols() / (argc - 2));
       noise[i - 2].resize(epoch);
       for(int j = 0; j < epoch; j ++) {
         noise[i - 2][j] = in[i - 2][0];
@@ -379,6 +383,8 @@ int main(int argc, const char* argv[]) {
             for(int n = 0; n < in[i][j].rows(); n ++)
               vwork.setVector(n * in[i][j].cols(), (in[i][j].row(n) + noise[i][jj].row(n)) / num_t(int(2)) );
             vwork[vwork.size() - 1] = in[i][j](m / in[i][j].cols(), m % in[i][j].cols());
+          for(int n = 0; n < vwork.size(); n ++)
+            vwork[n] = max(- num_t(int(1)), min(num_t(int(1)), vwork[n]));
   // XXX: Invariant summation causes average invariant.
   //      We need p1 or catg for linear ones,
   //      Otherwise we need multiplication and reduce method
