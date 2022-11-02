@@ -302,54 +302,45 @@ int main(int argc, const char* argv[]) {
     int rows(0);
     std::cin >> rows;
     assert(0 < rows);
-    num_t normL(int(0));
-    num_t maxL(int(0));
     for(int j = 0; j < 3; j ++) {
       SimpleMatrix<num_t> wL(rows, rows + 2);
-      for(int i = 0; i < rows; i ++) {
+      for(int i = 0; i < wL.rows(); i ++)
         // XXX: clang++13 causes SimpleFloat ... operator >> while loop
         //      illegaly omitted causes zero vector for each.
         //      however, this can be only the clang binary set I got had be
         //      infected condition.
         std::cin >> wL.row(i);
-        normL += wL.row(i).dot(wL.row(i));
-        for(int k = 0; k < wL.cols(); k ++)
-          maxL = max(maxL, abs(wL(i, k)));
-      }
       // L.emplace_back(move(wL));
       L.emplace_back(wL);
       assert(L[0].rows() == L[j].rows() && L[0].cols() == L[j].cols());
       assert(L[j].rows() + 2 == L[j].cols());
     }
-    normL /= num_t(int(3));
-    normL  = max(maxL, sqrt(normL));
-    for(int j = 0; j < L.size(); j ++)
-      L[j] /= normL;
     epoch *= L[0].rows();
     for(int i = 2; i < argc; i ++) {
       vector<SimpleMatrix<num_t> > out;
       if(! loadp2or3<num_t>(out, argv[i])) return - 1;
       assert(out[0].rows() * out[0].cols() == L[0].rows());
+      auto outs(out);
+      for(int j = 0; j < outs.size(); j ++) outs[j].O();
       for(int k = 0; k < epoch; k ++) {
         auto rin(out[0]);
-        rin.O();
         for(int n = 0; n < rin.rows(); n ++)
           for(int nn = 0; nn < rin.cols(); nn ++)
-            rin(n, nn) += rng();
+            rin(n, nn) = rng();
         for(int j = 0; j < out.size(); j ++) {
           cerr << k * out.size() + j << " / " << epoch * out.size() << " over " << i - 2 << " / " << argc - 2 << std::endl;
           SimpleVector<num_t> vwork(out[j].rows() * out[j].cols() + 1);
           for(int n = 0; n < out[j].rows(); n ++)
             vwork.setVector(n * out[j].cols(), (out[j].row(n) + rin.row(n)) / num_t(int(2)) );
           vwork[vwork.size() - 1] = num_t(int(0));
-          for(int n = 0; n < vwork.size(); n ++)
-            vwork[n] = max(- num_t(int(1)), min(num_t(int(1)), vwork[n]));
           auto outwork(L[j] * makeProgramInvariant<num_t>(vwork).first);
+          for(int n = 0; n < outwork.size(); n ++)
+            outwork[n] = revertProgramInvariant<num_t>(make_pair(outwork[n], num_t(int(1)) ));
           for(int n = 0; n < out[j].rows(); n ++)
-            out[j].row(n) = outwork.subVector(n * out[j].cols(), out[j].cols());
+            outs[j].row(n) += outwork.subVector(n * out[j].cols(), out[j].cols());
         }
       }
-      if(! savep2or3<num_t>(argv[i], normalize<num_t>(out), false, 65535) )
+      if(! savep2or3<num_t>(argv[i], normalize<num_t>(outs), false, 65535) )
         std::cerr << "failed to save." << std::endl;
     }
   } else {
@@ -363,14 +354,11 @@ int main(int argc, const char* argv[]) {
              in[0][0].cols() == in[i - 2][0].cols());
       assert(in[i - 2][0].rows() == in[i - 2][0].cols());
       if(i == 2) epoch *= max(1, in[0][0].rows() * in[0][0].cols() / (argc - 2));
-      noise[i - 2].resize(epoch);
-      for(int j = 0; j < epoch; j ++) {
-        noise[i - 2][j] = in[i - 2][0];
-        noise[i - 2][j].O();
+      noise[i - 2].resize(epoch, SimpleMatrix<num_t>(in[i - 2][0].rows(), in[i - 2][0].cols()));
+      for(int j = 0; j < epoch; j ++)
         for(int n = 0; n < noise[i - 2][j].rows(); n ++)
           for(int nn = 0; nn < noise[i - 2][j].cols(); nn ++)
-            noise[i - 2][j](n, nn) += rng();
-      }
+            noise[i - 2][j](n, nn) = rng();
     }
     std::cout << in[0][0].rows() * in[0][0].cols() << std::endl;
     for(int j = 0; j < in[0].size(); j ++)
@@ -378,13 +366,11 @@ int main(int argc, const char* argv[]) {
         cerr << j * in[0][0].rows() * in[0][0].cols() + m << " / " << in[0][0].rows() * in[0][0].cols() * in[0].size() << std::endl;
         SimpleMatrix<num_t> work(epoch * in.size(), in[0][0].rows() * in[0][0].cols() + 2);
         for(int i = 0; i < in.size(); i ++)
-          for(int jj = 0; jj < noise[i].size(); jj ++) {
+          for(int jj = 0; jj < epoch; jj ++) {
             SimpleVector<num_t> vwork(in[i][j].rows() * in[i][j].cols() + 1);
             for(int n = 0; n < in[i][j].rows(); n ++)
               vwork.setVector(n * in[i][j].cols(), (in[i][j].row(n) + noise[i][jj].row(n)) / num_t(int(2)) );
             vwork[vwork.size() - 1] = in[i][j](m / in[i][j].cols(), m % in[i][j].cols());
-          for(int n = 0; n < vwork.size(); n ++)
-            vwork[n] = max(- num_t(int(1)), min(num_t(int(1)), vwork[n]));
   // XXX: Invariant summation causes average invariant.
   //      We need p1 or catg for linear ones,
   //      Otherwise we need multiplication and reduce method
