@@ -6,6 +6,7 @@ This isn't useful to get full context meaning-full image by once, but we can app
 There exists Denoising Diffusion Probabilistic Models (DDPM; Ho et al. 2020). So this is another try on them.
 
 # Usage:
-    ./tools  <epoch-size> <in0.ppm> ... > cache.txt
-    ./tools -<epoch-size> <out0.ppm> ... < cache.txt
+    ./ddpmopt +  <in0.ppm> ... > cache.txt
+    ./ddpmopt ++ <in0.ppm> ... > cache.txt
+    ./ddpmopt -  <out0.ppm> ... < cache.txt
 

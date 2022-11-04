@@ -294,9 +294,9 @@ template <typename T> SimpleVector<T> reduce(const SimpleMatrix<T> m) {
 int main(int argc, const char* argv[]) {
 //#define int int64_t
 #define int int32_t
-  const auto epoch0(std::atoi(argv[1]));
-        auto epoch(abs(epoch0));
-  if(epoch0 < 0) {
+  assert(1 < argc);
+  const auto m(argv[1][0]);
+  if(m == '-') {
     vector<SimpleMatrix<num_t> > L;
     L.reserve(3);
     int rows(0);
@@ -315,45 +315,40 @@ int main(int argc, const char* argv[]) {
       assert(L[0].rows() == L[j].rows() && L[0].cols() == L[j].cols());
       assert(L[j].rows() + 2 == L[j].cols());
     }
-    epoch *= L[0].rows();
     for(int i = 2; i < argc; i ++) {
       vector<SimpleMatrix<num_t> > out;
       if(! loadp2or3<num_t>(out, argv[i])) return - 1;
       assert(out[0].rows() * out[0].cols() == L[0].rows());
-      auto outs(out);
-      for(int j = 0; j < outs.size(); j ++) outs[j].O();
-      for(int k = 0; k < epoch; k ++) {
-        auto rin(out[0]);
-        for(int n = 0; n < rin.rows(); n ++)
-          for(int nn = 0; nn < rin.cols(); nn ++)
-            rin(n, nn) = rng();
-        for(int j = 0; j < out.size(); j ++) {
-          cerr << k * out.size() + j << " / " << epoch * out.size() << " over " << i - 2 << " / " << argc - 2 << std::endl;
-          SimpleVector<num_t> vwork(out[j].rows() * out[j].cols() + 1);
-          for(int n = 0; n < out[j].rows(); n ++)
-            vwork.setVector(n * out[j].cols(), (out[j].row(n) + rin.row(n)) / num_t(int(2)) );
-          vwork[vwork.size() - 1] = num_t(int(0));
-          auto outwork(L[j] * makeProgramInvariant<num_t>(vwork).first);
-          for(int n = 0; n < outwork.size(); n ++)
-            outwork[n] = revertProgramInvariant<num_t>(make_pair(outwork[n], num_t(int(1)) ));
-          for(int n = 0; n < out[j].rows(); n ++)
-            outs[j].row(n) += outwork.subVector(n * out[j].cols(), out[j].cols());
-        }
+      auto rin(out[0]);
+      for(int n = 0; n < rin.rows(); n ++)
+        for(int nn = 0; nn < rin.cols(); nn ++)
+          rin(n, nn) = rng();
+      for(int j = 0; j < out.size(); j ++) {
+        cerr << j << " / " << out.size() << " over " << i - 2 << " / " << argc - 2 << std::endl;
+        SimpleVector<num_t> vwork(out[j].rows() * out[j].cols() + 1);
+        for(int n = 0; n < out[j].rows(); n ++)
+          vwork.setVector(n * out[j].cols(), (out[j].row(n) + rin.row(n)) / num_t(int(2)) );
+        vwork[vwork.size() - 1] = num_t(int(0));
+        auto outwork(L[j] * makeProgramInvariant<num_t>(vwork).first);
+        for(int n = 0; n < outwork.size(); n ++)
+          outwork[n] = revertProgramInvariant<num_t>(make_pair(outwork[n], num_t(int(1)) ));
+        for(int n = 0; n < out[j].rows(); n ++)
+          out[j].row(n) = outwork.subVector(n * out[j].cols(), out[j].cols());
       }
-      if(! savep2or3<num_t>(argv[i], normalize<num_t>(outs), false, 65535) )
+      if(! savep2or3<num_t>(argv[i], normalize<num_t>(out), false, 65535) )
         std::cerr << "failed to save." << std::endl;
     }
-  } else {
+  } else if(m == '+') {
     vector<vector<SimpleMatrix<num_t> > > in;
     vector<vector<SimpleMatrix<num_t> > > noise;
     in.resize(argc - 2);
     noise.resize(in.size());
+    const int epoch(ceil(argv[1][1] == '+' ? sqrt(num_t(argc - 2)) : log(num_t(argc - 2)) / log(num_t(int(2)))));
     for(int i = 2; i < argc; i ++) {
       if(! loadp2or3<num_t>(in[i - 2], argv[i])) continue;
       assert(in[0][0].rows() == in[i - 2][0].rows() &&
              in[0][0].cols() == in[i - 2][0].cols());
       assert(in[i - 2][0].rows() == in[i - 2][0].cols());
-      if(i == 2) epoch *= max(1, in[0][0].rows() * in[0][0].cols() / (argc - 2));
       noise[i - 2].resize(epoch, SimpleMatrix<num_t>(in[i - 2][0].rows(), in[i - 2][0].cols()));
       for(int j = 0; j < epoch; j ++)
         for(int n = 0; n < noise[i - 2][j].rows(); n ++)
@@ -361,6 +356,9 @@ int main(int argc, const char* argv[]) {
             noise[i - 2][j](n, nn) = rng();
     }
     std::cout << in[0][0].rows() * in[0][0].cols() << std::endl;
+    assert(in[0][0].rows() * in[0][0].cols() + 2 < in.size() &&
+           "Input number of graphics is too small differed from input graphics"
+           "size.");
     for(int j = 0; j < in[0].size(); j ++)
       for(int m = 0; m < in[0][0].rows() * in[0][0].cols(); m ++) {
         cerr << j * in[0][0].rows() * in[0][0].cols() + m << " / " << in[0][0].rows() * in[0][0].cols() * in[0].size() << std::endl;
