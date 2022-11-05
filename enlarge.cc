@@ -228,11 +228,15 @@ int main(int argc, const char* argv[]) {
       auto outs(out);
       for(int n = 0; n < outs.size(); n ++)
         outs[n] = SimpleMatrix<num_t>(sz0 * sz0, sz0 * sz0);
+      auto rin(out[0]);
+      for(int n = 0; n < rin.rows(); n ++)
+        for(int nn = 0; nn < rin.cols(); nn ++)
+          rin(n, nn) = rng();
       for(int j = 0; j < out.size(); j ++) {
         cerr << j << " / " << out.size() << " over " << i - 2 << " / " << argc - 2 << std::endl;
         SimpleVector<num_t> vwork0(out[j].rows() * out[j].cols() + 1);
         for(int n = 0; n < out[j].rows(); n ++)
-          vwork0.setVector(n * out[j].cols(), out[j].row(n));
+          vwork0.setVector(n * out[j].cols(), (out[j].row(n) + rin.row(n)) / num_t(int(2)));
         vwork0[vwork0.size() - 1] = num_t(int(0));
         const auto vwork(makeProgramInvariant<num_t>(vwork0).first);
         for(int k = 0; k < sz0 * sz0; k ++) {
@@ -241,8 +245,7 @@ int main(int argc, const char* argv[]) {
             outwork[n] = revertProgramInvariant<num_t>(make_pair(outwork[n], num_t(int(1)) ));
           for(int n = 0; n < out[j].rows(); n ++)
             out[j].row(n) = outwork.subVector(n * out[j].cols(), out[j].cols());
-          for(int n = 0; n < out[j].rows(); n ++)
-            outs[j].setMatrix((k / sz0) * sz0, (k % sz0) * sz0, out[j]);
+          outs[j].setMatrix((k / sz0) * sz0, (k % sz0) * sz0, out[j]);
         }
       }
       if(! savep2or3<num_t>(argv[i], normalize<num_t>(outs), false, 65535) )
@@ -250,18 +253,22 @@ int main(int argc, const char* argv[]) {
     }
   } else if(m == '+') {
     vector<vector<SimpleMatrix<num_t> > > in;
+    vector<vector<SimpleMatrix<num_t> > > noise;
     in.resize(argc - 2);
+    noise.resize(in.size());
+    const int sz0(sqrt(num_t(in.size())));
     for(int i = 2; i < argc; i ++) {
       if(! loadp2or3<num_t>(in[i - 2], argv[i])) continue;
       assert(in[0][0].rows() == in[i - 2][0].rows() &&
              in[0][0].cols() == in[i - 2][0].cols());
       assert(in[i - 2][0].rows() == in[i - 2][0].cols());
+      noise[i - 2].resize(sz0, SimpleMatrix<num_t>(sz0, sz0));
+      for(int j = 0; j < sz0; j ++)
+        for(int n = 0; n < sz0; n ++)
+          for(int nn = 0; nn < sz0; nn ++)
+            noise[i - 2][j](n, nn) = rng();
     }
-    const int sz0(pow(num_t(in[0][0].rows()), num_t(int(1)) / num_t(int(3))));
     assert(sz0 * sz0 == in[0][0].rows() && sz0 * sz0 == in[0][0].cols());
-    assert(sz0 * sz0 + 2 < in.size() &&
-           "Input number of graphics is too small differed from input graphics"
-           "size.");
     std::cout << sz0 << std::endl;
     auto shrink(in);
     for(int i = 0; i < shrink.size(); i ++)
@@ -277,16 +284,18 @@ int main(int argc, const char* argv[]) {
     for(int j = 0; j < in[0].size(); j ++)
       for(int m = 0; m < in[0][0].rows() * in[0][0].cols(); m ++) {
         cerr << j * in[0][0].rows() * in[0][0].cols() + m << " / " << in[0][0].rows() * in[0][0].cols() * in[0].size() << std::endl;
-        SimpleMatrix<num_t> work(in.size(), shrink[0][0].rows() * shrink[0][0].cols() + 2);
+        SimpleMatrix<num_t> work(sz0 * in.size(), shrink[0][0].rows() * shrink[0][0].cols() + 2);
         for(int i = 0; i < in.size(); i ++) {
           SimpleVector<num_t> vwork(shrink[i][j].rows() * shrink[i][j].cols() + 1);
           for(int n = 0; n < shrink[i][j].rows(); n ++)
-            vwork.setVector(n * shrink[i][j].cols(), shrink[i][j].row(n));
-          vwork[vwork.size() - 1] = in[i][j](m / in[i][j].cols(), m % in[i][j].cols());
-          auto mpi(makeProgramInvariant<num_t>(vwork));
-          work.row(i)  = move(mpi.first);
-          work.row(i) *=
-            pow(mpi.second, ceil(- log(in[0][0].epsilon()) ));
+            vwork.setVector(n * shrink[i][j].cols(), (shrink[i][j].row(n) + noise[i][j].row(n)) / num_t(int(2)));
+          for(int jj = 0; jj < sz0; jj ++) {
+            vwork[vwork.size() - 1] = in[i][j]((m / (sz0 * sz0 * sz0)) * sz0 + (m / sz0) % sz0, ((m / (sz0 * sz0)) % sz0) * sz0 + (m % sz0));
+            auto mpi(makeProgramInvariant<num_t>(vwork));
+            work.row(i * sz0 + jj)  = move(mpi.first);
+            work.row(i * sz0 + jj) *=
+              pow(mpi.second, ceil(- log(in[0][0].epsilon()) ));
+          }
         }
         auto vwork(linearInvariant(work));
         vwork /= - num_t(vwork[vwork.size() - 2]);
