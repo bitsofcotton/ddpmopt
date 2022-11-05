@@ -188,13 +188,14 @@ template <typename T> vector<SimpleMatrix<T> > normalize(const vector<SimpleMatr
 
 static inline num_t rng() {
   myuint res(0);
+  static std::random_device rd;
 #if defined(_FLOAT_BITS_)
   for(int i = 0; i < _FLOAT_BITS_ / sizeof(uint32_t) / 8; i ++) {
 #else
   for(int i = 0; i < 2; i ++) {
 #endif
     res <<= sizeof(uint32_t) * 8;
-    res  |= uint32_t(arc4random());
+    res  |= uint32_t(rd());
   }
   return max(- num_t(int(1)), min(num_t(int(1)), (num_t(res) / num_t(~ myuint(0)) - num_t(int(1)) / num_t(int(2))) * num_t(int(2)) ));
 }
@@ -363,7 +364,10 @@ int main(int argc, const char* argv[]) {
       for(int m = 0; m < in[0][0].rows() * in[0][0].cols(); m ++) {
         cerr << j * in[0][0].rows() * in[0][0].cols() + m << " / " << in[0][0].rows() * in[0][0].cols() * in[0].size() << std::endl;
         SimpleMatrix<num_t> work(epoch * in.size(), in[0][0].rows() * in[0][0].cols() + 2);
-        for(int i = 0; i < in.size(); i ++)
+#if defined(_OPENMP)
+#pragma omp parallel for schedule(static, 1)
+#endif
+        for(int i = 0; i < in.size(); i ++) {
           for(int jj = 0; jj < epoch; jj ++) {
             SimpleVector<num_t> vwork(in[i][j].rows() * in[i][j].cols() + 1);
             for(int n = 0; n < in[i][j].rows(); n ++)
@@ -384,6 +388,7 @@ int main(int argc, const char* argv[]) {
             work.row(i * epoch + jj) *=
               pow(mpi.second, ceil(- log(in[0][0].epsilon()) ));
           }
+        }
         auto vwork(linearInvariant(work));
         vwork /= - num_t(vwork[vwork.size() - 2]);
         vwork[vwork.size() - 2] = num_t(int(0));
