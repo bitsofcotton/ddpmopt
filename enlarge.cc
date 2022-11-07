@@ -289,18 +289,17 @@ int main(int argc, const char* argv[]) {
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
-        for(int i = 0; i < in.size(); i ++) {
-          SimpleVector<num_t> vwork(shrink[i][j].rows() * shrink[i][j].cols() + 1);
-          for(int n = 0; n < shrink[i][j].rows(); n ++)
-            vwork.setVector(n * shrink[i][j].cols(), (shrink[i][j].row(n) + noise[i][j].row(n)) / num_t(int(2)));
+        for(int i = 0; i < in.size(); i ++)
           for(int jj = 0; jj < sz0; jj ++) {
+            SimpleVector<num_t> vwork(shrink[i][j].rows() * shrink[i][j].cols() + 1);
+            for(int n = 0; n < shrink[i][j].rows(); n ++)
+              vwork.setVector(n * shrink[i][j].cols(), (shrink[i][j].row(n) + noise[i][jj].row(n)) / num_t(int(2)));
             vwork[vwork.size() - 1] = in[i][j]((m / (sz0 * sz0 * sz0)) * sz0 + (m / sz0) % sz0, ((m / (sz0 * sz0)) % sz0) * sz0 + (m % sz0));
             auto mpi(makeProgramInvariant<num_t>(vwork));
             work.row(i * sz0 + jj)  = move(mpi.first);
             work.row(i * sz0 + jj) *=
               pow(mpi.second, ceil(- log(in[0][0].epsilon()) ));
           }
-        }
         auto vwork(linearInvariant(work));
         vwork /= - num_t(vwork[vwork.size() - 2]);
         vwork[vwork.size() - 2] = num_t(int(0));
