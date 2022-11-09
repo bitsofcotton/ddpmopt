@@ -284,8 +284,8 @@ int main(int argc, const char* argv[]) {
         shrink[i][j] /= num_t((in[i][j].rows() / sz) * (in[i][j].cols() / sz));
       }
     for(int j = 0; j < in[0].size(); j ++)
-      for(int m = 0; m < in[0][0].rows() * in[0][0].cols(); m ++) {
-        cerr << j * in[0][0].rows() * in[0][0].cols() + m << " / " << in[0][0].rows() * in[0][0].cols() * in[0].size() << std::endl;
+      for(int m = 0; m < sz * sz * sz * sz; m ++) {
+        cerr << j * sz * sz * sz * sz + m << " / " << sz * sz * sz * sz* in[0].size() << std::endl;
         SimpleMatrix<num_t> work(num * in.size(), shrink[0][0].rows() * shrink[0][0].cols() + 2);
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
