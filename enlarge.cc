@@ -297,8 +297,8 @@ int main(int argc, const char* argv[]) {
               vwork.setVector(n * shrink[i][j].cols(), (shrink[i][j].row(n) + noise[i][jj].row(n)) / num_t(int(2)));
             vwork[vwork.size() - 1] = in[i][j]((m / (sz * sz * sz)) * sz + (m / sz) % sz, ((m / (sz * sz)) % sz) * sz + (m % sz));
             auto mpi(makeProgramInvariant<num_t>(vwork));
-            work.row(i * sz + jj)  = move(mpi.first);
-            work.row(i * sz + jj) *=
+            work.row(i * num + jj)  = move(mpi.first);
+            work.row(i * num + jj) *=
               pow(mpi.second, ceil(- log(in[0][0].epsilon()) ));
           }
         auto vwork(linearInvariant(work));
