@@ -278,10 +278,10 @@ int main(int argc, const char* argv[]) {
         shrink[i][j] = SimpleMatrix<num_t>(sz, sz).O();
         for(int ii = 0; ii < sz; ii ++)
           for(int jj = 0; jj < sz; jj ++)
-            for(int iik = 0; iik < sz; iik ++)
-              for(int jjk = 0; jjk < sz; jjk ++)
-                shrink[i][j](ii, jj) += in[i][j](ii * sz + iik, jj * sz + jjk);
-        shrink[i][j] /= num_t(sz * sz);
+            for(int iik = 0; iik < in[i][j].rows() / sz; iik ++)
+              for(int jjk = 0; jjk < in[i][j].cols() / sz; jjk ++)
+                shrink[i][j](ii, jj) += in[i][j](ii * (in[i][j].rows() / sz) + iik, jj * (in[i][j].cols() / sz) + jjk);
+        shrink[i][j] /= num_t((in[i][j].rows() / sz) * (in[i][j].cols() / sz));
       }
     for(int j = 0; j < in[0].size(); j ++)
       for(int m = 0; m < in[0][0].rows() * in[0][0].cols(); m ++) {
