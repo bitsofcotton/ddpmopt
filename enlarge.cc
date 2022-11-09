@@ -271,7 +271,6 @@ int main(int argc, const char* argv[]) {
           for(int nn = 0; nn < sz; nn ++)
             noise[i - 2][j](n, nn) = rng();
     }
-    assert(sz * sz <= in[0][0].rows() && sz * sz <= in[0][0].cols());
     std::cout << sz << std::endl;
     auto shrink(in);
     for(int i = 0; i < shrink.size(); i ++)
