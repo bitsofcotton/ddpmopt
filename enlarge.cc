@@ -209,26 +209,28 @@ int main(int argc, const char* argv[]) {
   if(m == '-') {
     vector<SimpleMatrix<num_t> > L;
     int sz0(0);
+    int h(0);
+    int w(0);
     std::cin >> sz0;
-    assert(0 < sz0);
-    L.reserve(3 * sz0 * sz0);
-    for(int j = 0; j < 3; j ++)
-      for(int kk = 0; kk < sz0 * sz0; kk ++) {
-        SimpleMatrix<num_t> wL(sz0 * sz0, sz0 * sz0 + 2);
-        for(int i = 0; i < wL.rows(); i ++)
-          std::cin >> wL.row(i);
-        // L.emplace_back(move(wL));
-        L.emplace_back(wL);
-        assert(L[0].rows() == L[j].rows() && L[0].cols() == L[j].cols());
-        assert(L[j].rows() + 2 == L[j].cols());
-      }
+    std::cin >> h;
+    std::cin >> w;
+    assert(0 < sz0 && 0 < h && 0 < w);
+    L.reserve(3);
+    for(int j = 0; j < 3; j ++) {
+      SimpleMatrix<num_t> wL(h * w, sz0 * sz0 + 2);
+      for(int i = 0; i < wL.rows(); i ++)
+        std::cin >> wL.row(i);
+      // L.emplace_back(move(wL));
+      L.emplace_back(wL);
+      assert(L[0].rows() == L[j].rows() && L[0].cols() == L[j].cols());
+    }
     for(int i = 2; i < argc; i ++) {
       vector<SimpleMatrix<num_t> > out;
       if(! loadp2or3<num_t>(out, argv[i])) return - 1;
       assert(out[0].rows() * out[0].cols() == L[0].rows());
       auto outs(out);
       for(int n = 0; n < outs.size(); n ++)
-        outs[n] = SimpleMatrix<num_t>(sz0 * sz0, sz0 * sz0);
+        outs[n] = SimpleMatrix<num_t>(h, w);
       auto rin(out[0]);
       for(int n = 0; n < rin.rows(); n ++)
         for(int nn = 0; nn < rin.cols(); nn ++)
@@ -239,15 +241,10 @@ int main(int argc, const char* argv[]) {
         for(int n = 0; n < out[j].rows(); n ++)
           vwork0.setVector(n * out[j].cols(), (out[j].row(n) + rin.row(n)) / num_t(int(2)));
         vwork0[vwork0.size() - 1] = num_t(int(0));
-        const auto vwork(makeProgramInvariant<num_t>(vwork0).first);
-        for(int k = 0; k < sz0 * sz0; k ++) {
-          auto outwork(L[j * sz0 * sz0 + k] * vwork);
-          for(int n = 0; n < outwork.size(); n ++)
-            outwork[n] = revertProgramInvariant<num_t>(make_pair(outwork[n], num_t(int(1)) ));
-          for(int n = 0; n < out[j].rows(); n ++)
-            out[j].row(n) = outwork.subVector(n * out[j].cols(), out[j].cols());
-          outs[j].setMatrix((k / sz0) * sz0, (k % sz0) * sz0, out[j]);
-        }
+        auto outwork(L[j] * makeProgramInvariant<num_t>(vwork0).first);
+        for(int n = 0; n < outwork.size(); n ++)
+          outs[j](n / outs[j].cols(), n % outs[j].cols()) =
+            revertProgramInvariant<num_t>(make_pair(outwork[n], num_t(int(1)) ));
       }
       if(! savep2or3<num_t>(argv[i], normalize<num_t>(outs), false, 65535) )
         std::cerr << "failed to save." << std::endl;
@@ -272,6 +269,8 @@ int main(int argc, const char* argv[]) {
             noise[i - 2][j](n, nn) = rng();
     }
     std::cout << sz << std::endl;
+    std::cout << in[0][0].rows() << std::endl;
+    std::cout << in[0][0].cols() << std::endl;
     auto shrink(in);
     for(int i = 0; i < shrink.size(); i ++)
       for(int j = 0; j < shrink[i].size(); j ++) {
@@ -284,8 +283,8 @@ int main(int argc, const char* argv[]) {
         shrink[i][j] /= num_t((in[i][j].rows() / sz) * (in[i][j].cols() / sz));
       }
     for(int j = 0; j < in[0].size(); j ++)
-      for(int m = 0; m < sz * sz * sz * sz; m ++) {
-        cerr << j * sz * sz * sz * sz + m << " / " << sz * sz * sz * sz* in[0].size() << std::endl;
+      for(int m = 0; m < in[0][0].rows() * in[0][0].cols(); m ++){
+        cerr << j * in[0][0].rows() * in[0][0].cols() + m << " / " << in[0][0].rows() * in[0][0].cols() * in[0].size() << std::endl;
         SimpleMatrix<num_t> work(num * in.size(), shrink[0][0].rows() * shrink[0][0].cols() + 2);
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
@@ -295,7 +294,7 @@ int main(int argc, const char* argv[]) {
             SimpleVector<num_t> vwork(shrink[i][j].rows() * shrink[i][j].cols() + 1);
             for(int n = 0; n < shrink[i][j].rows(); n ++)
               vwork.setVector(n * shrink[i][j].cols(), (shrink[i][j].row(n) + noise[i][jj].row(n)) / num_t(int(2)));
-            vwork[vwork.size() - 1] = in[i][j]((m / (sz * sz * sz)) * sz + (m / sz) % sz, ((m / (sz * sz)) % sz) * sz + (m % sz));
+            vwork[vwork.size() - 1] = in[i][j](m / in[0][0].cols(), m % in[0][0].cols());
             auto mpi(makeProgramInvariant<num_t>(vwork));
             work.row(i * num + jj)  = move(mpi.first);
             work.row(i * num + jj) *=
