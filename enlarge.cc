@@ -227,7 +227,7 @@ int main(int argc, const char* argv[]) {
     for(int i = 2; i < argc; i ++) {
       vector<SimpleMatrix<num_t> > out;
       if(! loadp2or3<num_t>(out, argv[i])) return - 1;
-      assert(out[0].rows() * out[0].cols() == L[0].rows());
+      assert(out[0].rows() * out[0].cols() == sz0 * sz0);
       auto outs(out);
       for(int n = 0; n < outs.size(); n ++)
         outs[n] = SimpleMatrix<num_t>(h, w);
@@ -261,7 +261,7 @@ int main(int argc, const char* argv[]) {
       assert(in[0][0].rows() == in[i - 2][0].rows() &&
              in[0][0].cols() == in[i - 2][0].cols());
       assert(in[i - 2][0].rows() == in[i - 2][0].cols());
-      if(i == 2) sz = in[i - 2][0].rows();
+      if(i == 2) sz = sqrt(num_t(in[i - 2][0].rows()));
       noise[i - 2].resize(num, SimpleMatrix<num_t>(sz, sz));
       for(int j = 0; j < num; j ++)
         for(int n = 0; n < sz; n ++)
