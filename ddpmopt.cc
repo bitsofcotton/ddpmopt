@@ -188,14 +188,23 @@ template <typename T> vector<SimpleMatrix<T> > normalize(const vector<SimpleMatr
 
 static inline num_t rng() {
   myuint res(0);
-  static std::random_device rd;
+  // XXX: we don't trust system or compiler PRNG.
+  // static std::random_device rd;
+  // XXX: we want natural, deterministic, better PRNG, however,
+  //      we don't search deepinside of this PRNG.
+  //      (might be predecessor exists.)
+  static uint32_t t(1);
+  assert(t && "rng() should not be periodical.");
 #if defined(_FLOAT_BITS_)
   for(int i = 0; i < _FLOAT_BITS_ / sizeof(uint32_t) / 8; i ++) {
 #else
   for(int i = 0; i < 2; i ++) {
 #endif
     res <<= sizeof(uint32_t) * 8;
-    res  |= uint32_t(rd());
+    auto buf(sin(num_t(t ++)) * pow(num_t(int(2)), num_t(int(32 + 8))));
+    buf  -= floor(buf / num_t(~ uint32_t(0))) * num_t(~ uint32_t(0));
+    res  |= uint32_t(int(buf));
+    // res  |= uint32_t(rd());
   }
   return max(- num_t(int(1)), min(num_t(int(1)), (num_t(res) / num_t(~ myuint(0)) - num_t(int(1)) / num_t(int(2))) * num_t(int(2)) ));
 }
@@ -324,6 +333,7 @@ int main(int argc, const char* argv[]) {
       for(int n = 0; n < rin.rows(); n ++)
         for(int nn = 0; nn < rin.cols(); nn ++)
           rin(n, nn) = rng();
+      rin = (dft<num_t>(- rin.rows()) * rin.template cast<complex<num_t> >() * dft<num_t>(- rin.cols())).template real<num_t>();
       for(int j = 0; j < out.size(); j ++) {
         cerr << j << " / " << out.size() << " over " << i - 2 << " / " << argc - 2 << std::endl;
         SimpleVector<num_t> vwork(out[j].rows() * out[j].cols() + 1);
@@ -351,10 +361,12 @@ int main(int argc, const char* argv[]) {
              in[0][0].cols() == in[i - 2][0].cols());
       assert(in[i - 2][0].rows() == in[i - 2][0].cols());
       noise[i - 2].resize(epoch, SimpleMatrix<num_t>(in[i - 2][0].rows(), in[i - 2][0].cols()));
-      for(int j = 0; j < epoch; j ++)
+      for(int j = 0; j < epoch; j ++) {
         for(int n = 0; n < noise[i - 2][j].rows(); n ++)
           for(int nn = 0; nn < noise[i - 2][j].cols(); nn ++)
             noise[i - 2][j](n, nn) = rng();
+        noise[i - 2][j] = (dft<num_t>(- noise[i - 2][j].rows()) * noise[i - 2][j].template cast<complex<num_t> >() * dft<num_t>(- noise[i - 2][j].cols())).template real<num_t>();
+      }
     }
     std::cout << in[0][0].rows() * in[0][0].cols() << std::endl;
     assert(in[0][0].rows() * in[0][0].cols() + 2 < in.size() &&
