@@ -206,7 +206,7 @@ static inline num_t rng() {
     res  |= uint32_t(int(buf));
     // res  |= uint32_t(rd());
   }
-  return max(- num_t(int(1)), min(num_t(int(1)), (num_t(res) / num_t(~ myuint(0)) - num_t(int(1)) / num_t(int(2))) * num_t(int(2)) ));
+  return max(num_t(int(0)), min(num_t(int(1)), num_t(res) / num_t(~ myuint(0)) ));
 }
 
 // XXX: Invariant integration meets gulf on finding regularity class and
@@ -329,6 +329,11 @@ int main(int argc, const char* argv[]) {
       vector<SimpleMatrix<num_t> > out;
       if(! loadp2or3<num_t>(out, argv[i])) return - 1;
       assert(out[0].rows() * out[0].cols() == L[0].rows());
+      // N.B. apply them into log space.
+      for(int j = 0; j < out.size(); j ++)
+        for(int n = 0; n < out[j].rows(); n ++)
+          for(int nn = 0; nn < out[j].cols(); nn ++)
+            out[j](n, nn) = log(num_t(int(255)) * out[j](n, nn) + num_t(int(1))) / log(num_t(int(256)));
       auto rin(out[0]);
       for(int n = 0; n < rin.rows(); n ++)
         for(int nn = 0; nn < rin.cols(); nn ++)
@@ -338,13 +343,18 @@ int main(int argc, const char* argv[]) {
         cerr << j << " / " << out.size() << " over " << i - 2 << " / " << argc - 2 << std::endl;
         SimpleVector<num_t> vwork(out[j].rows() * out[j].cols() + 1);
         for(int n = 0; n < out[j].rows(); n ++)
-          vwork.setVector(n * out[j].cols(), (out[j].row(n) + rin.row(n)) / num_t(int(2)) );
+          for(int nn = 0; nn < out[j].cols(); nn ++)
+            vwork[n * out[j].cols() + nn] = out[j](n, nn) * rin(n, nn);
         vwork[vwork.size() - 1] = num_t(int(0));
         auto outwork(L[j] * makeProgramInvariant<num_t>(vwork).first);
         for(int n = 0; n < outwork.size(); n ++)
           outwork[n] = revertProgramInvariant<num_t>(make_pair(outwork[n], num_t(int(1)) ));
         for(int n = 0; n < out[j].rows(); n ++)
           out[j].row(n) = outwork.subVector(n * out[j].cols(), out[j].cols());
+        // N.B. revert them into original space.
+        for(int n = 0; n < out[j].rows(); n ++)
+          for(int nn = 0; nn < out[j].cols(); nn ++)
+            out[j](n, nn) = exp(max(- num_t(int(1)), min(num_t(int(1)), out[j](n, nn) )) ) / exp(num_t(int(1)));
       }
       if(! savep2or3<num_t>(argv[i], normalize<num_t>(out), false, 65535) )
         std::cerr << "failed to save." << std::endl;
@@ -360,6 +370,11 @@ int main(int argc, const char* argv[]) {
       assert(in[0][0].rows() == in[i - 2][0].rows() &&
              in[0][0].cols() == in[i - 2][0].cols());
       assert(in[i - 2][0].rows() == in[i - 2][0].cols());
+      // N.B. apply them into log space.
+      for(int j = 0; j < in[i - 2].size(); j ++)
+        for(int n = 0; n < in[i - 2][j].rows(); n ++)
+          for(int nn = 0; nn < in[i - 2][j].cols(); nn ++)
+            in[i - 2][j](n, nn) = log(num_t(int(255)) * in[i - 2][j](n, nn) + num_t(int(1))) / log(num_t(int(256)));
       noise[i - 2].resize(epoch, SimpleMatrix<num_t>(in[i - 2][0].rows(), in[i - 2][0].cols()));
       for(int j = 0; j < epoch; j ++) {
         for(int n = 0; n < noise[i - 2][j].rows(); n ++)
@@ -383,7 +398,8 @@ int main(int argc, const char* argv[]) {
           for(int jj = 0; jj < epoch; jj ++) {
             SimpleVector<num_t> vwork(in[i][j].rows() * in[i][j].cols() + 1);
             for(int n = 0; n < in[i][j].rows(); n ++)
-              vwork.setVector(n * in[i][j].cols(), (in[i][j].row(n) + noise[i][jj].row(n)) / num_t(int(2)) );
+              for(int nn = 0; nn < in[i][j].cols(); nn ++)
+                vwork[n * in[i][j].cols() + nn] = in[i][j](n, nn) * noise[i][jj](n, nn);
             vwork[vwork.size() - 1] = in[i][j](m / in[i][j].cols(), m % in[i][j].cols());
   // XXX: Invariant summation causes average invariant.
   //      We need p1 or catg for linear ones,

@@ -203,7 +203,7 @@ static inline num_t rng() {
     res  |= uint32_t(int(buf));
     // res  |= uint32_t(rd());
   }
-  return max(- num_t(int(1)), min(num_t(int(1)), (num_t(res) / num_t(~ myuint(0)) - num_t(int(1)) / num_t(int(2))) * num_t(int(2)) ));
+  return max(num_t(int(0)), min(num_t(int(1)), num_t(res) / num_t(~ myuint(0)) ));
 }
 
 #undef int
@@ -246,7 +246,8 @@ int main(int argc, const char* argv[]) {
         cerr << j << " / " << out.size() << " over " << i - 2 << " / " << argc - 2 << std::endl;
         SimpleVector<num_t> vwork0(out[j].rows() * out[j].cols() + 1);
         for(int n = 0; n < out[j].rows(); n ++)
-          vwork0.setVector(n * out[j].cols(), (out[j].row(n) + rin.row(n)) / num_t(int(2)));
+          for(int nn = 0; nn < out[j].cols(); nn ++)
+            vwork0[n * out[j].cols() + nn] = out[j](n, nn) * rin(n, nn);
         vwork0[vwork0.size() - 1] = num_t(int(0));
         auto outwork(L[j] * makeProgramInvariant<num_t>(vwork0).first);
         for(int n = 0; n < outwork.size(); n ++)
@@ -302,7 +303,8 @@ int main(int argc, const char* argv[]) {
           for(int jj = 0; jj < num; jj ++) {
             SimpleVector<num_t> vwork(shrink[i][j].rows() * shrink[i][j].cols() + 1);
             for(int n = 0; n < shrink[i][j].rows(); n ++)
-              vwork.setVector(n * shrink[i][j].cols(), (shrink[i][j].row(n) + noise[i][jj].row(n)) / num_t(int(2)));
+              for(int nn = 0; nn < shrink[i][j].cols(); nn ++)
+                vwork[n * shrink[i][j].cols() + nn] = shrink[i][j](n, nn) * noise[i][jj](n, nn);
             vwork[vwork.size() - 1] = in[i][j](m / in[0][0].cols(), m % in[0][0].cols());
             auto mpi(makeProgramInvariant<num_t>(vwork));
             work.row(i * num + jj)  = move(mpi.first);
