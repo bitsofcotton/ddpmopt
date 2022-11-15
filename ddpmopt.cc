@@ -329,11 +329,6 @@ int main(int argc, const char* argv[]) {
       vector<SimpleMatrix<num_t> > out;
       if(! loadp2or3<num_t>(out, argv[i])) return - 1;
       assert(out[0].rows() * out[0].cols() == L[0].rows());
-      // N.B. apply them into log space.
-      for(int j = 0; j < out.size(); j ++)
-        for(int n = 0; n < out[j].rows(); n ++)
-          for(int nn = 0; nn < out[j].cols(); nn ++)
-            out[j](n, nn) = log(num_t(int(255)) * out[j](n, nn) + num_t(int(1))) / log(num_t(int(256)));
       auto rin(out[0]);
       for(int n = 0; n < rin.rows(); n ++)
         for(int nn = 0; nn < rin.cols(); nn ++)
@@ -351,10 +346,6 @@ int main(int argc, const char* argv[]) {
           outwork[n] = revertProgramInvariant<num_t>(make_pair(outwork[n], num_t(int(1)) ));
         for(int n = 0; n < out[j].rows(); n ++)
           out[j].row(n) = outwork.subVector(n * out[j].cols(), out[j].cols());
-        // N.B. revert them into original space.
-        for(int n = 0; n < out[j].rows(); n ++)
-          for(int nn = 0; nn < out[j].cols(); nn ++)
-            out[j](n, nn) = exp(max(- num_t(int(1)), min(num_t(int(1)), out[j](n, nn) )) ) / exp(num_t(int(1)));
       }
       if(! savep2or3<num_t>(argv[i], normalize<num_t>(out), false, 65535) )
         std::cerr << "failed to save." << std::endl;
@@ -370,11 +361,6 @@ int main(int argc, const char* argv[]) {
       assert(in[0][0].rows() == in[i - 2][0].rows() &&
              in[0][0].cols() == in[i - 2][0].cols());
       assert(in[i - 2][0].rows() == in[i - 2][0].cols());
-      // N.B. apply them into log space.
-      for(int j = 0; j < in[i - 2].size(); j ++)
-        for(int n = 0; n < in[i - 2][j].rows(); n ++)
-          for(int nn = 0; nn < in[i - 2][j].cols(); nn ++)
-            in[i - 2][j](n, nn) = log(num_t(int(255)) * in[i - 2][j](n, nn) + num_t(int(1))) / log(num_t(int(256)));
       noise[i - 2].resize(epoch, SimpleMatrix<num_t>(in[i - 2][0].rows(), in[i - 2][0].cols()));
       for(int j = 0; j < epoch; j ++) {
         for(int n = 0; n < noise[i - 2][j].rows(); n ++)
