@@ -193,7 +193,7 @@ static inline num_t rng() {
   // XXX: we want natural, deterministic, better PRNG, however,
   //      we don't search deepinside of this PRNG.
   //      (might be predecessor exists.)
-  static uint32_t t(1);
+  static uint64_t t(1);
   assert(t && "rng() should not be periodical.");
 #if defined(_FLOAT_BITS_)
   for(int i = 0; i < _FLOAT_BITS_ / sizeof(uint32_t) / 8; i ++) {
@@ -201,21 +201,21 @@ static inline num_t rng() {
   for(int i = 0; i < 2; i ++) {
 #endif
     res <<= sizeof(uint32_t) * 8;
-    auto buf(sin(num_t(t ++)) * pow(num_t(int(2)), num_t(int(32 + 8))));
-    buf  -= floor(buf / num_t(~ uint32_t(0))) * num_t(~ uint32_t(0));
-    res  |= uint32_t(int(buf));
+#if defined(_FLOAT_BITS_)
+typedef SimpleFloat<uint64_t, unsigned __int128, 64, int64_t> thisfl;
+#else
+typedef long double thisfl;
+#endif
+    auto buf(sin(thisfl(t ++)) * pow(thisfl(int(2)), thisfl(int(32))));
+    buf  -= floor(buf);
+    res  |= uint32_t(int(buf * pow(thisfl(int(2)), thisfl(int(32)) )));
+#undef thisfl
     // res  |= uint32_t(rd());
   }
   return max(num_t(int(0)), min(num_t(int(1)), num_t(res) / num_t(~ myuint(0)) ));
 }
 
-// XXX: Invariant integration meets gulf on finding regularity class and
-//      applying them into data class.
-//      This is avoidable if we can calculate each of 2 possible operands as
-//      the same operation. Otherwise, from somehow, it is learning itself on
-//      possible existance causes re-calculate has glitches to the first
-//      calculation, 3 or more possible calculation methods divided in some
-//      of the operand groups needs non-flat data integrity itself.
+// N.B. invariant gathers some of the group on the input pattern.
 template <typename T> SimpleMatrix<T> concat(const SimpleMatrix<T>& m0, const SimpleMatrix<T>& m1) {
   // det diag result = det diag m0 + det diag m1
   // [1 x x^reverse 1]
@@ -308,27 +308,29 @@ int main(int argc, const char* argv[]) {
   const auto m(argv[1][0]);
   if(m == '-') {
     vector<SimpleMatrix<num_t> > L;
+    int sz0(0);
+    int h(0);
+    int w(0);
+    std::cin >> sz0;
+    std::cin >> h;
+    std::cin >> w;
+    assert(0 < sz0 && 0 < h && 0 < w);
     L.reserve(3);
-    int rows(0);
-    std::cin >> rows;
-    assert(0 < rows);
     for(int j = 0; j < 3; j ++) {
-      SimpleMatrix<num_t> wL(rows, rows + 2);
+      SimpleMatrix<num_t> wL(h * w, sz0 * sz0 + 2);
       for(int i = 0; i < wL.rows(); i ++)
-        // XXX: clang++13 causes SimpleFloat ... operator >> while loop
-        //      illegaly omitted causes zero vector for each.
-        //      however, this can be only the clang binary set I got had be
-        //      infected condition.
         std::cin >> wL.row(i);
       // L.emplace_back(move(wL));
       L.emplace_back(wL);
       assert(L[0].rows() == L[j].rows() && L[0].cols() == L[j].cols());
-      assert(L[j].rows() + 2 == L[j].cols());
     }
     for(int i = 2; i < argc; i ++) {
       vector<SimpleMatrix<num_t> > out;
       if(! loadp2or3<num_t>(out, argv[i])) return - 1;
-      assert(out[0].rows() * out[0].cols() == L[0].rows());
+      assert(out[0].rows() * out[0].cols() == sz0 * sz0);
+      auto outs(out);
+      for(int n = 0; n < outs.size(); n ++)
+        outs[n] = SimpleMatrix<num_t>(h, w);
       auto rin(out[0]);
       for(int n = 0; n < rin.rows(); n ++)
         for(int nn = 0; nn < rin.cols(); nn ++)
@@ -336,18 +338,17 @@ int main(int argc, const char* argv[]) {
       rin = (dft<num_t>(- rin.rows()) * rin.template cast<complex<num_t> >() * dft<num_t>(- rin.cols())).template real<num_t>();
       for(int j = 0; j < out.size(); j ++) {
         cerr << j << " / " << out.size() << " over " << i - 2 << " / " << argc - 2 << std::endl;
-        SimpleVector<num_t> vwork(out[j].rows() * out[j].cols() + 1);
+        SimpleVector<num_t> vwork0(out[j].rows() * out[j].cols() + 1);
         for(int n = 0; n < out[j].rows(); n ++)
           for(int nn = 0; nn < out[j].cols(); nn ++)
-            vwork[n * out[j].cols() + nn] = out[j](n, nn) * rin(n, nn);
-        vwork[vwork.size() - 1] = num_t(int(0));
-        auto outwork(L[j] * makeProgramInvariant<num_t>(vwork).first);
+            vwork0[n * out[j].cols() + nn] = out[j](n, nn) * rin(n, nn);
+        vwork0[vwork0.size() - 1] = num_t(int(0));
+        auto outwork(L[j] * makeProgramInvariant<num_t>(vwork0).first);
         for(int n = 0; n < outwork.size(); n ++)
-          outwork[n] = revertProgramInvariant<num_t>(make_pair(outwork[n], num_t(int(1)) ));
-        for(int n = 0; n < out[j].rows(); n ++)
-          out[j].row(n) = outwork.subVector(n * out[j].cols(), out[j].cols());
+          outs[j](n / outs[j].cols(), n % outs[j].cols()) =
+            revertProgramInvariant<num_t>(make_pair(outwork[n], num_t(int(1)) ));
       }
-      if(! savep2or3<num_t>(argv[i], normalize<num_t>(out), false, 65535) )
+      if(! savep2or3<num_t>(argv[i], normalize<num_t>(outs), false, 65535) )
         std::cerr << "failed to save." << std::endl;
     }
   } else if(m == '+') {
@@ -355,54 +356,62 @@ int main(int argc, const char* argv[]) {
     vector<vector<SimpleMatrix<num_t> > > noise;
     in.resize(argc - 2);
     noise.resize(in.size());
-    const int epoch(ceil(argv[1][1] == '+' ? sqrt(num_t(argc - 2)) : log(num_t(argc - 2)) / log(num_t(int(2)))));
+          int sz(0);
+    const int num(argv[1][1] == '+' ? sqrt(num_t(in.size())) : log(num_t(in.size())) / log(num_t(int(2))));
     for(int i = 2; i < argc; i ++) {
       if(! loadp2or3<num_t>(in[i - 2], argv[i])) continue;
       assert(in[0][0].rows() == in[i - 2][0].rows() &&
              in[0][0].cols() == in[i - 2][0].cols());
-      assert(in[i - 2][0].rows() == in[i - 2][0].cols());
-      noise[i - 2].resize(epoch, SimpleMatrix<num_t>(in[i - 2][0].rows(), in[i - 2][0].cols()));
-      for(int j = 0; j < epoch; j ++) {
-        for(int n = 0; n < noise[i - 2][j].rows(); n ++)
-          for(int nn = 0; nn < noise[i - 2][j].cols(); nn ++)
+      if(i == 2) sz = min(num, int(sqrt(num_t(in[i - 2][0].rows()))));
+      noise[i - 2].resize(num, SimpleMatrix<num_t>(sz, sz));
+      for(int j = 0; j < num; j ++) {
+        for(int n = 0; n < sz; n ++)
+          for(int nn = 0; nn < sz; nn ++)
             noise[i - 2][j](n, nn) = rng();
         noise[i - 2][j] = (dft<num_t>(- noise[i - 2][j].rows()) * noise[i - 2][j].template cast<complex<num_t> >() * dft<num_t>(- noise[i - 2][j].cols())).template real<num_t>();
       }
     }
-    std::cout << in[0][0].rows() * in[0][0].cols() << std::endl;
-    assert(in[0][0].rows() * in[0][0].cols() + 2 < in.size() &&
-           "Input number of graphics is too small differed from input graphics"
-           "size.");
+    std::cout << sz << std::endl;
+    std::cout << in[0][0].rows() << std::endl;
+    std::cout << in[0][0].cols() << std::endl;
+    auto shrink(in);
+    for(int i = 0; i < shrink.size(); i ++)
+      for(int j = 0; j < shrink[i].size(); j ++) {
+        shrink[i][j] = SimpleMatrix<num_t>(sz, sz).O();
+        for(int ii = 0; ii < sz; ii ++)
+          for(int jj = 0; jj < sz; jj ++) {
+            int cnt(0);
+            for(int iik = 0;
+                iik < min(in[i][j].rows() / sz,
+                  in[i][j].rows() - ii * (in[i][j].rows() / sz)); iik ++)
+              for(int jjk = 0; jjk < min(in[i][j].cols() / sz,
+                    in[i][j].cols() - jj * (in[i][j].cols() / sz));
+                  jjk ++, cnt ++)
+                shrink[i][j](ii, jj) +=
+                  in[i][j](ii * (in[i][j].rows() / sz) + iik,
+                           jj * (in[i][j].cols() / sz) + jjk);
+            shrink[i][j](ii, jj) /= num_t(cnt);
+          }
+      }
     for(int j = 0; j < in[0].size(); j ++)
-      for(int m = 0; m < in[0][0].rows() * in[0][0].cols(); m ++) {
+      for(int m = 0; m < in[0][0].rows() * in[0][0].cols(); m ++){
         cerr << j * in[0][0].rows() * in[0][0].cols() + m << " / " << in[0][0].rows() * in[0][0].cols() * in[0].size() << std::endl;
-        SimpleMatrix<num_t> work(epoch * in.size(), in[0][0].rows() * in[0][0].cols() + 2);
+        SimpleMatrix<num_t> work(num * in.size(), shrink[0][0].rows() * shrink[0][0].cols() + 2);
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
-        for(int i = 0; i < in.size(); i ++) {
-          for(int jj = 0; jj < epoch; jj ++) {
-            SimpleVector<num_t> vwork(in[i][j].rows() * in[i][j].cols() + 1);
-            for(int n = 0; n < in[i][j].rows(); n ++)
-              for(int nn = 0; nn < in[i][j].cols(); nn ++)
-                vwork[n * in[i][j].cols() + nn] = in[i][j](n, nn) * noise[i][jj](n, nn);
-            vwork[vwork.size() - 1] = in[i][j](m / in[i][j].cols(), m % in[i][j].cols());
-  // XXX: Invariant summation causes average invariant.
-  //      We need p1 or catg for linear ones,
-  //      Otherwise we need multiplication and reduce method
-  //      described in randtools.
-  //      It is recommended to use latter one because of accuracy
-  //      but they needs huge calculation time.
-  //      Also, p1 and extreme accuracy condition should work but this needs
-  //      huge memory usage.
-  // XXX: in the both case, we need to treat different corresponding as
-  //      different vectors. Otherwise, we get spoiled result.
+        for(int i = 0; i < in.size(); i ++)
+          for(int jj = 0; jj < num; jj ++) {
+            SimpleVector<num_t> vwork(shrink[i][j].rows() * shrink[i][j].cols() + 1);
+            for(int n = 0; n < shrink[i][j].rows(); n ++)
+              for(int nn = 0; nn < shrink[i][j].cols(); nn ++)
+                vwork[n * shrink[i][j].cols() + nn] = shrink[i][j](n, nn) * noise[i][jj](n, nn);
+            vwork[vwork.size() - 1] = in[i][j](m / in[0][0].cols(), m % in[0][0].cols());
             auto mpi(makeProgramInvariant<num_t>(vwork));
-            work.row(i * epoch + jj)  = move(mpi.first);
-            work.row(i * epoch + jj) *=
+            work.row(i * num + jj)  = move(mpi.first);
+            work.row(i * num + jj) *=
               pow(mpi.second, ceil(- log(in[0][0].epsilon()) ));
           }
-        }
         auto vwork(linearInvariant(work));
         vwork /= - num_t(vwork[vwork.size() - 2]);
         vwork[vwork.size() - 2] = num_t(int(0));
