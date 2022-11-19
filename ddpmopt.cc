@@ -362,7 +362,7 @@ int main(int argc, const char* argv[]) {
       if(! loadp2or3<num_t>(in[i - 2], argv[i])) continue;
       assert(in[0][0].rows() == in[i - 2][0].rows() &&
              in[0][0].cols() == in[i - 2][0].cols());
-      if(i == 2) sz = min(num, int(sqrt(num_t(in[i - 2][0].rows()))));
+      if(i == 2) sz = int(sqrt(num_t(min(int(in.size()), int(in[i - 2][0].rows())))));
       noise[i - 2].resize(num, SimpleMatrix<num_t>(sz, sz));
       for(int j = 0; j < num; j ++) {
         for(int n = 0; n < sz; n ++)
