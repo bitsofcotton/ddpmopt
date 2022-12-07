@@ -9,4 +9,5 @@ There exists Denoising Diffusion Probabilistic Models (DDPM; Ho et al. 2020). So
     ./ddpmopt +  <in0.ppm> ... > cache.txt
     ./ddpmopt ++ <in0.ppm> ... > cache.txt
     ./ddpmopt -  <out0.ppm> ... < cache.txt
+    ./ddpmoptp <diffuse> <in0.ppm> ...
 
