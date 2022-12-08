@@ -49,7 +49,8 @@ public:
     const auto& buf(f.next(in));
     if(! f.full) return T(0);
     // N.B. please use catgp to compete with over learning.
-    const auto nin(sqrt(buf.dot(buf)));
+    // XXX: division accuracy glitch.
+    const auto nin(sqrt(buf.dot(buf)) * T(int(2)));
     if(! isfinite(nin) || nin == zero) return zero;
     SimpleMatrix<T> toeplitz(buf.size() - varlen - step + 2, varlen + 2);
     for(int i = 0; i < toeplitz.rows(); i ++) {

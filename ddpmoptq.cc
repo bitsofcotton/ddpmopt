@@ -344,27 +344,23 @@ template <typename T> SimpleVector<T> reduce(const SimpleMatrix<T> m) {
   return work.row(0);
 }
 
-template <typename T> vector<vector<SimpleMatrix<T> > > shrinken(const vector<vector<SimpleMatrix<T> > >& in, const int& sz = 2) {
-  vector<vector<SimpleMatrix<T> > > shrink;
-  shrink.resize(in.size());
-  for(int i = 0; i < shrink.size(); i ++) {
-    shrink[i].resize(in[i].size(), SimpleMatrix<T>(sz, sz).O());
-    for(int j = 0; j < shrink[i].size(); j ++)
-      for(int ii = 0; ii < sz; ii ++)
-        for(int jj = 0; jj < sz; jj ++) {
-          int cnt(0);
-          for(int iik = 0;
-              iik < min(in[i][j].rows() / sz,
-                in[i][j].rows() - ii * (in[i][j].rows() / sz)); iik ++)
-            for(int jjk = 0; jjk < min(in[i][j].cols() / sz,
-                  in[i][j].cols() - jj * (in[i][j].cols() / sz));
-                jjk ++, cnt ++)
-              shrink[i][j](ii, jj) +=
-                in[i][j](ii * (in[i][j].rows() / sz) + iik,
-                         jj * (in[i][j].cols() / sz) + jjk);
-          shrink[i][j](ii, jj) /= num_t(cnt);
-        }
-  }
+template <typename T> SimpleMatrix<T> shrinken(const SimpleMatrix<T>& in, const int& h = 2, const int& w = 2) {
+  SimpleMatrix<T> shrink(h, w);
+  shrink.O();
+  for(int ii = 0; ii < h; ii ++)
+    for(int jj = 0; jj < w; jj ++) {
+      int cnt(0);
+      for(int iik = 0;
+          iik < min(in.rows() / h,
+            in.rows() - ii * (in.rows() / h)); iik ++)
+        for(int jjk = 0; jjk < min(in.cols() / w,
+              in.cols() - jj * (in.cols() / w));
+            jjk ++, cnt ++)
+          shrink(ii, jj) +=
+            in(ii * (in.rows() / h) + iik,
+                     jj * (in.cols() / w) + jjk);
+      shrink(ii, jj) /= num_t(cnt);
+    }
   return shrink;
 }
 
@@ -373,206 +369,248 @@ int main(int argc, const char* argv[]) {
 //#define int int64_t
 #define int int32_t
   assert(1 < argc);
-  vector<vector<SimpleMatrix<num_t> > > in;
-  vector<vector<SimpleMatrix<num_t> > > noise;
-  vector<vector<SimpleMatrix<num_t> > > p;
-  vector<vector<SimpleMatrix<num_t> > > L;
-  vector<vector<SimpleMatrix<num_t> > > pL;
-  vector<P<num_t> > p0;
-  int sz(0);
-  int num(0);
-  in.resize(argc - 2);
-  noise.resize(in.size());
-  for(int ext = 0; ext < in.size() / 2; ext ++) {
-    const int status(in.size() / (ext + 1) - 2);
-    const int var0(max(num_t(int(1)), num_t(int(exp(sqrt(log(num_t(status)))))) ) );
-    if(status < var0 + 3 * 2) break;
-    p0.emplace_back(P<num_t>(status));
-  }
-  p.resize(p0.size());
-  auto q(p);
-  for(int i = 1; i < argc; i ++) {
-    if(! loadp2or3<num_t>(in[i - 1], argv[i])) continue;
-    assert(in[0][0].rows() == in[i - 1][0].rows() &&
-           in[0][0].cols() == in[i - 1][0].cols());
-    if(i == 1) {
-      sz  = int(sqrt(num_t(min(int(in.size()), int(in[i - 1][0].rows())))));
-      // XXX:
-      num = int(num_t(in.size()) * log(num_t(in.size())));
+  const auto ext(std::atoi(argv[1]));
+  for(int i0 = 2; i0 < argc; i0 ++) {
+    vector<SimpleMatrix<num_t> > in;
+    if(! loadp2or3<num_t>(in, argv[i0])) continue;
+    const num_t diag(in[0].rows() * in[0].cols());
+    const int   sz(sqrt(diag));
+    const int   num(diag * log(diag));
+    vector<SimpleVector<num_t> > noisep;
+    vector<SimpleVector<num_t> > noiseq;
+    noisep.resize(num, SimpleVector<num_t>(sz));
+    noiseq.resize(num, SimpleVector<num_t>(sz));
+    for(int j = 0; j < noisep.size(); j ++) {
+      for(int n = 0; n < noisep[j].size(); n ++)
+        noisep[j][n] = rng();
+      noisep[j] = (dft<num_t>(- noisep[j].size()) * noisep[j].template cast<complex<num_t> >()).template real<num_t>();
     }
-    noise[i - 1].resize(num, SimpleMatrix<num_t>(sz, sz));
-    for(int j = 0; j < num; j ++) {
-      for(int n = 0; n < sz; n ++)
-        for(int nn = 0; nn < sz; nn ++)
-          noise[i - 1][j](n, nn) = rng();
-      noise[i - 1][j] = (dft<num_t>(- noise[i - 1][j].rows()) * noise[i - 1][j].template cast<complex<num_t> >() * dft<num_t>(- noise[i - 1][j].cols())).template real<num_t>();
+    for(int j = 0; j < noiseq.size(); j ++) {
+      for(int n = 0; n < noiseq[j].size(); n ++)
+        noiseq[j][n] = rng();
+      noiseq[j] = (dft<num_t>(- noiseq[j].size()) * noiseq[j].template cast<complex<num_t> >()).template real<num_t>();
     }
-  }
-  for(int i = 0; i < p.size(); i ++) {
-    p[i].resize(in[i].size(), SimpleMatrix<num_t>(in[i][0].rows(), in[i][0].cols()).O());
-    q[i].resize(in[i].size(), SimpleMatrix<num_t>(in[i][0].rows(), in[i][0].cols()).O());
-    for(int k = 0; k < p[i].size(); k ++) {
-      cerr << "Step 1: " << i * p[i].size() + k << " / " << p.size() * p[i].size() << std::endl;
+    auto out(in);
+    for(int i = 0; i < out.size(); i ++) {
+      out[i].resize(in[i].rows() + ext * 2, in[i].cols() + ext * 2);
+      out[i].O().setMatrix(ext, ext, in[i]);
+    }
+    SimpleMatrix<num_t> riny(ext, out[0].cols());
+    SimpleMatrix<num_t> rinx(out[0].rows(), ext);
+    for(int n = 0; n < riny.rows(); n ++)
+      for(int nn = 0; nn < riny.cols(); nn ++)
+        riny(n, nn) = rng();
+    for(int n = 0; n < rinx.rows(); n ++)
+      for(int nn = 0; nn < rinx.cols(); nn ++)
+        rinx(n, nn) = rng();
+    for(int i = 0; i < ext; i ++) {
+      P<num_t> p0(in[0].rows() + i * 2 - 2);
+      vector<SimpleVector<num_t> > yp;
+      yp.resize(out.size(), SimpleVector<num_t>(in[0].cols() + i * 2).O());
+      auto ym(yp);
+      cerr << "Step 1: " << i << " / " << ext << " over " << i0 << " / " << argc - 1 << std::endl;
+      for(int k = 0; k < out.size(); k ++) {
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
-      for(int ii = 0; ii < p[i][k].rows(); ii ++) {
-        for(int jj = 0; jj < p[i][k].cols(); jj ++) {
-          auto pf(p0[i]);
-          auto pb(p0[i]);
+        for(int ii = i; ii < out[k].cols() - i; ii ++) {
+          auto pf(p0);
+          auto pb(p0);
           try {
-            for(int kk = 0; kk < in.size() / (i + 1); kk ++) {
-              assert(0 <= (in.size() / (i + 1) - (kk + 1)) * (i + 1));
-              assert((in.size() / (i + 1) - (kk + 1)) * (i + 1) < in.size());
-              assert(- num_t(int(1)) <= in[(in.size() / (i + 1) - (kk + 1)) * (i + 1)][k](ii, jj));
-              assert(in[(in.size() / (i + 1) - (kk + 1)) * (i + 1)][k](ii, jj) <= num_t(int(1)));
-              q[i][k](ii, jj) = pb.next(in[(in.size() / (i + 1) - (kk + 1)) * (i + 1)][k](ii, jj));
-            }
+            for(int jj = i; jj < out[k].rows() - i; jj ++)
+              ym[k][ii - i] = pf.next(out[k](out[k].rows() - i - 1 - jj, ii));
           } catch(const char* e) {
-            q[i][k](ii, jj) = num_t(int(0));
+            ym[k][ii - i] = num_t(int(0));
           }
           try {
-            for(int kk = 0; kk < in.size() / (i + 1); kk ++) {
-              assert(0 <= (in.size() / (i + 1) - (kk + 1)) * (i + 1));
-              assert((in.size() / (i + 1) - (kk + 1)) * (i + 1) < in.size());
-              assert(- num_t(int(1)) <= in[in.size() - 1 -
-                (in.size() / (i + 1) - (kk + 1)) * (i + 1)][k](ii, jj));
-              assert(in[in.size() - 1 -
-                (in.size() / (i + 1) - (kk + 1)) * (i + 1)][k](ii, jj) <= num_t(int(1)));
-              p[i][k](ii, jj) = pf.next(in[in.size() - 1 -
-                (in.size() / (i + 1) - (kk + 1)) * (i + 1)][k](ii, jj));
-            }
+            for(int jj = i; jj < out[k].rows() - i; jj ++)
+              yp[k][ii - i] = pb.next(out[k](jj, ii));
           } catch(const char* e) {
-            p[i][k](ii, jj) = num_t(int(0));
+            yp[k][ii - i] = num_t(int(0));
           }
         }
       }
-    }
-  }
-  auto shrink(shrinken<num_t>(in, sz));
-  L.resize(in.size());
-  for(int i = 0; i < in.size(); i ++) {
-    L[i].resize(in[0].size());
-    for(int j = 0; j < in[0].size(); j ++) {
-      L[i][j].resize(in[0][0].rows() * in[0][0].cols(), shrink[0][0].rows() * shrink[0][0].cols() + 2);
+      P<num_t> q0(in[0].cols() + i * 2 - 2);
+      vector<SimpleVector<num_t> > xp;
+      xp.resize(out.size(), SimpleVector<num_t>(in[0].rows() + i * 2).O());
+      auto xm(xp);
+      cerr << "Step 2: " << i << " / " << ext << " over " << i0 << " / " << argc - 1 << std::endl;
+      for(int k = 0; k < out.size(); k ++) {
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
-      for(int m = 0; m < in[0][0].rows() * in[0][0].cols(); m ++) {
-        cerr << "Step 2: " << i * in[0].size() * in[0][0].rows() * in[0][0].cols() + j * in[0][0].rows() * in[0][0].cols() + m << " / " << in.size() * in[0][0].rows() * in[0][0].cols() * in[0].size() << std::endl;
-        SimpleMatrix<num_t> work(num, shrink[0][0].rows() * shrink[0][0].cols() + 2);
-        for(int jj = 0; jj < num; jj ++) {
-          SimpleVector<num_t> vwork(shrink[i][j].rows() * shrink[i][j].cols() + 1);
-          for(int n = 0; n < shrink[i][j].rows(); n ++)
-            for(int nn = 0; nn < shrink[i][j].cols(); nn ++)
-              vwork[n * shrink[i][j].cols() + nn] = shrink[i][j](n, nn) * noise[i][jj](n, nn);
-          vwork[vwork.size() - 1] = in[i][j](m / in[0][0].cols(), m % in[0][0].cols());
-          auto mpi(makeProgramInvariant<num_t>(vwork));
-          work.row(jj)  = std::move(mpi.first);
-          work.row(jj) *=
-            pow(mpi.second, ceil(- log(in[0][0].epsilon()) ));
+        for(int ii = i; ii < out[k].rows() - i; ii ++) {
+          auto pf(q0);
+          auto pb(q0);
+          try {
+            for(int jj = i; jj < out[k].cols() - i; jj ++)
+              ym[k][ii - i] = pf.next(out[k](ii, out[k].cols() - i - 1 - jj));
+          } catch(const char* e) {
+            ym[k][ii - i] = num_t(int(0));
+          }
+          try {
+            for(int jj = i; jj < out[k].cols() - i; jj ++)
+              yp[k][ii - i] = pb.next(out[k](ii, jj));
+          } catch(const char* e) {
+            yp[k][ii - i] = num_t(int(0));
+          }
         }
-        L[i][j].row(m) = linearInvariant(work);
       }
-    }
-  }
-  pL.resize(p.size());
-  auto qL(pL);
-  for(int i = 0; i < p.size(); i ++) {
-    pL[i].resize(p[i].size(), SimpleMatrix<num_t>(L[0][0].rows(), L[0][0].cols()).O());
-    qL[i].resize(p[i].size(), SimpleMatrix<num_t>(L[0][0].rows(), L[0][0].cols()).O());
-    for(int j = 0; j < pL[i].size(); j ++) {
-      cerr << "Step 3: " << i * pL[i].size() + j << " / " << pL.size() * pL[i].size() << std::endl;
+      cerr << "Step 3: " << i << " / " << ext << " over " << i0 << " / " << argc - 1 << std::endl;
+      vector<SimpleMatrix<num_t> > Lp;
+      Lp.resize(out.size());
+      for(int ii = 0; ii < Lp.size(); ii ++) {
+        auto shrinky(shrinken<num_t>(in[ii].subMatrix(i, i, in[ii].rows() - i * 2, in[ii].cols() - i * 2), in[ii].rows() - i * 2, sz));
+        Lp[ii].resize(in[0].cols(), sz + 2);
+        Lp[ii].O();
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
-      for(int ii = 0; ii < pL[i][j].rows(); ii ++) {
-        for(int jj = 0; jj < pL[i][j].cols(); jj ++) {
-          auto pf(p0[i]);
-          auto pb(p0[i]);
-          num_t qLn(int(0));
-          num_t pLn(int(0));
-          for(int kk = 0; kk < L.size() / (i + 1); kk ++)
-            qLn += L[(L.size() / (i + 1) - (kk + 1)) * (i + 1)][j](ii, jj) *
-                   L[(L.size() / (i + 1) - (kk + 1)) * (i + 1)][j](ii, jj);
-          for(int kk = 0; kk < L.size() / (i + 1); kk ++)
-            pLn += L[L.size() - 1 -
-              (L.size() / (i + 1) - (kk + 1)) * (i + 1)][j](ii, jj) *
-                   L[L.size() - 1 -
-              (L.size() / (i + 1) - (kk + 1)) * (i + 1)][j](ii, jj);
-          // N.B. multiply by 2 for division accuracy.
-          //      we need this because some of the implementation int32_t
-          //      have 64bit integer type causes SimpleFloat glitch.
-          qLn = sqrt(qLn) * num_t(int(2));
-          pLn = sqrt(pLn) * num_t(int(2));
-          try {
-            for(int kk = 0; kk < L.size() / (i + 1); kk ++) {
-              assert(0 <= (L.size() / (i + 1) - (kk + 1)) * (i + 1));
-              assert((L.size() / (i + 1) - (kk + 1)) * (i + 1) < L.size());
-              assert(L[(L.size() / (i + 1) - (kk + 1)) * (i + 1)][j](ii, jj) / qLn <= num_t(int(1)));
-              assert(- num_t(int(1)) <= L[(L.size() / (i + 1) - (kk + 1)) * (i + 1)][j](ii, jj) / qLn);
-              qL[i][j](ii, jj) = pb.next(
-                L[(L.size() / (i + 1) - (kk + 1)) * (i + 1)][j](ii, jj) / qLn);
-            }
-          } catch(const char* e) {
-            qL[i][j](ii, jj) = num_t(int(0));
-            for(int kk = 0; kk < L.size() / (i + 1); kk ++)
-              qL[i][j](ii, jj) += L[(L.size() / (i + 1) - (kk + 1)) * (i + 1)][j](ii, jj) / qLn;
-            qL[i][j](ii, jj) /= num_t(L.size() / (i + 1));
+        for(int m = 0; m < in[0].cols(); m ++) {
+          SimpleMatrix<num_t> work(num, sz + 2);
+          for(int jj = 0; jj < num; jj ++) {
+            SimpleVector<num_t> vwork(shrinky.cols() + 1);
+            for(int n = 0; n < shrinky.cols(); n ++)
+              vwork[n] = shrinky(jj * shrinky.rows() / num, n) * noisep[jj][n];
+            vwork[vwork.size() - 1] = in[ii](jj * shrinky.rows() / num, m);
+            auto mpi(makeProgramInvariant<num_t>(vwork));
+            work.row(jj)  = move(mpi.first);
+            work.row(jj) *=
+              pow(mpi.second, ceil(- log(in[0].epsilon()) ));
           }
-          try {
-            for(int kk = 0; kk < L.size() / (i + 1); kk ++) {
-              assert(0 <= (L.size() / (i + 1) - (kk + 1)) * (i + 1));
-              assert((L.size() / (i + 1) - (kk + 1)) * (i + 1) < L.size());
-              assert(L[L.size() - 1 - 
-                (L.size() / (i + 1) - (kk + 1)) * (i + 1)][j](ii, jj) / pLn <=
-                num_t(int(1)));
-              assert(- num_t(int(1)) <= L[L.size() - 1 - 
-                (L.size() / (i + 1) - (kk + 1)) * (i + 1)][j](ii, jj) / pLn);
-              pL[i][j](ii, jj) = pf.next(L[L.size() - 1 - 
-                (L.size() / (i + 1) - (kk + 1)) * (i + 1)][j](ii, jj) / pLn);
-            }
-          } catch(const char* e) {
-            pL[i][j](ii, jj) = num_t(int(0));
-            for(int kk = 0; kk < L.size() / (i + 1); kk ++)
-              pL[i][j](ii, jj) += L[L.size() - 1 - 
-                (L.size() / (i + 1) - (kk + 1)) * (i + 1)][j](ii, jj) / pLn;
-            pL[i][j](ii, jj) /= num_t(L.size() / (i + 1));
-          }
-          qL[i][j](ii, jj) *= qLn;
-          pL[i][j](ii, jj) *= pLn;
+          Lp[ii].row(m) = linearInvariant(work);
         }
-        pL[i][j].row(ii) /= num_t(pL[i][j](ii, pL[i][j].cols() - 2));
-        pL[i][j](ii, pL[i][j].cols() - 2) = num_t(int(0));
-        qL[i][j].row(ii) /= num_t(qL[i][j](ii, qL[i][j].cols() - 2));
-        qL[i][j](ii, qL[i][j].cols() - 2) = num_t(int(0));
+      }
+      vector<SimpleMatrix<num_t> > Lq;
+      Lq.resize(0);
+      Lq.resize(out.size());
+      for(int ii = 0; ii < Lq.size(); ii ++) {
+        auto shrinkx(shrinken<num_t>(in[ii].subMatrix(i, i, in[ii].rows() - i * 2, in[ii].cols() - i * 2), sz, in[ii].cols() - i * 2));
+        Lq[ii].resize(in[0].rows(), sz + 2);
+        Lq[ii].O();
+#if defined(_OPENMP)
+#pragma omp parallel for schedule(static, 1)
+#endif
+        for(int m = 0; m < in[0].rows(); m ++) {
+          SimpleMatrix<num_t> work(num, sz + 2);
+          for(int jj = 0; jj < num; jj ++) {
+            SimpleVector<num_t> vwork(shrinkx.rows() + 1);
+            for(int n = 0; n < shrinkx.rows(); n ++)
+              vwork[n] = shrinkx(n, jj * shrinkx.cols() / num) * noiseq[jj][n];
+            vwork[vwork.size() - 1] = in[ii](m, jj * shrinkx.cols() / num);
+            auto mpi(makeProgramInvariant<num_t>(vwork));
+            work.row(jj)  = move(mpi.first);
+            work.row(jj) *=
+              pow(mpi.second, ceil(- log(in[0].epsilon()) ));
+          }
+          Lq[ii].row(m) = linearInvariant(work);
+        }
+      }
+      for(int k = 0; k < Lp.size(); k ++) {
+        auto pL(Lp[k]);
+        auto qL(Lq[k]);
+#if defined(_OPENMP)
+#pragma omp parallel for schedule(static, 1)
+#endif
+        for(int ii = 0; ii < Lp[k].rows(); ii ++) {
+          for(int jj = 0; jj < Lp[k].cols(); jj ++) {
+            auto pf(p0);
+            auto pb(p0);
+            num_t qLn(int(0));
+            num_t pLn(int(0));
+            for(int kk = 0; kk < Lp.size() / (i + 1); kk ++)
+              qLn += Lp[(Lp.size() / (i + 1) - (kk + 1)) * (i + 1)](ii, jj) *
+                     Lp[(Lp.size() / (i + 1) - (kk + 1)) * (i + 1)](ii, jj);
+            for(int kk = 0; kk < Lp.size() / (i + 1); kk ++)
+              pLn += Lp[Lp.size() - 1 -
+                (Lp.size() / (i + 1) - (kk + 1)) * (i + 1)](ii, jj) *
+                     Lp[Lp.size() - 1 -
+                (Lp.size() / (i + 1) - (kk + 1)) * (i + 1)](ii, jj);
+            qLn = sqrt(qLn) * num_t(int(2));
+            pLn = sqrt(pLn) * num_t(int(2));
+            try {
+              for(int kk = 0; kk < Lp.size() / (i + 1); kk ++)
+                qL(ii, jj) = pb.next(
+                  Lp[(Lp.size() / (i + 1) - (kk + 1)) * (i + 1)](ii, jj) / qLn);
+            } catch(const char* e) {
+              qL(ii, jj) = num_t(int(0));
+            }
+            try {
+              for(int kk = 0; kk < Lp.size() / (i + 1); kk ++)
+                pL(ii, jj) = pf.next(
+                  Lp[Lp.size() - 1 -
+                  (Lp.size() / (i + 1) - (kk + 1)) * (i + 1)](ii, jj) / pLn);
+            } catch(const char* e) {
+              pL(ii, jj) = num_t(int(0));
+            }
+            qL(ii, jj) *= qLn;
+            pL(ii, jj) *= pLn;
+          }
+          pL.row(ii) /= num_t(pL(ii, pL.cols() - 2));
+          pL(ii, pL.cols() - 2) = num_t(int(0));
+          qL.row(ii) /= num_t(qL(ii, qL.cols() - 2));
+          qL(ii, qL.cols() - 2) = num_t(int(0));
+        }
+        out[k].row(i).setVector(ext - i - 1, qL * makeProgramInvariant<num_t>(
+          SimpleVector<num_t>(ym[k].size() + 1).O().setVector(0, ym[k])).first);
+        out[k].row(out[k].rows() - i - 1).setVector(ext - i - 1,
+          pL * makeProgramInvariant<num_t>(
+            SimpleVector<num_t>(yp[k].size() + 1).O().setVector(0, yp[k])).first);
+        pL = Lp[k];
+        qL = Lq[k];
+#if defined(_OPENMP)
+#pragma omp parallel for schedule(static, 1)
+#endif
+        for(int ii = 0; ii < Lq[k].rows(); ii ++) {
+          for(int jj = 0; jj < Lq[k].cols(); jj ++) {
+            auto pf(q0);
+            auto pb(q0);
+            num_t qLn(int(0));
+            num_t pLn(int(0));
+            for(int kk = 0; kk < Lq.size() / (i + 1); kk ++)
+              qLn += Lq[(Lq.size() / (i + 1) - (kk + 1)) * (i + 1)](ii, jj) *
+                     Lq[(Lq.size() / (i + 1) - (kk + 1)) * (i + 1)](ii, jj);
+            for(int kk = 0; kk < Lq.size() / (i + 1); kk ++)
+              pLn += Lq[Lq.size() - 1 -
+                (Lq.size() / (i + 1) - (kk + 1)) * (i + 1)](ii, jj) *
+                     Lq[Lq.size() - 1 -
+                (Lq.size() / (i + 1) - (kk + 1)) * (i + 1)](ii, jj);
+            qLn = sqrt(qLn) * num_t(int(2));
+            pLn = sqrt(pLn) * num_t(int(2));
+            try {
+              for(int kk = 0; kk < Lq.size() / (i + 1); kk ++)
+                qL(ii, jj) = pb.next(
+                  Lq[(Lq.size() / (i + 1) - (kk + 1)) * (i + 1)](ii, jj) / qLn);
+            } catch(const char* e) {
+              qL(ii, jj) = num_t(int(0));
+            }
+            try {
+              for(int kk = 0; kk < Lq.size() / (i + 1); kk ++)
+                pL(ii, jj) = pf.next(
+                  Lq[Lq.size() - 1 -
+                  (Lq.size() / (i + 1) - (kk + 1)) * (i + 1)](ii, jj) / pLn);
+            } catch(const char* e) {
+              pL(ii, jj) = num_t(int(0));
+            }
+            qL(ii, jj) *= qLn;
+            pL(ii, jj) *= pLn;
+          }
+          pL.row(ii) /= num_t(pL(ii, pL.cols() - 2));
+          pL(ii, pL.cols() - 2) = num_t(int(0));
+          qL.row(ii) /= num_t(qL(ii, qL.cols() - 2));
+          qL(ii, qL.cols() - 2) = num_t(int(0));
+        }
+        out[k].setCol(i, SimpleVector<num_t>(out[k].col(i)).setVector(
+          ext - i - 1,
+          qL * makeProgramInvariant<num_t>(
+            SimpleVector<num_t>(xm[k].size() + 1).O().setVector(0, xm[k])).first));
+        out[k].setCol(out[k].cols() - i - 1, SimpleVector<num_t>(out[k].col(
+          out[k].cols() - i - 1)).setVector(ext - i - 1,
+          pL * makeProgramInvariant<num_t>(
+            SimpleVector<num_t>(xp[k].size() + 1).O().setVector(0, xp[k])).first));
       }
     }
-  }
-  p.insert(p.end(), q.begin(), q.end());
-  pL.insert(pL.end(), qL.begin(), qL.end());
-  auto sp(shrinken<num_t>(p, sz));
-  for(int i = 0; i < p.size(); i ++) {
-    auto& out(sp[i]);
-    auto& outs(p[i]);
-    auto  rin(out[0]);
-    for(int n = 0; n < rin.rows(); n ++)
-      for(int nn = 0; nn < rin.cols(); nn ++)
-        rin(n, nn) = rng();
-    rin = (dft<num_t>(- rin.rows()) * rin.template cast<complex<num_t> >() * dft<num_t>(- rin.cols())).template real<num_t>();
-    for(int j = 0; j < out.size(); j ++) {
-      cerr << "Step 4: " << j << " / " << out.size() << " over " << i << " / " << p.size() << std::endl;
-      SimpleVector<num_t> vwork0(out[j].rows() * out[j].cols() + 1);
-      for(int n = 0; n < out[j].rows(); n ++)
-        for(int nn = 0; nn < out[j].cols(); nn ++)
-          vwork0[n * out[j].cols() + nn] = out[j](n, nn) * rin(n, nn);
-      vwork0[vwork0.size() - 1] = num_t(int(0));
-      auto outwork(pL[i][j] * makeProgramInvariant<num_t>(vwork0).first);
-      for(int n = 0; n < outwork.size(); n ++)
-        outs[j](n / outs[j].cols(), n % outs[j].cols()) =
-          revertProgramInvariant<num_t>(make_pair(outwork[n], num_t(int(1)) ));
-    }
-    if(! savep2or3<num_t>((std::string("ddpmoptp-") + std::to_string(i) + std::string(".ppm")).c_str(), normalize<num_t>(outs), false, 65535) )
+    if(! savep2or3<num_t>(argv[i0], normalize<num_t>(out), false, 65535) )
       std::cerr << "failed to save." << std::endl;
   }
   return 0;
