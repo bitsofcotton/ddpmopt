@@ -386,7 +386,7 @@ int main(int argc, const char* argv[]) {
       out[i].resize(in[i].rows() + 2, in[i].cols() + 2);
       out[i].O().setMatrix(1, 1, in[i]);
     }
-    P<num_t> p0(in[0].rows() - 2);
+    P<num_t> p0(sz - 2);
     vector<SimpleMatrix<num_t> > sy;
     vector<SimpleMatrix<num_t> > sx;
     sy.resize(in.size());
@@ -420,7 +420,7 @@ int main(int argc, const char* argv[]) {
         }
       }
     }
-    P<num_t> q0(in[0].cols() - 2);
+    P<num_t> q0(sz - 2);
     vector<SimpleVector<num_t> > xp;
     xp.resize(sx.size(), SimpleVector<num_t>(sz + 1).O());
     auto xm(xp);
