@@ -602,6 +602,10 @@ int main(int argc, const char* argv[]) {
             SimpleVector<num_t>(xp[k].size() + 1).O().setVector(0, xp[k])).first));
       }
       for(int k = 0; k < out.size(); k ++) {
+        out[k].row(0) *= sqrt(out[k].row(1).dot(out[k].row(1)) / out[k].row(0).dot(out[k].row(0)));
+        out[k].row(out[k].rows() - 1) *= sqrt(out[k].row(out[k].rows() - 2).dot(out[k].row(out[k].rows() - 2)) / out[k].row(out[k].rows() - 1).dot(out[k].row(out[k].rows() - 1)));
+        out[k].setCol(0, out[k].col(0) * sqrt(out[k].col(1).dot(out[k].col(1)) / out[k].col(0).dot(out[k].col(0))));
+        out[k].setCol(out[k].cols() - 1, out[k].col(out[k].cols() - 1) * sqrt(out[k].col(out[k].cols() - 2).dot(out[k].col(out[k].cols() - 2)) / out[k].col(out[k].cols() - 1).dot(out[k].col(out[k].cols() - 1))));
         for(int kk = 0; kk < out[k].rows(); kk ++) {
           out[k](kk, 0) = max(num_t(int(0)), min(num_t(int(1)), out[k](kk, 0)));
           out[k](kk, out[k].cols() - 1) =
