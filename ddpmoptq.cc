@@ -376,19 +376,12 @@ int main(int argc, const char* argv[]) {
     const num_t diag(in[0].rows() * in[0].cols());
     const int   sz(sqrt(diag));
     const int   num(diag * log(diag));
-    vector<SimpleVector<num_t> > noisep;
-    vector<SimpleVector<num_t> > noiseq;
-    noisep.resize(num, SimpleVector<num_t>(sz));
-    noiseq.resize(num, SimpleVector<num_t>(sz));
-    for(int j = 0; j < noisep.size(); j ++) {
-      for(int n = 0; n < noisep[j].size(); n ++)
-        noisep[j][n] = rng();
-      noisep[j] = (dft<num_t>(- noisep[j].size()) * noisep[j].template cast<complex<num_t> >()).template real<num_t>();
-    }
-    for(int j = 0; j < noiseq.size(); j ++) {
-      for(int n = 0; n < noiseq[j].size(); n ++)
-        noiseq[j][n] = rng();
-      noiseq[j] = (dft<num_t>(- noiseq[j].size()) * noiseq[j].template cast<complex<num_t> >()).template real<num_t>();
+    vector<SimpleVector<num_t> > noise;
+    noise.resize(num, SimpleVector<num_t>(sz));
+    for(int j = 0; j < noise.size(); j ++) {
+      for(int n = 0; n < noise[j].size(); n ++)
+        noise[j][n] = rng();
+      noise[j] = (dft<num_t>(- noise[j].size()) * noise[j].template cast<complex<num_t> >()).template real<num_t>();
     }
     auto out(in);
     for(int i = 0; i < out.size(); i ++) {
@@ -404,6 +397,7 @@ int main(int argc, const char* argv[]) {
       for(int nn = 0; nn < rinx.cols(); nn ++)
         rinx(n, nn) = rng();
     for(int i = 0; i < ext; i ++) {
+      const auto ei(ext - i);
       P<num_t> p0(in[0].rows() + i * 2 - 2);
       vector<SimpleVector<num_t> > yp;
       yp.resize(out.size(), SimpleVector<num_t>(in[0].cols() + i * 2).O());
@@ -413,17 +407,17 @@ int main(int argc, const char* argv[]) {
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
-        for(int ii = i; ii < out[k].cols() - i; ii ++) {
+        for(int ii = ei; ii < out[k].cols() - ei * 2; ii ++) {
           auto pf(p0);
           auto pb(p0);
           try {
-            for(int jj = i; jj < out[k].rows() - i; jj ++)
+            for(int jj = ei; jj < out[k].rows() - ei * 2; jj ++)
               ym[k][ii - i] = pf.next(out[k](out[k].rows() - 1 - jj, ii));
           } catch(const char* e) {
             ym[k][ii - i] = num_t(int(0));
           }
           try {
-            for(int jj = i; jj < out[k].rows() - i; jj ++)
+            for(int jj = ei; jj < out[k].rows() - ei * 2; jj ++)
               yp[k][ii - i] = pb.next(out[k](jj, ii));
           } catch(const char* e) {
             yp[k][ii - i] = num_t(int(0));
@@ -439,17 +433,17 @@ int main(int argc, const char* argv[]) {
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
-        for(int ii = i; ii < out[k].rows() - i; ii ++) {
+        for(int ii = ei; ii < out[k].rows() - ei * 2; ii ++) {
           auto pf(q0);
           auto pb(q0);
           try {
-            for(int jj = i; jj < out[k].cols() - i; jj ++)
+            for(int jj = ei; jj < out[k].cols() - ei * 2; jj ++)
               ym[k][ii - i] = pf.next(out[k](ii, out[k].cols() - 1 - jj));
           } catch(const char* e) {
             ym[k][ii - i] = num_t(int(0));
           }
           try {
-            for(int jj = i; jj < out[k].cols() - i; jj ++)
+            for(int jj = ei; jj < out[k].cols() - ei * 2; jj ++)
               yp[k][ii - i] = pb.next(out[k](ii, jj));
           } catch(const char* e) {
             yp[k][ii - i] = num_t(int(0));
@@ -471,7 +465,7 @@ int main(int argc, const char* argv[]) {
           for(int jj = 0; jj < num; jj ++) {
             SimpleVector<num_t> vwork(shrinky.cols() + 1);
             for(int n = 0; n < shrinky.cols(); n ++)
-              vwork[n] = shrinky(jj * shrinky.rows() / num, n) * noisep[jj][n];
+              vwork[n] = shrinky(jj * shrinky.rows() / num, n) * noise[jj][n];
             vwork[vwork.size() - 1] = in[ii](jj * shrinky.rows() / num, m);
             auto mpi(makeProgramInvariant<num_t>(vwork));
             work.row(jj)  = move(mpi.first);
@@ -496,7 +490,7 @@ int main(int argc, const char* argv[]) {
           for(int jj = 0; jj < num; jj ++) {
             SimpleVector<num_t> vwork(shrinkx.rows() + 1);
             for(int n = 0; n < shrinkx.rows(); n ++)
-              vwork[n] = shrinkx(n, jj * shrinkx.cols() / num) * noiseq[jj][n];
+              vwork[n] = shrinkx(n, jj * shrinkx.cols() / num) * noise[jj][n];
             vwork[vwork.size() - 1] = in[ii](m, jj * shrinkx.cols() / num);
             auto mpi(makeProgramInvariant<num_t>(vwork));
             work.row(jj)  = move(mpi.first);
