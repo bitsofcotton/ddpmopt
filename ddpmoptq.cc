@@ -418,7 +418,7 @@ int main(int argc, const char* argv[]) {
           auto pb(p0);
           try {
             for(int jj = i; jj < out[k].rows() - i; jj ++)
-              ym[k][ii - i] = pf.next(out[k](out[k].rows() - i - 1 - jj, ii));
+              ym[k][ii - i] = pf.next(out[k](out[k].rows() - 1 - jj, ii));
           } catch(const char* e) {
             ym[k][ii - i] = num_t(int(0));
           }
@@ -444,7 +444,7 @@ int main(int argc, const char* argv[]) {
           auto pb(q0);
           try {
             for(int jj = i; jj < out[k].cols() - i; jj ++)
-              ym[k][ii - i] = pf.next(out[k](ii, out[k].cols() - i - 1 - jj));
+              ym[k][ii - i] = pf.next(out[k](ii, out[k].cols() - 1 - jj));
           } catch(const char* e) {
             ym[k][ii - i] = num_t(int(0));
           }
@@ -508,7 +508,7 @@ int main(int argc, const char* argv[]) {
       }
       for(int k = 0; k < Lp.size(); k ++) {
         auto pL(Lp[k]);
-        auto qL(Lq[k]);
+        auto qL(Lp[k]);
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
@@ -551,12 +551,13 @@ int main(int argc, const char* argv[]) {
           qL.row(ii) /= num_t(qL(ii, qL.cols() - 2));
           qL(ii, qL.cols() - 2) = num_t(int(0));
         }
-        out[k].row(i).setVector(ext - i - 1, qL * makeProgramInvariant<num_t>(
+        out[k].row(ext - i - 1).setVector(ext - i - 1,
+          qL * makeProgramInvariant<num_t>(
           SimpleVector<num_t>(ym[k].size() + 1).O().setVector(0, ym[k])).first);
-        out[k].row(out[k].rows() - i - 1).setVector(ext - i - 1,
+        out[k].row(in[k].rows() + ext + i).setVector(ext - i - 1,
           pL * makeProgramInvariant<num_t>(
             SimpleVector<num_t>(yp[k].size() + 1).O().setVector(0, yp[k])).first);
-        pL = Lp[k];
+        pL = Lq[k];
         qL = Lq[k];
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
@@ -600,12 +601,12 @@ int main(int argc, const char* argv[]) {
           qL.row(ii) /= num_t(qL(ii, qL.cols() - 2));
           qL(ii, qL.cols() - 2) = num_t(int(0));
         }
-        out[k].setCol(i, SimpleVector<num_t>(out[k].col(i)).setVector(
-          ext - i - 1,
+        out[k].setCol(ext - i - 1, SimpleVector<num_t>(
+          out[k].col(ext - i - 1)).setVector(ext - i - 1,
           qL * makeProgramInvariant<num_t>(
             SimpleVector<num_t>(xm[k].size() + 1).O().setVector(0, xm[k])).first));
-        out[k].setCol(out[k].cols() - i - 1, SimpleVector<num_t>(out[k].col(
-          out[k].cols() - i - 1)).setVector(ext - i - 1,
+        out[k].setCol(in[k].cols() + ext + i, SimpleVector<num_t>(out[k].col(
+          in[k].cols() + ext + i)).setVector(ext - i - 1,
           pL * makeProgramInvariant<num_t>(
             SimpleVector<num_t>(xp[k].size() + 1).O().setVector(0, xp[k])).first));
       }
