@@ -534,11 +534,9 @@ int main(int argc, const char* argv[]) {
         qL(ii, qL.cols() - 2) = num_t(int(0));
       }
       out[k].row(0).setVector(1,
-        qL * makeProgramInvariant<num_t>(
-          SimpleVector<num_t>(ym[k].size() + 1).O().setVector(0, ym[k])).first);
+        qL * makeProgramInvariant<num_t>(ym[k]).first);
       out[k].row(out[k].rows() - 1).setVector(1,
-        pL * makeProgramInvariant<num_t>(
-          SimpleVector<num_t>(yp[k].size() + 1).O().setVector(0, yp[k])).first);
+        pL * makeProgramInvariant<num_t>(yp[k]).first);
       pL = Lq[k];
       qL = Lq[k];
 #if defined(_OPENMP)
@@ -579,12 +577,10 @@ int main(int argc, const char* argv[]) {
       }
       out[k].setCol(0, SimpleVector<num_t>(
         out[k].col(0)).setVector(1,
-        qL * makeProgramInvariant<num_t>(
-          SimpleVector<num_t>(xm[k].size() + 1).O().setVector(0, xm[k])).first));
+        qL * makeProgramInvariant<num_t>(xm[k]).first));
       out[k].setCol(out[k].cols() - 1, SimpleVector<num_t>(out[k].col(
         out[k].cols() - 1)).setVector(1,
-        pL * makeProgramInvariant<num_t>(
-          SimpleVector<num_t>(xp[k].size() + 1).O().setVector(0, xp[k])).first));
+        pL * makeProgramInvariant<num_t>(xp[k]).first));
     }
     num_t y0(0);
     auto  y1(y0);
