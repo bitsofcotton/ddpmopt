@@ -373,31 +373,22 @@ int main(int argc, const char* argv[]) {
   for(int i0 = 2; i0 < argc; i0 ++) {
     vector<SimpleMatrix<num_t> > in;
     if(! loadp2or3<num_t>(in, argv[i0])) continue;
-    const num_t sz0(min(in[0].rows(), in[0].cols()));
-    const int   sz(sqrt(sz0));
-    const int   num(sz0 * log(sz0));
-    vector<SimpleVector<num_t> > noise;
-    noise.resize(num, SimpleVector<num_t>(sz));
-    for(int j = 0; j < noise.size(); j ++) {
-      for(int n = 0; n < noise[j].size(); n ++)
-        noise[j][n] = rng();
-      noise[j] = (dft<num_t>(- noise[j].size()) * noise[j].template cast<complex<num_t> >()).template real<num_t>();
-    }
-    auto out(in);
-    for(int i = 0; i < out.size(); i ++) {
-      out[i].resize(in[i].rows() + ext * 2, in[i].cols() + ext * 2);
-      out[i].O().setMatrix(ext, ext, in[i]);
-    }
-    SimpleMatrix<num_t> riny(ext, out[0].cols());
-    SimpleMatrix<num_t> rinx(out[0].rows(), ext);
-    for(int n = 0; n < riny.rows(); n ++)
-      for(int nn = 0; nn < riny.cols(); nn ++)
-        riny(n, nn) = rng();
-    for(int n = 0; n < rinx.rows(); n ++)
-      for(int nn = 0; nn < rinx.cols(); nn ++)
-        rinx(n, nn) = rng();
     for(int i = 0; i < ext; i ++) {
-      const auto ei(ext - i);
+      const num_t sz0(min(in[0].rows(), in[0].cols()));
+      const int   sz(sqrt(sz0));
+      const int   num(sz0 * log(sz0));
+      vector<SimpleVector<num_t> > noise;
+      noise.resize(num, SimpleVector<num_t>(sz));
+      for(int j = 0; j < noise.size(); j ++) {
+        for(int n = 0; n < noise[j].size(); n ++)
+          noise[j][n] = rng();
+        noise[j] = (dft<num_t>(- noise[j].size()) * noise[j].template cast<complex<num_t> >()).template real<num_t>();
+      }
+      auto out(in);
+      for(int i = 0; i < out.size(); i ++) {
+        out[i].resize(in[i].rows() + 2, in[i].cols() + 2);
+        out[i].O().setMatrix(1, 1, in[i]);
+      }
       P<num_t> p0(in[0].rows() + i * 2 - 2);
       vector<SimpleMatrix<num_t> > sy;
       vector<SimpleMatrix<num_t> > sx;
@@ -551,10 +542,10 @@ int main(int argc, const char* argv[]) {
           qL.row(ii) /= num_t(qL(ii, qL.cols() - 2));
           qL(ii, qL.cols() - 2) = num_t(int(0));
         }
-        out[k].row(ext - i - 1).setVector(ext,
+        out[k].row(0).setVector(1,
           qL * makeProgramInvariant<num_t>(
           SimpleVector<num_t>(ym[k].size() + 1).O().setVector(0, ym[k])).first);
-        out[k].row(in[k].rows() + ext + i).setVector(ext,
+        out[k].row(out[k].rows() - 1).setVector(1,
           pL * makeProgramInvariant<num_t>(
             SimpleVector<num_t>(yp[k].size() + 1).O().setVector(0, yp[k])).first);
         pL = Lq[k];
@@ -601,18 +592,31 @@ int main(int argc, const char* argv[]) {
           qL.row(ii) /= num_t(qL(ii, qL.cols() - 2));
           qL(ii, qL.cols() - 2) = num_t(int(0));
         }
-        out[k].setCol(ext - i - 1, SimpleVector<num_t>(
-          out[k].col(ext - i - 1)).setVector(ext,
+        out[k].setCol(0, SimpleVector<num_t>(
+          out[k].col(0)).setVector(1,
           qL * makeProgramInvariant<num_t>(
             SimpleVector<num_t>(xm[k].size() + 1).O().setVector(0, xm[k])).first));
-        out[k].setCol(in[k].cols() + ext + i, SimpleVector<num_t>(out[k].col(
-          in[k].cols() + ext + i)).setVector(ext,
+        out[k].setCol(out[k].cols() - 1, SimpleVector<num_t>(out[k].col(
+          out[k].cols() - 1)).setVector(1,
           pL * makeProgramInvariant<num_t>(
             SimpleVector<num_t>(xp[k].size() + 1).O().setVector(0, xp[k])).first));
       }
+      for(int k = 0; k < out.size(); k ++) {
+        for(int kk = 0; kk < out[k].rows(); kk ++) {
+          out[k](kk, 0) = max(num_t(int(0)), min(num_t(int(1)), out[k](kk, 0)));
+          out[k](kk, out[k].cols() - 1) =
+            max(num_t(int(0)), min(num_t(int(1)), out[k](kk, out[k].cols() - 1)));
+        }
+        for(int kk = 0; kk < out[k].cols(); kk ++) {
+          out[k](0, kk) = max(num_t(int(0)), min(num_t(int(1)), out[k](0, kk)));
+          out[k](out[k].rows() - 1, kk) =
+            max(num_t(int(0)), min(num_t(int(1)), out[k](out[k].rows() - 1, kk)));
+        }
+      }
+      if(! savep2or3<num_t>(argv[i0], normalize<num_t>(in = out),
+             false, 65535) )
+        std::cerr << "failed to save." << std::endl;
     }
-    if(! savep2or3<num_t>(argv[i0], normalize<num_t>(out), false, 65535) )
-      std::cerr << "failed to save." << std::endl;
   }
   return 0;
 }
