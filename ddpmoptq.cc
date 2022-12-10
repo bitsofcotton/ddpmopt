@@ -396,7 +396,7 @@ int main(int argc, const char* argv[]) {
     for(int k = 0; k < sx.size(); k ++)
       sx[k] = shrinken<num_t>(in[k], sz, in[k].cols());
     vector<SimpleVector<num_t> > yp;
-    yp.resize(out.size(), SimpleVector<num_t>(sz + 2).O());
+    yp.resize(out.size(), SimpleVector<num_t>(sz + 1).O());
     auto ym(yp);
     cerr << "Step 1: " << i0 << " / " << argc - 1 << std::endl;
     for(int k = 0; k < sy.size(); k ++) {
@@ -422,7 +422,7 @@ int main(int argc, const char* argv[]) {
     }
     P<num_t> q0(in[0].cols() - 2);
     vector<SimpleVector<num_t> > xp;
-    xp.resize(sx.size(), SimpleVector<num_t>(sz + 2).O());
+    xp.resize(sx.size(), SimpleVector<num_t>(sz + 1).O());
     auto xm(xp);
     cerr << "Step 2: " << i0 << " / " << argc - 1 << std::endl;
     for(int k = 0; k < sx.size(); k ++) {
