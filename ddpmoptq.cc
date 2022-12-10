@@ -395,9 +395,9 @@ int main(int argc, const char* argv[]) {
       sy.resize(in.size());
       sx.resize(in.size());
       for(int k = 0; k < sy.size(); k ++)
-        sy[k] = shrinken<num_t>(in[k].subMatrix(i, i, in[k].rows() - i * 2, in[k].cols() - i * 2), in[k].rows() - i * 2, sz);
+        sy[k] = shrinken<num_t>(in[k], in[k].rows(), sz);
       for(int k = 0; k < sx.size(); k ++)
-        sx[k] = shrinken<num_t>(in[k].subMatrix(i, i, in[k].rows() - i * 2, in[k].cols() - i * 2), sz, in[k].cols() - i * 2);
+        sx[k] = shrinken<num_t>(in[k], sz, in[k].cols());
       vector<SimpleVector<num_t> > yp;
       yp.resize(out.size(), SimpleVector<num_t>(sy[0].cols() + i * 2).O());
       auto ym(yp);
