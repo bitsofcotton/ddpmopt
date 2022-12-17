@@ -434,15 +434,15 @@ int main(int argc, const char* argv[]) {
         auto pb(q0);
         try {
           for(int jj = 0; jj < sx[k].cols(); jj ++)
-            ym[k][ii] = pf.next(sx[k](ii, sx[k].cols() - 1 - jj));
+            xm[k][ii] = pf.next(sx[k](ii, sx[k].cols() - 1 - jj));
         } catch(const char* e) {
-          ym[k][ii] = num_t(int(0));
+          xm[k][ii] = num_t(int(0));
         }
         try {
           for(int jj = 0; jj < sx[k].cols(); jj ++)
-            yp[k][ii] = pb.next(sx[k](ii, jj));
+            xp[k][ii] = pb.next(sx[k](ii, jj));
         } catch(const char* e) {
-          yp[k][ii] = num_t(int(0));
+          xp[k][ii] = num_t(int(0));
         }
       }
     }
