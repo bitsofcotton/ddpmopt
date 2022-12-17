@@ -386,7 +386,7 @@ int main(int argc, const char* argv[]) {
       out[i].resize(in[i].rows() + 2, in[i].cols() + 2);
       out[i].O().setMatrix(1, 1, in[i]);
     }
-    P<num_t> p0(sz - 2);
+    P<num_t> p0(in[0].rows() - 2);
     vector<SimpleMatrix<num_t> > sy;
     vector<SimpleMatrix<num_t> > sx;
     sy.resize(in.size());
@@ -420,7 +420,7 @@ int main(int argc, const char* argv[]) {
         }
       }
     }
-    P<num_t> q0(sz - 2);
+    P<num_t> q0(in[0].cols() - 2);
     vector<SimpleVector<num_t> > xp;
     xp.resize(sx.size(), SimpleVector<num_t>(sz + 1).O());
     auto xm(xp);
@@ -447,134 +447,137 @@ int main(int argc, const char* argv[]) {
       }
     }
     cerr << "Step 3: " << i0 << " / " << argc - 1 << std::endl;
-    vector<SimpleMatrix<num_t> > Lp;
+    vector<vector<SimpleMatrix<num_t> > > Lp;
     Lp.resize(out.size());
     for(int ii = 0; ii < Lp.size(); ii ++) {
-      Lp[ii].resize(in[0].cols(), sz + 2);
-      Lp[ii].O();
+      Lp[ii].resize(in[0].rows());
+      for(int iii = 0; iii < Lp[ii].size(); iii ++) {
+        Lp[ii][iii].resize(in[0].cols(), sz + 2);
+        Lp[ii][iii].O();
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
-      for(int m = 0; m < in[0].cols(); m ++) {
-        SimpleMatrix<num_t> work(num, sz + 2);
-        for(int jj = 0; jj < num; jj ++) {
-          SimpleVector<num_t> vwork(sy[ii].cols() + 1);
-          for(int n = 0; n < sy[ii].cols(); n ++)
-            vwork[n] = sy[ii](jj * sy[ii].rows() / num, n) * noise[jj][n];
-          vwork[vwork.size() - 1] = in[ii](jj * sy[ii].rows() / num, m);
-          auto mpi(makeProgramInvariant<num_t>(vwork));
-          work.row(jj)  = move(mpi.first);
-          work.row(jj) *=
-            pow(mpi.second, ceil(- log(in[0].epsilon()) ));
+        for(int m = 0; m < in[0].cols(); m ++) {
+          SimpleMatrix<num_t> work(num, sz + 2);
+          for(int jj = 0; jj < num; jj ++) {
+            SimpleVector<num_t> vwork(sy[ii].cols() + 1);
+            for(int n = 0; n < sy[ii].cols(); n ++)
+              vwork[n] = sy[ii](iii, n) * noise[jj][n];
+            vwork[vwork.size() - 1] = in[ii](iii, m);
+            auto mpi(makeProgramInvariant<num_t>(vwork));
+            work.row(jj)  = move(mpi.first);
+            work.row(jj) *=
+              pow(mpi.second, ceil(- log(in[0].epsilon()) ));
+          }
+          Lp[ii][iii].row(m) = linearInvariant(work);
         }
-        Lp[ii].row(m) = linearInvariant(work);
       }
     }
-    vector<SimpleMatrix<num_t> > Lq;
-    Lq.resize(0);
+    vector<vector<SimpleMatrix<num_t> > > Lq;
     Lq.resize(out.size());
     for(int ii = 0; ii < Lq.size(); ii ++) {
-      Lq[ii].resize(in[0].rows(), sz + 2);
-      Lq[ii].O();
+      Lq[ii].resize(in[0].cols());
+      for(int iii = 0; iii < Lq[ii].size(); iii ++) {
+        Lq[ii][iii].resize(in[0].rows(), sz + 2);
+        Lq[ii][iii].O();
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
-      for(int m = 0; m < in[0].rows(); m ++) {
-        SimpleMatrix<num_t> work(num, sz + 2);
-        for(int jj = 0; jj < num; jj ++) {
-          SimpleVector<num_t> vwork(sx[ii].rows() + 1);
-          for(int n = 0; n < sx[ii].rows(); n ++)
-            vwork[n] = sx[ii](n, jj * sx[ii].cols() / num) * noise[jj][n];
-          vwork[vwork.size() - 1] = in[ii](m, jj * sx[ii].cols() / num);
-          auto mpi(makeProgramInvariant<num_t>(vwork));
-          work.row(jj)  = move(mpi.first);
-          work.row(jj) *=
-            pow(mpi.second, ceil(- log(in[0].epsilon()) ));
+        for(int m = 0; m < in[0].rows(); m ++) {
+          SimpleMatrix<num_t> work(num, sz + 2);
+          for(int jj = 0; jj < num; jj ++) {
+            SimpleVector<num_t> vwork(sx[ii].rows() + 1);
+            for(int n = 0; n < sx[ii].rows(); n ++)
+              vwork[n] = sx[ii](n, iii) * noise[jj][n];
+            vwork[vwork.size() - 1] = in[ii](m, iii);
+            auto mpi(makeProgramInvariant<num_t>(vwork));
+            work.row(jj)  = move(mpi.first);
+            work.row(jj) *=
+              pow(mpi.second, ceil(- log(in[0].epsilon()) ));
+          }
+          Lq[ii][iii].row(m) = linearInvariant(work);
         }
-        Lq[ii].row(m) = linearInvariant(work);
       }
     }
     for(int k = 0; k < Lp.size(); k ++) {
-      auto pL(Lp[k]);
-      auto qL(Lp[k]);
+      auto pL(Lp[k][0]);
+      auto qL(Lp[k][0]);
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
-      for(int ii = 0; ii < Lp[k].rows(); ii ++) {
-        for(int jj = 0; jj < Lp[k].cols(); jj ++) {
+      for(int ii = 0; ii < Lp[k][0].rows(); ii ++) {
+        for(int jj = 0; jj < Lp[k][0].cols(); jj ++) {
           auto pf(p0);
           auto pb(p0);
-          num_t qLn(int(0));
-          num_t pLn(int(0));
-          for(int kk = 0; kk < Lp.size(); kk ++)
-            qLn += Lp[Lp.size() - (kk + 1)](ii, jj) *
-                   Lp[Lp.size() - (kk + 1)](ii, jj);
-          for(int kk = 0; kk < Lp.size(); kk ++)
-            pLn += Lp[kk](ii, jj) * Lp[kk](ii, jj);
-          qLn = sqrt(qLn) * num_t(int(2));
-          pLn = sqrt(pLn) * num_t(int(2));
+          num_t normL(int(0));
+          for(int kk = 0; kk < Lp[k].size(); kk ++)
+            normL += Lp[k][kk](ii, jj) * Lp[k][kk](ii, jj);
+          normL = sqrt(normL) * num_t(int(2));
           try {
-            for(int kk = 0; kk < Lp.size(); kk ++)
-              qL(ii, jj) = pb.next(Lp[Lp.size() - 1 - kk](ii, jj) / qLn);
+            for(int kk = 0; kk < Lp[k].size(); kk ++)
+              qL(ii, jj) = pb.next(Lp[k][Lp[k].size() - 1 - kk](ii, jj) / normL);
           } catch(const char* e) {
             qL(ii, jj) = num_t(int(0));
           }
           try {
-            for(int kk = 0; kk < Lp.size(); kk ++)
-              pL(ii, jj) = pf.next(Lp[kk](ii, jj) / pLn);
+            for(int kk = 0; kk < Lp[k].size(); kk ++)
+              pL(ii, jj) = pf.next(Lp[k][kk](ii, jj) / normL);
           } catch(const char* e) {
             pL(ii, jj) = num_t(int(0));
           }
-          qL(ii, jj) *= qLn;
-          pL(ii, jj) *= pLn;
+          qL(ii, jj) *= normL;
+          pL(ii, jj) *= normL;
         }
         pL.row(ii) /= num_t(pL(ii, pL.cols() - 2));
         pL(ii, pL.cols() - 2) = num_t(int(0));
         qL.row(ii) /= num_t(qL(ii, qL.cols() - 2));
         qL(ii, qL.cols() - 2) = num_t(int(0));
       }
+      for(int kk = 0; kk < ym[k].size(); kk ++)
+        ym[k][kk] *= rng();
+      for(int kk = 0; kk < yp[k].size(); kk ++)
+        yp[k][kk] *= rng();
       out[k].row(0).setVector(1,
         qL * makeProgramInvariant<num_t>(ym[k]).first);
       out[k].row(out[k].rows() - 1).setVector(1,
         pL * makeProgramInvariant<num_t>(yp[k]).first);
-      pL = Lq[k];
-      qL = Lq[k];
+      pL = Lq[k][0];
+      qL = Lq[k][0];
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
-      for(int ii = 0; ii < Lq[k].rows(); ii ++) {
-        for(int jj = 0; jj < Lq[k].cols(); jj ++) {
+      for(int ii = 0; ii < Lq[k][0].rows(); ii ++) {
+        for(int jj = 0; jj < Lq[k][0].cols(); jj ++) {
           auto pf(q0);
           auto pb(q0);
-          num_t qLn(int(0));
-          num_t pLn(int(0));
-          for(int kk = 0; kk < Lq.size(); kk ++)
-            qLn += Lq[Lq.size() - (kk + 1)](ii, jj) *
-                   Lq[Lq.size() - (kk + 1)](ii, jj);
-          for(int kk = 0; kk < Lq.size(); kk ++)
-            pLn += Lq[kk](ii, jj) * Lq[kk](ii, jj);
-          qLn = sqrt(qLn) * num_t(int(2));
-          pLn = sqrt(pLn) * num_t(int(2));
+          num_t normL(int(0));
+          for(int kk = 0; kk < Lq[k].size(); kk ++)
+            normL += Lq[k][kk](ii, jj) * Lq[k][kk](ii, jj);
+          normL = sqrt(normL) * num_t(int(2));
           try {
-            for(int kk = 0; kk < Lq.size(); kk ++)
-              qL(ii, jj) = pb.next(Lq[Lq.size() - kk - 1](ii, jj) / qLn);
+            for(int kk = 0; kk < Lq[k].size(); kk ++)
+              qL(ii, jj) = pb.next(Lq[k][Lq[k].size() - kk - 1](ii, jj) / normL);
           } catch(const char* e) {
             qL(ii, jj) = num_t(int(0));
           }
           try {
-            for(int kk = 0; kk < Lq.size(); kk ++)
-              pL(ii, jj) = pf.next(Lq[kk](ii, jj) / pLn);
+            for(int kk = 0; kk < Lq[k].size(); kk ++)
+              pL(ii, jj) = pf.next(Lq[k][kk](ii, jj) / normL);
           } catch(const char* e) {
             pL(ii, jj) = num_t(int(0));
           }
-          qL(ii, jj) *= qLn;
-          pL(ii, jj) *= pLn;
+          qL(ii, jj) *= normL;
+          pL(ii, jj) *= normL;
         }
         pL.row(ii) /= num_t(pL(ii, pL.cols() - 2));
         pL(ii, pL.cols() - 2) = num_t(int(0));
         qL.row(ii) /= num_t(qL(ii, qL.cols() - 2));
         qL(ii, qL.cols() - 2) = num_t(int(0));
       }
+      for(int kk = 0; kk < xm[k].size(); kk ++)
+        xm[k][kk] *= rng();
+      for(int kk = 0; kk < xp[k].size(); kk ++)
+        xp[k][kk] *= rng();
       out[k].setCol(0, SimpleVector<num_t>(
         out[k].col(0)).setVector(1,
         qL * makeProgramInvariant<num_t>(xm[k]).first));
