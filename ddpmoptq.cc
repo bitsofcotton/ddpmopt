@@ -541,6 +541,14 @@ int main(int argc, const char* argv[]) {
         qL * makeProgramInvariant<num_t>(ym[k]).first);
       out[k].row(out[k].rows() - 1).setVector(1,
         pL * makeProgramInvariant<num_t>(yp[k]).first);
+      for(int kk = 1; kk < out[k].cols() - 1; kk ++) {
+        out[k](0, kk) =
+          revertProgramInvariant<num_t>(make_pair(out[k](0, kk),
+            num_t(int(1))));
+        out[k](out[k].rows() - 1, kk) =
+          revertProgramInvariant<num_t>(make_pair(out[k](out[k].rows() - 1, kk),
+            num_t(int(1))));
+      }
       pL = Lq[k][0];
       qL = Lq[k][0];
 #if defined(_OPENMP)
@@ -584,39 +592,13 @@ int main(int argc, const char* argv[]) {
       out[k].setCol(out[k].cols() - 1, SimpleVector<num_t>(out[k].col(
         out[k].cols() - 1)).setVector(1,
         pL * makeProgramInvariant<num_t>(xp[k]).first));
-    }
-    num_t y0(0);
-    auto  y1(y0);
-    auto  yn0(y0);
-    auto  yn1(y0);
-    auto  x0(y0);
-    auto  x1(y0);
-    auto  xn0(y0);
-    auto  xn1(y0);
-    for(int k = 0; k < out.size(); k ++) {
-      y0  += out[k].row(0).dot(out[k].row(0));
-      y1  += out[k].row(1).dot(out[k].row(1));
-      yn0 += out[k].row(out[k].rows() - 1).dot(out[k].row(out[k].rows() - 1));
-      yn1 += out[k].row(out[k].rows() - 2).dot(out[k].row(out[k].rows() - 2));
-      x0  += out[k].col(0).dot(out[k].col(0));
-      x1  += out[k].col(1).dot(out[k].col(1));
-      xn0 += out[k].col(out[k].cols() - 1).dot(out[k].col(out[k].cols() - 1));
-      xn1 += out[k].col(out[k].cols() - 2).dot(out[k].col(out[k].cols() - 2));
-    }
-    for(int k = 0; k < out.size(); k ++) {
-      out[k].row(0) *= sqrt(y1 / y0);
-      out[k].row(out[k].rows() - 1) *= sqrt(yn1 / yn0);
-      out[k].setCol(0, out[k].col(0) * sqrt(x1 / x0));
-      out[k].setCol(out[k].cols() - 1, out[k].col(out[k].cols() - 1) * sqrt(xn1 / xn0));
-      for(int kk = 0; kk < out[k].rows(); kk ++) {
-        out[k](kk, 0) = max(num_t(int(0)), min(num_t(int(1)), out[k](kk, 0)));
+      for(int kk = 1; kk < out[k].rows() - 1; kk ++) {
+        out[k](kk, 0) =
+          revertProgramInvariant<num_t>(make_pair(out[k](kk, 0),
+            num_t(int(1))));
         out[k](kk, out[k].cols() - 1) =
-          max(num_t(int(0)), min(num_t(int(1)), out[k](kk, out[k].cols() - 1)));
-      }
-      for(int kk = 0; kk < out[k].cols(); kk ++) {
-        out[k](0, kk) = max(num_t(int(0)), min(num_t(int(1)), out[k](0, kk)));
-        out[k](out[k].rows() - 1, kk) =
-          max(num_t(int(0)), min(num_t(int(1)), out[k](out[k].rows() - 1, kk)));
+          revertProgramInvariant<num_t>(make_pair(out[k](kk, out[k].cols() - 1),
+            num_t(int(1))));
       }
     }
     if(! savep2or3<num_t>(argv[i0], normalize<num_t>(in = out),
