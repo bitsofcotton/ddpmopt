@@ -562,9 +562,11 @@ int main(int argc, const char* argv[]) {
             qL(ii, jj) *= nfL;
             pL(ii, jj) *= nbL;
           }
-          pL.row(ii) /= num_t(pL(ii, pL.cols() - 2));
+          if(pL(ii, pL.cols() - 2) != num_t(int(0)))
+            pL.row(ii) /= num_t(pL(ii, pL.cols() - 2));
           pL(ii, pL.cols() - 2) = num_t(int(0));
-          qL.row(ii) /= num_t(qL(ii, qL.cols() - 2));
+          if(qL(ii, qL.cols() - 2) != num_t(int(0)))
+            qL.row(ii) /= num_t(qL(ii, qL.cols() - 2));
           qL(ii, qL.cols() - 2) = num_t(int(0));
           for(int kk = 0; kk < ym[k].size(); kk ++) {
             ym[k1][k][kk] *= rng();
@@ -618,11 +620,13 @@ int main(int argc, const char* argv[]) {
             qL(ii, jj) *= nfL;
             pL(ii, jj) *= nbL;
           }
-          pL.row(ii) /= num_t(pL(ii, pL.cols() - 2));
+          if(pL(ii, pL.cols() - 2) != num_t(int(0)))
+            pL.row(ii) /= num_t(pL(ii, pL.cols() - 2));
           pL(ii, pL.cols() - 2) = num_t(int(0));
-          qL.row(ii) /= num_t(qL(ii, qL.cols() - 2));
+          if(qL(ii, qL.cols() - 2) != num_t(int(0)))
+            qL.row(ii) /= num_t(qL(ii, qL.cols() - 2));
           qL(ii, qL.cols() - 2) = num_t(int(0));
-          for(int kk = 0; kk < xm[k].size(); kk ++) {
+          for(int kk = 0; kk < xm[1][k].size(); kk ++) {
             xm[k1][k][kk] *= rng();
             xp[k1][k][kk] *= rng();
           }
