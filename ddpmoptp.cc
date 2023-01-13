@@ -381,7 +381,7 @@ int main(int argc, const char* argv[]) {
   vector<P<num_t> > p0;
   int sz(0);
   int num(0);
-  in.resize(argc - 2);
+  in.resize(argc - 1);
   noise.resize(in.size());
   for(int ext = 0; ext < in.size() / 2; ext ++) {
     const int status(in.size() / (ext + 1) - 2);
