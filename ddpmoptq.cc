@@ -568,15 +568,15 @@ int main(int argc, const char* argv[]) {
           if(qL(ii, qL.cols() - 2) != num_t(int(0)))
             qL.row(ii) /= num_t(qL(ii, qL.cols() - 2));
           qL(ii, qL.cols() - 2) = num_t(int(0));
-          for(int kk = 0; kk < ym[k].size(); kk ++) {
-            ym[k1][k][kk] *= rng();
-            yp[k1][k][kk] *= rng();
-          }
-          out[k].row(p0.size() - k1 - 1).setVector(q0.size(),
-            qL * makeProgramInvariant<num_t>(ym[k1][k]).first);
-          out[k].row(out[k].rows() - p0.size() + k1).setVector(q0.size(),
-            pL * makeProgramInvariant<num_t>(yp[k1][k]).first);
         }
+        for(int kk = 0; kk < ym[k].size(); kk ++) {
+          ym[k1][k][kk] *= rng();
+          yp[k1][k][kk] *= rng();
+        }
+        out[k].row(p0.size() - k1 - 1).setVector(q0.size(),
+          qL * makeProgramInvariant<num_t>(ym[k1][k]).first);
+        out[k].row(out[k].rows() - p0.size() + k1).setVector(q0.size(),
+          pL * makeProgramInvariant<num_t>(yp[k1][k]).first);
       }
       for(int k1 = 0; k1 < p0.size(); k1 ++)
         for(int kk = 1; kk < out[k].cols() - 1; kk ++) {
@@ -626,17 +626,17 @@ int main(int argc, const char* argv[]) {
           if(qL(ii, qL.cols() - 2) != num_t(int(0)))
             qL.row(ii) /= num_t(qL(ii, qL.cols() - 2));
           qL(ii, qL.cols() - 2) = num_t(int(0));
-          for(int kk = 0; kk < xm[1][k].size(); kk ++) {
-            xm[k1][k][kk] *= rng();
-            xp[k1][k][kk] *= rng();
-          }
-          out[k].setCol(q0.size() - k1 - 1, SimpleVector<num_t>(
-            out[k].col(q0.size() - k1 - 1)).setVector(p0.size(),
-            qL * makeProgramInvariant<num_t>(xm[k1][k]).first));
-          out[k].setCol(out[k].cols() - q0.size() + k1, SimpleVector<num_t>(out[k].col(
-            out[k].cols() - q0.size() + k1)).setVector(p0.size(),
-            pL * makeProgramInvariant<num_t>(xp[k1][k]).first));
         }
+        for(int kk = 0; kk < xm[1][k].size(); kk ++) {
+          xm[k1][k][kk] *= rng();
+          xp[k1][k][kk] *= rng();
+        }
+        out[k].setCol(q0.size() - k1 - 1, SimpleVector<num_t>(
+          out[k].col(q0.size() - k1 - 1)).setVector(p0.size(),
+          qL * makeProgramInvariant<num_t>(xm[k1][k]).first));
+        out[k].setCol(out[k].cols() - q0.size() + k1, SimpleVector<num_t>(out[k].col(
+          out[k].cols() - q0.size() + k1)).setVector(p0.size(),
+          pL * makeProgramInvariant<num_t>(xp[k1][k]).first));
       }
       for(int k1 = 0; k1 < q0.size(); k1 ++)
         for(int kk = 1; kk < out[k].rows() - 1; kk ++) {
