@@ -2,20 +2,20 @@ CXX=	clang++
 #CXX=	eg++
 
 # compiler flags.
-CXXFLAGS+=	-Ofast -mtune=native -gfull
-#CXXFLAGS+=	-Oz -mtune=native -gfull
+#CXXFLAGS+=	-Ofast -mtune=native -gfull
+CXXFLAGS+=	-Oz -mtune=native -gfull
 #CXXFLAGS+=	-O0 -mtune=native -gfull
-#MPFLAGS=	-I/usr/local/include -L/usr/local/lib -lomp -fopenmp
+MPFLAGS=	-I/usr/local/include -L/usr/local/lib -lomp -fopenmp
 CXXFLAGS+=	-std=c++11
 LDFLAGS+=	-lc++ -L/usr/local/lib
 #LDFLAGS+=	-lestdc++ -L/usr/local/lib
 
-CLEANFILES= *.o ddpmopt ddpmopt32 ddpmopt64 ddpmoptp ddpmoptp32 ddpmoptp64 ddpmoptq ddpmoptq32 ddpmoptq64
+CLEANFILES= *.o ddpmopt ddpmopt32 ddpmoptp ddpmoptp32 ddpmoptq ddpmoptq32 ddpmoptmp ddpmopt32mp ddpmoptpmp ddpmoptp32mp ddpmoptqmp ddpmoptq32mp
 
 clean:
 	@rm -rf ${CLEANFILES}
 
-all:	ddpmopt ddpmopt32 ddpmopt64 ddpmoptp ddpmoptp32 ddpmoptp64 ddpmoptq ddpmoptq32 ddpmoptq64
+all:	ddpmopt ddpmopt32 ddpmoptp ddpmoptp32 ddpmoptq ddpmoptq32 ddpmoptmp ddpmopt32mp ddpmoptpmp ddpmoptp32mp ddpmoptqmp ddpmoptq32mp
 ddpmopt:
 	${CXX} ${CXXFLAGS} -static -o ddpmopt ddpmopt.cc
 ddpmopt32:
@@ -34,4 +34,22 @@ ddpmoptq32:
 	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=32 -o ddpmoptq32 ddpmoptq.cc
 ddpmoptq64:
 	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=64 -o ddpmoptq64 ddpmoptq.cc
+ddpmoptmp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -o ddpmoptmp ddpmopt.cc
+ddpmopt32mp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=32 -o ddpmopt32mp ddpmopt.cc
+ddpmopt64mp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=64 -o ddpmopt64mp ddpmopt.cc
+ddpmoptpmp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -o ddpmoptpmp ddpmoptp.cc
+ddpmoptp32mp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=32 -o ddpmoptp32mp ddpmoptp.cc
+ddpmoptp64mp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=64 -o ddpmoptp64mp ddpmoptp.cc
+ddpmoptqmp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -o ddpmoptqmp ddpmoptq.cc
+ddpmoptq32mp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=32 -o ddpmoptq32mp ddpmoptq.cc
+ddpmoptq64mp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=64 -o ddpmoptq64mp ddpmoptq.cc
 

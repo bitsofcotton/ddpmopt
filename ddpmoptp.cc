@@ -455,11 +455,11 @@ int main(int argc, const char* argv[]) {
     L[i].resize(in[0].size());
     for(int j = 0; j < in[0].size(); j ++) {
       L[i][j].resize(in[0][0].rows() * in[0][0].cols(), shrink[0][0].rows() * shrink[0][0].cols() + 2);
+      cerr << "Step 2: " << i * in[0].size() + j << " / " << in.size() * in[0].size() << std::endl;
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
       for(int m = 0; m < in[0][0].rows() * in[0][0].cols(); m ++) {
-        cerr << "Step 2: " << i * in[0].size() * in[0][0].rows() * in[0][0].cols() + j * in[0][0].rows() * in[0][0].cols() + m << " / " << in.size() * in[0][0].rows() * in[0][0].cols() * in[0].size() << std::endl;
         SimpleMatrix<num_t> work(num, shrink[0][0].rows() * shrink[0][0].cols() + 2);
         for(int jj = 0; jj < num; jj ++) {
           SimpleVector<num_t> vwork(shrink[i][j].rows() * shrink[i][j].cols() + 1);
