@@ -549,6 +549,7 @@ int main(int argc, const char* argv[]) {
       }
     }
   }
+  cerr << "Step 4 " << std::flush;
   p.insert(p.end(), q.begin(), q.end());
   pL.insert(pL.end(), qL.begin(), qL.end());
   auto sp(shrinken<num_t>(p, sz));
@@ -561,7 +562,6 @@ int main(int argc, const char* argv[]) {
         rin(n, nn) = rng();
     rin = (dft<num_t>(- rin.rows()) * rin.template cast<complex<num_t> >() * dft<num_t>(- rin.cols())).template real<num_t>();
     for(int j = 0; j < out.size(); j ++) {
-      cerr << "Step 4: " << j << " / " << out.size() << " over " << i << " / " << p.size() << std::endl;
       SimpleVector<num_t> vwork0(out[j].rows() * out[j].cols() + 1);
       for(int n = 0; n < out[j].rows(); n ++)
         for(int nn = 0; nn < out[j].cols(); nn ++)
@@ -575,6 +575,7 @@ int main(int argc, const char* argv[]) {
     if(! savep2or3<num_t>((std::string("ddpmoptp-") + std::to_string(i) + std::string(".ppm")).c_str(), normalize<num_t>(outs), false, 65535) )
       std::cerr << "failed to save." << std::endl;
   }
+  cerr << " Done" << std::endl;
   return 0;
 }
 
