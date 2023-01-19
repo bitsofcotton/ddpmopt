@@ -180,7 +180,7 @@ int main(int argc, const char* argv[]) {
       out.reserve(in.size());
       for(int ii = 0; ii < in.size(); ii ++) {
         out.emplace_back(SimpleMatrix<num_t>(abs(m), in[ii].cols() / abs(m)));
-        for(int j = 0; j < in[ii].cols() / abs(m); j ++)
+        for(int j = 0; j < abs(m); j ++)
           out[ii].row(j) = in[ii].subMatrix(0, in[ii].cols() / abs(m) * j,
             1, in[ii].cols() / abs(m)).row(0);
       }
