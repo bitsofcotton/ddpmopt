@@ -387,6 +387,9 @@ int main(int argc, const char* argv[]) {
       const int var0(max(num_t(int(1)), num_t(int(exp(sqrt(log(num_t(status))))))) );
       if(status < var0 + 3 * 2) break;
       p0.emplace_back(P<num_t>(status));
+      auto pp(p0[ext]);
+      for(int j = 0; j < status + 2; j ++)
+        pp.next(num_t(j + 1) / num_t(status + 3) - num_t(int(1)) / num_t(int(2)));
     }
     vector<P<num_t> > q0;
     for(int ext = 0; ext < in[0].cols() / 2; ext ++) {
@@ -394,6 +397,9 @@ int main(int argc, const char* argv[]) {
       const int var0(max(num_t(int(1)), num_t(int(exp(sqrt(log(num_t(status))))))) );
       if(status < var0 + 3 * 2) break;
       q0.emplace_back(P<num_t>(status));
+      auto qq(q0[ext]);
+      for(int j = 0; j < status + 2; j ++)
+        qq.next(num_t(j + 1) / num_t(status + 3) - num_t(int(1)) / num_t(int(2)));
     }
     auto out(in);
     for(int i = 0; i < out.size(); i ++) {

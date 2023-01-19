@@ -388,6 +388,9 @@ int main(int argc, const char* argv[]) {
     const int var0(max(num_t(int(1)), num_t(int(exp(sqrt(log(num_t(status)))))) ) );
     if(status < var0 + 3 * 2) break;
     p0.emplace_back(P<num_t>(status));
+    auto pp(p0[ext]);
+    for(int i = 0; i < status + 2; i ++)
+      pp.next(num_t(i + 1) / num_t(status + 3) - num_t(int(1)) / num_t(int(2)));
   }
   p.resize(p0.size());
   auto q(p);
