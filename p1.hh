@@ -58,7 +58,8 @@ public:
       work[work.size() - 1] = buf[i + varlen + step - 2] / nin;
       auto mp(makeProgramInvariant<T>(move(work),
                 T(i + 1) / T(toeplitz.rows() + 1)));
-      toeplitz.row(i) = move(mp.first) * pow(mp.second, ceil(- log(toeplitz.epsilon()) ));
+      toeplitz.row(i)  = move(mp.first);
+      toeplitz.row(i) *= pow(mp.second, ceil(- log(toeplitz.epsilon()) ));
     }
     const auto invariant(linearInvariant<T>(toeplitz));
     if(invariant[varlen - 1] == zero) return zero;

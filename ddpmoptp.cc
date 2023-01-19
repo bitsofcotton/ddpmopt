@@ -61,7 +61,7 @@ public:
     M += max(- one, min(one, p2.next(d)));
     {
       auto qm(makeProgramInvariant<T>(q.next(d)));
-      q0 += std::move(qm.first) * pow(qm.second, ceil(- log(SimpleMatrix<T>().epsilon())));
+      q0 += qm.first * pow(qm.second, ceil(- log(SimpleMatrix<T>().epsilon())));
       auto qq(q);
       auto qqm(makeProgramInvariant<T>(qq.next(d)));
       M += max(- one, min(one, revertProgramInvariant<T>(make_pair(
@@ -170,7 +170,8 @@ template <typename T> bool loadp2or3(vector<SimpleMatrix<T> >& data, const char*
   return true;
 }
 
-template <typename T> bool savep2or3(const char* filename, const vector<SimpleMatrix<T> >& data, const bool& gray, const int& depth = 255) { ofstream output;
+template <typename T> bool savep2or3(const char* filename, const vector<SimpleMatrix<T> >& data, const bool& gray, const int& depth = 255) {
+  ofstream output;
   output.open(filename);
   if(output.is_open()) {
     try {
@@ -190,7 +191,6 @@ template <typename T> bool savep2or3(const char* filename, const vector<SimpleMa
     } catch (...) {
       cerr << "An error has occured while writing file." << endl;
     }
-    output.close();
     output.close();
   } else {
     cerr << "Unable to open file for write: " << filename << endl;
