@@ -471,7 +471,7 @@ int main(int argc, const char* argv[]) {
               vwork[n * shrink[i][j].cols() + nn] = shrink[i][j](n, nn) * noise[i][jj](n, nn);
           vwork[vwork.size() - 1] = in[i][j](m / in[0][0].cols(), m % in[0][0].cols());
           auto mpi(makeProgramInvariant<num_t>(vwork));
-          work.row(jj)  = std::move(mpi.first);
+          work.row(jj)  = move(mpi.first);
           work.row(jj) *=
             pow(mpi.second, ceil(- log(in[0][0].epsilon()) ));
         }

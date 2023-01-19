@@ -61,7 +61,7 @@ public:
     M += max(- one, min(one, p2.next(d)));
     {
       auto qm(makeProgramInvariant<T>(q.next(d)));
-      q0 += std::move(qm.first) * pow(qm.second, ceil(- log(SimpleMatrix<T>().epsilon())));
+      q0 += qm.first * pow(qm.second, ceil(- log(SimpleMatrix<T>().epsilon())));
       auto qq(q);
       auto qqm(makeProgramInvariant<T>(qq.next(d)));
       M += max(- one, min(one, revertProgramInvariant<T>(make_pair(

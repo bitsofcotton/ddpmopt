@@ -12,7 +12,7 @@ Either of them needs denlarge in gokicheck after calculation.
 
 # Tips on malloc options
 Some of the implementation needs to run them with specifying malloc options.
-(cf. jj&gt;&gt; on OpenBSD)
+(cf. &gt;&gt;&gt; on OpenBSD)
 This is because we need huge number of allocations/frees to run.
 
 # Usage:
