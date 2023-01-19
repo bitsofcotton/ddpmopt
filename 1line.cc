@@ -168,7 +168,7 @@ int main(int argc, const char* argv[]) {
         cerr << "could not open " << argv[i] << std::endl;
         continue;
       }
-      if(in[0].rows() != 0) {
+      if(in[0].rows() != 1) {
         cerr << argv[i] << " : isn't 1-lined" << std::endl;
         continue;
       }
@@ -180,8 +180,9 @@ int main(int argc, const char* argv[]) {
       out.reserve(in.size());
       for(int ii = 0; ii < in.size(); ii ++) {
         out.emplace_back(SimpleMatrix<num_t>(abs(m), in[ii].cols() / abs(m)));
-        for(int j = 0; j < abs(m); j ++)
-          out[ii].row(j) = in[ii].subMatrix(0, abs(m) * j, 1, abs(m)).row(0);
+        for(int j = 0; j < in[ii].cols() / abs(m); j ++)
+          out[ii].row(j) = in[ii].subMatrix(0, in[ii].cols() / abs(m) * j,
+            1, in[ii].cols() / abs(m)).row(0);
       }
       if(! savep2or3<num_t>(argv[i], out, false, 65535) )
         cerr << "could not save " << argv[i] << std::endl;
