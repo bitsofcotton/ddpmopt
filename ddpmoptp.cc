@@ -413,10 +413,10 @@ int main(int argc, const char* argv[]) {
     q[i].resize(in[i].size(), SimpleMatrix<num_t>(in[i][0].rows(), in[i][0].cols()).O());
     for(int k = 0; k < p[i].size(); k ++) {
       cerr << "Step 1: " << i * p[i].size() + k << " / " << p.size() * p[i].size() << std::endl;
+      for(int ii = 0; ii < p[i][k].rows(); ii ++) {
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
-      for(int ii = 0; ii < p[i][k].rows(); ii ++) {
         for(int jj = 0; jj < p[i][k].cols(); jj ++) {
           auto pf(p0[i]);
           auto pb(p0[i]);
