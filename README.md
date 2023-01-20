@@ -15,6 +15,10 @@ Some of the implementation needs to run them with specifying malloc options.
 (cf. &gt;&gt;&gt; on OpenBSD)
 This is because we need huge number of allocations/frees to run.
 
+# Tips on shared memory
+If we run them with openmp, we need large shared memory size.
+They usually configurable by sysctl on unix-like systems.
+
 # Usage:
     ./ddpmopt +  <in0.ppm> ... > cache.txt
     ./ddpmopt ++ <in0.ppm> ... > cache.txt
