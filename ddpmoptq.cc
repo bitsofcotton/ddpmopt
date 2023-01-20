@@ -390,6 +390,7 @@ int main(int argc, const char* argv[]) {
       auto pp(p0[ext]);
       for(int j = 0; j < status + 2; j ++)
         pp.next(num_t(j + 1) / num_t(status + 3) - num_t(int(1)) / num_t(int(2)));
+      cerr << "(volatile dummy:)" << pp.next(num_t(int(0))) << std::endl;
     }
     vector<P<num_t> > q0;
     for(int ext = 0; ext < in[0].cols() / 2; ext ++) {
@@ -400,6 +401,7 @@ int main(int argc, const char* argv[]) {
       auto qq(q0[ext]);
       for(int j = 0; j < status + 2; j ++)
         qq.next(num_t(j + 1) / num_t(status + 3) - num_t(int(1)) / num_t(int(2)));
+      cerr << "(volatile dummy:)" << qq.next(num_t(int(0))) << std::endl;
     }
     auto out(in);
     for(int i = 0; i < out.size(); i ++) {

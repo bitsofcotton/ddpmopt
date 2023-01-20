@@ -391,6 +391,7 @@ int main(int argc, const char* argv[]) {
     auto pp(p0[ext]);
     for(int i = 0; i < status + 2; i ++)
       pp.next(num_t(i + 1) / num_t(status + 3) - num_t(int(1)) / num_t(int(2)));
+    cerr << "(volatile dummy:)" << pp.next(num_t(int(0))) << std::endl;
   }
   p.resize(p0.size());
   auto q(p);
