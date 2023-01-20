@@ -388,8 +388,8 @@ int main(int argc, const char* argv[]) {
       if(status < var0 + 3 * 2) break;
       p0.emplace_back(P<num_t>(status));
       auto pp(p0[ext]);
-      for(int j = 0; j < status + 2; j ++)
-        pp.next(num_t(j + 1) / num_t(status + 3) - num_t(int(1)) / num_t(int(2)));
+      for(int j = 0; j < status * 2 + 4; j ++)
+        pp.next(num_t(j + 1) / num_t(status * 2 + 5) - num_t(int(1)) / num_t(int(2)));
       cerr << "(volatile dummy:)" << pp.next(num_t(int(0))) << std::endl;
     }
     vector<P<num_t> > q0;
@@ -399,8 +399,8 @@ int main(int argc, const char* argv[]) {
       if(status < var0 + 3 * 2) break;
       q0.emplace_back(P<num_t>(status));
       auto qq(q0[ext]);
-      for(int j = 0; j < status + 2; j ++)
-        qq.next(num_t(j + 1) / num_t(status + 3) - num_t(int(1)) / num_t(int(2)));
+      for(int j = 0; j < status * 2 + 4; j ++)
+        qq.next(num_t(j + 1) / num_t(status * 2 + 5) - num_t(int(1)) / num_t(int(2)));
       cerr << "(volatile dummy:)" << qq.next(num_t(int(0))) << std::endl;
     }
     auto out(in);

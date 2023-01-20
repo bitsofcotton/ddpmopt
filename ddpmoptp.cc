@@ -389,8 +389,8 @@ int main(int argc, const char* argv[]) {
     if(status < var0 + 3 * 2) break;
     p0.emplace_back(P<num_t>(status));
     auto pp(p0[ext]);
-    for(int i = 0; i < status + 2; i ++)
-      pp.next(num_t(i + 1) / num_t(status + 3) - num_t(int(1)) / num_t(int(2)));
+    for(int i = 0; i < status * 2 + 4; i ++)
+      pp.next(num_t(i + 1) / num_t(status * 2 + 5) - num_t(int(1)) / num_t(int(2)));
     cerr << "(volatile dummy:)" << pp.next(num_t(int(0))) << std::endl;
   }
   p.resize(p0.size());
