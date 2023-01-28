@@ -7,13 +7,17 @@ There exists Denoising Diffusion Probabilistic Models (DDPM; Ho et al. 2020). So
 
 # Tips on calculation order
 ddpmoptp and ddpmoptq needs O((input mem size) * plen^1.5 * log^2((input mem size) * plen)).
+
 We can 1line when we met ddpmoptp.
+
 Either of them needs denlarge in gokicheck after calculation.
 
 # Tips on malloc options
 Some of the implementation needs to run them with specifying malloc options.
 (cf. &gt;&gt;&gt; on OpenBSD)
 This is because we need huge number of allocations/frees to run.
+
+Also, we need to do ulimit or edit /etc/login.conf for large malloc use cases required by larger than medium sized input.
 
 # Tips on shared memory
 If we run them with openmp, we need large shared memory size.
