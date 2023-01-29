@@ -159,9 +159,8 @@ template <typename T> bool savep2or3(const char* filename, const vector<SimpleMa
 int main(int argc, const char* argv[]) {
 //#define int int64_t
 #define int int32_t
-  assert(1 < argc);
   const auto m(std::atoi(argv[1]));
-  if(m < 0) {
+  if(m) {
     for(int i = 2; i < argc; i ++) {
       vector<SimpleMatrix<num_t> > in;
       if(! loadp2or3<num_t>(in, argv[i])) {
@@ -177,14 +176,14 @@ int main(int argc, const char* argv[]) {
         continue;
       }
       vector<SimpleMatrix<num_t> > out;
-      out.reserve(in.size());
+      out.reserve(m < 0 ? 1 : 3);
       for(int ii = 0; ii < in.size(); ii ++) {
-        out.emplace_back(SimpleMatrix<num_t>(abs(m), in[ii].cols() / abs(m)));
+        out.emplace_back(SimpleMatrix<num_t>(abs(m), in[ii].cols() / abs(m) / (m < 0 ? 1 : 3)));
         for(int j = 0; j < abs(m); j ++)
-          out[ii].row(j) = in[ii].subMatrix(0, in[ii].cols() / abs(m) * j,
-            1, in[ii].cols() / abs(m)).row(0);
+          out[ii].row(j) = in[ii].subMatrix(0, out[ii].cols() * j +
+            out[0].rows() * out[0].cols() * ii, i, out[ii].cols()).row(0);
       }
-      if(! savep2or3<num_t>(argv[i], out, false, 65535) )
+      if(! savep2or3<num_t>(argv[i], out, ! (m < 0), 65535) )
         cerr << "could not save " << argv[i] << std::endl;
     }
   } else {
@@ -195,13 +194,11 @@ int main(int argc, const char* argv[]) {
         continue;
       }
       vector<SimpleMatrix<num_t> > out;
-      out.reserve(in.size());
-      for(int ii = 0; ii < in.size(); ii ++) {
-        out.emplace_back(SimpleMatrix<num_t>(1, in[ii].rows() * in[ii].cols()));
+      out.emplace_back(SimpleMatrix<num_t>(1, in[0].rows() * in[0].cols() * in.size()));
+      for(int ii = 0; ii < in.size(); ii ++)
         for(int j = 0; j < in[ii].rows(); j ++)
-          out[ii].row(0).setVector(j * in[ii].cols(), in[ii].row(j));
-      }
-      if(! savep2or3<num_t>(argv[i], out, false, 65535) )
+          out[0].row(0).setVector(j * in[ii].cols() + in[0].cols() * in[0].rows() * ii, in[ii].row(j));
+      if(! savep2or3<num_t>(argv[i], out, true, 65535) )
         cerr << "could not save " << argv[i] << std::endl;
     }
   }

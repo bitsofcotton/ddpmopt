@@ -98,9 +98,9 @@ template <typename T> bool loadp2or3(vector<SimpleMatrix<T> >& data, const char*
       iline3 >> nmax;
       if(line[0] == 'P') {
         if(line[1] == '2') {
-          data[0] = SimpleMatrix<T>(h, w).O();
+          data.resize(1);
+          data[0] = SimpleMatrix<T>(h,w ).O();
           loadstub<T>(input, nmax, 1, data);
-          data[1] = data[2] = data[0];
         } else if(line[1] == '3') {
           for(int i = 0; i < 3; i ++)
             data[i] = SimpleMatrix<T>(h, w).O();

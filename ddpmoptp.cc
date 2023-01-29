@@ -142,9 +142,9 @@ template <typename T> bool loadp2or3(vector<SimpleMatrix<T> >& data, const char*
       iline3 >> nmax;
       if(line[0] == 'P') {
         if(line[1] == '2') {
+          data.resize(1);
           data[0] = SimpleMatrix<T>(h, w).O();
           loadstub<T>(input, nmax, 1, data);
-          data[1] = data[2] = data[0];
         } else if(line[1] == '3') {
           for(int i = 0; i < 3; i ++)
             data[i] = SimpleMatrix<T>(h, w).O();
@@ -400,7 +400,7 @@ int main(int argc, const char* argv[]) {
     assert(in[0][0].rows() == in[i - 1][0].rows() &&
            in[0][0].cols() == in[i - 1][0].cols());
     if(i == 1) {
-      sz  = int(sqrt(num_t(min(int(in.size()), int(in[i - 1][0].rows())))));
+      sz  = int(sqrt(num_t(min(int(in.size()), int(sqrt(num_t(in[i - 1][0].rows() * in[i - 1][0].rows() + in[i - 1][0].cols() * in[i - 1][0].cols())))))));
       // XXX:
       num = int(num_t(in.size()) * log(num_t(in.size())));
     }
