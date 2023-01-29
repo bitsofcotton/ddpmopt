@@ -382,9 +382,9 @@ int main(int argc, const char* argv[]) {
           for(int jj = 0; jj < sz; jj ++) {
             int cnt(0);
             for(int iik = 0;
-                iik < min(in[i][j].rows() / sz,
+                iik <= min(in[i][j].rows() / sz - 1,
                   in[i][j].rows() - ii * (in[i][j].rows() / sz)); iik ++)
-              for(int jjk = 0; jjk < min(in[i][j].cols() / sz,
+              for(int jjk = 0; jjk <= min(in[i][j].cols() / sz - 1,
                     in[i][j].cols() - jj * (in[i][j].cols() / sz));
                   jjk ++, cnt ++)
                 shrink[i][j](ii, jj) +=

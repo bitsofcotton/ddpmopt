@@ -354,15 +354,15 @@ template <typename T> vector<vector<SimpleMatrix<T> > > shrinken(const vector<ve
         for(int jj = 0; jj < sz; jj ++) {
           int cnt(0);
           for(int iik = 0;
-              iik < min(in[i][j].rows() / sz,
+              iik <= min(in[i][j].rows() / sz - 1,
                 in[i][j].rows() - ii * (in[i][j].rows() / sz)); iik ++)
-            for(int jjk = 0; jjk < min(in[i][j].cols() / sz,
+            for(int jjk = 0; jjk <= min(in[i][j].cols() / sz - 1,
                   in[i][j].cols() - jj * (in[i][j].cols() / sz));
                 jjk ++, cnt ++)
               shrink[i][j](ii, jj) +=
                 in[i][j](ii * (in[i][j].rows() / sz) + iik,
                          jj * (in[i][j].cols() / sz) + jjk);
-          shrink[i][j](ii, jj) /= num_t(cnt);
+          if(cnt) shrink[i][j](ii, jj) /= num_t(cnt);
         }
   }
   return shrink;
@@ -486,11 +486,11 @@ int main(int argc, const char* argv[]) {
     pL[i].resize(p[i].size(), SimpleMatrix<num_t>(L[0][0].rows(), L[0][0].cols()).O());
     qL[i].resize(p[i].size(), SimpleMatrix<num_t>(L[0][0].rows(), L[0][0].cols()).O());
     for(int j = 0; j < pL[i].size(); j ++) {
-      cerr << "Step 3: " << i * pL[i].size() + j << " / " << pL.size() * pL[i].size() << std::endl;
+      for(int ii = 0; ii < pL[i][j].rows(); ii ++) {
+        cerr << "Step 3: " << (i * pL[i].size() + j) * pL[i][j].rows() + ii << " / " << pL.size() * pL[i].size() * pL[i][j].rows() << std::endl;
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
-      for(int ii = 0; ii < pL[i][j].rows(); ii ++) {
         for(int jj = 0; jj < pL[i][j].cols(); jj ++) {
           auto pf(p0[i]);
           auto pb(p0[i]);
@@ -576,7 +576,7 @@ int main(int argc, const char* argv[]) {
         outs[j](n / outs[j].cols(), n % outs[j].cols()) =
           revertProgramInvariant<num_t>(make_pair(outwork[n], num_t(int(1)) ));
     }
-    if(! savep2or3<num_t>((std::string("ddpmoptp-") + std::to_string(i) + std::string(".ppm")).c_str(), normalize<num_t>(outs), false, 65535) )
+    if(! savep2or3<num_t>((std::string("ddpmoptp-") + std::to_string(i) + std::string(".ppm")).c_str(), normalize<num_t>(outs), outs.size() == 1, 65535) )
       std::cerr << "failed to save." << std::endl;
   }
   cerr << " Done" << std::endl;

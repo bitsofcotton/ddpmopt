@@ -8,8 +8,6 @@ There exists Denoising Diffusion Probabilistic Models (DDPM; Ho et al. 2020). So
 # Tips on calculation order
 ddpmoptp and ddpmoptq needs O((input mem size) * plen^1.5 * log^2((input mem size) * plen)).
 
-We can 1line when we met ddpmoptp.
-
 Either of them needs denlarge in gokicheck after calculation.
 
 # Tips on malloc options
@@ -29,7 +27,4 @@ They usually configurable by sysctl on unix-like systems.
     ./ddpmopt -  <out0.ppm> ... < cache.txt
     ./ddpmoptp <in0.ppm> ...
     ./ddpmoptq <inout0.ppm> ...
-    ./1line 0 <inout0.ppm> ...
-    ./1line  <number of colums with 3ch color> <inout0.ppm> ...
-    ./1line -<number of colums with gray scale> <inout0.ppm> ...
 

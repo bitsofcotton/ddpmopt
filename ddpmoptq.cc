@@ -351,10 +351,10 @@ template <typename T> SimpleMatrix<T> shrinken(const SimpleMatrix<T>& in, const 
     for(int jj = 0; jj < w; jj ++) {
       int cnt(0);
       for(int iik = 0;
-          iik < (in.rows() / 2 < h ? 1 : min(in.rows() / h,
-            in.rows() - ii * (in.rows() / h))); iik ++)
-        for(int jjk = 0; jjk < (in.cols() / 2 < w ? 1 : min(in.cols() / w,
-              in.cols() - jj * (in.cols() / w)));
+          iik <= min(in.rows() / h - 1,
+            in.rows() - ii * (in.rows() / h)); iik ++)
+        for(int jjk = 0; jjk <= min(in.cols() / w - 1,
+              in.cols() - jj * (in.cols() / w));
             jjk ++, cnt ++)
           shrink(ii, jj) +=
             in(ii * (in.rows() / h) + iik,
@@ -670,7 +670,7 @@ int main(int argc, const char* argv[]) {
         }
     }
     if(! savep2or3<num_t>(argv[i0], normalize<num_t>(in = out),
-           false, 65535) )
+           out.size() == 1, 65535) )
       std::cerr << "failed to save." << std::endl;
   }
   return 0;
