@@ -8,7 +8,8 @@ There exists Denoising Diffusion Probabilistic Models (DDPM; Ho et al. 2020). So
 # Tips on calculation order
 ddpmoptp and ddpmoptq needs O((input mem size) * plen^1.5 * log^2((input mem size) * plen)).
 
-This better works with pgm files, and we might need to do half size operation after doing them.
+We recommend to input medium to large size (larger than 512x512 pixels) pgm monochrome image, however, the calculation cost is high enough.
+So to view result, we can use goki check cc venlarge comman.
 
 # Tips on malloc options
 Some of the implementation needs to run them with specifying malloc options.
