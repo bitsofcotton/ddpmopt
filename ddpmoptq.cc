@@ -372,7 +372,11 @@ int main(int argc, const char* argv[]) {
     vector<SimpleMatrix<num_t> > in;
     if(! loadp2or3<num_t>(in, argv[i0])) continue;
     const num_t sz0(min(in[0].rows(), in[0].cols()));
+#if defined(_CONDORCET_JURY_)
     const int   sz(sqrt(sz0));
+#else
+    const int   sz(1);
+#endif
     const int   num(sz0 * log(sz0));
     vector<SimpleVector<num_t> > noise;
     noise.resize(num, SimpleVector<num_t>(sz));

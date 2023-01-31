@@ -400,7 +400,11 @@ int main(int argc, const char* argv[]) {
     assert(in[0][0].rows() == in[i - 1][0].rows() &&
            in[0][0].cols() == in[i - 1][0].cols());
     if(i == 1) {
+#if defined(_CONDORCET_JURY_)
       sz  = int(sqrt(num_t(min(int(in.size()), int(sqrt(num_t(in[i - 1][0].rows() * in[i - 1][0].rows() + in[i - 1][0].cols() * in[i - 1][0].cols())))))));
+#else
+      sz  = 1;
+#endif
       // XXX:
       num = int(num_t(in.size()) * log(num_t(in.size())));
     }
@@ -486,10 +490,18 @@ int main(int argc, const char* argv[]) {
     pL[i].resize(p[i].size(), SimpleMatrix<num_t>(L[0][0].rows(), L[0][0].cols()).O());
     qL[i].resize(p[i].size(), SimpleMatrix<num_t>(L[0][0].rows(), L[0][0].cols()).O());
     for(int j = 0; j < pL[i].size(); j ++) {
+#if ! defined(_CONDORCET_JURY_)
+      cerr << "Step 3: " << i * pL[i].size() + j << " / " << pL.size() * pL[i].size() << std::endl;
+#if defined(_OPENMP)
+#pragma omp parallel for schedule(static, 1)
+#endif
+#endif
       for(int ii = 0; ii < pL[i][j].rows(); ii ++) {
+#if defined(_CONDORCET_JURY_)
         cerr << "Step 3: " << (i * pL[i].size() + j) * pL[i][j].rows() + ii << " / " << pL.size() * pL[i].size() * pL[i][j].rows() << std::endl;
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
+#endif
 #endif
         for(int jj = 0; jj < pL[i][j].cols(); jj ++) {
           auto pf(p0[i]);
