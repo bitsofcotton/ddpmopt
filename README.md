@@ -9,7 +9,7 @@ There exists Denoising Diffusion Probabilistic Models (DDPM; Ho et al. 2020). So
 ddpmoptp and ddpmoptq needs O((input mem size) * plen^1.5 * log^2((input mem size) * plen)).
 
 We recommend to input medium to large size (larger than 512x512 pixels) pgm monochrome image, however, the calculation cost is high enough.
-So to view result, we can use goki check cc venlarge comman.
+So to use result, we can use goki check cc denlarge command but we should use them to copy of the result.
 
 # Tips on malloc options
 Some of the implementation needs to run them with specifying malloc options.
