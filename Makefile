@@ -16,6 +16,7 @@ clean:
 	@rm -rf ${CLEANFILES}
 
 all:	ddpmopt ddpmopt32 ddpmoptp ddpmoptp32 ddpmoptq ddpmoptq32 ddpmoptmp ddpmopt32mp ddpmoptpmp ddpmoptp32mp ddpmoptqmp ddpmoptq32mp ddpmoptpm ddpmoptpm32 ddpmoptpmmp ddpmoptpm32mp ddpmoptqm ddpmoptqm32 ddpmoptqmmp ddpmoptqm32mp
+
 ddpmopt:
 	${CXX} ${CXXFLAGS} -static -o ddpmopt ddpmopt.cc
 ddpmopt32:
