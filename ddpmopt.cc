@@ -261,8 +261,7 @@ int main(int argc, const char* argv[]) {
         auto outwork(L[j] * makeProgramInvariant<num_t>(vwork0).first);
         for(int n = 0; n < outwork.size(); n ++)
           outs[j](n / outs[j].cols(), n % outs[j].cols()) =
-            // revertProgramInvariant<num_t>(make_pair(outwork[n], num_t(int(1)) ));
-            outwork[n];
+            revertProgramInvariant<num_t>(make_pair(outwork[n], num_t(int(1)) ));
       }
       if(! savep2or3<num_t>(argv[i], normalize<num_t>(outs), false, 65535) )
         std::cerr << "failed to save." << std::endl;
