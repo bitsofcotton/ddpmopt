@@ -10,12 +10,12 @@ CXXFLAGS+=	-std=c++11
 LDFLAGS+=	-lc++ -L/usr/local/lib
 #LDFLAGS+=	-lestdc++ -L/usr/local/lib
 
-CLEANFILES= *.o ddpmopt ddpmopt32 ddpmoptp ddpmoptp32 ddpmoptq ddpmoptq32 ddpmoptmp ddpmopt32mp ddpmoptpmp ddpmoptp32mp ddpmoptqmp ddpmoptq32mp ddpmoptpm ddpmoptpm32 ddpmoptpmmp ddpmoptpm32mp ddpmoptqm ddpmoptqm32 ddpmoptqmmp ddpmoptqm32mp
+CLEANFILES= *.o ddpmopt ddpmopt32 ddpmoptp ddpmoptp32 ddpmoptq ddpmoptq32 ddpmoptmp ddpmopt32mp ddpmoptpmp ddpmoptp32mp ddpmoptqmp ddpmoptq32mp ddpmoptpm ddpmoptpm32 ddpmoptpmmp ddpmoptpm32mp ddpmoptqm ddpmoptqm32 ddpmoptqmmp ddpmoptqm32mp predg predg32 predgmp predg32mp qredg qredg32 qredgmp qredg32mp
 
 clean:
 	@rm -rf ${CLEANFILES}
 
-all:	ddpmopt ddpmopt32 ddpmoptp ddpmoptp32 ddpmoptq ddpmoptq32 ddpmoptmp ddpmopt32mp ddpmoptpmp ddpmoptp32mp ddpmoptqmp ddpmoptq32mp ddpmoptpm ddpmoptpm32 ddpmoptpmmp ddpmoptpm32mp ddpmoptqm ddpmoptqm32 ddpmoptqmmp ddpmoptqm32mp
+all:	ddpmopt ddpmopt32 ddpmoptp ddpmoptp32 ddpmoptq ddpmoptq32 ddpmoptmp ddpmopt32mp ddpmoptpmp ddpmoptp32mp ddpmoptqmp ddpmoptq32mp ddpmoptpm ddpmoptpm32 ddpmoptpmmp ddpmoptpm32mp ddpmoptqm ddpmoptqm32 ddpmoptqmmp ddpmoptqm32mp predg predg32 predgmp predg32mp qredg qredg32 qredgmp qredg32mp
 
 ddpmopt:
 	${CXX} ${CXXFLAGS} -static -o ddpmopt ddpmopt.cc
@@ -77,4 +77,28 @@ ddpmoptqm32mp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=32 -D_CONDORCET_JURY_ -o ddpmoptqm32mp ddpmoptq.cc
 ddpmoptqm64mp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=64 -D_CONDORCET_JURY_ -o ddpmoptqm64mp ddpmoptq.cc
+predg:
+	${CXX} ${CXXFLAGS} -static -o predg predg.cc
+predg32:
+	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=32 -o predg32 predg.cc
+predg64:
+	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=64 -o predg64 predg.cc
+predgmp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -o predgmp predg.cc
+predg32mp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=32 -o predg32mp predg.cc
+predg64mp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=64 -o predg64mp predg.cc
+qredg:
+	${CXX} ${CXXFLAGS} -static -o qredg qredg.cc
+qredg32:
+	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=32 -o qredg32 qredg.cc
+qredg64:
+	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=64 -o qredg64 qredg.cc
+qredgmp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -o qredgmp qredg.cc
+qredg32mp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=32 -o qredg32mp qredg.cc
+qredg64mp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=64 -o qredg64mp qredg.cc
 

@@ -22,7 +22,6 @@ typedef myfloat num_t;
 #include "p0.hh"
 #include "p1.hh"
 #include "catg.hh"
-#include "decompose.hh"
 
 using std::cout;
 using std::cerr;
