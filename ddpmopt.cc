@@ -249,7 +249,7 @@ int main(int argc, const char* argv[]) {
       auto rin(out[0]);
       for(int n = 0; n < rin.rows(); n ++)
         for(int nn = 0; nn < rin.cols(); nn ++)
-          rin(n, nn) = argv[1][1] == '0' ? num_t(int(1)) : rng();
+          rin(n, nn) = rng();
       rin = (dft<num_t>(- rin.rows()) * rin.template cast<complex<num_t> >() * dft<num_t>(- rin.cols())).template real<num_t>();
       for(int j = 0; j < out.size(); j ++) {
         cerr << j << " / " << out.size() << " over " << i - 2 << " / " << argc - 2 << std::endl;
@@ -261,7 +261,8 @@ int main(int argc, const char* argv[]) {
         auto outwork(L[j] * makeProgramInvariant<num_t>(vwork0).first);
         for(int n = 0; n < outwork.size(); n ++)
           outs[j](n / outs[j].cols(), n % outs[j].cols()) =
-            revertProgramInvariant<num_t>(make_pair(outwork[n], num_t(int(1)) ));
+            // revertProgramInvariant<num_t>(make_pair(outwork[n], num_t(int(1)) ));
+            outwork[n];
       }
       if(! savep2or3<num_t>(argv[i], normalize<num_t>(outs), false, 65535) )
         std::cerr << "failed to save." << std::endl;
@@ -282,7 +283,7 @@ int main(int argc, const char* argv[]) {
       for(int j = 0; j < num; j ++) {
         for(int n = 0; n < sz; n ++)
           for(int nn = 0; nn < sz; nn ++)
-            noise[i - 2][j](n, nn) = argv[1][0] == '0' ? num_t(int(1)) : rng();
+            noise[i - 2][j](n, nn) = rng();
         noise[i - 2][j] = (dft<num_t>(- noise[i - 2][j].rows()) * noise[i - 2][j].template cast<complex<num_t> >() * dft<num_t>(- noise[i - 2][j].cols())).template real<num_t>();
       }
     }
