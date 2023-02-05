@@ -215,91 +215,6 @@ typedef long double thisfl;
   return max(num_t(int(0)), min(num_t(int(1)), num_t(res) / num_t(~ myuint(0)) ));
 }
 
-// N.B. invariant gathers some of the group on the input pattern.
-template <typename T> SimpleMatrix<T> concat(const SimpleMatrix<T>& m0, const SimpleMatrix<T>& m1) {
-  // det diag result = det diag m0 + det diag m1
-  // [1 x x^reverse 1]
-  // if we met rank shrink, assert exit then.
-  // we can handle this with compiling operation adding period-depend values.
-  assert(m0.rows() == m1.rows() && m0.cols() == m1.cols());
-  SimpleMatrix<T> work0(m0);
-  SimpleMatrix<T> work1(m1);
-  auto res(m0);
-  for(int i = 0; i < m0.rows(); i ++) {
-    auto qw1(work1.transpose().QR());
-    auto rw1(qw1 * work1.transpose());
-    // XXX : assert exit here.
-    work0 = (rw1.inverse() * qw1 * work0.transpose()).transpose();
-    assert(work0.rows() == work0.cols());
-    SimpleMatrix<T> lwork(work0.rows() * 2, work0.cols() * 2);
-    const auto ii(SimpleMatrix<T>(work0.rows(), work0.cols()).I());
-    lwork.setMatrix(0, 0, ii).setMatrix(0, work0.cols(), work0 - ii).setMatrix(work0.rows(), work0.cols(), ii);
-    for(int j = 0; j < work0.rows(); j ++)
-      for(int k = 0; k < work0.cols(); k ++)
-        lwork(lwork.rows() - j, work0.cols() - k) = work0(j, k);
-    for(int j = 0; j < lwork.rows() / 2; j ++)
-      for(int k = 0; k < lwork.cols(); k ++)
-        std::swap(lwork(j, k), lwork(lwork.rows() - j, k));
-    for(int j = 0; j < lwork.rows(); j ++)
-      for(int k = 0; k < lwork.cols() / 2; k ++)
-        std::swap(lwork(j, k), lwork(j, lwork.cols() - k));
-    // LDLt:
-/*
-    auto L();
-    auto D();
-    auto Linv();
-    for(int j = 0; j < L.rows() / 2; j ++)
-      for(int k = 0; k < L.cols(); k ++)
-        std::swap(L(j, k), L(L.rows() - j, k));
-    for(int j = 0; j < Linv.rows(); j ++)
-      for(int k = 0; k < Linv.cols() / 2; k ++)
-        std::swap(Linv(j, k), Linv(j, Linv.cols() - k));
-*/
-    // factor apply res, work0, work1:
-  }
-  return res;
-}
-
-template <typename T> SimpleMatrix<T> diff(const SimpleMatrix<T>& m, const int& idx) {
-  SimpleMatrix<T> res(m.rows() - 1, m.cols());
-  res.O();
-  for(int i = 0; i < m.rows(); i ++) {
-    auto lres(res);
-    lres.O();
-    for(int j = 0; j < i; j ++) lres.row(j) = m.row(j);
-    for(int j = i + 1; j < m.rows(); j ++) lres.row(j - 1) = m.row(j);
-    if(m(i, i) == T(int(0))) continue;
-    else if(m(i, i) < T(int(0))) lres.row(0) = - lres.row(0);
-    res = concat(res, lres /= pow(abs(m(i, i)), T(int(1)) / T(int(lres.rows()))));
-  }
-}
-
-template <typename T> SimpleMatrix<T> integrate(const SimpleMatrix<T>& m, const int& idx, const int& stage = 0) {
-  // N.B. S^x det diag Ax dx (= S u'v) =
-  //  (S^x dx) * det diag Ax (= S(uv)') -
-  //  S^x(x(det diag Ax)')dx (= S uv')
-  //      S^x(x(det diag Ax)')dx   (= S u'v) =
-  //  (S^x x dx) * (det diag Ax)'  (= S(uv)') -
-  //  S^x(x^2/2 (det diag Ax)'')dx (= S uv')
-  //    ...
-  SimpleMatrix<T> factorial(m.rows(), m.cols());
-  factorial.O();
-  for(int i = 0; i < factorial.rows(); i ++)
-    factorial(i, idx) = T(int(1)) / T(int(i + 1));
-  if(stage == m.rows() - 1) return factorial * m(m.rows() - 1, idx);
-  return concat(m, factorial.setMatrix(stage + 1, 0, integrate(diff(m, idx), idx, stage + 1)), true);
-}
-
-// N.B. we need huge computing power depends on m at least O(m.rows()^4).
-template <typename T> SimpleVector<T> reduce(const SimpleMatrix<T> m) {
-  SimpleMatrix<T> work(m);
-  for(int i = 0; i < m.rows() - 1; i ++)
-    work = integrate(work, i);
-  for(int i = 0; i < m.rows() - 1; i ++)
-    work = diff(work, i);
-  return work.row(0);
-}
-
 #undef int
 int main(int argc, const char* argv[]) {
 //#define int int64_t
@@ -351,13 +266,13 @@ int main(int argc, const char* argv[]) {
       if(! savep2or3<num_t>(argv[i], normalize<num_t>(outs), false, 65535) )
         std::cerr << "failed to save." << std::endl;
     }
-  } else if(m == '+') {
+  } else if(m == '+' || m == '0') {
     vector<vector<SimpleMatrix<num_t> > > in;
     vector<vector<SimpleMatrix<num_t> > > noise;
     in.resize(argc - 2);
     noise.resize(in.size());
           int sz(0);
-    const int num(argv[1][1] == '+' ? sqrt(num_t(in.size())) : log(num_t(in.size())) / log(num_t(int(2))));
+    const int num(argv[1][1] == '+' ? sqrt(num_t(in.size())) : (argv[1][0] == '0' ? num_t(int(1)) : log(num_t(in.size())) / log(num_t(int(2)))));
     for(int i = 2; i < argc; i ++) {
       if(! loadp2or3<num_t>(in[i - 2], argv[i])) continue;
       assert(in[0][0].rows() == in[i - 2][0].rows() &&
