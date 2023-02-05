@@ -24,7 +24,6 @@ We recommend to use large pgm input with rough calculation or small ppm input wi
     ./ddpmopt +  <in0.ppm> ... > cache.txt
     ./ddpmopt ++ <in0.ppm> ... > cache.txt
     ./ddpmopt -  <out0.ppm> ... < cache.txt
-    ./ddpmopt -0 <out0.ppm> ... < cache.txt
     ./predg <in0.ppm> ...
     ./qredg <inout0.ppm> ...
 
