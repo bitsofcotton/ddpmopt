@@ -62,24 +62,28 @@ int main(int argc, const char* argv[]) {
       for(int k = 0; k < py.first.size(); k ++)
         for(int kk = 0; kk < py.first[k].size(); kk ++) {
           swork(py.first.size() - k - 1, px.first.size() + kk) =
-            revertProgramInvariant<num_t>(make_pair(
+            max(num_t(int(0)), min(num_t(int(1)),
+              revertProgramInvariant<num_t>(make_pair(
               py.first[k][kk] / py.first[k][py.first[k].size() - 1],
-              num_t(int(1)) ));
+              num_t(int(1)) )) ));
           swork(py.first.size() + work[j].rows() + k, px.first.size() + kk) =
-            revertProgramInvariant<num_t>(make_pair(
+            max(num_t(int(0)), min(num_t(int(1)),
+              revertProgramInvariant<num_t>(make_pair(
               py.second[k][kk] / py.second[k][py.second[k].size() - 1],
-              num_t(int(1)) ));
+              num_t(int(1)) )) ));
         }
       for(int k = 0; k < px.first.size(); k ++)
         for(int kk = 0; kk < px.first[k].size(); kk ++) {
           swork(py.first.size() + kk, px.first.size() - k - 1) =
-            revertProgramInvariant<num_t>(make_pair(
+            max(num_t(int(0)), min(num_t(int(1)),
+              revertProgramInvariant<num_t>(make_pair(
               px.first[k][kk] / px.first[k][px.first[k].size() - 1],
-              num_t(int(1)) ));
+              num_t(int(1)) )) ));
           swork(py.first.size() + kk, px.first.size() + work[j].cols() + k) =
-            revertProgramInvariant<num_t>(make_pair(
+            max(num_t(int(0)), min(num_t(int(1)),
+              revertProgramInvariant<num_t>(make_pair(
               px.second[k][kk] / px.second[k][px.second[k].size() - 1],
-              num_t(int(1)) ));
+              num_t(int(1)) )) ));
         }
       std::swap(work[j], swork);
     }
