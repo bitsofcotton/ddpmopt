@@ -216,6 +216,32 @@ public:
   SimpleVector<T> q0;
 };
 
+template <typename T, typename P> class Ppad {
+public:
+  inline Ppad() { ; }
+  inline Ppad(P&& p, const int& pad = 1) {
+    this->p.resize(pad, p);
+    b.resize(pad, T(t ^= t));
+    f = idFeeder<T>(pad);
+  }
+  inline ~Ppad() { ; }
+  inline T next(const T& in) {
+    const auto& ff(f.next(in));
+    if(! f.full) return T(int(0));
+    auto fin(ff[0]);
+    for(int i = 1; i < ff.size(); i ++) fin += ff[i];
+    b[t] = p[t].next(fin);
+    if(p.size() <= (++ t)) t ^= t;
+    auto res(b[0]);
+    for(int i = 1; i < b.size(); i ++) res += b[i];
+    return res;
+  }
+  int t;
+  vector<P> p;
+  vector<T> b;
+  idFeeder<T> f;
+};
+
 template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > predv(const vector<SimpleVector<T> >& in) {
   vector<Prange<T> > p0;
   for(int ext = 0; ext < in.size() / 2; ext ++) {
