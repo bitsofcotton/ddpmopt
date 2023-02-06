@@ -12,12 +12,11 @@ This is because we need huge number of allocations/frees to run.
 
 Also, we need to do ulimit or edit /etc/login.conf for large malloc use cases required by larger than medium sized input.
 
-# Tips on shared memory
-If we run them with openmp, we need large shared memory size.
-They usually configurable by sysctl on unix-like systems.
+Also, if we run these programs with openmp, we need large shared memory size.
+They are usually configurable by sysctl on unix-like systems.
 
-# Tips on recommended input condition
-We recommend to use large pgm input with rough calculation or small ppm input with accurate calculation. Otherwise, we get meaning-less result.
+# Tips on small images
+If we treat small images instead of the originals, they seems to be better by looking, but if we treat original images as some slided parts of them and invert originals, they doesn't enhance at all in these programs.
 
 # Usage:
     ./ddpmopt 0  <in0.ppm> ... > cache.txt
