@@ -5,6 +5,7 @@ using std::ifstream;
 using std::ofstream;
 using std::getline;
 using std::istringstream;
+using std::vector;
 
 static inline bool whiteline(const string& s) {
   for(auto ss(s.begin()); ss < s.end(); ++ ss)
@@ -125,6 +126,37 @@ template <typename T> bool savep2or3(const char* filename, const vector<SimpleMa
     return false;
   }
   return true;
+}
+
+template <typename T> vector<SimpleMatrix<T> > normalize(const vector<SimpleMatrix<T> >& data, const T& upper = T(1)) {
+  T MM(0), mm(0);
+  bool fixed(false);
+  for(int k = 0; k < data.size(); k ++)
+    for(int i = 0; i < data[k].rows(); i ++)
+      for(int j = 0; j < data[k].cols(); j ++)
+        if(! fixed || (isfinite(data[k](i, j)) && ! isinf(data[k](i, j)) && ! isnan(data[k](i, j)))) {
+          if(! fixed)
+            MM = mm = data[k](i, j);
+          else {
+            MM = max(MM, data[k](i, j));
+            mm = min(mm, data[k](i, j));
+          }
+          fixed = true;
+        }
+  if(MM == mm || ! fixed)
+    return data;
+  auto result(data);
+  for(int k = 0; k < data.size(); k ++)
+    for(int i = 0; i < data[k].rows(); i ++)
+      for(int j = 0; j < data[k].cols(); j ++) {
+        if(isfinite(result[k](i, j)) && ! isinf(data[k](i, j)) && ! isnan(result[k](i, j)))
+          result[k](i, j) -= mm;
+        else
+          result[k](i, j)  = T(0);
+        assert(T(0) <= result[k](i, j) && result[k](i, j) <= MM - mm);
+        result[k](i, j) *= upper / (MM - mm);
+      }
+  return result;
 }
 
 #define _UTIL_DDPMOPT_

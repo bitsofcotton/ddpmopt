@@ -159,7 +159,7 @@ public:
   }
   inline ~PBlur() { ; }
   inline const T& next(const T& d) {
-    if(d == num_t(int(0))) return res;
+    if(d == T(int(0))) return res;
     M0   = max(M0, abs(d));
     M1   = max(M0, abs(S += d));
     res  = p[0].next(d);
@@ -187,7 +187,7 @@ public:
     p0 = P0maxRank<T>(status - var0 - 3);
     p1 = shrinkMatrix<T, P1I<T, idFeeder<T> > >(P1I<T, idFeeder<T> >(status - var1 * 2, var1, var1), var1);
     p2 = shrinkMatrix<T, P012L<T, idFeeder<T> > >(P012L<T, idFeeder<T> >(status - var2 * 2, var2, var2), var2);
-    const int qstatus(sqrt(num_t(status)));
+    const int qstatus(sqrt(T(status)));
     q  = idFeeder<T>(qstatus);
     q0 = SimpleVector<T>(qstatus + 1).O();
   }
@@ -207,7 +207,7 @@ public:
              qqm.first[qqm.first.size() - 2]) / q0[q0.size() - 2] /
            T(int(q0.size())), qqm.second)) ));
     }
-    return max(- num_t(int(1)), min(num_t(int(1)), (M += d) *= num_t(int(2)) / num_t(int(5)) ));
+    return max(- T(int(1)), min(T(int(1)), (M += d) *= T(int(2)) / T(int(5)) ));
   }
   P0maxRank<T> p0;
   shrinkMatrix<T, P1I<T, idFeeder<T> > > p1;
@@ -217,29 +217,29 @@ public:
 };
 
 template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > predv(const vector<SimpleVector<T> >& in) {
-  vector<Prange<num_t> > p0;
+  vector<Prange<T> > p0;
   for(int ext = 0; ext < in.size() / 2; ext ++) {
     const int status(in.size() / (ext + 1) - 2);
-    const int var0(max(num_t(int(1)), num_t(int(exp(sqrt(log(num_t(status)))))) ) );
+    const int var0(max(T(int(1)), T(int(exp(sqrt(log(T(status)))))) ) );
     if(status < var0 + 3 * 2) break;
-    p0.emplace_back(Prange<num_t>(status));
+    p0.emplace_back(Prange<T>(status));
     auto pp(p0[ext]);
     for(int i = 0; i < status * 2 + 4; i ++)
-      pp.next(num_t(i + 1) / num_t(status * 2 + 5) - num_t(int(1)) / num_t(int(2)));
-    cerr << "(volatile dummy:)" << pp.next(num_t(int(0))) << endl;
+      pp.next(T(i + 1) / T(status * 2 + 5) - T(int(1)) / T(int(2)));
+    cerr << "(volatile dummy:)" << pp.next(T(int(0))) << endl;
   }
-  vector<SimpleVector<num_t> > invariant;
+  vector<SimpleVector<T> > invariant;
   invariant.resize(in.size());
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
   for(int i = 0; i < in.size(); i ++) {
-    auto inv(makeProgramInvariant<num_t>(in[i]));
+    auto inv(makeProgramInvariant<T>(in[i]));
     invariant[i]  = move(inv.first);
     invariant[i] *=
       pow(inv.second, ceil(- log(SimpleMatrix<T>().epsilon()) ));
   }
-  vector<SimpleVector<num_t> > p;
+  vector<SimpleVector<T> > p;
   p.resize(p0.size());
   auto q(p);
   for(int i = 0; i < p0.size(); i ++) {
@@ -252,10 +252,10 @@ template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > 
 #pragma omp parallel for schedule(static, 1)
 #endif
     for(int j = 0; j < p[i].size(); j ++) {
-      auto  pf(p0[i]);
-      auto  pb(p0[i]);
-      num_t qmax(int(0));
-      num_t pmax(int(0));
+      auto pf(p0[i]);
+      auto pb(p0[i]);
+      T    qmax(int(0));
+      T    pmax(int(0));
       for(int k = 0; k < invariant.size() / (i + 1); k ++)
         qmax += invariant[(invariant.size() / (i + 1) - (k + 1)) * (i + 1)][j] *
           invariant[(invariant.size() / (i + 1) - (k + 1)) * (i + 1)][j];
@@ -264,32 +264,32 @@ template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > 
             (invariant.size() / (i + 1) - (k + 1)) * (i + 1)][j] *
                 invariant[invariant.size() - 1 -
             (invariant.size() / (i + 1) - (k + 1)) * (i + 1)][j];
-      qmax = sqrt(qmax * num_t(int(2)));
-      pmax = sqrt(pmax * num_t(int(2)));
+      qmax = sqrt(qmax * T(int(2)));
+      pmax = sqrt(pmax * T(int(2)));
       try {
         for(int k = 0; k < invariant.size() / (i + 1); k ++) {
           assert(0 <= (invariant.size() / (i + 1) - (k + 1)) * (i + 1));
           assert((invariant.size() / (i + 1) - (k + 1)) * (i + 1) < invariant.size());
-          assert(- num_t(int(1)) <= invariant[(invariant.size() / (i + 1) - (k + 1)) * (i + 1)][j] / qmax);
-          assert(invariant[(invariant.size() / (i + 1) - (k + 1)) * (i + 1)][j] / qmax <= num_t(int(1)));
+          assert(- T(int(1)) <= invariant[(invariant.size() / (i + 1) - (k + 1)) * (i + 1)][j] / qmax);
+          assert(invariant[(invariant.size() / (i + 1) - (k + 1)) * (i + 1)][j] / qmax <= T(int(1)));
           q[i][j] = pb.next(invariant[(invariant.size() / (i + 1) - (k + 1)) * (i + 1)][j] / qmax);
         }
       } catch(const char* e) {
-        q[i][j] = num_t(int(0));
+        q[i][j] = T(int(0));
       }
       try {
         for(int k = 0; k < invariant.size() / (i + 1); k ++) {
           assert(0 <= (invariant.size() / (i + 1) - (k + 1)) * (i + 1));
           assert((invariant.size() / (i + 1) - (k + 1)) * (i + 1) < invariant.size());
-          assert(- num_t(int(1)) <= invariant[invariant.size() - 1 -
+          assert(- T(int(1)) <= invariant[invariant.size() - 1 -
             (invariant.size() / (i + 1) - (k + 1)) * (i + 1)][j] / pmax);
           assert(invariant[invariant.size() - 1 -
-            (invariant.size() / (i + 1) - (k + 1)) * (i + 1)][j] / pmax <= num_t(int(1)));
+            (invariant.size() / (i + 1) - (k + 1)) * (i + 1)][j] / pmax <= T(int(1)));
           p[i][j] = pf.next(invariant[invariant.size() - 1 -
               (invariant.size() / (i + 1) - (k + 1)) * (i + 1)][j] / pmax);
         }
       } catch(const char* e) {
-        p[i][j] = num_t(int(0));
+        p[i][j] = T(int(0));
       }
       q[i][j] *= qmax;
       p[i][j] *= pmax;

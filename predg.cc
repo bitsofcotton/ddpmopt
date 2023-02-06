@@ -80,11 +80,10 @@ int main(int argc, const char* argv[]) {
       outs[j].resize(rows, cols);
       for(int k = 0; k < outs[j].rows() * outs[j].cols(); k ++)
         outs[j](k / outs[j].cols(), k % outs[j].cols()) =
-          max(num_t(int(0)), min(num_t(int(1)),
-            revertProgramInvariant<num_t>(make_pair(
-            out[j][i][k] / out[j][i][out[j][i].size() - 1], num_t(int(1)) )) ));
+          revertProgramInvariant<num_t>(make_pair(
+            out[j][i][k] / out[j][i][out[j][i].size() - 1], num_t(int(1)) ));
     }
-    if(! savep2or3<num_t>((std::string("predg-") + std::to_string(i) + std::string(".ppm")).c_str(), outs) )
+    if(! savep2or3<num_t>((std::string("predg-") + std::to_string(i) + std::string(".ppm")).c_str(), normalize<num_t>(outs)) )
       cerr << "failed to save." << endl;
   }
   cerr << " Done" << endl;
