@@ -19,8 +19,8 @@ They are usually configurable by sysctl on unix-like systems.
 If we treat small images instead of the originals, they seems to be better by looking, but if we treat original images as some slided parts of them and invert originals, they doesn't enhance at all in these programs.
 
 # Tips on predg/qredg
-We take class P prediction on each pixel of makeProgramInvariant.
-This is because we make the hypothesis there exists hidden invariant on whole of the set of images in complexity-wise meaning.
+We take class Prange prediction on each pixel of makeProgramInvariant.
+This is because we make the hypothesis there exists hidden invariant on whole of the set of images for each image in complexity-wise meaning.
 
 # Usage:
     ./ddpmopt 0  <in0.ppm> ... > cache.txt
