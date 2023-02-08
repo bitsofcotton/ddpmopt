@@ -26,7 +26,7 @@ This is because we make the hypothesis there exists hidden invariant on whole of
     ./ddpmopt 0  <in0.ppm> ... > cache.txt
     ./ddpmopt +  <in0.ppm> ... > cache.txt
     ./ddpmopt ++ <in0.ppm> ... > cache.txt
-    ./ddpmopt -  <out0.ppm> ... < cache.txt
+    ./ddpmopt -  <inout0.ppm> ... < cache.txt
     ./predg <in0.ppm> ...
     ./qredg <inout0.ppm> ...
 
