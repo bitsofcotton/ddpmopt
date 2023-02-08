@@ -51,12 +51,14 @@ int main(int argc, const char* argv[]) {
       SimpleVector<num_t>(work[0].cols() * work.size()).O());
     qwork.resize(work[0].cols(),
       SimpleVector<num_t>(work[0].rows() * work.size()).O());
-    for(int k = 0; k < work[0].rows(); k ++)
-      for(int j = 0; j < work.size(); j ++)
-        pwork[k].setVector(j * work[j].cols(), work[j].row(k));
-    for(int k = 0; k < work[0].cols(); k ++)
-      for(int j = 0; j < work.size(); j ++)
-        qwork[k].setVector(j * work[j].rows(), work[j].col(k));
+    for(int j = 0; j < work.size(); j ++)
+      for(int k = 0; k < work[j].rows(); k ++)
+        pwork[k].setVector(j * work[j].rows() * work[j].cols() +
+                           k * work[j].cols(), work[j].row(k));
+    for(int j = 0; j < work.size(); j ++)
+      for(int k = 0; k < work[j].cols(); k ++)
+        qwork[k].setVector(j * work[j].rows() * work[j].cols() +
+                           k * work[j].rows(), work[j].col(k));
     auto py(predv<num_t>(pwork));
     auto px(predv<num_t>(qwork));
     vector<SimpleMatrix<num_t> > swork(work.size(),
