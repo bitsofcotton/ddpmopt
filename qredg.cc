@@ -63,7 +63,7 @@ int main(int argc, const char* argv[]) {
       SimpleMatrix<num_t>(work[0].rows() + py.first.size() * 2,
                           work[0].cols() + px.first.size() * 2).O());
     for(int j = 0; j < work.size(); j ++)
-      swork[j].O().setMatrix(py.first.size(), px.first.size(), work[j]);
+      swork[j].setMatrix(py.first.size(), px.first.size(), work[j] / num_t(int(2)));
     for(int k = 0; k < py.first.size(); k ++)
       for(int kk = 0; kk < py.first[k].size() / work.size(); kk ++)
         for(int j = 0; j < work.size(); j ++) {

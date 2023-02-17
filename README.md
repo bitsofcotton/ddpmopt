@@ -22,6 +22,10 @@ If we treat small images instead of the originals, they seems to be better by lo
 We take class Prange prediction on each pixel of makeProgramInvariant.
 This is because we make the hypothesis there exists hidden invariant on whole of the set of images for each image in complexity-wise meaning.
 
+# Tips on context structure we don't suppose
+We don't suppose the structure on the inputs that effects the whole program differential equation coefficient or its distribution who describes the structure.
+So we only make the hypothesis above, we should shrink the images after \[pq\]redg or ddpmopt. This is because only the each pixel context on whole invariant is determined.
+
 # Usage:
     ./ddpmopt 0  <in0.ppm> ... > cache.txt
     ./ddpmopt +  <in0.ppm> ... > cache.txt
