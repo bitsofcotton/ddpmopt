@@ -26,6 +26,11 @@ This is because we make the hypothesis there exists hidden invariant on whole of
 We don't suppose the structure on the inputs that effects the whole program differential equation coefficient or its distribution who describes the structure.
 So we only make the hypothesis above, we should shrink the images after \[pq\]redg or ddpmopt. This is because only the each pixel context on whole invariant is determined.
 
+# Tips on goki check cc denlarge penlarge chain
+Some chain causes non expected result they seems to be not broken in meaning.
+So we should use per one task per one method.
+Also, we should use huge number of the input datas because of non context-full but calculation over-{} return result gained otherwise.
+
 # Usage:
     ./ddpmopt 0  <in0.ppm> ... > cache.txt
     ./ddpmopt +  <in0.ppm> ... > cache.txt
