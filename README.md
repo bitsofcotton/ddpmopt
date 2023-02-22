@@ -30,6 +30,7 @@ So we only make the hypothesis above, we should shrink the images after \[pq\]re
 Some chain causes non expected result they seems to be not broken in meaning.
 So we should use per one task per one method.
 Also, we should use huge number of the input datas because of non context-full but calculation over-{} return result gained otherwise.
+However, we recommend you and us to use denlarge sharpen chain on goki_check_cc after predg/qredg.
 
 # Usage:
     ./ddpmopt 0  <in0.ppm> ... > cache.txt
