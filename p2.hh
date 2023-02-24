@@ -233,11 +233,11 @@ public:
     if(t ++ < nxt) return res;
     const auto nxt2(pow(T(pad += pad0), T(int(2)) / T(int(3))));
     if(nxt2 < T(nxt + 1) + T(int(1)) / T(int(4))) {
-      nxt = pow(T(pad = pad0), T(int(2)) / T(int(3)));
+      nxt = int(pow(T(pad = pad0), T(int(2)) / T(int(3))));
       p   = p0;
       return res = d = T(tt = t ^= t);
     }
-    nxt = nxt2;
+    nxt = int(nxt2);
     res = p.next(d);
     return tt ++ < absent ? res = T(int(0)) : res;
   }
