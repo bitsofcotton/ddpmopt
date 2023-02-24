@@ -219,27 +219,59 @@ public:
 template <typename T, typename P> class Ppad {
 public:
   inline Ppad() { ; }
-  inline Ppad(P&& p, const int& pad = 1) {
-    this->p.resize(pad, p);
-    b.resize(pad, T(t ^= t));
-    f = idFeeder<T>(pad);
+  inline Ppad(P&& p, const int& pad = 1, const int& absent = - 1) {
+    this->p = p0 = p;
+    nxt = int(pow(T(this->pad = pad0 = pad), T(int(2)) / T(int(3))));
+    assert(0 < pad);
+    d = res = T(tt = t ^= t);
+    tt ++;
+    this->absent = absent < 0 ? pad : absent;
   }
   inline ~Ppad() { ; }
-  inline T next(const T& in) {
-    const auto& ff(f.next(in));
-    if(! f.full) return T(int(0));
-    auto fin(ff[0]);
-    for(int i = 1; i < ff.size(); i ++) fin += ff[i];
-    b[t] = p[t].next(fin);
-    if(p.size() <= (++ t)) t ^= t;
-    auto res(b[0]);
-    for(int i = 1; i < b.size(); i ++) res += b[i];
-    return res;
+  inline const T& next(const T& in) {
+    d += in;
+    if(t ++ < nxt) return res;
+    const auto nxt2(pow(T(pad += pad0), T(int(2)) / T(int(3))));
+    if(nxt2 < T(nxt + 1) + T(int(1)) / T(int(4))) {
+      nxt = pow(T(pad = pad0), T(int(2)) / T(int(3)));
+      p   = p0;
+      return res = d = T(tt = t ^= t);
+    }
+    nxt = nxt2;
+    res = p.next(d);
+    return tt ++ < absent ? res = T(int(0)) : res;
   }
   int t;
+  int tt;
+  int absent;
+  int pad0;
+  int pad;
+  int nxt;
+  P p0;
+  P p;
+  T d;
+  T res;
+};
+
+template <typename T, typename P> class Ppretry {
+public:
+  inline Ppretry() { ; }
+  inline Ppretry(P&& p) { p0 = p; flag = true; }
+  inline ~Ppretry() { ; }
+  inline T next(const T& in) {
+    if(flag) {
+      if(! p.size() || p[0].tt)
+        p.emplace_back(p0);
+      else if(p.size()) flag = ! flag;
+    }
+    T res(int(0));
+    for(int i = 0; i < p.size(); i ++)
+      res += p[i].next(in);
+    return res;
+  }
+  P p0;
   vector<P> p;
-  vector<T> b;
-  idFeeder<T> f;
+  bool flag;
 };
 
 template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > predv(const vector<SimpleVector<T> >& in) {
