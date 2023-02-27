@@ -38,68 +38,82 @@ using std::move;
 using std::cerr;
 using std::endl;
 
-// N.B. prediction on some range do persistent.
-template <typename T> class P {
+// N.B. [- 1, 1] prediction with certain range.
+template <typename T> class Prange {
 public:
-  inline P() { ; }
-  inline P(const int& status) {
+  inline Prange() { ; }
+  inline Prange(const int& status) {
     assert(0 < status);
+    const int var0(max(T(int(1)), T(int(exp(sqrt(log(T(status)))))) ) );
     const int var1(max(T(int(2)), pow(T(status), T(int(1)) / T(int(3)))));
     const int var2(max(T(int(2)), pow(T(status), T(int(1)) / T(int(4)))));
-    M.resize(7, Mx0 = MM = T(int(0)));;
-    Mx.resize(M.size(), MM);
-    p0 = P0maxRank<T>(status);
-    p1 = shrinkMatrix<T, P1I<T, idFeeder<T> > >(P1I<T, idFeeder<T> >(status, var1, var1), var1);
-    p2 = shrinkMatrix<T, P012L<T, idFeeder<T> > >(P012L<T, idFeeder<T> >(status, var2, var2), var2);
-    q  = idFeeder<T>(status);
-    q0 = SimpleVector<T>(status + 1).O();
-    f  = idFeeder<T>(status);
+    p0 = P0maxRank<T>(status - var0 - 3);
+    p1 = shrinkMatrix<T, P1I<T, idFeeder<T> > >(P1I<T, idFeeder<T> >(status - var1 * 2, var1, var1), var1);
+    p2 = shrinkMatrix<T, P012L<T, idFeeder<T> > >(P012L<T, idFeeder<T> >(status - var2 * 2, var2, var2), var2);
+    const int qstatus(sqrt(T(status)));
+    q  = idFeeder<T>(qstatus);
+    q0 = SimpleVector<T>(qstatus + 1).O();
   }
-  inline ~P() { ; }
-  inline const T& next(T d) {
-    Mx0   = max(Mx0, abs(d));
-    if(Mx0 == T(int(0)) || (d /= Mx0) == T(int(0)) || ! isfinite(d))
-      return MM;
-    M[1]  = p0.next(d);
-    M[2]  = p1.next(d);
-    M[3]  = p2.next(d);
-    if((Mx[1] = max(Mx[1], abs(M[1]))) != T(int(0))) M[1] /= Mx[1];
-    if((Mx[2] = max(Mx[2], abs(M[2]))) != T(int(0))) M[2] /= Mx[2];
-    if((Mx[3] = max(Mx[3], abs(M[3]))) != T(int(0))) M[3] /= Mx[3];
+  inline ~Prange() { ; }
+  inline T next(T d) {
+    static const T one(int(1));
+    auto M(max(- one, min(one, p0.next(d))) );
+    M += max(- one, min(one, p1.next(d)));
+    M += max(- one, min(one, p2.next(d)));
     {
       auto qm(makeProgramInvariant<T>(q.next(d)));
-      q0 += move(qm.first) * pow(qm.second, ceil(- log(SimpleMatrix<T>().epsilon())));
+      q0 += qm.first * pow(qm.second, ceil(- log(SimpleMatrix<T>().epsilon())));
       auto qq(q);
       auto qqm(makeProgramInvariant<T>(qq.next(d)));
-      M[4] = revertProgramInvariant<T>(make_pair(
+      M += max(- one, min(one, revertProgramInvariant<T>(make_pair(
         - (q0.dot(qqm.first) - q0[q0.size() - 2] *
              qqm.first[qqm.first.size() - 2]) / q0[q0.size() - 2] /
-           T(int(q0.size())), qqm.second));
+           T(int(q0.size())), qqm.second)) ));
     }
-    M[4] /= (Mx[4] = max(Mx[4], abs(M[4])));
-    {
-      const auto& ff(f.next(d));
-      Mx[6] = max(abs(d), Mx[6]);
-      if(f.full) {
-        M[6] = ff[0];
-        for(int i = 1; i < ff.size(); i ++) M[6] += ff[i];
-        M[6] = (- M[6]) / (Mx[6] = max(Mx[6], abs(M[6])));
-      }
-    }
-    MM = T(int(0));
-    for(int i = 0; i < M.size(); i ++) if(isfinite(M[i])) MM += M[i];
-    return MM *= Mx0 / T(int(M.size() - 2));
+    return max(- T(int(1)), min(T(int(1)), (M += d) *= T(int(2)) / T(int(5)) ));
   }
   P0maxRank<T> p0;
   shrinkMatrix<T, P1I<T, idFeeder<T> > > p1;
   shrinkMatrix<T, P012L<T, idFeeder<T> > > p2;
   idFeeder<T> q;
   SimpleVector<T> q0;
+};
+
+// N.B. prediction on some range do persistent.
+template <typename T> class P {
+public:
+  inline P() { ; }
+  inline P(const int& status) {
+    assert(0 < status);
+    p = Prange<T>(status);
+    f = idFeeder<T>(status);
+    Mx0 = MxM = Mx = MM = Md = M6 = T(int(0));
+  }
+  inline ~P() { ; }
+  inline const T& next(T d) {
+    Mx0 = max(abs(d), Mx0);
+    MxM = max(abs(Mx += d), MxM);
+    if(Mx0 == T(int(0)) || (d /= Mx0) == T(int(0)) || ! isfinite(d))
+      return MM;
+    const auto& ff(f.next(d));
+    M6 = max(Md = max(abs(d), Md), M6);
+    MM = T(int(0));
+    if(f.full) {
+      MM = ff[0];
+      for(int i = 1; i < ff.size(); i ++) MM += ff[i];
+      MM = (- MM) / (M6 = max(abs(MM), M6));
+    }
+    MM += p.next(d) * T(int(5)) + Mx / MxM;
+    return MM *= Mx0 / T(int(7));
+  }
+  Prange<T> p;
   idFeeder<T> f;
+  T M6;
+  T Md;
   T MM;
+  T Mx;
+  T MxM;
   T Mx0;
-  vector<T> M;
-  vector<T> Mx;
 };
 
 // N.B. subtract minimum square.
@@ -145,47 +159,6 @@ public:
   T S;
   P p;
   P q;
-};
-
-// N.B. [- 1, 1] prediction with certain range.
-template <typename T> class Prange {
-public:
-  inline Prange() { ; }
-  inline Prange(const int& status) {
-    assert(0 < status);
-    const int var0(max(T(int(1)), T(int(exp(sqrt(log(T(status)))))) ) );
-    const int var1(max(T(int(2)), pow(T(status), T(int(1)) / T(int(3)))));
-    const int var2(max(T(int(2)), pow(T(status), T(int(1)) / T(int(4)))));
-    p0 = P0maxRank<T>(status - var0 - 3);
-    p1 = shrinkMatrix<T, P1I<T, idFeeder<T> > >(P1I<T, idFeeder<T> >(status - var1 * 2, var1, var1), var1);
-    p2 = shrinkMatrix<T, P012L<T, idFeeder<T> > >(P012L<T, idFeeder<T> >(status - var2 * 2, var2, var2), var2);
-    const int qstatus(sqrt(T(status)));
-    q  = idFeeder<T>(qstatus);
-    q0 = SimpleVector<T>(qstatus + 1).O();
-  }
-  inline ~Prange() { ; }
-  inline T next(T d) {
-    static const T one(int(1));
-    auto M(max(- one, min(one, p0.next(d))) );
-    M += max(- one, min(one, p1.next(d)));
-    M += max(- one, min(one, p2.next(d)));
-    {
-      auto qm(makeProgramInvariant<T>(q.next(d)));
-      q0 += qm.first * pow(qm.second, ceil(- log(SimpleMatrix<T>().epsilon())));
-      auto qq(q);
-      auto qqm(makeProgramInvariant<T>(qq.next(d)));
-      M += max(- one, min(one, revertProgramInvariant<T>(make_pair(
-        - (q0.dot(qqm.first) - q0[q0.size() - 2] *
-             qqm.first[qqm.first.size() - 2]) / q0[q0.size() - 2] /
-           T(int(q0.size())), qqm.second)) ));
-    }
-    return max(- T(int(1)), min(T(int(1)), (M += d) *= T(int(2)) / T(int(5)) ));
-  }
-  P0maxRank<T> p0;
-  shrinkMatrix<T, P1I<T, idFeeder<T> > > p1;
-  shrinkMatrix<T, P012L<T, idFeeder<T> > > p2;
-  idFeeder<T> q;
-  SimpleVector<T> q0;
 };
 
 // N.B. x -> x^(2/3) replacement. This causes (cbrt(x))^2 series or rich of
