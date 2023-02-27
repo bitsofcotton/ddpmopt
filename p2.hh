@@ -102,6 +102,7 @@ public:
   vector<T> Mx;
 };
 
+// N.B. subtract minimum square.
 template <typename T, typename P> class Pmss {
 public:
   inline Pmss() { ; }
@@ -216,6 +217,8 @@ public:
   SimpleVector<T> q0;
 };
 
+// N.B. x -> x^(2/3) replacement. This causes (cbrt(x))^2 series or rich of
+//                   information on sparse input matrix.
 template <typename T, typename P> class Ppad {
 public:
   inline Ppad() { ; }
@@ -239,6 +242,7 @@ public:
     }
     nxt = int(nxt2);
     res = p.next(d);
+    d   = T(int(0));
     return tt ++ < absent ? res = T(int(0)) : res;
   }
   int t;
@@ -253,6 +257,7 @@ public:
   T res;
 };
 
+// N.B. auto retry Ppad, we need this because x -> large, delta x^(2/3) -> 0.
 template <typename T, typename P> class Ppretry {
 public:
   inline Ppretry() { ; }
