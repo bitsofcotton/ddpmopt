@@ -147,35 +147,6 @@ public:
   P q;
 };
 
-// Blur prediction by status length, this causes a little improve.
-template <typename T> class PBlur {
-public:
-  inline PBlur() { ; }
-  inline PBlur(const int& status) {
-    assert(5 < status);
-    p.reserve(status - 5);
-    for(int i = 5; i <= status; i ++)
-      p.emplace_back(PWalkBoth<T, Pmss<T, P<T> > >(Pmss<T, P<T> >(P<T>(i), i)));
-    S = M0 = M1 = res = T(int(0));
-  }
-  inline ~PBlur() { ; }
-  inline const T& next(const T& d) {
-    if(d == T(int(0))) return res;
-    M0   = max(M0, abs(d));
-    M1   = max(M0, abs(S += d));
-    res  = p[0].next(d);
-    for(int i = 1; i < p.size(); i ++) res += p[i].next(d);
-    res -= d;
-    if(M1 != T(int(0))) res += S / M1 * M0;
-    return res /= T(p.size() + 2);
-  }
-  vector<PWalkBoth<T, Pmss<T, P<T> > > > p;
-  T S;
-  T M0;
-  T M1;
-  T res;
-};
-
 // N.B. [- 1, 1] prediction with certain range.
 template <typename T> class Prange {
 public:
