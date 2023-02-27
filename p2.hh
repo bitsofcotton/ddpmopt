@@ -103,7 +103,7 @@ public:
       for(int i = 1; i < ff.size(); i ++) MM += ff[i];
       MM = (- MM) / (M6 = max(abs(MM), M6));
     }
-    MM += p.next(d) * T(int(5)) + Mx / MxM;
+    MM += p.next(d) * T(int(5)) - Mx / MxM;
     return MM *= Mx0 / T(int(7));
   }
   Prange<T> p;
