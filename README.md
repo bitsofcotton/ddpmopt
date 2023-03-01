@@ -34,9 +34,14 @@ However, we recommend you and us to use denlarge sharpen chain on goki_check_cc 
 
 # Usage:
     ./ddpmopt 0  <in0.ppm> ... > cache.txt
+    ./ddpmopt 00 <in0.ppm> ... > cache.txt
     ./ddpmopt +  <in0.ppm> ... > cache.txt
     ./ddpmopt ++ <in0.ppm> ... > cache.txt
     ./ddpmopt -  <inout0.ppm> ... < cache.txt
+    ./ddpmopt -0 <inout0.ppm> ... < cache.txt
     ./predg <in0.ppm> ...
     ./qredg <inout0.ppm> ...
+
+# Real close
+2023/03/01
 

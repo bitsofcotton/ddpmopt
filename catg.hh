@@ -326,9 +326,10 @@ template <typename T, typename feeder> inline T P012L<T,feeder>::next(const T& i
     avg /= T(int(pw.rows()));
     const auto q(pw.rows() <= pw.cols() || ! pw.rows() ? Vec() : linearInvariant<T>(pw));
     work[work.size() - 1] = (q.size() ?
-      revertProgramInvariant<T>(make_pair(
+      (q[varlen - 1] == zero ? zero :
+       revertProgramInvariant<T>(make_pair(
         - (q.dot(vdp.first) - q[varlen - 1] * vdp.first[varlen - 1])
-        / q[varlen - 1] / T(int(q.size())), vdp.second) ) :
+        / q[varlen - 1] / T(int(q.size())), vdp.second) ) ) :
       revertProgramInvariant<T>(make_pair(avg[varlen - 1] /=
         pow(vdp.second, ceil(- log(pw.epsilon() ))) * T(int(avg.size())),
         vdp.second)) );
@@ -338,7 +339,7 @@ template <typename T, typename feeder> inline T P012L<T,feeder>::next(const T& i
     res += q.size() ? abs(score) * work[work.size() - 1] : score * work[work.size() - 1];
     sscore += abs(score);
   }
-  return res * M / sscore;
+  return sscore == zero ? sscore : res * M / sscore;
 }
 
 #define _CATG_
