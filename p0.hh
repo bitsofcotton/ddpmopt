@@ -285,7 +285,7 @@ template <typename T> class P0maxRank {
 public:
   inline P0maxRank() { ; }
   inline P0maxRank(const int& status, int var = - 1) {
-    if(var < 0) var = max(int(1), int(exp(sqrt(log(T(status))))));
+    if(var < 0) var = max(int(1), min(status / 3, int(exp(sqrt(log(T(status)))))));
     p = p0_t(p0_5t(p0_4t(p0_3t(p0_2t(p0_1t(p0_0t(status, var) )) )) ));
     buf = idFeeder<T>(status + 1 + var);
   }

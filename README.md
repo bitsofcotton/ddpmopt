@@ -44,4 +44,5 @@ However, we recommend you and us to use denlarge sharpen chain on goki_check_cc 
 
 # Real close
 2023/03/01
+2023/03/09 bug fix after close #1.
 

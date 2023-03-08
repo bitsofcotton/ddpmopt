@@ -44,10 +44,10 @@ public:
   inline Prange() { ; }
   inline Prange(const int& status) {
     assert(0 < status);
-    const int var0(max(T(int(1)), T(int(exp(sqrt(log(T(status)))))) ) );
+    const int var0(max(T(int(1)), T(min(status / 3, int(exp(sqrt(log(T(status))))))) ) );
     const int var1(max(T(int(2)), pow(T(status), T(int(1)) / T(int(3)))));
     const int var2(max(T(int(2)), pow(T(status), T(int(1)) / T(int(4)))));
-    p0 = P0maxRank<T>(status - var0 - 3);
+    p0 = P0maxRank<T>(status - var0);
     p1 = shrinkMatrix<T, P1I<T, idFeeder<T> > >(P1I<T, idFeeder<T> >(status - var1 * 2, var1, var1), var1);
     p2 = shrinkMatrix<T, P012L<T, idFeeder<T> > >(P012L<T, idFeeder<T> >(status - var2 * 2, var2, var2), var2);
     const int qstatus(sqrt(T(status)));
@@ -70,7 +70,7 @@ public:
              qqm.first[qqm.first.size() - 2]) / q0[q0.size() - 2] /
            T(int(q0.size())), qqm.second)) ));
     }
-    return max(- T(int(1)), min(T(int(1)), (M += d) *= T(int(2)) / T(int(5)) ));
+    return max(- T(int(1)), min(T(int(1)), M /= T(int(2)) ));
   }
   P0maxRank<T> p0;
   shrinkMatrix<T, P1I<T, idFeeder<T> > > p1;
@@ -103,7 +103,7 @@ public:
       for(int i = 1; i < ff.size(); i ++) MM += ff[i];
       MM = (- MM) / (M6 = max(abs(MM), M6));
     }
-    MM += p.next(d) * T(int(5)) - Mx / MxM;
+    MM += p.next(d) * T(int(4)) + d - Mx / MxM;
     return MM *= Mx0 / T(int(7));
   }
   Prange<T> p;
@@ -227,8 +227,8 @@ template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > 
   vector<Prange<T> > p0;
   for(int ext = 0; ext < in.size() / 2; ext ++) {
     const int status(in.size() / (ext + 1) - 2);
-    const int var0(max(T(int(1)), T(int(exp(sqrt(log(T(status)))))) ) );
-    if(status < var0 + 3 * 2) break;
+    const int var0(max(T(int(1)), T(min(status / 3, int(exp(sqrt(log(T(status))))))) ) );
+    if(status < 8) break;
     p0.emplace_back(Prange<T>(status));
     auto pp(p0[ext]);
     for(int i = 0; i < status * 2 + 4; i ++)
