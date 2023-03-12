@@ -47,7 +47,7 @@ public:
     const int var0(max(T(int(1)), T(min(status / 3, int(exp(sqrt(log(T(status))))))) ) );
     const int var1(max(T(int(2)), pow(T(status), T(int(1)) / T(int(3)))));
     const int var2(max(T(int(2)), pow(T(status), T(int(1)) / T(int(4)))));
-    p0 = P0maxRank<T>(status - var0);
+    p0 = P0maxRank<T>(status - var0 - 1);
     p1 = shrinkMatrix<T, P1I<T, idFeeder<T> > >(P1I<T, idFeeder<T> >(status - var1 * 2, var1, var1), var1);
     p2 = shrinkMatrix<T, P012L<T, idFeeder<T> > >(P012L<T, idFeeder<T> >(status - var2 * 2, var2, var2), var2);
     M  = T(int(1));
@@ -66,27 +66,6 @@ public:
   T M;
 };
 
-// N.B. subtract minimum square.
-template <typename T, typename P> class Pmss {
-public:
-  inline Pmss() { ; }
-  inline Pmss(P&& p, const int& len = 2) {
-    this->p = p;
-    r = q = idFeeder<T>(len);
-  }
-  inline ~Pmss() { ; }
-  inline T next(const T& d) {
-    const auto& msv(q.next(d));
-    const auto  ms(msv.dot(mscache<T>(msv.size())));
-    if(! q.full) return T(int(0));
-    const auto& mssv(r.next(ms));
-    return r.full ? p.next(d - ms) + pnextcacher<T>(mssv.size(), 1, 2).dot(mssv) / T(int(2)) : T(int(0));
-  }
-  P p;
-  idFeeder<T> q;
-  idFeeder<T> r;
-};
-
 // In laurent series, we treat a_-1 as both side a_1 and a_-1 arithmetric avg.
 template <typename T, typename P> class PWalkBoth {
 public:
@@ -100,9 +79,10 @@ public:
     const auto bS(S);
     if((S += d) != zero && bS != zero) {
       const auto dd(one / S - one / bS);
+      const auto pd(p.next(d));
             auto qd(q.next(dd));
-      qd = qd == zero ? qd : one / (one / S + one / qd) - S;
-      return (p.next(d) + (isfinite(qd) ? qd : zero)) / two;
+      qd = qd == zero ? pd : one / (one / S + one / qd) - S;
+      return (pd + (isfinite(qd) ? qd : pd)) / two;
     }
     return p.next(d);
   }
@@ -174,12 +154,12 @@ public:
 };
 
 template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > predv(const vector<SimpleVector<T> >& in) {
-  vector<Prange<T> > p0;
+  vector<PWalkBoth<T, Prange<T> > > p0;
   for(int ext = 0; ext < in.size() / 2; ext ++) {
     const int status(in.size() / (ext + 1) - 2);
-    const int var0(max(T(int(1)), T(min(status / 3, int(exp(sqrt(log(T(status))))))) ) );
+    const int var0(max(T(int(1)), T(min(status / 3, int(exp(sqrt(log(T(status)))))) - 2) ) );
     if(status < 8) break;
-    p0.emplace_back(Prange<T>(status));
+    p0.emplace_back(PWalkBoth<T, Prange<T> >(status));
     auto pp(p0[ext]);
     for(int i = 0; i < status * 2 + 4; i ++)
       pp.next(T(i + 1) / T(status * 2 + 5) - T(int(1)) / T(int(2)));
