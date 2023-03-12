@@ -50,70 +50,20 @@ public:
     p0 = P0maxRank<T>(status - var0);
     p1 = shrinkMatrix<T, P1I<T, idFeeder<T> > >(P1I<T, idFeeder<T> >(status - var1 * 2, var1, var1), var1);
     p2 = shrinkMatrix<T, P012L<T, idFeeder<T> > >(P012L<T, idFeeder<T> >(status - var2 * 2, var2, var2), var2);
-    const int qstatus(sqrt(T(status)));
-    q  = idFeeder<T>(qstatus);
-    q0 = SimpleVector<T>(qstatus + 1).O();
+    M  = T(int(1));
   }
   inline ~Prange() { ; }
   inline T next(T d) {
-    static const T one(int(1));
-    auto M(max(- one, min(one, p0.next(d))) );
-    M += max(- one, min(one, p1.next(d)));
-    M += max(- one, min(one, p2.next(d)));
-    {
-      auto qm(makeProgramInvariant<T>(q.next(d)));
-      q0 += qm.first * pow(qm.second, ceil(- log(SimpleMatrix<T>().epsilon())));
-      auto qq(q);
-      auto qqm(makeProgramInvariant<T>(qq.next(d)));
-      M += max(- one, min(one, revertProgramInvariant<T>(make_pair(
-        - (q0.dot(qqm.first) - q0[q0.size() - 2] *
-             qqm.first[qqm.first.size() - 2]) / q0[q0.size() - 2] /
-           T(int(q0.size())), qqm.second)) ));
-    }
-    return max(- T(int(1)), min(T(int(1)), M /= T(int(2)) ));
+    M = max(abs(d), M);
+    return max(- M, min(M, (
+      max(- M, min(M, p0.next(d))) +
+      max(- M, min(M, p1.next(d))) +
+      max(- M, min(M, p2.next(d))) ) / T(int(3)) * T(int(2)) ));
   }
   P0maxRank<T> p0;
   shrinkMatrix<T, P1I<T, idFeeder<T> > > p1;
   shrinkMatrix<T, P012L<T, idFeeder<T> > > p2;
-  idFeeder<T> q;
-  SimpleVector<T> q0;
-};
-
-// N.B. prediction on some range do persistent.
-template <typename T> class P {
-public:
-  inline P() { ; }
-  inline P(const int& status) {
-    assert(0 < status);
-    p = Prange<T>(status);
-    f = idFeeder<T>(status);
-    Mx0 = MxM = Mx = MM = Md = M6 = T(int(0));
-  }
-  inline ~P() { ; }
-  inline const T& next(T d) {
-    Mx0 = max(abs(d), Mx0);
-    MxM = max(abs(Mx += d), MxM);
-    if(Mx0 == T(int(0)) || (d /= Mx0) == T(int(0)) || ! isfinite(d))
-      return MM;
-    const auto& ff(f.next(d));
-    M6 = max(Md = max(abs(d), Md), M6);
-    MM = T(int(0));
-    if(f.full) {
-      MM = ff[0];
-      for(int i = 1; i < ff.size(); i ++) MM += ff[i];
-      MM = (- MM) / (M6 = max(abs(MM), M6));
-    }
-    MM += p.next(d) * T(int(4)) + d - Mx / MxM;
-    return MM *= Mx0 / T(int(7));
-  }
-  Prange<T> p;
-  idFeeder<T> f;
-  T M6;
-  T Md;
-  T MM;
-  T Mx;
-  T MxM;
-  T Mx0;
+  T M;
 };
 
 // N.B. subtract minimum square.
@@ -209,7 +159,7 @@ public:
   inline ~Ppretry() { ; }
   inline T next(const T& in) {
     if(flag) {
-      if(! p.size() || p[0].tt)
+      if(! p.size() || p[0].p.tt)
         p.emplace_back(p0);
       else if(p.size()) flag = ! flag;
     }
