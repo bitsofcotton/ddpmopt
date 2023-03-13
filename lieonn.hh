@@ -2818,6 +2818,31 @@ private:
   feeder f;
 };
 
+template <typename T, typename feeder> class cbrtFeeder {
+public:
+  inline cbrtFeeder() { full = false; }
+  inline cbrtFeeder(const int& size) {
+    res.resize(size);
+    for(int i = 0; i < res.size(); i ++)
+      res[i] = T(int(0));
+    f = feeder(1 + int(T(size - 1) * ceil(T(int(1)) / (pow(T(size), T(int(2)) / T(int(3)) ) - pow(T(size - 1), T(int(2)) / T(int(3)) ) )) ) );
+    full = false;
+  }
+  inline ~cbrtFeeder() { ; }
+  inline const SimpleVector<T>& next(const T& in) {
+    const auto& g(f.next(in));
+    if(! (full = f.full) ) return res;
+    for(int i = 0; i < res.size(); i ++)
+      res[i] = g[int(T(i) * ceil(T(int(1)) / (pow(T(res.size()), T(int(2)) / T(int(3)) ) - pow(T(res.size() - 1), T(int(2)) / T(int(3)) ) )) )];
+    full = false;
+    return res;
+  }
+  SimpleVector<T> res;
+  bool full;
+private:
+  feeder f;
+};
+
 template <typename T, typename feeder> class invFeeder {
 public:
   inline invFeeder() { full = false; }
