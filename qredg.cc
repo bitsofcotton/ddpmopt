@@ -11,19 +11,10 @@
 #include <random>
 #include <assert.h>
 
-#if defined(_OPENMP)
-#include <omp.h>
-#endif
-
 //#define int int64_t
 #define int int32_t
 #include "lieonn.hh"
 typedef myfloat num_t;
-#include "util.hh"
-#include "p0.hh"
-#include "p1.hh"
-#include "catg.hh"
-#include "p2.hh"
 
 using std::cout;
 using std::cerr;
