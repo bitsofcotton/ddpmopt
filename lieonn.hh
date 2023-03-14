@@ -2825,7 +2825,7 @@ public:
     res.resize(size);
     for(int i = 0; i < res.size(); i ++)
       res[i] = T(int(0));
-    f = feeder(1 + int(T(size - 1) * ceil(T(int(1)) / (pow(T(size), T(int(2)) / T(int(3)) ) - pow(T(size - 1), T(int(2)) / T(int(3)) ) )) ) );
+    f = feeder(1 + int(ceil(T(size - 1) / (pow(T(size + 1), T(int(2)) / T(int(3)) ) - pow(T(size), T(int(2)) / T(int(3)) ) )) ) );
     full = false;
   }
   inline ~cbrtFeeder() { ; }
@@ -2833,7 +2833,7 @@ public:
     const auto& g(f.next(in));
     if(! (full = f.full) ) return res;
     for(int i = 0; i < res.size(); i ++)
-      res[i] = g[int(T(i) * ceil(T(int(1)) / (pow(T(res.size()), T(int(2)) / T(int(3)) ) - pow(T(res.size() - 1), T(int(2)) / T(int(3)) ) )) )];
+      res[i] = g[int(ceil(T(i) / (pow(T(res.size() + 1), T(int(2)) / T(int(3)) ) - pow(T(res.size()), T(int(2)) / T(int(3)) ) )) )];
     full = false;
     return res;
   }
@@ -3657,26 +3657,31 @@ public:
     this->p = p;
     f0 = feed0(status);
     f1 = feed1(status);
+    M  = T(int(1));
   }
   inline ~PBond() { ; }
   inline T next(const T& in) {
+    M = max(M, abs(in));
     const auto& g0(f0.next(in));
     const auto& g1(f1.next(in));
-    return f0.full && f1.full ?
-      (p.next(g0) + p.next(g1)) / T(int(2)) : T(int(0));
+    if(! (f0.full && f1.full)) return T(int(0));
+    const auto  pg0(p.next(g0));
+          auto  pg1(p.next(g1));
+    pg1 = pg1 == g1[g1.size() - 1] ? pg0 : T(int(1)) / (pg1 + g1[g1.size() - 1]) - g0[g0.size() - 1];
+    return (max(- M, min(M, pg0)) + max(- M, min(M, (isfinite(pg1) ? pg1 : pg0)) )) / T(int(2));
   }
   feed0 f0;
   feed1 f1;
   P p;
+  T M;
 };
 
 template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > predv(const vector<SimpleVector<T> >& in) {
-  vector<PBond<T, Prange<T, idFeeder<T>, idFeeder<T> >, idFeeder<T>, deltaFeeder<T, invFeeder<T, sumFeeder<T, idFeeder<T> > > > > > p0;
+  vector<PBond<T, Prange<T, deltaFeeder<T, idFeeder<T> >, deltaFeeder<T, idFeeder<T> > >, sumFeeder<T, idFeeder<T> >, invFeeder<T, sumFeeder<T, idFeeder<T> > > > > p0;
   for(int ext = 0; ext < in.size() / 2; ext ++) {
-    const int status(in.size() / (ext + 1) - 2);
-    const int var0(max(T(int(1)), T(min(status / 3, int(exp(sqrt(log(T(status)))))) - 2) ) );
-    if(status < 8) break;
-    p0.emplace_back(PBond<T, Prange<T, idFeeder<T>, idFeeder<T> >, idFeeder<T>, deltaFeeder<T, invFeeder<T, sumFeeder<T, idFeeder<T> > > > >(Prange<T, idFeeder<T>, idFeeder<T> >(status), status));
+    const int status(in.size() / (ext + 1) - 1);
+    if(status < 5) break;
+    p0.emplace_back(PBond<T, Prange<T, deltaFeeder<T, idFeeder<T> >, deltaFeeder<T, idFeeder<T> > >, sumFeeder<T, idFeeder<T> >, invFeeder<T, sumFeeder<T, idFeeder<T> > > >(Prange<T, deltaFeeder<T, idFeeder<T> >, deltaFeeder<T, idFeeder<T> > >(status), status));
     auto pp(p0[ext]);
     for(int i = 0; i < status * 2 + 4; i ++)
       pp.next(T(i + 1) / T(status * 2 + 5) - T(int(1)) / T(int(2)));
@@ -3708,45 +3713,20 @@ template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > 
     for(int j = 0; j < p[i].size(); j ++) {
       auto pf(p0[i]);
       auto pb(p0[i]);
-      T    qmax(int(0));
-      T    pmax(int(0));
-      for(int k = 0; k < invariant.size() / (i + 1); k ++)
-        qmax += invariant[(invariant.size() / (i + 1) - (k + 1)) * (i + 1)][j] *
-          invariant[(invariant.size() / (i + 1) - (k + 1)) * (i + 1)][j];
-      for(int k = 0; k < invariant.size() / (i + 1); k ++)
-        pmax += invariant[invariant.size() - 1 -
-            (invariant.size() / (i + 1) - (k + 1)) * (i + 1)][j] *
-                invariant[invariant.size() - 1 -
-            (invariant.size() / (i + 1) - (k + 1)) * (i + 1)][j];
-      qmax = sqrt(qmax * T(int(2)));
-      pmax = sqrt(pmax * T(int(2)));
       try {
-        for(int k = 0; k < invariant.size() / (i + 1); k ++) {
-          assert(0 <= (invariant.size() / (i + 1) - (k + 1)) * (i + 1));
-          assert((invariant.size() / (i + 1) - (k + 1)) * (i + 1) < invariant.size());
-          assert(- T(int(1)) <= invariant[(invariant.size() / (i + 1) - (k + 1)) * (i + 1)][j] / qmax);
-          assert(invariant[(invariant.size() / (i + 1) - (k + 1)) * (i + 1)][j] / qmax <= T(int(1)));
-          q[i][j] = pb.next(invariant[(invariant.size() / (i + 1) - (k + 1)) * (i + 1)][j] / qmax);
-        }
+        for(int k = 0; k < invariant.size() / (i + 1); k ++)
+          q[i][j] = pb.next(invariant[(invariant.size() / (i + 1) -
+            (k + 1)) * (i + 1)][j]);
       } catch(const char* e) {
         q[i][j] = T(int(0));
       }
       try {
-        for(int k = 0; k < invariant.size() / (i + 1); k ++) {
-          assert(0 <= (invariant.size() / (i + 1) - (k + 1)) * (i + 1));
-          assert((invariant.size() / (i + 1) - (k + 1)) * (i + 1) < invariant.size());
-          assert(- T(int(1)) <= invariant[invariant.size() - 1 -
-            (invariant.size() / (i + 1) - (k + 1)) * (i + 1)][j] / pmax);
-          assert(invariant[invariant.size() - 1 -
-            (invariant.size() / (i + 1) - (k + 1)) * (i + 1)][j] / pmax <= T(int(1)));
+        for(int k = 0; k < invariant.size() / (i + 1); k ++)
           p[i][j] = pf.next(invariant[invariant.size() - 1 -
-              (invariant.size() / (i + 1) - (k + 1)) * (i + 1)][j] / pmax);
-        }
+              (invariant.size() / (i + 1) - (k + 1)) * (i + 1)][j]);
       } catch(const char* e) {
         p[i][j] = T(int(0));
       }
-      q[i][j] *= qmax;
-      p[i][j] *= pmax;
     }
   }
   return make_pair(move(p), move(q));
