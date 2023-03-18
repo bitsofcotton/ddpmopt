@@ -3302,45 +3302,7 @@ template <typename T> inline T P012L<T>::next(const SimpleVector<T>& d) {
 
 
 template <typename T> SimpleVector<T> pnext(const int& size, const int& step = 1, const int& r = 1) {
-  SimpleVector<T> p;
-  if(size * r <= 1) {
-    p.resize(1);
-    p[0] = T(1);
-  } else if(size * r <= 2) {
-    p.resize(2);
-    p[0] = T(1) / T(2) + T(step * r < 0 ? 1 : 0);
-    p[1] = T(1) / T(2) + T(step * r < 0 ? 0 : 1);
-    p   /= T(2);
-  } else {
-    const auto file(std::string("./.cache/lieonn/next-") +
-      std::to_string(size) + std::string("-") + std::to_string(step) +
-      std::string("-") + std::to_string(r) +
-#if defined(_FLOAT_BITS_)
-      std::string("-") + std::to_string(_FLOAT_BITS_)
-#else
-      std::string("-ld")
-#endif
-    );
-    ifstream cache(file.c_str());
-    if(cache.is_open()) {
-      cache >> p;
-      cache.close();
-    } else {
-      p = taylor(size * r, T(step * r < 0 ? step * r : (size + step) * r - 1));
-      cerr << "." << flush;
-      if(abs(step) <= int(exp(sqrt(log(T(size * 2)))))) {
-        const auto pp(pnext<T>(size - 1, step, r));
-        for(int j = 0; j < pp.size(); j ++)
-          p[step < 0 ? j : j - pp.size() + p.size()] += pp[j] * T(size - 1);
-        p /= T(size);
-        ofstream ocache(file.c_str());
-        ocache << p << endl;
-        ocache.close();
-      }
-    }
-  }
-  assert(p.size() == size * r);
-  return p;
+  return taylor(size * r, T(step * r < 0 ? step * r : (size + step) * r - 1));
 }
 
 template <typename T> SimpleVector<T> minsq(const int& size) {
@@ -3528,7 +3490,7 @@ public:
   //      so we should use sectional measurement for them.
   // N.B. the sectional measurament is done by following Ppad class.
   //      So this is only the raw prediction.
-  typedef P0<T> p0_0t;
+  typedef sumChain<T, P0<T>, true> p0_0t;
   typedef P0inv<T, p0_0t> p0_i0t;
   p0_0t p;
   p0_i0t q;
