@@ -37,51 +37,30 @@ int main(int argc, const char* argv[]) {
     vector<SimpleMatrix<num_t> > work;
     if(! loadp2or3<num_t>(work, argv[i])) continue;
     vector<SimpleVector<num_t> > pwork;
-    vector<SimpleVector<num_t> > qwork;
     pwork.resize(work[0].rows(),
       SimpleVector<num_t>(work[0].cols() * work.size()).O());
-    qwork.resize(work[0].cols(),
-      SimpleVector<num_t>(work[0].rows() * work.size()).O());
     for(int k = 0; k < work[0].rows(); k ++)
       for(int j = 0; j < work.size(); j ++)
         pwork[k].setVector(j * work[j].cols(), work[j].row(k));
-    for(int k = 0; k < work[0].cols(); k ++)
-      for(int j = 0; j < work.size(); j ++)
-        qwork[k].setVector(j * work[j].rows(), work[j].col(k));
-    auto py(predv<num_t>(pwork));
-    auto px(predv<num_t>(qwork));
+    auto p(predv<num_t>(pwork));
     vector<SimpleMatrix<num_t> > swork(work.size(),
-      SimpleMatrix<num_t>(work[0].rows() + py.first.size() * 2,
-                          work[0].cols() + px.first.size() * 2).O());
+      SimpleMatrix<num_t>(work[0].rows() + p.first.size() * 2,
+        work[0].cols()).O());
     for(int j = 0; j < work.size(); j ++)
-      swork[j].setMatrix(py.first.size(), px.first.size(), work[j] / num_t(int(2)));
-    for(int k = 0; k < py.first.size(); k ++)
-      for(int kk = 0; kk < py.first[k].size() / work.size(); kk ++)
+      swork[j].setMatrix(p.first.size(), 0, work[j] / num_t(int(2)));
+    for(int k = 0; k < p.first.size(); k ++)
+      for(int kk = 0; kk < p.first[k].size() / work.size(); kk ++)
         for(int j = 0; j < work.size(); j ++) {
-          swork[j](py.first.size() - k - 1, px.first.size() + kk) =
+          swork[j](p.first.size() - k - 1, kk) =
             revertProgramInvariant<num_t>(make_pair(
-              py.first[k][j * py.first[k].size() / work.size() + kk] /
-                py.first[k][py.first[k].size() - 1],
+              p.first[k][j * p.first[k].size() / work.size() + kk] /
+                p.first[k][p.first[k].size() - 1],
             num_t(int(1)) ));
-          swork[j](py.first.size() + work[j].rows() + k, px.first.size() + kk) =
+          swork[j](p.first.size() + work[j].rows() + k, kk) =
             revertProgramInvariant<num_t>(make_pair(
-              py.second[k][j * py.first[k].size() / work.size() + kk] /
-                py.second[k][py.second[k].size() - 1],
+              p.second[k][j * p.first[k].size() / work.size() + kk] /
+                p.second[k][p.second[k].size() - 1],
             num_t(int(1)) ));
-        }
-    for(int k = 0; k < px.first.size(); k ++)
-      for(int kk = 0; kk < px.first[k].size() / work.size(); kk ++)
-        for(int j = 0; j < work.size(); j ++) {
-          swork[j](py.first.size() + kk, px.first.size() - k - 1) =
-            revertProgramInvariant<num_t>(make_pair(
-              px.first[k][j * px.first[k].size() / work.size() + kk] /
-                px.first[k][px.first[k].size() - 1],
-              num_t(int(1)) ));
-          swork[j](py.first.size() + kk, px.first.size() + work[j].cols() + k) =
-            revertProgramInvariant<num_t>(make_pair(
-              px.second[k][j * px.first[k].size() / work.size() + kk] /
-                px.second[k][px.second[k].size() - 1],
-              num_t(int(1)) ));
         }
     if(! savep2or3<num_t>(argv[i], normalize<num_t>(swork)) )
       cerr << "failed to save." << endl;

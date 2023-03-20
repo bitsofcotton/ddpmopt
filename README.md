@@ -48,3 +48,5 @@ However, we recommend you and us to use denlarge sharpen chain on goki_check_cc 
 2023/03/13 bug fix after close #2.
 2023/03/13 integrate all files into lieonn.hh after close #3.
 2023/03/18 merge latest p0, after close #4.
+2023/03/20 qred makes only row-direction prediction.
+
