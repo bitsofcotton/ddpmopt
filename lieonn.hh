@@ -3302,7 +3302,7 @@ template <typename T> inline T P012L<T>::next(const SimpleVector<T>& d) {
 
 
 template <typename T> SimpleVector<T> pnext(const int& size, const int& step = 1, const int& r = 1) {
-  return taylor(size * r, T(step * r < 0 ? step * r : (size + step) * r - 1));
+  return (dft<T>(- size * r).subMatrix(0, 0, size * r, size) * dft<T>(size)).template real<T>().transpose() * taylor(size * r, T(step * r < 0 ? step * r : (size + step) * r - 1)) * T(r);
 }
 
 template <typename T> SimpleVector<T> minsq(const int& size) {
@@ -3326,7 +3326,7 @@ template <typename T> const SimpleVector<T>& pnextcacher(const int& size, const 
   if(cp[size][step].size() <= r)
     cp[size][step].resize(r + 1, SimpleVector<T>());
   if(cp[size][step][r].size()) return cp[size][step][r];
-  return cp[size][step][r] = (dft<T>(- size * r).subMatrix(0, 0, size * r, size) * dft<T>(size)).template real<T>().transpose() * pnext<T>(size, step, r);
+  return cp[size][step][r] = pnext<T>(size, step, r);
 }
 
 template <typename T> const SimpleVector<T>& mscache(const int& size) {
@@ -3351,7 +3351,7 @@ template <typename T> const SimpleMatrix<complex<T> >& dftcache(const int& size)
   return cidft[abs(size)] = dft<T>(size);
 }
 
-template <typename T, int r = 2> class P0 {
+template <typename T, int r = 4> class P0 {
 public:
   inline P0(const int& step = 1) {
     this->step = step;
@@ -3601,7 +3601,7 @@ public:
     return max(- M, min(M, (
       max(- M, min(M, p0.next(f1.res))) +
       max(- M, min(M, p1.next(f1.res))) +
-      max(- M, min(M, p2.next(f1.res))) ) / T(int(3)) * T(int(2)) ));
+      max(- M, min(M, p2.next(f1.res))) ) / T(int(3)) ));
   }
   P0maxRank<T> p0;
   P1I<T> p1;

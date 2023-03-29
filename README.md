@@ -50,4 +50,5 @@ However, we recommend you and us to use denlarge sharpen chain on goki_check_cc 
 2023/03/18 merge latest p0, after close #4.
 2023/03/20 qred makes only row-direction prediction, after close #5.
 2023/03/24 ddpmopt.cc +0 00 -0 command fix, code clean, after close #6.
+2023/03/29 merge p0 pnext, after close #7.
 
