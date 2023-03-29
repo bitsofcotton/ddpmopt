@@ -3302,7 +3302,10 @@ template <typename T> inline T P012L<T>::next(const SimpleVector<T>& d) {
 
 
 template <typename T> SimpleVector<T> pnext(const int& size, const int& step = 1, const int& r = 1) {
-  return (dft<T>(- size * r).subMatrix(0, 0, size * r, size) * dft<T>(size)).template real<T>().transpose() * taylor(size * r, T(step * r < 0 ? step * r : (size + step) * r - 1)) * T(r);
+  auto work(taylor(size * r, T(step * r < 0 ? step * r : (size + step) * r - 1)));
+  for(int i = 1; i < r; i ++)
+    work += taylor(size * r, T(step * r < 0 ? step * r + i : (size + step) * r - 1 - i));
+  return (dft<T>(- size * r).subMatrix(0, 0, size * r, size) * dft<T>(size)).template real<T>().transpose() * work;
 }
 
 template <typename T> SimpleVector<T> minsq(const int& size) {
