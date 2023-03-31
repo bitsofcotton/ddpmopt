@@ -41,7 +41,7 @@ However, we recommend you and us to use denlarge sharpen chain on goki_check_cc 
     ./ddpmopt -0 <inout0.ppm> ... < cache.txt
     ./predg <rand> <in0.ppm> ...
     ./qredg <rand> <inout0.ppm> ...
-    # 0 < rand for arc4random, rand < 0 for deterministic PRNG,
+    # rand < 0 for arc4random, 0 < rand for deterministic PRNG,
     # rand == 0 for no PRNG.
 
 # Real close
