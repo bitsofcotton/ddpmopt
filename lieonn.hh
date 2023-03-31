@@ -3644,9 +3644,9 @@ public:
   inline Prand() { ; }
   inline Prand(P&& p, const int& len = 0) {
     r.resize(abs(len));
-    det = (len <= 0);
+    det = (0 <= len);
     for(int i = 0; i < r.size(); i ++) r[i] = myrand();
-    this->p.resize(max(1, abs(len)), p);
+    this->p.resize(max(int(1), abs(len)), p);
   }
   inline ~Prand() { ; }
   inline T next(const T& d) {
@@ -3660,8 +3660,8 @@ public:
   }
   inline T myrand() {
     static uint64_t t(1);
-    if(det)
-      return max(T(int(0)), min(T(int(1)), T(int(arc4random())) / T(int(- uint32_t(0))) ));
+    if(! det)
+      return max(T(int(0)), min(T(int(1)), T(int(arc4random())) / T(int(~ uint32_t(0))) ));
     assert(t && "rng() should not be periodical.");
     myuint res(int(0));
 #if defined(_OPENMP)

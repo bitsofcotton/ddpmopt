@@ -11,8 +11,8 @@
 #include <random>
 #include <assert.h>
 
-//#define int int64_t
-#define int int32_t
+#define int int64_t
+//#define int int32_t
 #include "lieonn.hh"
 typedef myfloat num_t;
 
@@ -30,8 +30,8 @@ using std::istringstream;
 
 #undef int
 int main(int argc, const char* argv[]) {
-//#define int int64_t
-#define int int32_t
+#define int int64_t
+//#define int int32_t
   assert(2 < argc);
   for(int i = 2; i < argc; i ++) {
     vector<SimpleMatrix<num_t> > work;
