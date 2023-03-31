@@ -39,8 +39,10 @@ However, we recommend you and us to use denlarge sharpen chain on goki_check_cc 
     ./ddpmopt ++ <in0.ppm> ... > cache.txt
     ./ddpmopt -  <inout0.ppm> ... < cache.txt
     ./ddpmopt -0 <inout0.ppm> ... < cache.txt
-    ./predg <in0.ppm> ...
-    ./qredg <inout0.ppm> ...
+    ./predg <rand> <in0.ppm> ...
+    ./qredg <rand> <inout0.ppm> ...
+    # 0 < rand for arc4random, rand < 0 for deterministic PRNG,
+    # rand == 0 for no PRNG.
 
 # Real close
 2023/03/01
@@ -51,4 +53,5 @@ However, we recommend you and us to use denlarge sharpen chain on goki_check_cc 
 2023/03/20 qred makes only row-direction prediction, after close #5.
 2023/03/24 ddpmopt.cc +0 00 -0 command fix, code clean, after close #6.
 2023/03/29 merge p0 pnext, after close #7.
+2023/03/31 persistent prediction to get average 1/2 * 2/3 pixels.
 
