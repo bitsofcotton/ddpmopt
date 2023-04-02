@@ -51,24 +51,10 @@ int main(int argc, const char* argv[]) {
     for(int k = 0; k < p.first.size(); k ++)
       for(int kk = 0; kk < p.first[k].size() / work.size(); kk ++)
         for(int j = 0; j < work.size(); j ++) {
-          try {
-            swork[j](p.first.size() - k - 1, kk) =
-              revertProgramInvariant<num_t>(make_pair(
-                p.first[k][j * p.first[k].size() / work.size() + kk] /
-                  p.first[k][p.first[k].size() - 1],
-              num_t(int(1)) ));
-          } catch(const char* e) {
-            std::cerr << "e" << std::flush;
-          }
-          try { 
-            swork[j](p.first.size() + work[j].rows() + k, kk) =
-              revertProgramInvariant<num_t>(make_pair(
-                p.second[k][j * p.first[k].size() / work.size() + kk] /
-                  p.second[k][p.second[k].size() - 1],
-              num_t(int(1)) ));
-          } catch(const char* e) {
-            std::cerr << "e" << std::flush;
-          }
+          swork[j](p.first.size() - k - 1, kk) =
+            p.first[k][j * p.first[k].size() / work.size() + kk];
+          swork[j](p.first.size() + work[j].rows() + k, kk) =
+            p.second[k][j * p.first[k].size() / work.size() + kk];
         }
     if(! savep2or3<num_t>(argv[i], normalize<num_t>(swork)) )
       cerr << "failed to save." << endl;
