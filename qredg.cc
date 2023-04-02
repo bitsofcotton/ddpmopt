@@ -32,8 +32,8 @@ using std::istringstream;
 int main(int argc, const char* argv[]) {
 #define int int64_t
 //#define int int32_t
-  assert(2 < argc);
-  for(int i = 2; i < argc; i ++) {
+  assert(1 < argc);
+  for(int i = 1; i < argc; i ++) {
     vector<SimpleMatrix<num_t> > work;
     if(! loadp2or3<num_t>(work, argv[i])) continue;
     vector<SimpleVector<num_t> > pwork;
@@ -42,7 +42,7 @@ int main(int argc, const char* argv[]) {
     for(int k = 0; k < work[0].rows(); k ++)
       for(int j = 0; j < work.size(); j ++)
         pwork[k].setVector(j * work[j].cols(), work[j].row(k));
-    auto p(predv<num_t>(pwork, std::atoi(argv[1]) ));
+    auto p(predv<num_t>(pwork));
     vector<SimpleMatrix<num_t> > swork(work.size(),
       SimpleMatrix<num_t>(work[0].rows() + p.first.size() * 2,
         work[0].cols()).O());

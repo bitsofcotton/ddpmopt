@@ -33,13 +33,13 @@ using std::move;
 int main(int argc, const char* argv[]) {
 #define int int64_t
 //#define int int32_t
-  assert(2 < argc);
+  assert(1 < argc);
   vector<SimpleVector<num_t> > in;
   int color(0);
   int rows(0);
   int cols(0);
-  in.reserve(argc - 2);
-  for(int i = 2; i < argc; i ++) {
+  in.reserve(argc - 1);
+  for(int i = 1; i < argc; i ++) {
     vector<SimpleMatrix<num_t> > work;
     if(! loadp2or3<num_t>(work, argv[i])) continue;
     assert(! color || color == work.size());
@@ -51,11 +51,11 @@ int main(int argc, const char* argv[]) {
     in.emplace_back(SimpleVector<num_t>(work.size() * work[0].rows() * work[0].cols()));
     for(int j = 0; j < work.size(); j ++)
       for(int k = 0; k < work[j].rows(); k ++)
-        in[i - 2].setVector(j * work[j].rows() * work[j].cols() +
+        in[i - 1].setVector(j * work[j].rows() * work[j].cols() +
           k * work[j].cols(), work[j].row(k));
   }
   vector<SimpleVector<num_t> > out;
-  auto p(predv<num_t>(in, std::atoi(argv[1]) ));
+  auto p(predv<num_t>(in));
   out = move(p.first);
   out.insert(out.end(), p.second.begin(), p.second.end());
   vector<SimpleMatrix<num_t> > outs;
