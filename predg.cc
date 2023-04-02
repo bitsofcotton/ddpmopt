@@ -61,15 +61,21 @@ int main(int argc, const char* argv[]) {
   vector<SimpleMatrix<num_t> > outs;
   outs.resize(color);
   for(int i = 0; i < out.size(); i ++) {
-    for(int j = 0; j < outs.size(); j ++)
+    for(int j = 0; j < outs.size(); j ++) {
       outs[j].resize(rows, cols);
+      outs[j].O();
+    }
     for(int j = 0; j < outs.size(); j ++)
       for(int k = 0; k < outs[j].rows() * outs[j].cols(); k ++)
-        outs[j](k / outs[j].cols(), k % outs[j].cols()) =
-          revertProgramInvariant<num_t>(make_pair(
-            out[i][j * outs[j].rows() * outs[j].cols() + k] /
-              out[i][out[i].size() - 1],
-          num_t(int(1)) ));
+        try {
+          outs[j](k / outs[j].cols(), k % outs[j].cols()) =
+            revertProgramInvariant<num_t>(make_pair(
+              out[i][j * outs[j].rows() * outs[j].cols() + k] /
+                out[i][out[i].size() - 1],
+            num_t(int(1)) ));
+        } catch (const char* e) {
+          std::cerr << "e" << std::flush;
+        }
     if(! savep2or3<num_t>((std::string("predg-") + std::to_string(i) + std::string(".ppm")).c_str(), normalize<num_t>(outs)) )
       cerr << "failed to save." << endl;
   }
