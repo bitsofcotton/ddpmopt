@@ -3045,8 +3045,7 @@ template <typename T> inline CatG<T>::CatG(const int& size0, const vector<Vec>& 
     // N.B. test for linear ones:
     // A.row(i).setVector(0, tayl(size, in[i].size()) * in[i]);
   }
-  const auto Q(A.QR());
-        auto Pt(Q);
+        auto Pt(A.QR());
         auto Ptb(Pt);
   const auto R(Pt * A);
         Vec  one(Pt.cols());
@@ -3098,7 +3097,9 @@ template <typename T> inline CatG<T>::CatG(const int& size0, const vector<Vec>& 
     if(size0 < 0) fix[pidx[iidx]] = true;
   }
   cut = R.solve(Pt * one);
-  auto test(Q.transpose() * cut);
+  auto cutn(sqrt(cut.dot(cut)));
+  if(cutn != T(int(0))) cut /= cutn;
+  auto test(A * cut);
   vector<T> testv;
   testv.reserve(test.size());
   for(int i = 0; i < test.size(); i ++) testv.emplace_back(abs(test[i]));
@@ -3588,7 +3589,6 @@ public:
   inline Prange(const int& status) {
     assert(0 < status);
     p1 = P1I<T>(int(max(T(int(2)), sqrt(T(status)) )) );
-    p2 = P012L<T>(int(max(T(int(2)), pow(T(status), T(int(1)) / T(int(3)) ))) );
     this->status = status;
   }
   inline ~Prange() { ; }
@@ -3603,12 +3603,10 @@ public:
     for(int i = 0; i < f0.res.size(); i ++) M = max(M, abs(f0.res[i]));
     return max(- M, min(M, (
       max(- M, min(M, p0.next(f1.res))) +
-      max(- M, min(M, p1.next(f1.res))) +
-      max(- M, min(M, p2.next(f1.res))) ) / T(int(3)) ));
+      max(- M, min(M, p1.next(f1.res))) ) / T(int(2)) ));
   }
   P0maxRank<T> p0;
   P1I<T> p1;
-  P012L<T> p2;
   int status;
 };
 
