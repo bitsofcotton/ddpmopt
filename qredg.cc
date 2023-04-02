@@ -52,9 +52,9 @@ int main(int argc, const char* argv[]) {
       for(int kk = 0; kk < p.first[k].size() / work.size(); kk ++)
         for(int j = 0; j < work.size(); j ++) {
           swork[j](p.first.size() - k - 1, kk) =
-            p.first[k][j * p.first[k].size() / work.size() + kk];
+            abs(p.first[k][j * p.first[k].size() / work.size() + kk]);
           swork[j](p.first.size() + work[j].rows() + k, kk) =
-            p.second[k][j * p.first[k].size() / work.size() + kk];
+            abs(p.second[k][j * p.first[k].size() / work.size() + kk]);
         }
     if(! savep2or3<num_t>(argv[i], normalize<num_t>(swork)) )
       cerr << "failed to save." << endl;
