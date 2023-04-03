@@ -3530,13 +3530,13 @@ template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > 
     invariant[i]  = move(inv.first);
     invariant[i] *=
       pow(inv.second, ceil(- log(SimpleMatrix<T>().epsilon()) ));
+    invariant[i][invariant[i].size() - 1] = sqrt(in[i].dot(in[i]));
   }
   vector<SimpleVector<T> > p;
   if(in.size() < 3) return make_pair(p, p);
   p.resize(p0);
   auto q(p);
   for(int i = 0; i < p0; i ++) {
-    cerr << i << " / " << p0 << endl;
     p[i].resize(invariant[0].size());
     q[i].resize(invariant[0].size());
     p[i].O();
@@ -3546,6 +3546,7 @@ template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > 
 #pragma omp parallel for schedule(static, 1)
 #endif
   for(int j = 0; j < invariant[0].size(); j ++) {
+    cerr << j << " / " << invariant[0].size() << endl;
     idFeeder<T> pb(invariant.size());
     idFeeder<T> pf(invariant.size());
     for(int k = 0; k < invariant.size(); k ++)
@@ -3566,6 +3567,18 @@ template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > 
         p[i][j] = T(int(0));
       }
     }
+  }
+  for(int i = 0; i < p.size(); i ++) {
+    const auto norm(p[i][p[i].size() - 1]);
+    p[i][p[i].size() - 1] = T(int(0));
+    const auto normp(sqrt(p[i].dot(p[i])));
+    if(normp != T(int(0))) p[i] *= norm / normp;
+  }
+  for(int i = 0; i < q.size(); i ++) {
+    const auto norm(q[i][q[i].size() - 1]);
+    q[i][q[i].size() - 1] = T(int(0));
+    const auto normq(sqrt(q[i].dot(q[i])));
+    if(normq != T(int(0))) q[i] *= norm / normq;
   }
   return make_pair(move(p), move(q));
 }
