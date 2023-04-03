@@ -55,4 +55,5 @@ However, we recommend you and us to use denlarge sharpen chain on goki_check_cc 
 2023/03/29 merge p0 pnext, after close #7.
 2023/03/31 persistent prediction to get average 1/2 * 2/3 pixels.
 2023/04/02 merge p2 result.
+2023/04/03 better simple predv.
 
