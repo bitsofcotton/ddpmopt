@@ -3573,12 +3573,20 @@ template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > 
     p[i][p[i].size() - 1] = T(int(0));
     const auto normp(sqrt(p[i].dot(p[i])));
     if(normp != T(int(0))) p[i] *= norm / normp;
+    const auto pp(p[i]);
+    p[i].resize(in[0].size());
+    for(int j = 0; j < p[i].size(); j ++)
+      p[i][j] = abs(pp[j]);
   }
   for(int i = 0; i < q.size(); i ++) {
     const auto norm(q[i][q[i].size() - 1]);
     q[i][q[i].size() - 1] = T(int(0));
     const auto normq(sqrt(q[i].dot(q[i])));
     if(normq != T(int(0))) q[i] *= norm / normq;
+    const auto qq(q[i]);
+    q[i].resize(in[0].size());
+    for(int j = 0; j < q[i].size(); j ++)
+      q[i][j] = abs(qq[j]);
   }
   return make_pair(move(p), move(q));
 }

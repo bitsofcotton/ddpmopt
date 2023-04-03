@@ -49,13 +49,14 @@ int main(int argc, const char* argv[]) {
     for(int j = 0; j < work.size(); j ++)
       swork[j].setMatrix(p.first.size(), 0, work[j] / num_t(int(2)));
     for(int k = 0; k < p.first.size(); k ++)
-      for(int kk = 0; kk < p.first[k].size() / work.size(); kk ++)
-        for(int j = 0; j < work.size(); j ++) {
-          swork[j](p.first.size() - k - 1, kk) =
-            abs(p.first[k][j * p.first[k].size() / work.size() + kk]);
-          swork[j](p.first.size() + work[j].rows() + k, kk) =
-            abs(p.second[k][j * p.first[k].size() / work.size() + kk]);
-        }
+      for(int j = 0; j < work.size(); j ++) {
+        swork[j].row(p.first.size() - k - 1) =
+          p.first[k].subVector(j * p.first[k].size() / work.size(),
+            swork[j].cols());
+        swork[j].row(p.first.size() + work[j].rows() + k) =
+          p.second[k].subVector(j * p.first[k].size() / work.size(),
+            swork[j].cols());
+      }
     if(! savep2or3<num_t>(argv[i], normalize<num_t>(swork)) )
       cerr << "failed to save." << endl;
   }

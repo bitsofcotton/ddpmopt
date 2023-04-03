@@ -66,9 +66,9 @@ int main(int argc, const char* argv[]) {
       outs[j].O();
     }
     for(int j = 0; j < outs.size(); j ++)
-      for(int k = 0; k < outs[j].rows() * outs[j].cols(); k ++)
-        outs[j](k / outs[j].cols(), k % outs[j].cols()) =
-          abs(out[i][j * outs[j].rows() * outs[j].cols() + k]);
+      for(int k = 0; k < outs[j].rows(); k ++)
+        outs[j].row(k) = out[i].subVector(j * outs[j].rows() * outs[j].cols() +
+          k * outs[j].cols(), outs[j].cols());
     if(! savep2or3<num_t>((std::string("predg-") + std::to_string(i) + std::string(".ppm")).c_str(), normalize<num_t>(outs)) )
       cerr << "failed to save." << endl;
   }
