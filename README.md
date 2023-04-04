@@ -32,6 +32,10 @@ So we should use per one task per one method.
 Also, we should use huge number of the input datas because of non context-full but calculation over-{} return result gained otherwise.
 However, we recommend you and us to use denlarge sharpen chain on goki_check_cc after predg/qredg.
 
+# Tips on accuracy
+We need huge accuracy to get accurate upbounded result on \[pq\]redg.
+This is because the complexity upper bound hypothesis we make depends on calculation accuracy itself.
+
 # Usage:
     ./ddpmopt 0  <in0.ppm> ... > cache.txt
     ./ddpmopt 00 <in0.ppm> ... > cache.txt
@@ -39,10 +43,8 @@ However, we recommend you and us to use denlarge sharpen chain on goki_check_cc 
     ./ddpmopt ++ <in0.ppm> ... > cache.txt
     ./ddpmopt -  <inout0.ppm> ... < cache.txt
     ./ddpmopt -0 <inout0.ppm> ... < cache.txt
-    ./predg <rand> <in0.ppm> ...
-    ./qredg <rand> <inout0.ppm> ...
-    # rand < 0 for arc4random, 0 < rand for deterministic PRNG,
-    # rand == 0 for no PRNG.
+    ./predg <in0.ppm> ...
+    ./qredg <inout0.ppm> ...
 
 # Real close
 2023/03/01
@@ -56,4 +58,5 @@ However, we recommend you and us to use denlarge sharpen chain on goki_check_cc 
 2023/03/31 persistent prediction to get average 1/2 * 2/3 pixels.
 2023/04/02 merge p2 result.
 2023/04/03 better simple predv.
+2023/04/04 update readme.
 
