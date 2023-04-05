@@ -3152,11 +3152,11 @@ template <typename T> inline T P012L<T>::next(const SimpleVector<T>& d) {
     Mat pw(cat[i].first.size(), cat[i].first[0].size() + 1);
     auto mp(makeProgramInvariant<T>(cat[i].first[0]));
     pw.row(0) = move(mp.first);
-    auto avg(pw.row(0) *= pow(mp.second, ceil(- log(pw.epsilon()) )) );
+    auto avg(pw.row(0) *= pow(mp.second, ceil(- log(pw.epsilon()) / T(int(2)) )) );
     for(int j = 1; j < pw.rows(); j ++) {
       auto mp(makeProgramInvariant<T>(cat[i].first[j]));
       pw.row(j) = move(mp.first);
-      avg += (pw.row(j) *= pow(mp.second, ceil(- log(pw.epsilon()) )) );
+      avg += (pw.row(j) *= pow(mp.second, ceil(- log(pw.epsilon()) / T(int(2)) )) );
     }
     avg /= T(int(pw.rows()));
     const auto q(pw.rows() <= pw.cols() || ! pw.rows() ? Vec() : linearInvariant<T>(pw));
@@ -3166,8 +3166,8 @@ template <typename T> inline T P012L<T>::next(const SimpleVector<T>& d) {
         - (q.dot(vdp.first) - q[varlen - 1] * vdp.first[varlen - 1])
         / q[varlen - 1] / T(int(q.size())), vdp.second) ) ) :
       revertProgramInvariant<T>(make_pair(avg[varlen - 1] /=
-        pow(vdp.second, ceil(- log(pw.epsilon() ))) * T(int(avg.size())),
-        vdp.second)) );
+        pow(vdp.second, ceil(- log(pw.epsilon() / T(int(2)) ))) *
+          T(int(avg.size())), vdp.second)) );
     T score(0);
     for(int j = 0; j < work.size(); j ++)
       score += work[j] * revertProgramInvariant<T>(make_pair(avg[j] /= pow(vdp.second, ceil(- log(pw.epsilon() ))) * T(int(avg.size())), vdp.second));
@@ -3450,7 +3450,7 @@ public:
       auto mp(makeProgramInvariant<T>(move(work),
                 T(i + 1) / T(toeplitz.rows() + 1)));
       toeplitz.row(i)  = move(mp.first);
-      toeplitz.row(i) *= pow(mp.second, ceil(- log(toeplitz.epsilon()) ));
+      toeplitz.row(i) *= pow(mp.second, ceil(- log(toeplitz.epsilon()) / T(int(2)) ));
     }
     const auto invariant(linearInvariant<T>(toeplitz));
     if(invariant[varlen - 1] == zero) return zero;
@@ -3529,7 +3529,7 @@ template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > 
     auto inv(makeProgramInvariant<T>(in[i]));
     invariant[i]  = move(inv.first);
     invariant[i] *=
-      pow(inv.second, ceil(- log(SimpleMatrix<T>().epsilon()) ));
+      pow(inv.second, ceil(- log(SimpleMatrix<T>().epsilon()) / T(int(2)) ));
     invariant[i][invariant[i].size() - 1] = sqrt(in[i].dot(in[i]));
   }
   vector<SimpleVector<T> > p;

@@ -59,4 +59,5 @@ This is because the complexity upper bound hypothesis we make depends on calcula
 2023/04/02 merge p2 result.
 2023/04/03 better simple predv.
 2023/04/04 update readme.
+2023/04/05 fix makeProgramInvariant scale accuracy stability.
 
