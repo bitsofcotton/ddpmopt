@@ -75,20 +75,14 @@ int main(int argc, const char* argv[]) {
     std::cin >> w;
     assert(0 < sz0 && 0 < h && 0 < w);
     L.reserve(3);
-    num_t norm(int(0));
     for(int j = 0; j < 3; j ++) {
       SimpleMatrix<num_t> wL(h * w, sz0 * sz0 + 2);
-      for(int i = 0; i < wL.rows(); i ++) {
+      for(int i = 0; i < wL.rows(); i ++)
         std::cin >> wL.row(i);
-        norm += wL.row(i).dot(wL.row(i));
-      }
       // L.emplace_back(move(wL));
       L.emplace_back(wL);
       assert(L[0].rows() == L[j].rows() && L[0].cols() == L[j].cols());
     }
-    norm /= num_t(int(L.size()) * int(L[0].rows()));
-    norm  = sqrt(norm);
-    for(int i = 0; i < L.size(); i ++) L[i] /= norm;
     for(int i = 2; i < argc; i ++) {
       vector<SimpleMatrix<num_t> > out;
       if(! loadp2or3<num_t>(out, argv[i])) return - 1;
@@ -111,10 +105,9 @@ int main(int argc, const char* argv[]) {
         vwork0[vwork0.size() - 1] = num_t(int(0));
         auto outwork(L[j] * makeProgramInvariant<num_t>(vwork0).first);
         for(int n = 0; n < outwork.size(); n ++)
-          outs[j](n / outs[j].cols(), n % outs[j].cols()) =
-            revertProgramInvariant<num_t>(make_pair(outwork[n], num_t(int(1)) ));
+          outs[j](n / outs[j].cols(), n % outs[j].cols()) = abs(outwork[n]);
       }
-      if(! savep2or3<num_t>(argv[i], outs) )
+      if(! savep2or3<num_t>(argv[i], normalize<num_t>(outs)) )
         cerr << "failed to save." << endl;
     }
   } else if(m == '+' || m == '0') {
