@@ -77,7 +77,7 @@ int main(int argc, const char* argv[]) {
       for(int j = 0; j < abs(len); j ++) {
         for(int i = 0; i < lwork.size(); i ++) lwork[i] = rng();
         for(int i = 0; i < min(lwork.size() - 1, int(s.size())); i ++)
-          lwork[i - min(lwork.size() - 1, int(s.size())) + lwork.size()]
+          lwork[i - min(lwork.size(), int(s.size()) + 1) + lwork.size()]
             = num_t(s[i - min(lwork.size() - 1, int(s.size())) + int(s.size())]) / num_t(int(256));
         lwork[lwork.size() - 1] = num_t(int(0));
         int   Midx(- 1);
