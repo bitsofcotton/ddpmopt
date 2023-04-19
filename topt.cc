@@ -63,8 +63,7 @@ typedef long double thisfl;
 int main(int argc, const char* argv[]) {
 //#define int int64_t
 #define int int32_t
-  assert(1 < argc);
-  const auto len(std::atoi(argv[1]));
+  auto len(1 < argc ? std::atoi(argv[1]) : 0);
   if(len < 0) {
     int size(0);
     std::cin >> size;
@@ -94,10 +93,11 @@ int main(int argc, const char* argv[]) {
       }
       std::cout << s << std::endl;
     }
-  } else if(0 < len) {
+  } else if(0 <= len) {
     string s;
     string t;
     while(std::getline(std::cin, s, '\n')) t += s;
+    if(! len) len = int(pow(num_t(int(t.size())), num_t(int(1)) / num_t(int(3)) ));
     vector<SimpleVector<num_t> > work;
     work.reserve(t.size() - len + 1);
     for(int i = 0; i <= t.size() - len; i ++) {
