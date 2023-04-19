@@ -11,12 +11,12 @@ CXXFLAGS+=	-std=c++11
 LDFLAGS+=	-lc++ -L/usr/local/lib
 #LDFLAGS+=	-lestdc++ -L/usr/local/lib
 
-CLEANFILES= *.o ddpmopt ddpmopt32 ddpmoptmp ddpmopt32mp predg predg32 predgmp predg32mp qredg qredg32 qredgmp qredg32mp
+CLEANFILES= *.o ddpmopt ddpmopt32 ddpmoptmp ddpmopt32mp predg predg32 predgmp predg32mp qredg qredg32 qredgmp qredg32mp topt topt32 toptmp topt32mp
 
 clean:
 	@rm -rf ${CLEANFILES}
 
-all:	ddpmopt ddpmopt32 ddpmoptmp ddpmopt32mp predg predg32 predgmp predg32mp qredg qredg32 qredgmp qredg32mp
+all:	ddpmopt ddpmopt32 ddpmoptmp ddpmopt32mp predg predg32 predgmp predg32mp qredg qredg32 qredgmp qredg32mp topt topt32 toptmp topt32mp
 
 ddpmopt:
 	${CXX} ${CXXFLAGS} -static -o ddpmopt ddpmopt.cc
@@ -30,6 +30,18 @@ ddpmopt32mp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=32 -o ddpmopt32mp ddpmopt.cc
 ddpmopt64mp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=64 -o ddpmopt64mp ddpmopt.cc
+topt:
+	${CXX} ${CXXFLAGS} -static -o topt topt.cc
+topt32:
+	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=32 -o topt32 topt.cc
+topt64:
+	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=64 -o topt64 topt.cc
+toptmp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -o toptmp topt.cc
+topt32mp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=32 -o topt32mp topt.cc
+topt64mp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=64 -o topt64mp topt.cc
 predg:
 	${CXX} ${CXXFLAGS} -static -o predg predg.cc
 predg32:

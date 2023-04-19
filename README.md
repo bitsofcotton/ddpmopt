@@ -43,6 +43,8 @@ This is because the complexity upper bound hypothesis we make depends on calcula
     ./ddpmopt ++ <in0.ppm> ... > cache.txt
     ./ddpmopt -  <inout0.ppm> ... < cache.txt
     ./ddpmopt -0 <inout0.ppm> ... < cache.txt
+    ./topt <dim> < in.txt > cache.txt
+    cat cache.txt - | ./topt -<num>
     ./predg <in0.ppm> ...
     ./qredg <inout0.ppm> ...
 
@@ -60,4 +62,5 @@ This is because the complexity upper bound hypothesis we make depends on calcula
 2023/04/03 better simple predv.
 2023/04/04 update readme.
 2023/04/05 fix makeProgramInvariant scale accuracy stability.
+2023/04/19 add topt.cc.
 
