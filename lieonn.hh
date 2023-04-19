@@ -2972,7 +2972,10 @@ template <typename T> inline CatG<T>::CatG(const int& size0, const vector<Vec>& 
     fix[iidx] = true;
     if(size0 < 0) fix[pidx[iidx]] = true;
   }
-  cut = R.solve(Pt * one);
+  auto ptone(Pt * one);
+  if(ptone.dot(ptone) <= Pt.epsilon())
+    ptone = Ptb * one;
+  cut = R.solve(ptone);
   auto cutn(sqrt(cut.dot(cut)));
   if(cutn != T(int(0))) cut /= cutn;
   auto test(A * cut);
@@ -2982,7 +2985,7 @@ template <typename T> inline CatG<T>::CatG(const int& size0, const vector<Vec>& 
   std::sort(testv.begin(), testv.end());
   distance = T(int(0));
   for(int i = 1; i < testv.size(); i ++)
-    if(distance < testv[i] - testv[i - 1]) {
+    if(distance <= testv[i] - testv[i - 1]) {
       distance =  testv[i] - testv[i - 1];
       origin   = (testv[i] + testv[i - 1]) / T(int(2));
     }

@@ -97,7 +97,7 @@ int main(int argc, const char* argv[]) {
     string s;
     string t;
     while(std::getline(std::cin, s, '\n')) t += s;
-    if(! len) len = int(pow(num_t(int(t.size())), num_t(int(1)) / num_t(int(6)) ));
+    if(! len) len = int(ceil(pow(num_t(int(t.size())), num_t(int(1)) / num_t(int(6)) ))) + 1;
     vector<SimpleVector<num_t> > work;
     work.reserve(t.size() - len + 1);
     for(int i = 0; i <= t.size() - len; i ++) {
