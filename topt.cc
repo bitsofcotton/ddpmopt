@@ -66,19 +66,31 @@ int main(int argc, const char* argv[]) {
   assert(1 < argc);
   const auto len(std::atoi(argv[1]));
   if(len < 0) {
+    int size(0);
+    std::cin >> size;
     std::string s;
-    SimpleVector<num_t> work;
-    std::cin >> work;
+    vector<SimpleVector<num_t> > work;
+    work.resize(size);
+    for(int j = 0; j < size; j ++)
+      std::cin >> work[j];
     while(std::getline(std::cin, s, '\n')) {
-      SimpleVector<num_t> lwork(work.size() - 1);
+      SimpleVector<num_t> lwork(work[0].size() - 1);
       for(int j = 0; j < abs(len); j ++) {
         for(int i = 0; i < lwork.size(); i ++) lwork[i] = rng();
         for(int i = 0; i < min(lwork.size() - 1, int(s.size())); i ++)
           lwork[i - min(lwork.size() - 1, int(s.size())) + lwork.size()]
             = num_t(s[i - min(lwork.size() - 1, int(s.size())) + int(s.size())]) / num_t(int(256));
         lwork[lwork.size() - 1] = num_t(int(0));
-        const char res(int(abs(work.dot(makeProgramInvariant<num_t>(lwork).first)) * num_t(int(256))));
-        s += res;
+        int   Midx(- 1);
+        num_t M(int(0));
+        for(int k = 0; k < work.size(); k ++) {
+          const auto lM(abs(work[k].dot(makeProgramInvariant<num_t>(lwork).first) / sqrt(work[k].dot(work[k])) ));
+          if(Midx < 0 || M < lM) {
+            M = lM;
+            Midx = k;
+          }
+        }
+        s += char(int(abs(work[Midx].dot(makeProgramInvariant<num_t>(lwork).first)) * num_t(int(256))));
       }
       std::cout << s << std::endl;
     }
@@ -86,20 +98,37 @@ int main(int argc, const char* argv[]) {
     string s;
     string t;
     while(std::getline(std::cin, s, '\n')) t += s;
-    SimpleMatrix<num_t> work(t.size() - len + 1, len + 1);
+    vector<SimpleVector<num_t> > work;
+    work.reserve(t.size() - len + 1);
     for(int i = 0; i <= t.size() - len; i ++) {
       SimpleVector<num_t> lwork(len);
       for(int j = 0; j < len; j ++)
         lwork[j] = num_t(t[i + j]) / num_t(int(256));
-      auto llwork(makeProgramInvariant<num_t>(lwork));
-      work.row(i)  = move(llwork.first);
-      work.row(i) *=
-        pow(llwork.second, ceil(- log(work.epsilon()) ));
+      work.emplace_back(lwork);
     }
-    auto vwork(linearInvariant(work));
-    vwork /= - num_t(vwork[vwork.size() - 2]);
-    vwork[vwork.size() - 2] = - num_t(int(1));
-    cout << vwork;
+    auto vwork(crush<num_t>(work));
+    std::cout << vwork.size() << std::endl;
+    for(int i = 0; i < vwork.size(); i ++) {
+      SimpleMatrix<num_t> lwork(vwork[i].first.size(), len + 1);
+      for(int j = 0; j < lwork.rows(); j ++) {
+        auto llwork(makeProgramInvariant<num_t>(vwork[i].first[j]));
+        lwork.row(j)  = move(llwork.first);
+        lwork.row(j) *=
+          pow(llwork.second, ceil(- log(lwork.epsilon()) ));
+      }
+      if(lwork.rows() <= lwork.cols() + 1) {
+        for(int j = 1; j < lwork.rows(); j ++)
+          lwork.row(0) += lwork.row(j);
+        lwork.row(0) /= - num_t(lwork(0, lwork.cols() - 2));
+        lwork(0, lwork.cols() - 2) = num_t(int(0));
+        cout << lwork.row(0);
+      } else {
+        auto vvwork(linearInvariant(lwork));
+        vvwork /= - num_t(vvwork[vvwork.size() - 2]);
+        vvwork[vvwork.size() - 2] = num_t(int(0));
+        cout << vvwork;
+      }
+    }
   }
   return 0;
 }
