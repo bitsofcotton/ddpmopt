@@ -97,7 +97,7 @@ int main(int argc, const char* argv[]) {
     string s;
     string t;
     while(std::getline(std::cin, s, '\n')) t += s;
-    if(! len) len = int(pow(num_t(int(t.size())), num_t(int(1)) / num_t(int(3)) ));
+    if(! len) len = int(pow(num_t(int(t.size())), num_t(int(1)) / num_t(int(6)) ));
     vector<SimpleVector<num_t> > work;
     work.reserve(t.size() - len + 1);
     for(int i = 0; i <= t.size() - len; i ++) {
@@ -106,7 +106,7 @@ int main(int argc, const char* argv[]) {
         lwork[j] = num_t(t[i + j]) / num_t(int(256));
       work.emplace_back(lwork);
     }
-    auto vwork(crush<num_t>(work));
+    auto vwork(crush<num_t>(work, work[0].size(), sqrt(num_t(work.size()) / num_t(len)) ));
     std::cout << vwork.size() << std::endl;
     for(int i = 0; i < vwork.size(); i ++) {
       SimpleMatrix<num_t> lwork(vwork[i].first.size(), len + 1);
