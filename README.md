@@ -30,7 +30,7 @@ So we only make the hypothesis above, we should shrink the images after \[pq\]re
 Some chain causes non expected result they seems to be not broken in meaning.
 So we should use per one task per one method.
 Also, we should use huge number of the input datas because of non context-full but calculation over-{} return result gained otherwise.
-However, we recommend you and us to use denlarge sharpen chain on goki_check_cc after predg/qredg.
+However, we recommend you and us to use imagemagick option -gamma ... -despeckle -despeckle -resize ... -normalize after predg/qredg.
 
 # Tips on accuracy
 We need huge accuracy to get accurate upbounded result on \[pq\]redg.
@@ -63,4 +63,5 @@ This is because the complexity upper bound hypothesis we make depends on calcula
 2023/04/04 update readme.
 2023/04/05 fix makeProgramInvariant scale accuracy stability.
 2023/04/19 add topt.cc.
+2023/04/21 shape up around makeProgramInvariant/revertProgramInvariant, algorithm changed.
 

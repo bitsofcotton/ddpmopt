@@ -82,14 +82,17 @@ int main(int argc, const char* argv[]) {
         lwork[lwork.size() - 1] = num_t(int(0));
         int   Midx(- 1);
         num_t M(int(0));
+        num_t sec(int(1));
         for(int k = 0; k < work.size(); k ++) {
-          const auto lM(abs(work[k].dot(makeProgramInvariant<num_t>(lwork).first) / sqrt(work[k].dot(work[k])) ));
+          const auto pinv(makeProgramInvariant<num_t>(lwork));
+          const auto lM(abs(work[k].dot(pinv.first) / sqrt(work[k].dot(work[k])) ));
           if(Midx < 0 || M < lM) {
-            M = lM;
+            M    = lM;
+            sec  = pinv.second;
             Midx = k;
           }
         }
-        s += char(int(abs(work[Midx].dot(makeProgramInvariant<num_t>(lwork).first)) * num_t(int(256))));
+        s += char(int(revertProgramInvariant<num_t>(make_pair(work[Midx].dot(makeProgramInvariant<num_t>(lwork).first), sec)) * num_t(int(256)) ));
       }
       std::cout << s << std::endl;
     }

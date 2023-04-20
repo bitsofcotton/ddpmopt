@@ -103,9 +103,9 @@ int main(int argc, const char* argv[]) {
           for(int nn = 0; nn < out[j].cols(); nn ++)
             vwork0[n * out[j].cols() + nn] = out[j](n, nn) * rin(n, nn);
         vwork0[vwork0.size() - 1] = num_t(int(0));
-        auto outwork(L[j] * makeProgramInvariant<num_t>(vwork0).first);
-        for(int n = 0; n < outwork.size(); n ++)
-          outs[j](n / outs[j].cols(), n % outs[j].cols()) = abs(outwork[n]);
+        auto outwork(revertProgramInvariant<num_t>(L[j] * makeProgramInvariant<num_t>(vwork0).first) );
+        for(int n = 0; n < outs[j].rows(); n ++)
+          outs[j].row(n) = outwork.subVector(n * outs[j].cols(), outs[j].cols());
       }
       if(! savep2or3<num_t>(argv[i], normalize<num_t>(outs)) )
         cerr << "failed to save." << endl;
@@ -168,10 +168,7 @@ int main(int argc, const char* argv[]) {
               for(int nn = 0; nn < shrink[i][j].cols(); nn ++)
                 vwork[n * shrink[i][j].cols() + nn] = shrink[i][j](n, nn) * noise[i][jj](n, nn);
             vwork[vwork.size() - 1] = in[i][j](m / in[0][0].cols(), m % in[0][0].cols());
-            auto mpi(makeProgramInvariant<num_t>(vwork));
-            work.row(i * num + jj)  = move(mpi.first);
-            work.row(i * num + jj) *=
-              pow(mpi.second, ceil(- log(in[0][0].epsilon()) ));
+            work.row(i * num + jj) = makeProgramInvariant<num_t>(vwork).first;
           }
         auto vwork(linearInvariant(work));
         vwork /= - num_t(vwork[vwork.size() - 2]);
