@@ -3160,8 +3160,7 @@ template <typename T> inline T P012L<T>::next(const SimpleVector<T>& d) {
        revertProgramInvariant<T>(make_pair(
         - (q.dot(vdp.first) - q[varlen - 1] * vdp.first[varlen - 1])
         / q[varlen - 1] / T(int(q.size())), vdp.second) ) ) :
-      revertProgramInvariant<T>(make_pair(avg[varlen - 1] /=
-        pow(vdp.second, ceil(- log(pw.epsilon() / T(int(2)) ))) *
+      revertProgramInvariant<T>(make_pair(avg[varlen - 1] /
           T(int(avg.size())), vdp.second)) );
     T score(0);
     for(int j = 0; j < work.size(); j ++)
