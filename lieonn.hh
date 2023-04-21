@@ -2721,16 +2721,22 @@ template <typename T> static inline pair<SimpleVector<T>, T> makeProgramInvarian
 }
 
 template <typename T> static inline T revertProgramInvariant(const pair<T, T>& in) {
-  return tan((exp(- abs(in.first * in.second) ) * T(int(2)) - T(int(1)) ) * T(int(2)) * atan(T(int(1))) );
+  return tan(max(- T(int(1)) + sqrt(SimpleMatrix<T>().epsilon()),
+             min(  T(int(1)) - sqrt(SimpleMatrix<T>().epsilon()),
+             exp(- abs(in.first * in.second) ) * T(int(2)) - T(int(1)) ))
+             * atan(T(int(1))) * T(int(2)) );
 }
 
 template <typename T> static inline SimpleVector<T> revertProgramInvariant(const SimpleVector<T>& in) {
   auto M(abs(in[0]));
   for(int i = 1; i < in.size(); i ++) M = max(M, abs(in[i]));
   if(M == T(int(0))) M = T(int(1));
-  auto res(in / M);
+  auto res(in);
+#if defined(_OPENMP)
+#pragma omp parallel for schedule(static, 1)
+#endif
   for(int i = 0; i < res.size(); i ++)
-    res[i] = revertProgramInvariant<T>(make_pair(res[i], T(int(1)) ));
+    res[i] = revertProgramInvariant<T>(make_pair(res[i] / M, T(int(1)) ));
   return res;
 }
 
@@ -3292,12 +3298,15 @@ public:
       else {
         ff[i] = atan(in[i]);
         // assert(- M < ff[i] && ff[i] < M);
-        ff[i] = atan(one / ff[i]);
+        // N.B. we don't avoid right hand side, it's harmless.
+        // ff[i] = atan(one / ff[i]);
         // assert(- M < ff[i] && ff[i] < M);
       }
     auto work(p.next(ff));
-    if(! isfinite(work) || work == zero) return in[in.size() - 1];
-    work = tan(max(- M, min(M, one / tan(max(- M, min(M, work))))));
+    // if(! isfinite(work) || work == zero) return in[in.size() - 1];
+    if(! isfinite(work)) return in[in.size() - 1];
+    // work = tan(max(- M, min(M, one / tan(max(- M, min(M, work))))));
+    work = tan(max(- M, min(M, work)));
     if(isfinite(work)) return work;
     return in[in.size() - 1];
   }
