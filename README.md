@@ -64,4 +64,5 @@ This is because the complexity upper bound hypothesis we make depends on calcula
 2023/04/05 fix makeProgramInvariant scale accuracy stability.
 2023/04/19 add topt.cc.
 2023/04/21 shape up around makeProgramInvariant/revertProgramInvariant, algorithm changed.
+2023/04/23 qredg.cc prediction/original norm fix.
 
