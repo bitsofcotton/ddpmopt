@@ -113,12 +113,8 @@ int main(int argc, const char* argv[]) {
     std::cout << vwork.size() << std::endl;
     for(int i = 0; i < vwork.size(); i ++) {
       SimpleMatrix<num_t> lwork(vwork[i].first.size(), len + 1);
-      for(int j = 0; j < lwork.rows(); j ++) {
-        auto llwork(makeProgramInvariant<num_t>(vwork[i].first[j]));
-        lwork.row(j)  = move(llwork.first);
-        lwork.row(j) *=
-          pow(llwork.second, ceil(- log(lwork.epsilon()) ));
-      }
+      for(int j = 0; j < lwork.rows(); j ++)
+        lwork.row(j) = makeProgramInvariant<num_t>(vwork[i].first[j]).first;
       if(lwork.rows() <= lwork.cols() + 1) {
         for(int j = 1; j < lwork.rows(); j ++)
           lwork.row(0) += lwork.row(j);
