@@ -76,7 +76,7 @@ int main(int argc, const char* argv[]) {
     assert(0 < sz0 && 0 < h && 0 < w);
     L.reserve(3);
     for(int j = 0; j < 3; j ++) {
-      SimpleMatrix<num_t> wL(h * w, sz0 * sz0 + 2);
+      SimpleMatrix<num_t> wL(h * w, sz0 * sz0 * 3 + 2);
       for(int i = 0; i < wL.rows(); i ++)
         std::cin >> wL.row(i);
       // L.emplace_back(move(wL));
@@ -96,14 +96,16 @@ int main(int argc, const char* argv[]) {
           rin(n, nn) = argv[1][1] == '0' ? num_t(int(1)) : rng();
       if(argv[1][1] != '0')
         rin = (dft<num_t>(- rin.rows()) * rin.template cast<complex<num_t> >() * dft<num_t>(- rin.cols())).template real<num_t>();
+      SimpleVector<num_t> vwork(out[0].rows() * out[0].cols() * out.size() + 1);
+      for(int k = 0; k < out.size(); k ++)
+        for(int n = 0; n < out[k].rows(); n ++)
+          for(int nn = 0; nn < out[k].cols(); nn ++)
+            vwork[k * out[k].rows() * out[k].cols() + n * out[k].cols() + nn] = out[k](n, nn) * rin(n, nn);
+      vwork[vwork.size() - 1] = num_t(int(0));
+      vwork = makeProgramInvariant<num_t>(vwork).first;
       for(int j = 0; j < out.size(); j ++) {
         cerr << j << " / " << out.size() << " over " << i - 2 << " / " << argc - 2 << endl;
-        SimpleVector<num_t> vwork0(out[j].rows() * out[j].cols() + 1);
-        for(int n = 0; n < out[j].rows(); n ++)
-          for(int nn = 0; nn < out[j].cols(); nn ++)
-            vwork0[n * out[j].cols() + nn] = out[j](n, nn) * rin(n, nn);
-        vwork0[vwork0.size() - 1] = num_t(int(0));
-        auto outwork(revertProgramInvariant<num_t>(L[j] * makeProgramInvariant<num_t>(vwork0).first) );
+        auto outwork(revertProgramInvariant<num_t>(L[j] * vwork) );
         for(int n = 0; n < outs[j].rows(); n ++)
           outs[j].row(n) = outwork.subVector(n * outs[j].cols(), outs[j].cols());
       }
@@ -116,12 +118,12 @@ int main(int argc, const char* argv[]) {
     in.resize(argc - 2);
     noise.resize(in.size());
           int sz(0);
-    const int num(argv[1][1] == '+' ? sqrt(num_t(in.size())) : (argv[1][0] == '0' ? num_t(int(1)) : log(num_t(in.size())) / log(num_t(int(2)))));
+    const int num(argv[1][1] == '+' ? sqrt(num_t(in.size()) / num_t(int(3))) : (argv[1][0] == '0' ? num_t(int(1)) : log(num_t(in.size()) / num_t(int(3))) / log(num_t(int(2)))));
     for(int i = 2; i < argc; i ++) {
       if(! loadp2or3<num_t>(in[i - 2], argv[i])) continue;
       assert(in[0][0].rows() == in[i - 2][0].rows() &&
              in[0][0].cols() == in[i - 2][0].cols());
-      if(i == 2) sz = int(sqrt(num_t(min(int(in.size()), int(in[i - 2][0].rows())))));
+      if(i == 2) sz = int(sqrt(num_t(min(int(in.size()), int(in[i - 2][0].rows()))) / num_t(int(3))));
       noise[i - 2].resize(num, SimpleMatrix<num_t>(sz, sz));
       for(int j = 0; j < num; j ++) {
         for(int n = 0; n < sz; n ++)
@@ -157,18 +159,19 @@ int main(int argc, const char* argv[]) {
     for(int j = 0; j < in[0].size(); j ++)
       for(int m = 0; m < in[0][0].rows() * in[0][0].cols(); m ++){
         cerr << j * in[0][0].rows() * in[0][0].cols() + m << " / " << in[0][0].rows() * in[0][0].cols() * in[0].size() << endl;
-        SimpleMatrix<num_t> work(num * in.size(), shrink[0][0].rows() * shrink[0][0].cols() + 2);
+        SimpleMatrix<num_t> work(num * in.size(), shrink[0][0].rows() * shrink[0][0].cols() * in[0].size() + 2);
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
-        for(int i = 0; i < in.size(); i ++)
+        for(int ii = 0; ii < in.size(); ii ++)
           for(int jj = 0; jj < num; jj ++) {
-            SimpleVector<num_t> vwork(shrink[i][j].rows() * shrink[i][j].cols() + 1);
-            for(int n = 0; n < shrink[i][j].rows(); n ++)
-              for(int nn = 0; nn < shrink[i][j].cols(); nn ++)
-                vwork[n * shrink[i][j].cols() + nn] = shrink[i][j](n, nn) * noise[i][jj](n, nn);
-            vwork[vwork.size() - 1] = in[i][j](m / in[0][0].cols(), m % in[0][0].cols());
-            work.row(i * num + jj) = makeProgramInvariant<num_t>(vwork).first;
+            SimpleVector<num_t> vwork(shrink[ii][j].rows() * shrink[ii][j].cols() * in[0].size() + 1);
+            for(int i = 0; i < in[0].size(); i ++)
+              for(int n = 0; n < shrink[i][j].rows(); n ++)
+                for(int nn = 0; nn < shrink[i][j].cols(); nn ++)
+                  vwork[i * shrink[i][j].rows() * shrink[i][j].cols() + n * shrink[i][j].cols() + nn] = shrink[i][j](n, nn) * noise[i][jj](n, nn);
+            vwork[vwork.size() - 1] = in[ii][j](m / in[0][0].cols(), m % in[0][0].cols());
+            work.row(ii * num + jj) = makeProgramInvariant<num_t>(vwork).first;
           }
         auto vwork(linearInvariant(work));
         vwork /= - num_t(vwork[vwork.size() - 2]);
