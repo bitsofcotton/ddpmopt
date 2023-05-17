@@ -3462,28 +3462,6 @@ private:
   int step;
 };
 
-// N.B. persistent raw prediction.
-template <typename T> class Prange {
-public:
-  inline Prange() { ; }
-  inline Prange(const int& status) {
-    assert(0 < status);
-    p1 = P1I<T>(int(sqrt(T(status))) );
-    this->status = status;
-  }
-  inline ~Prange() { ; }
-  inline T next(const SimpleVector<T>& in) {
-    T M(int(1));
-    for(int i = 0; i < in.size(); i ++) M = max(M, abs(in[i]));
-    return max(- M, min(M, (
-      max(- M, min(M, p0.next(in))) +
-      max(- M, min(M, p1.next(in))) ) / T(int(2)) ));
-  }
-  P0maxRank<T> p0;
-  P1I<T> p1;
-  int status;
-};
-
 // N.B. we omit high frequency part (1/f(x) input) to be treated better in P.
 template <typename T, typename P> class PBond {
 public:
@@ -3537,7 +3515,7 @@ template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > 
 #endif
   for(int j = 0; j < invariant[0].size(); j ++) {
     cerr << j << " / " << invariant[0].size() << endl;
-    idFeeder<T> pb(invariant.size());
+    idFeeder<T> pb(min(int(11), int(invariant.size())));
     idFeeder<T> pf(invariant.size());
     for(int k = 0; k < invariant.size(); k ++)
       pb.next(invariant[invariant.size() - k - 1][j]);
@@ -3545,7 +3523,7 @@ template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > 
       pf.next(invariant[k][j]);
     for(int i = 0; i < p0; i ++) {
       northPole<T, P0maxRank0<T> > q0(P0maxRank0<T>(i + 1));
-      P1I<T> q1(int(sqrt(T(int(invariant.size()) - (i + 1)))), i + 1);
+      P1I<T> q1(min(int(6), int(sqrt(T(int(invariant.size()) - (i + 1))))), i + 1);
       try {
         q[i][j] = (q0.next(pb.res) + q1.next(pb.res)) / T(int(2));
       } catch(const char* e) {
