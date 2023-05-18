@@ -64,6 +64,7 @@ int main(int argc, const char* argv[]) {
 //#define int int64_t
 #define int int32_t
   auto len(1 < argc ? std::atoi(argv[1]) : 0);
+  if(0 <= len) len = min(int(6), len);
   if(len < 0) {
     int size(0);
     std::cin >> size;
@@ -100,7 +101,7 @@ int main(int argc, const char* argv[]) {
     string s;
     string t;
     while(std::getline(std::cin, s, '\n')) t += s;
-    if(! len) len = int(ceil(pow(num_t(int(t.size())), num_t(int(1)) / num_t(int(6)) ))) + 1;
+    if(! len) len = min(int(6), int(ceil(pow(num_t(int(t.size())), num_t(int(1)) / num_t(int(6)) ))) + 1);
     vector<SimpleVector<num_t> > work;
     work.reserve(t.size() - len + 1);
     for(int i = 0; i <= t.size() - len; i ++) {

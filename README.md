@@ -15,26 +15,11 @@ Also, we need to do ulimit or edit /etc/login.conf for large malloc use cases re
 Also, if we run these programs with openmp, we need large shared memory size.
 They are usually configurable by sysctl on unix-like systems.
 
-# Tips on small images
-If we treat small images instead of the originals, they seems to be better by looking, but if we treat original images as some slided parts of them and invert originals, they doesn't enhance at all in these programs.
-
-# Tips on predg/qredg
-We take class Prange prediction on each pixel of makeProgramInvariant.
-This is because we make the hypothesis there exists hidden invariant on whole of the set of images for each image in complexity-wise meaning.
-
-# Tips on context structure we don't suppose
-We don't suppose the structure on the inputs that effects the whole program differential equation coefficient or its distribution who describes the structure.
-So we only make the hypothesis above, we should shrink the images after \[pq\]redg or ddpmopt. This is because only the each pixel context on whole invariant is determined.
-
-# Tips on goki check cc denlarge penlarge chain
-Some chain causes non expected result they seems to be not broken in meaning.
-So we should use per one task per one method.
-Also, we should use huge number of the input datas because of non context-full but calculation over-{} return result gained otherwise.
-However, we recommend you and us to use imagemagick option -gamma ... -despeckle -despeckle -resize ... -normalize after predg/qredg.
-
-# Tips on accuracy
-We need huge accuracy to get accurate upbounded result on \[pq\]redg.
-This is because the complexity upper bound hypothesis we make depends on calculation accuracy itself.
+# goki denlarge chain
+We recommend you and us to use imagemagick option -gamma ... -resize ... -despeckle -despeckle -resize ... -normalize after ddpm/predg/qredg.
+This is because the one we apply filter doesn't have meaning analytical enough.
+Despite each image invariant have analytical meaning enough, the each pixel prediction doesn't.
+In detail, please refer randtools General Tips K, L.
 
 # Usage:
     ./ddpmopt 0  <in0.ppm> ... > cache.txt
@@ -65,4 +50,5 @@ This is because the complexity upper bound hypothesis we make depends on calcula
 2023/04/19 add topt.cc.
 2023/04/21 shape up around makeProgramInvariant/revertProgramInvariant, algorithm changed.
 2023/04/23 qredg.cc prediction/original norm fix.
+2023/05/18 predv function change to better analytical, update README.md.
 
