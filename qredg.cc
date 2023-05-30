@@ -63,10 +63,10 @@ int main(int argc, const char* argv[]) {
     for(int k = 0; k < p.first.size(); k ++)
       for(int j = 0; j < work.size(); j ++) {
         swork[j].row(p.first.size() - k - 1) =
-          p.first[k].subVector(j * p.first[k].size() / work.size(),
+          p.second[k].subVector(j * p.first[k].size() / work.size(),
             swork[j].cols()) * norm2;
         swork[j].row(p.first.size() + work[j].rows() + k) =
-          p.second[k].subVector(j * p.first[k].size() / work.size(),
+          p.first[k].subVector(j * p.first[k].size() / work.size(),
             swork[j].cols()) * norm2;
       }
     if(! savep2or3<num_t>(argv[i], normalize<num_t>(swork)) )
