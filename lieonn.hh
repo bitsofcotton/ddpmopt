@@ -3527,35 +3527,45 @@ template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > 
 #endif
   for(int j = 0; j < invariant[0].size(); j ++) {
     cerr << j << " / " << invariant[0].size() << endl;
-    idFeeder<T> pb(min(int(11) * (j + 1), int(invariant.size())));
-    idFeeder<T> pf(invariant.size());
-    for(int k = 0; k < invariant.size(); k ++)
-      pb.next(invariant[invariant.size() - k - 1][j]);
-    for(int k = 0; k < invariant.size(); k ++)
-      pf.next(invariant[k][j]);
+    idFeeder<T> pb0(min(int(11) * (j + 1), int(invariant.size())));
+    idFeeder<T> pf0(min(int(11) * (j + 1), int(invariant.size())));
+    idFeeder<T> pb1(invariant.size());
+    idFeeder<T> pf1(invariant.size());
+    for(int k = 0; k < invariant.size(); k ++) {
+      pb0.next(invariant[invariant.size() - k - 1][j]);
+      pb1.next(invariant[invariant.size() - k - 1][j]);
+    }
+    for(int k = 0; k < invariant.size(); k ++) {
+      pf0.next(invariant[k][j]);
+      pf1.next(invariant[k][j]);
+    }
     // N.B. normalize with 0 < v 's maximum orthogonality:
-    T Mb(log(pb.res[0] + one65536));
-    T Mf(log(pf.res[0] + one65536));
-    for(int k = 1; k < pb.res.size(); k ++)
-      Mb += log(pb.res[k] + one65536);
-    for(int k = 1; k < pf.res.size(); k ++)
-      Mf += log(pf.res[k] + one65536);
-    Mb /= T(int(pb.res.size()));
-    Mf /= T(int(pf.res.size()));
-    Mb  = - exp(Mb);
-    Mf  = - exp(Mf);
-    pb.res /= Mb;
-    pf.res /= Mf;
+    T Mb0(log(pb0.res[0] + one65536));
+    T Mb1(log(pb1.res[0] + one65536));
+    T Mf0(log(pf0.res[0] + one65536));
+    T Mf1(log(pf1.res[0] + one65536));
+    for(int k = 1; k < pb0.res.size(); k ++)
+      Mb0 += log(pb0.res[k] + one65536);
+    for(int k = 1; k < pb1.res.size(); k ++)
+      Mb1 += log(pb1.res[k] + one65536);
+    for(int k = 1; k < pf0.res.size(); k ++)
+      Mf0 += log(pf0.res[k] + one65536);
+    for(int k = 1; k < pf1.res.size(); k ++)
+      Mf1 += log(pf1.res[k] + one65536);
+    pb0.res /= (Mb0 = - exp(Mb0 / T(int(pb0.res.size())) ) );
+    pb1.res /= (Mb1 = - exp(Mb1 / T(int(pb1.res.size())) ) );
+    pf0.res /= (Mf0 = - exp(Mf0 / T(int(pf0.res.size())) ) );
+    pf1.res /= (Mf1 = - exp(Mf1 / T(int(pf1.res.size())) ) );
     for(int i = 0; i < p0; i ++) {
       northPole<T, P0maxRank0<T> > q0(P0maxRank0<T>(i + 1));
       P1I<T> q1(min(int(6), int(sqrt(T(int(invariant.size()) - (i + 1))))), i + 1);
       try {
-        q[i][j] = (q0.next(pb.res) + q1.next(pb.res)) / T(int(2)) * Mb;
+        q[i][j] = (q0.next(pb0.res) * Mb0 + q1.next(pb1.res) * Mb1) / T(int(2));
       } catch(const char* e) {
         q[i][j] = T(int(0));
       }
       try {
-        p[i][j] = (q0.next(pf.res) + q1.next(pf.res)) / T(int(2)) * Mf;
+        p[i][j] = (q0.next(pf0.res) * Mf0 + q1.next(pf1.res) * Mf1) / T(int(2));
       } catch(const char* e) {
         p[i][j] = T(int(0));
       }
