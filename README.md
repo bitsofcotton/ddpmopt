@@ -51,4 +51,5 @@ In detail, please refer randtools General Tips K, L.
 2023/04/21 shape up around makeProgramInvariant/revertProgramInvariant, algorithm changed.
 2023/04/23 qredg.cc prediction/original norm fix.
 2023/05/18 predv function change to better analytical, update README.md.
+2023/06/08 predv normalization fix.
 

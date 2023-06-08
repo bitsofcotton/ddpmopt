@@ -64,7 +64,6 @@ int main(int argc, const char* argv[]) {
 //#define int int64_t
 #define int int32_t
   auto len(1 < argc ? std::atoi(argv[1]) : 0);
-  if(0 <= len) len = min(int(6), len);
   if(len < 0) {
     int size(0);
     std::cin >> size;
@@ -83,17 +82,15 @@ int main(int argc, const char* argv[]) {
         lwork[lwork.size() - 1] = num_t(int(0));
         int   Midx(- 1);
         num_t M(int(0));
-        num_t sec(int(1));
+        const auto pinv(makeProgramInvariant<num_t>(lwork));
         for(int k = 0; k < work.size(); k += 2) {
-          const auto pinv(makeProgramInvariant<num_t>(lwork));
           const auto lM(abs(work[k].dot(pinv.first) ));
           if(Midx < 0 || lM < M) {
             M    = lM;
-            sec  = pinv.second;
             Midx = k;
           }
         }
-        s += char(int(revertProgramInvariant<num_t>(make_pair(work[++ Midx].dot(makeProgramInvariant<num_t>(lwork).first), sec)) * num_t(int(256)) ));
+        s += char(int(revertProgramInvariant<num_t>(make_pair(work[++ Midx].dot(makeProgramInvariant<num_t>(lwork).first), num_t(int(1)) /* pinv.second */)) * num_t(int(256)) ));
       }
       std::cout << s << std::endl;
     }

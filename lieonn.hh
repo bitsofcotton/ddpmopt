@@ -3498,9 +3498,10 @@ public:
   T M;
 };
 
-template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > predv(const vector<SimpleVector<T> >& in) {
+template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > predv(const vector<SimpleVector<T> >& in, int msz = - 1) {
   int p0(0);
-  for( ; p0 < in.size() / 2; p0 ++) {
+  if(msz < 0) msz = in.size();
+  for( ; p0 < min(int(in.size() / 2), msz); p0 ++) {
     if(max(int(in.size()) - 2 * (6 + (p0 + 1)), int(sqrt(T(int(in.size()) - (p0 + 1))))) < 1) break;
     const auto& pn(pnextcacher<T>(min(int(11) * (p0 + 1), int(in.size())), p0 + 1, 4));
     if(T(min(int(11) * (p0 + 1), int(in.size()))) < pn.dot(pn)) break;
@@ -3578,6 +3579,7 @@ template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > 
     const auto norm(p[i][p[i].size() - 1]);
     p[i][p[i].size() - 1] = T(int(0));
     p[i] = revertProgramInvariant<T>(p[i]);
+    p[i][p[i].size() - 1] = T(int(0));
     const auto normp(sqrt(p[i].dot(p[i])));
     if(normp != T(int(0))) p[i] *= norm / normp;
   }
@@ -3585,6 +3587,7 @@ template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > 
     const auto norm(q[i][q[i].size() - 1]);
     q[i][q[i].size() - 1] = T(int(0));
     q[i] = revertProgramInvariant<T>(q[i]);
+    q[i][q[i].size() - 1] = T(int(0));
     const auto normq(sqrt(q[i].dot(q[i])));
     if(normq != T(int(0))) q[i] *= norm / normq;
   }
