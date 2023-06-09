@@ -46,7 +46,7 @@ int main(int argc, const char* argv[]) {
       norm2 += pwork[k].dot(pwork[k]);
     }
     norm2 /= num_t(work[0].rows());
-    auto p(predv<num_t>(pwork, 20));
+    auto p(predv<num_t>(pwork));
     vector<SimpleMatrix<num_t> > swork(work.size(),
       SimpleMatrix<num_t>(work[0].rows() + p.first.size() * 2,
         work[0].cols()).O());
