@@ -7,7 +7,7 @@ There exists Denoising Diffusion Probabilistic Models (DDPM; Ho et al. 2020). So
 
 # Tips on malloc options
 Some of the implementation needs to run them with specifying malloc options.
-(cf. &gt;&gt;&gt; on OpenBSD)
+(cf. jjj&gt;&gt;&gt; on OpenBSD)
 This is because we need huge number of allocations/frees to run.
 
 Also, we need to do ulimit or edit /etc/login.conf for large malloc use cases required by larger than medium sized input.
@@ -16,10 +16,10 @@ Also, if we run these programs with openmp, we need large shared memory size.
 They are usually configurable by sysctl on unix-like systems.
 
 # goki denlarge chain
-We recommend you and us to use imagemagick option -gamma ... -resize ... -despeckle -despeckle -resize ... -normalize after ddpm/predg/qredg.
-This is because the one we apply filter doesn't have meaning analytical enough.
-Despite each image invariant have analytical meaning enough, the each pixel prediction doesn't.
-In detail, please refer randtools General Tips K, L.
+We recommend you and us to use goki denlarge+? 1 ..., then, mogrify -equalize ..., then, use of some enlarge methods.
+This is because we shrink the analytical noises then, enlarge somewhat reasonable.
+Also, we recommend you and us to use some of the img2img method to denoise these outputs. This is because we have multiple context in the single image, so we need to get whole-image reasonable ones.
+Either, we use some of the method above to use ddpmopt in this repository, we cannot test them because of machine power and the data amount we have.
 
 # Usage:
     ./ddpmopt 0  <in0.ppm> ... > cache.txt
@@ -52,4 +52,5 @@ In detail, please refer randtools General Tips K, L.
 2023/04/23 qredg.cc prediction/original norm fix.
 2023/05/18 predv function change to better analytical, update README.md.
 2023/06/08 predv normalization fix.
+2023/06/11 topt.cc output normalization fix. update readme.
 

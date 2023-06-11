@@ -128,7 +128,9 @@ int main(int argc, const char* argv[]) {
 */
         ;
       } else {
-        auto vvwork(linearInvariant(lwork));
+              auto vvwork(linearInvariant(lwork));
+        const auto n2(vvwork.dot(vvwork));
+        if(n2 != num_t(int(0))) vvwork /= sqrt(n2);
         cout << vvwork;
         vvwork /= - num_t(vvwork[vvwork.size() - 2]);
         vvwork[vvwork.size() - 2] = num_t(int(0));
