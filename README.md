@@ -4,6 +4,7 @@ This isn't useful to get full context meaning-full image by once, but we can app
 
 # Context
 There exists Denoising Diffusion Probabilistic Models (DDPM; Ho et al. 2020). So this is another try on them.
+However, we don't use them because after the some of the implementation, we only focus to enlarge with some categorized learned vector without noise. So we shrink input images to multiple meaning, then, returns one meaning output.
 
 # Tips on malloc options
 Some of the implementation needs to run them with specifying malloc options.
@@ -20,17 +21,9 @@ However, openmp costs large enough beat with single core even in multicore becau
 We recommend you and us to use goki denlarge+? 1 ..., this is because to denoise analytic noises we cannot reduce by calculate them once.
 Then, we recoomend one of the two methods after denlarge+?: (i) mogrify -despeckle -despeckle -equalize ... or (ii) use some of the enlarge method alike stable diffusion.
 
-# The ddpmopt binary glitch
-We need rewrite to beat with ddpmopt binary as up to 6 or 11 elements they represents per each stage caused by s2m2s condition.
-We need 3x3 tile or so to represent them.
-
 # Usage:
-    ./ddpmopt 0  <in0.ppm> ... > cache.txt
-    ./ddpmopt 00 <in0.ppm> ... > cache.txt
-    ./ddpmopt +  <in0.ppm> ... > cache.txt
-    ./ddpmopt ++ <in0.ppm> ... > cache.txt
-    ./ddpmopt -  <inout0.ppm> ... < cache.txt
-    ./ddpmopt -0 <inout0.ppm> ... < cache.txt
+    ./ddpmopt 0 <in0.ppm> ... > cache.txt
+    ./ddpmopt - <inout0.ppm> ... < cache.txt
     ./topt <dim>? < in.txt > cache.txt
     cat cache.txt - | ./topt -<num>
     ./predg <in0.ppm> ...
@@ -56,5 +49,5 @@ We need 3x3 tile or so to represent them.
 2023/05/18 predv function change to better analytical, update README.md.
 2023/06/08 predv normalization fix.
 2023/06/11 topt.cc output normalization fix. update readme.
-2023/06/13 update readme.
+2023/06/13 update readme. ddpmopt.cc large change.
 

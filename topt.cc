@@ -90,7 +90,7 @@ int main(int argc, const char* argv[]) {
             Midx = k;
           }
         }
-        s += char(int(revertProgramInvariant<num_t>(make_pair(work[++ Midx].dot(makeProgramInvariant<num_t>(lwork).first), num_t(int(1)) /* pinv.second */)) * num_t(int(256)) ));
+        s += char(int(revertProgramInvariant<num_t>(make_pair(work[++ Midx].dot(pinv.first), num_t(int(1)) /* pinv.second */)) * num_t(int(256)) ));
       }
       std::cout << s << std::endl;
     }
