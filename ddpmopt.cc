@@ -56,7 +56,7 @@ int main(int argc, const char* argv[]) {
 //#define int int64_t
 #define int int32_t
   assert(1 < argc);
-  const auto sz(3);
+  const auto sz(2);
   const auto m(argv[1][0]);
   if(m == '-') {
     vector<vector<SimpleVector<num_t> > > L;
@@ -65,12 +65,18 @@ int main(int argc, const char* argv[]) {
       auto sz0(0);
       std::cin >> sz0;
       L[i].reserve(sz0 * 2);
-      for(int j = 0; j < sz0 * 2; j ++) {
+      for(int j = 0; j < sz0; j ++) {
         SimpleVector<num_t> b;
         std::cin >> b;
+        auto bb(b);
+        bb[sz * sz] = num_t(int(0));
+        L[i].emplace_back(bb /= sqrt(bb.dot(bb)));
+        b /= - num_t(b[sz * sz]);
+        b[sz * sz] = num_t(int(0));
         L[i].emplace_back(b);
         assert(L[0][0].size() == L[i][j].size());
       }
+      assert(L[i].size());
     }
     for(int i = 2; i < argc; i ++) {
       cerr << i - 2 << " / " << argc - 2 << endl;
@@ -80,7 +86,7 @@ int main(int argc, const char* argv[]) {
       {
         vector<vector<SimpleMatrix<num_t> > > buf;
         buf.emplace_back(out);
-        auto shrink0(shrinken(buf));
+        auto shrink0(shrinken(buf, sz));
         shrink = shrink0[0];
       }
       auto outs(out);
@@ -88,24 +94,28 @@ int main(int argc, const char* argv[]) {
         outs[n] = SimpleMatrix<num_t>(shrink[n].rows() * sz,
                                       shrink[n].cols() * sz).O();
       SimpleVector<num_t> buf(shrink.size() * shrink[0].rows() * shrink[0].cols() * sz * sz);
+      SimpleVector<num_t> normal(sz * sz);
       SimpleVector<num_t> v(sz * sz + 1);
+      SimpleVector<num_t> vv(v.size() + 1);
       buf.O();
+      normal.O();
       for(int j = 0; j < shrink.size(); j ++)
         for(int idx = 0; idx < sz * sz; idx ++)
           for(int m = 0; m < shrink[j].rows() * shrink[j].cols(); m ++) {
-            for(int ii = 0; ii < sz; ii ++)
-              for(int jj = 0; jj < sz; jj ++)
-                v[ii * sz + jj] = shrink[j](
-                  min(shrink[j].rows() - 1,
-                    m / shrink[j].cols() + ii),
-                  min(shrink[j].cols() - 1,
-                    m % shrink[j].cols() + jj) );
-            v[sz * sz] = num_t(int(0));
-            const auto vv(makeProgramInvariant<num_t>(v));
             int   Midx(- 1);
             num_t M(int(0));
+            for(int ii = 0; ii < sz; ii ++)
+              for(int jj = 0; jj < sz; jj ++)
+                if((m / shrink[j].cols()) + ii < shrink[j].rows() &&
+                   (m % shrink[j].cols()) + jj < shrink[j].cols())
+                  v[ii * sz + jj] = shrink[j](
+                    (m / shrink[j].cols()) + ii,
+                    (m % shrink[j].cols()) + jj);
+                else goto next0;
+            v[sz * sz] = num_t(int(0));
+            vv = makeProgramInvariant<num_t>(v).first;
             for(int k = 0; k < L[idx].size(); k += 2) {
-              const auto lM(abs(L[idx][k].dot(vv.first) ));
+              const auto lM(abs(L[idx][k].dot(vv) ));
               if(Midx < 0 || lM < M) {
                 M    = lM;
                 Midx = k;
@@ -114,16 +124,29 @@ int main(int argc, const char* argv[]) {
             assert(0 <= Midx && Midx < L[idx].size());
             buf[m + idx * shrink[j].rows() * shrink[j].cols() +
                     j * sz * sz * shrink[j].rows() * shrink[j].cols()] =
-              L[idx][++ Midx].dot(vv.first);
+              L[idx][++ Midx].dot(vv);
+           next0:
+            ;
           }
       buf = revertProgramInvariant<num_t>(buf);
+      for(int idx = 0; idx < normal.size(); idx ++) {
+        for(int j = 0; j < shrink.size(); j ++)
+          for(int m = 0; m < shrink[j].rows() * shrink[j].cols(); m ++)
+            normal[idx] +=
+              buf[m + idx * shrink[j].rows() * shrink[j].cols() +
+                      j * sz * sz * shrink[j].rows() * shrink[j].cols()] *
+              buf[m + idx * shrink[j].rows() * shrink[j].cols() +
+                      j * sz * sz * shrink[j].rows() * shrink[j].cols()];
+        normal[idx] = sqrt(normal[idx]);
+      }
       for(int j = 0; j < shrink.size(); j ++)
         for(int idx = 0; idx < sz * sz; idx ++)
           for(int m = 0; m < shrink[j].rows() * shrink[j].cols(); m ++)
             outs[j](m / shrink[j].cols()  * sz + idx / sz,
                    (m % shrink[j].cols()) * sz + idx % sz) =
               buf[m + idx * shrink[j].rows() * shrink[j].cols() +
-                      j * sz * sz * shrink[j].rows() * shrink[j].cols()];
+                      j * sz * sz * shrink[j].rows() * shrink[j].cols()] /
+                normal[idx];
       if(! savep2or3<num_t>(argv[i], normalize<num_t>(outs)) )
         cerr << "failed to save." << endl;
     }
@@ -135,7 +158,7 @@ int main(int argc, const char* argv[]) {
       assert(in[0][0].rows() == in[i - 2][0].rows() &&
              in[0][0].cols() == in[i - 2][0].cols());
     }
-    auto shrink(shrinken<num_t>(in));
+    auto shrink(shrinken<num_t>(in, sz));
     for(int i0 = 0; i0 < sz * sz; i0 ++) {
       vector<SimpleVector<num_t> > v;
       v.reserve(in.size() * in[0].size() * in[0][0].rows() * in[0][0].cols());
@@ -146,40 +169,36 @@ int main(int argc, const char* argv[]) {
           for(int m = 0; m < shrink[i][j].rows() * shrink[i][j].cols(); m ++) {
             for(int ii = 0; ii < sz; ii ++)
               for(int jj = 0; jj < sz; jj ++)
-                tv[ii * sz + jj] = shrink[i][j](
-                  min(shrink[i][j].rows() - 1, 
-                     m / shrink[i][j].cols()  + ii),
-                  min(shrink[i][j].cols() - 1,
-                    (m % shrink[i][j].cols()) + jj) );
+                if((m / shrink[i][j].cols()) + ii < shrink[i][j].rows() &&
+                   (m % shrink[i][j].cols()) + jj < shrink[i][j].cols())
+                  tv[ii * sz + jj] = shrink[i][j](
+                    (m / shrink[i][j].cols()) + ii,
+                    (m % shrink[i][j].cols()) + jj);
+                else goto next1;
             tv[sz * sz] = in[i][j](
                min(in[i][j].rows() - 1,
                  (m / shrink[i][j].cols()) * sz + i0 / sz),
                min(in[i][j].cols() - 1,
                  (m % shrink[i][j].cols()) * sz + i0 % sz) );
             v.emplace_back(tv);
+           next1:
+            ;
           }
         }
       auto c(crush(v));
       int  cnt(0);
       for(int i = 0; i < c.size(); i ++)
-        if(! (c[i].first.size() < v[0].size() + 1 + 1 + 1) ) cnt ++;
+        if(! (c[i].first.size() < v[0].size() + 1 + 1) ) cnt ++;
       std::cout << cnt << std::endl;
       for(int i = 0; i < c.size(); i ++) {
         SimpleMatrix<num_t> lc(c[i].first.size(), v[0].size() + 1);
         for(int j = 0; j < lc.rows(); j ++)
           lc.row(j) = makeProgramInvariant<num_t>(c[i].first[j]).first;
-        if(lc.rows() <= lc.cols() + 1) {
+        if(lc.rows() <= lc.cols()) {
           /* */
           ;
-        } else {
-                auto llc(linearInvariant(lc));
-          const auto n2(llc.dot(llc));
-          if(n2 != num_t(int(0))) llc /= sqrt(n2);
-          cout << llc;
-          llc /= - num_t(llc[llc.size() - 2]);
-          llc[llc.size() - 2] = num_t(int(0));
-          cout << llc;
-        }
+        } else
+          cout << linearInvariant<num_t>(lc);
       }
     }
   }

@@ -69,9 +69,17 @@ int main(int argc, const char* argv[]) {
     std::cin >> size;
     std::string s;
     vector<SimpleVector<num_t> > work;
-    work.resize(size * 2);
-    for(int j = 0; j < size * 2; j ++)
-      std::cin >> work[j];
+    work.reserve(size * 2);
+    for(int j = 0; j < size; j ++) {
+      SimpleVector<num_t> vwork;
+      std::cin >> vwork;
+      auto vvwork(vwork);
+      vvwork[vvwork.size() - 2] = num_t(int(0));
+      work.emplace_back(vvwork /= sqrt(vvwork.dot(vvwork)));
+      vwork /= - num_t(vwork[vwork.size() - 2]);
+      vwork[vwork.size() - 2] = num_t(int(0));
+      work.emplace_back(vwork);
+    }
     while(std::getline(std::cin, s, '\n')) {
       SimpleVector<num_t> lwork(work[0].size() - 1);
       for(int j = 0; j < abs(len); j ++) {
@@ -90,6 +98,7 @@ int main(int argc, const char* argv[]) {
             Midx = k;
           }
         }
+        assert(0 <= Midx && Midx < work.size() );
         s += char(int(revertProgramInvariant<num_t>(make_pair(work[++ Midx].dot(pinv.first), num_t(int(1)) /* pinv.second */)) * num_t(int(256)) ));
       }
       std::cout << s << std::endl;
@@ -111,13 +120,13 @@ int main(int argc, const char* argv[]) {
     //std::cout << vwork.size() << std::endl;
     int cnt(0);
     for(int i = 0; i < vwork.size(); i ++)
-      if(! (vwork[i].first.size() < len + 1 + 1 + 1) ) cnt ++;
+      if(! (vwork[i].first.size() < len + 1 + 1) ) cnt ++;
     std::cout << cnt << std::endl;
     for(int i = 0; i < vwork.size(); i ++) {
       SimpleMatrix<num_t> lwork(vwork[i].first.size(), len + 1);
       for(int j = 0; j < lwork.rows(); j ++)
         lwork.row(j) = makeProgramInvariant<num_t>(vwork[i].first[j]).first;
-      if(lwork.rows() <= lwork.cols() + 1) {
+      if(lwork.rows() <= lwork.cols()) {
 /*
         for(int j = 1; j < lwork.rows(); j ++)
           lwork.row(0) += lwork.row(j);
@@ -127,15 +136,8 @@ int main(int argc, const char* argv[]) {
         cout << lwork.row(0);
 */
         ;
-      } else {
-              auto vvwork(linearInvariant(lwork));
-        const auto n2(vvwork.dot(vvwork));
-        if(n2 != num_t(int(0))) vvwork /= sqrt(n2);
-        cout << vvwork;
-        vvwork /= - num_t(vvwork[vvwork.size() - 2]);
-        vvwork[vvwork.size() - 2] = num_t(int(0));
-        cout << vvwork;
-      }
+      } else
+        cout << linearInvariant<num_t>(lwork);
     }
   }
   return 0;
