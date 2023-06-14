@@ -23,7 +23,7 @@ Then, we recoomend one of the two methods after denlarge+?: (i) mogrify -despeck
 
 # Usage:
     ./ddpmopt + <in0.ppm> ... > cache.txt
-    ./ddpmopt - <inout0.ppm> ... < cache.txt
+    ./ddpmopt -<cut off percent> <inout0.ppm> ... < cache.txt
     ./topt <dim>? < in.txt > cache.txt
     cat cache.txt - | ./topt -<num>
     ./predg <in0.ppm> ...

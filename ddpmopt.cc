@@ -53,6 +53,42 @@ template <typename T> static inline vector<vector<SimpleMatrix<T> > > shrinken(c
   return shrink;
 }
 
+template <typename T> static inline SimpleVector<T> norm(const SimpleVector<T>& in, const int& sz, const vector<SimpleMatrix<T> >& ms, const vector<SimpleMatrix<T> >& mso, const T& effect0 = T(int(2) / int(10))) {
+  auto effect(effect0);
+  if(T(int(1)) / T(int(2)) < effect) effect = T(int(1)) - effect;
+  assert(T(int(0)) <= effect && effect <= T(int(1)) / T(int(2)));
+  auto buf(in);
+  for(int idx = 0; idx < sz * sz; idx ++) {
+    auto lev(in.subVector(idx * ms[0].rows() * ms[0].cols(), ms[0].rows() * ms[0].cols()).entity);
+    for(int j = 1; j < ms.size(); j ++) {
+      auto w(in.subVector(idx * ms[j].rows() * ms[j].cols() + j * sz * sz * ms[j].rows() * ms[j].cols(), ms[j].rows() * ms[j].cols()).entity);
+      lev.insert(lev.end(), w.begin(), w.end());
+    }
+    std::sort(lev.begin(), lev.end());
+    T   normal(int(0));
+    int cnt(0);
+    for(int j = 0; j < ms.size(); j ++)
+      for(int m = 0; m < ms[j].rows() * ms[j].cols(); m ++)
+        if((m / ms[j].cols()) * sz + idx / sz < mso[j].rows() &&
+           (m % ms[j].cols()) * sz + idx % sz < mso[j].cols()) {
+          auto& p(buf[m + idx * ms[j].rows() * ms[j].cols() +
+                  j * sz * sz * ms[j].rows() * ms[j].cols()]);
+          p = max(lev[int(T(lev.size()) * effect)],
+              min(lev[int(T(lev.size()) * (T(int(1)) - effect))], p));
+          normal += p * p;
+          cnt ++;
+        }
+    normal = sqrt(normal / T(cnt));
+    for(int j = 0; j < ms.size(); j ++)
+      for(int m = 0; m < ms[j].rows() * ms[j].cols(); m ++)
+        if((m / ms[j].cols()) * sz + idx / sz < mso[j].rows() &&
+           (m % ms[j].cols()) * sz + idx % sz < mso[j].cols())
+          buf[m + idx * ms[j].rows() * ms[j].cols() +
+            j * sz * sz * ms[j].rows() * ms[j].cols()] /= normal;
+  }
+  return buf;
+}
+
 #undef int
 int main(int argc, const char* argv[]) {
 //#define int int64_t
@@ -92,8 +128,8 @@ int main(int argc, const char* argv[]) {
       }
       auto outs(out);
       for(int n = 0; n < outs.size(); n ++)
-        outs[n] = SimpleMatrix<num_t>(shrink[n].rows() * sz - sz * 2,
-                                      shrink[n].cols() * sz - sz * 2).O();
+        outs[n] = SimpleMatrix<num_t>(shrink[n].rows() * sz,
+                                      shrink[n].cols() * sz).O();
       SimpleVector<num_t> buf(shrink.size() * shrink[0].rows() * shrink[0].cols() * sz * sz);
       SimpleVector<num_t> v(sz * sz + 1);
       SimpleVector<num_t> vv(v.size() + 1);
@@ -127,31 +163,17 @@ int main(int argc, const char* argv[]) {
            next0:
             ;
           }
-      buf = revertProgramInvariant<num_t>(buf);
-      SimpleVector<num_t> normal(sz * sz);
-      for(int idx = 0; idx < normal.size(); idx ++) {
-        int cnt(0);
+      const auto effects(num_t(- std::atoi(argv[1])) / num_t(int(100)) );
+      buf = norm<num_t>(revertProgramInvariant<num_t>(norm<num_t>(buf, sz, shrink, outs, effects)), sz, shrink, outs, effects);
+      for(int idx = 0; idx < sz * sz; idx ++)
         for(int j = 0; j < shrink.size(); j ++)
-          for(int m = 0; m < shrink[j].rows() * shrink[j].cols(); m ++)
-            if((m / shrink[j].cols()) * sz + idx / sz < outs[j].rows() &&
-               (m % shrink[j].cols()) * sz + idx % sz < outs[j].cols()) {
-              const auto& b(buf[m + idx * shrink[j].rows() * shrink[j].cols() +
-                j * sz * sz * shrink[j].rows() * shrink[j].cols()]);
-              normal[idx] += b * b;
-              cnt ++;
-            }
-        normal[idx] = sqrt(normal[idx] / num_t(cnt));
-      }
-      for(int j = 0; j < shrink.size(); j ++)
-        for(int idx = 0; idx < sz * sz; idx ++)
           for(int m = 0; m < shrink[j].rows() * shrink[j].cols(); m ++)
             if((m / shrink[j].cols()) * sz + idx / sz < outs[j].rows() &&
                (m % shrink[j].cols()) * sz + idx % sz < outs[j].cols())
               outs[j]((m / shrink[j].cols()) * sz + idx / sz,
                       (m % shrink[j].cols()) * sz + idx % sz) =
                 buf[m + idx * shrink[j].rows() * shrink[j].cols() +
-                        j * sz * sz * shrink[j].rows() * shrink[j].cols()] /
-                  normal[idx];
+                        j * sz * sz * shrink[j].rows() * shrink[j].cols()];
       if(! savep2or3<num_t>(argv[i], normalize<num_t>(outs)) )
         cerr << "failed to save." << endl;
     }
