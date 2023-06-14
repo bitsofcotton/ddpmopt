@@ -53,7 +53,7 @@ template <typename T> static inline vector<vector<SimpleMatrix<T> > > shrinken(c
   return shrink;
 }
 
-template <typename T> static inline SimpleVector<T> norm(const SimpleVector<T>& in, const int& sz, const vector<SimpleMatrix<T> >& ms, const vector<SimpleMatrix<T> >& mso, const T& effect0 = T(int(2) / int(10))) {
+template <typename T> static inline SimpleVector<T> norm(const SimpleVector<T>& in, const int& sz, const vector<SimpleMatrix<T> >& ms, const vector<SimpleMatrix<T> >& mso, const T& effect0 = T(int(1) / int(3))) {
   auto effect(effect0);
   if(T(int(1)) / T(int(2)) < effect) effect = T(int(1)) - effect;
   assert(T(int(0)) <= effect && effect <= T(int(1)) / T(int(2)));
@@ -163,8 +163,7 @@ int main(int argc, const char* argv[]) {
            next0:
             ;
           }
-      const auto effects(num_t(- std::atoi(argv[1])) / num_t(int(100)) );
-      buf = norm<num_t>(revertProgramInvariant<num_t>(norm<num_t>(buf, sz, shrink, outs, effects)), sz, shrink, outs, effects);
+      buf = norm<num_t>(revertProgramInvariant<num_t>(norm<num_t>(buf, sz, shrink, outs)), sz, shrink, outs);
       for(int idx = 0; idx < sz * sz; idx ++)
         for(int j = 0; j < shrink.size(); j ++)
           for(int m = 0; m < shrink[j].rows() * shrink[j].cols(); m ++)

@@ -18,12 +18,16 @@ They are usually configurable by sysctl on unix-like systems.
 However, openmp costs large enough beat with single core even in multicore because of their (and our) memory architecture.
 
 # Denoise
-We recommend you and us to use goki denlarge+? 1 ..., this is because to denoise analytic noises we cannot reduce by calculate them once.
-Then, we recoomend one of the two methods after denlarge+?: (i) mogrify -despeckle -despeckle -equalize ... or (ii) use some of the enlarge method alike stable diffusion.
+We recommend you and us to use mogrify -resize 33.33...% ... after doing these operations.
+This is because we expect 2/3 on predg, qredg.
+
+# Tips around topt
+We cannot denoise topt because they predict one by one to continue.
+In some of the learning programs, they avoid some of the errors, however, this cannot avoid 2/3 limit without large data learning.
 
 # Usage:
     ./ddpmopt + <in0.ppm> ... > cache.txt
-    ./ddpmopt -<cut off percent> <inout0.ppm> ... < cache.txt
+    ./ddpmopt - <inout0.ppm> ... < cache.txt
     ./topt <dim>? < in.txt > cache.txt
     cat cache.txt - | ./topt -<num>
     ./predg <in0.ppm> ...

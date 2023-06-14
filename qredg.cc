@@ -53,10 +53,14 @@ int main(int argc, const char* argv[]) {
     for(int j = 0; j < work.size(); j ++)
       swork[j].setMatrix(p.first.size(), 0, work[j]);
     num_t pnorm2(int(0));
-    for(int j = 0; j < p.first.size(); j ++)
+    for(int j = 0; j < p.first.size(); j ++) {
+      p.first[j] = autoLevel<num_t>(p.first[j], int(num_t(p.first[j].size()) / num_t(int(3)) ));
       pnorm2 += p.first[j].dot(p.first[j]);
-    for(int j = 0; j < p.second.size(); j ++)
+    }
+    for(int j = 0; j < p.second.size(); j ++) {
+      p.second[j] = autoLevel<num_t>(p.second[j], int(num_t(p.second[j].size()) / num_t(int(3)) ));
       pnorm2 += p.second[j].dot(p.first[j]);
+    }
     pnorm2 /= num_t(p.first.size() + p.second.size());
     norm2  /= pnorm2;
     norm2   = sqrt(norm2);
