@@ -92,8 +92,8 @@ int main(int argc, const char* argv[]) {
       }
       auto outs(out);
       for(int n = 0; n < outs.size(); n ++)
-        outs[n] = SimpleMatrix<num_t>(out[n].rows() / sz * sz,
-                                      out[n].cols() / sz * sz).O();
+        outs[n] = SimpleMatrix<num_t>(shrink[n].rows() * sz - sz * 2,
+                                      shrink[n].cols() * sz - sz * 2).O();
       SimpleVector<num_t> buf(shrink.size() * shrink[0].rows() * shrink[0].cols() * sz * sz);
       SimpleVector<num_t> v(sz * sz + 1);
       SimpleVector<num_t> vv(v.size() + 1);
