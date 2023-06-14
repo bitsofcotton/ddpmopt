@@ -133,7 +133,6 @@ int main(int argc, const char* argv[]) {
         lwork.row(0) /= - num_t(lwork(0, lwork.cols() - 2));
         lwork(0, lwork.cols() - 2) = num_t(int(0));
         cout << lwork.row(0);
-        cout << lwork.row(0);
 */
         ;
       } else

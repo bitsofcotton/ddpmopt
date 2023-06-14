@@ -22,7 +22,7 @@ We recommend you and us to use goki denlarge+? 1 ..., this is because to denoise
 Then, we recoomend one of the two methods after denlarge+?: (i) mogrify -despeckle -despeckle -equalize ... or (ii) use some of the enlarge method alike stable diffusion.
 
 # Usage:
-    ./ddpmopt 0 <in0.ppm> ... > cache.txt
+    ./ddpmopt + <in0.ppm> ... > cache.txt
     ./ddpmopt - <inout0.ppm> ... < cache.txt
     ./topt <dim>? < in.txt > cache.txt
     cat cache.txt - | ./topt -<num>
@@ -50,4 +50,5 @@ Then, we recoomend one of the two methods after denlarge+?: (i) mogrify -despeck
 2023/06/08 predv normalization fix.
 2023/06/11 topt.cc output normalization fix. update readme.
 2023/06/13 update readme. ddpmopt.cc large change.
+2023/06/14 ddpmopt.cc fix now works, update readme.
 
