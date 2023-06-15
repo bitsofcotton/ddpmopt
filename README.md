@@ -18,8 +18,8 @@ They are usually configurable by sysctl on unix-like systems.
 However, openmp costs large enough beat with single core even in multicore because of their (and our) memory architecture.
 
 # Denoise
-We recommend you and us to use mogrify -resize 33.33...% ... after doing these operations.
-This is because we expect 2/3 on predg, qredg.
+We recommend you and us to use goki gokibin denlarge+? ... after doing these operations.
+This is because we get better and better result when shrink and shrink in probable errors.
 
 # Tips around topt
 We cannot denoise topt because they predict one by one to continue.
@@ -55,4 +55,5 @@ In some of the learning programs, they avoid some of the errors, however, this c
 2023/06/11 topt.cc output normalization fix. update readme.
 2023/06/13 update readme. ddpmopt.cc large change.
 2023/06/14 ddpmopt.cc fix now works, update readme.
+2023/06/15 update readme, some fixes around predg, qredg, ddpmopt.
 
