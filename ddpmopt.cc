@@ -53,9 +53,7 @@ template <typename T> static inline vector<vector<SimpleMatrix<T> > > shrinken(c
   return shrink;
 }
 
-template <typename T> static inline SimpleVector<T> norm(const SimpleVector<T>& in, const int& sz, const vector<SimpleMatrix<T> >& ms, const vector<SimpleMatrix<T> >& mso, const T& effect0 = T(int(1) / int(3))) {
-  auto effect(effect0);
-  if(T(int(1)) / T(int(2)) < effect) effect = T(int(1)) - effect;
+template <typename T> static inline SimpleVector<T> norm(const SimpleVector<T>& in, const int& sz, const vector<SimpleMatrix<T> >& ms, const vector<SimpleMatrix<T> >& mso, const T& effect = T(int(1)) / T(int(6))) {
   assert(T(int(0)) <= effect && effect <= T(int(1)) / T(int(2)));
   auto buf(in);
   for(int idx = 0; idx < sz * sz; idx ++) {
@@ -79,12 +77,13 @@ template <typename T> static inline SimpleVector<T> norm(const SimpleVector<T>& 
           cnt ++;
         }
     normal = sqrt(normal / T(cnt));
-    for(int j = 0; j < ms.size(); j ++)
-      for(int m = 0; m < ms[j].rows() * ms[j].cols(); m ++)
-        if((m / ms[j].cols()) * sz + idx / sz < mso[j].rows() &&
-           (m % ms[j].cols()) * sz + idx % sz < mso[j].cols())
-          buf[m + idx * ms[j].rows() * ms[j].cols() +
-            j * sz * sz * ms[j].rows() * ms[j].cols()] /= normal;
+    if(normal != T(int(0)))
+      for(int j = 0; j < ms.size(); j ++)
+        for(int m = 0; m < ms[j].rows() * ms[j].cols(); m ++)
+          if((m / ms[j].cols()) * sz + idx / sz < mso[j].rows() &&
+             (m % ms[j].cols()) * sz + idx % sz < mso[j].cols())
+            buf[m + idx * ms[j].rows() * ms[j].cols() +
+              j * sz * sz * ms[j].rows() * ms[j].cols()] /= normal;
   }
   return buf;
 }
