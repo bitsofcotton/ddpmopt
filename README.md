@@ -56,4 +56,5 @@ In some of the learning programs, they avoid some of the errors, however, this c
 2023/06/13 update readme. ddpmopt.cc large change.
 2023/06/14 ddpmopt.cc fix now works, update readme.
 2023/06/15 update readme, some fixes around predg, qredg, ddpmopt.
+2023/06/24 fix qredg.cc autoLevel in lieonn.
 
