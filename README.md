@@ -25,6 +25,15 @@ This is because we get better and better result when shrink and shrink in probab
 We cannot denoise topt because they predict one by one to continue.
 In some of the learning programs, they avoid some of the errors, however, this cannot avoid 2/3 limit without large data learning.
 
+# Tips around ddpmopt.
+ddpmopt reduces the noise by categorizing input resize matrix, however, makeProgramInvariant makes sense down to geometric average of the input vector series.
+So we should retry and retry on them by taking subtraction or so on.
+
+# Tips around ddpmopt on single 1 to 1 enlarge.
+ddpmopt enlarges single image into single image 1 to 1.
+So this means multiple of the context they shall have is ignored and we take average context on them with best effort.
+On going ddpm uses some of the GPT result on the text prediction, so they should have better result than us.
+
 # Usage:
     ./ddpmopt + <in0.ppm> ... > cache.txt
     ./ddpmopt - <inout0.ppm> ... < cache.txt
@@ -57,4 +66,5 @@ In some of the learning programs, they avoid some of the errors, however, this c
 2023/06/14 ddpmopt.cc fix now works, update readme.
 2023/06/15 update readme, some fixes around predg, qredg, ddpmopt.
 2023/06/24 fix qredg.cc autoLevel in lieonn.
+2023/06/27 ddpmopt.cc sz 3 to 2 change, update readme.
 

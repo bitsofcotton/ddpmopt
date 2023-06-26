@@ -93,7 +93,7 @@ int main(int argc, const char* argv[]) {
 //#define int int64_t
 #define int int32_t
   assert(1 < argc);
-  const auto sz(3);
+  const auto sz(2);
   const auto m(argv[1][0]);
   if(m == '-') {
     vector<vector<SimpleVector<num_t> > > L;
