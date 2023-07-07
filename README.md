@@ -67,4 +67,5 @@ On going ddpm uses some of the GPT result on the text prediction, so they should
 2023/06/15 update readme, some fixes around predg, qredg, ddpmopt.
 2023/06/24 fix qredg.cc autoLevel in lieonn.
 2023/06/27 ddpmopt.cc sz 3 to 2 change, update readme.
+2023/07/07 [pq]redg predict along with middle image/line.
 
