@@ -55,7 +55,7 @@ int main(int argc, const char* argv[]) {
       SimpleMatrix<num_t>(work[0].rows() + p.first.size() / 2 * 2,
         work[0].cols()).O());
     for(int j = 0; j < work.size(); j ++)
-      swork[j].setMatrix(p.first.size(), 0, work[j]);
+      swork[j].setMatrix(p.first.size() / 2, 0, work[j]);
     num_t pnorm2(int(0));
     for(int j = 0; j < p.first.size(); j ++) {
       p.first[j] = autoLevel<num_t>(p.first[j], int(num_t(p.first[j].size()) / num_t(int(3)) ));
