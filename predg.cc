@@ -59,6 +59,7 @@ int main(int argc, const char* argv[]) {
   vector<SimpleVector<num_t> > out;
   auto p(predv<num_t>(in));
   out = move(p.first);
+  if(out.size() & 1) out.erase(out.end() - 1);
   out.insert(out.end(), p.second.begin(), p.second.end());
   vector<SimpleMatrix<num_t> > outs;
   outs.resize(color);
