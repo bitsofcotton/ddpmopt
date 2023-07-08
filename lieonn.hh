@@ -3501,7 +3501,7 @@ template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > 
   int p0(0);
   if(msz < 0) msz = in.size();
   for( ; p0 < min(int(in.size() / 2), msz); p0 ++) {
-    if(max(int(in.size()) - 2 * (3 + (p0 + 1)), int(sqrt(T(int(in.size()) - (p0 + 1))))) < 1) break;
+    if(max(int(in.size()) - 2 * (4 + (p0 + 1)), int(sqrt(T(int(in.size()) - (p0 + 1))))) < 1) break;
     const auto& pn(pnextcacher<T>(min(int(7) * (p0 + 1), int(in.size())), p0 + 1, 4));
     if(T(min(int(7) * (p0 + 1), int(in.size()))) < pn.dot(pn)) break;
   }
@@ -3561,7 +3561,7 @@ template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > 
     pf1.res /= (Mf1 = - exp(Mf1 / T(int(pf1.res.size())) ) );
     for(int i = 0; i < p0; i ++) {
       northPole<T, P0maxRank0<T> > q0(P0maxRank0<T>(i + 1));
-      P1I<T> q1(min(int(3), int(sqrt(T(int(invariant.size()) - (i + 1))))), i + 1);
+      P1I<T> q1(min(int(4), int(sqrt(T(int(invariant.size()) - (i + 1))))), i + 1);
       try {
         q[i][j] = (q0.next(pb0.res) * Mb0 + q1.next(pb1.res) * Mb1) / T(int(2));
       } catch(const char* e) {
