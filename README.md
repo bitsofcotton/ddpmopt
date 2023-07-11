@@ -25,6 +25,8 @@ This is because we get better and better result when shrink and shrink in probab
 We cannot denoise topt because they predict one by one to continue.
 In some of the learning programs, they avoid some of the errors, however, this cannot avoid 2/3 limit without large data learning.
 
+However, if we apply topt variant into puts_cc sparse tensor with makeProgramInvariant, we might get better results.
+
 # Tips around ddpmopt.
 ddpmopt reduces the noise by categorizing input resize matrix, however, makeProgramInvariant makes sense down to geometric average of the input vector series.
 So we should retry and retry on them by taking subtraction or so on.
@@ -69,4 +71,5 @@ On going ddpm uses some of the GPT result on the text prediction, so they should
 2023/06/27 ddpmopt.cc sz 3 to 2 change, update readme.
 2023/07/07 [pq]redg predict along with middle image/line.
 2023/07/08 invariant causes +1. qredg.cc fix crash.
+2023/07/12 update readme.
 
