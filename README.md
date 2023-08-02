@@ -72,4 +72,5 @@ On going ddpm uses some of the GPT result on the text prediction, so they should
 2023/07/07 [pq]redg predict along with middle image/line.
 2023/07/08 invariant causes +1. qredg.cc fix crash.
 2023/07/12 update readme.
+2023/08/02 update topt, lieonn as crush to the last.
 
