@@ -105,12 +105,8 @@ int main(int argc, const char* argv[]) {
       for(int j = 0; j < sz0; j ++) {
         SimpleVector<num_t> b;
         std::cin >> b;
-        auto bb(b);
-        bb[sz * sz] = num_t(int(0));
-        L[i].emplace_back(bb /= sqrt(bb.dot(bb)));
-        b /= - num_t(b[sz * sz]);
         b[sz * sz] = num_t(int(0));
-        L[i].emplace_back(b);
+        L[i].emplace_back(b /= sqrt(b.dot(b)));
         assert(L[0][0].size() == L[i][j].size());
       }
       assert(L[i].size());
@@ -148,9 +144,9 @@ int main(int argc, const char* argv[]) {
                 else goto next0;
             v[sz * sz] = num_t(int(0));
             vv = makeProgramInvariant<num_t>(v).first;
-            for(int k = 0; k < L[idx].size(); k += 2) {
+            for(int k = 0; k < L[idx].size(); k ++) {
               const auto lM(abs(L[idx][k].dot(vv) ));
-              if(Midx < 0 || lM < M) {
+              if(Midx < 0 || M < lM) {
                 M    = lM;
                 Midx = k;
               }
@@ -158,7 +154,7 @@ int main(int argc, const char* argv[]) {
             assert(0 <= Midx && Midx < L[idx].size());
             buf[m + idx * shrink[j].rows() * shrink[j].cols() +
                     j * sz * sz * shrink[j].rows() * shrink[j].cols()] =
-              L[idx][++ Midx].dot(vv);
+              L[idx][Midx].dot(vv);
            next0:
             ;
           }
@@ -209,20 +205,14 @@ int main(int argc, const char* argv[]) {
            next1:
             ;
           }
-      auto c(crush(v));
-      int  cnt(0);
-      for(int i = 0; i < c.size(); i ++)
-        if(! (c[i].first.size() < v[0].size() + 1 + 1) ) cnt ++;
-      cout << cnt << endl;
+      auto c(crush(v, v[0].size(), v.size()));
+      cout << c.size() << endl;
       for(int i = 0; i < c.size(); i ++) {
-        SimpleMatrix<num_t> lc(c[i].first.size(), v[0].size() + 1);
-        for(int j = 0; j < lc.rows(); j ++)
-          lc.row(j) = makeProgramInvariant<num_t>(c[i].first[j]).first;
-        if(lc.rows() <= lc.cols()) {
-          /* */
-          ;
-        } else
-          cout << linearInvariant<num_t>(lc);
+        SimpleVector<num_t> avg(c[i].first[0].size() + 1);
+        avg.O();
+        for(int j = 0; j < c[i].first.size(); j ++)
+          avg += makeProgramInvariant<num_t>(c[i].first[j]).first;
+        cout << avg;
       }
     }
   }
