@@ -73,8 +73,11 @@ int main(int argc, const char* argv[]) {
     for(int j = 0; j < size; j ++) {
       SimpleVector<num_t> vwork;
       std::cin >> vwork;
+      const auto vvv(vwork[vwork.size() - 2]);
       vwork[vwork.size() - 2] = num_t(int(0));
-      work.emplace_back(vwork /= sqrt(vwork.dot(vwork)));
+      vwork /= sqrt(vwork.dot(vwork));
+      work.emplace_back(vwork);
+      work.emplace_back(vwork * vvv);
     }
     while(std::getline(std::cin, s, '\n')) {
       SimpleVector<num_t> lwork(work[0].size() - 1);
@@ -87,7 +90,7 @@ int main(int argc, const char* argv[]) {
         int   Midx(- 1);
         num_t M(int(0));
         const auto pinv(makeProgramInvariant<num_t>(lwork));
-        for(int k = 0; k < work.size(); k ++) {
+        for(int k = 0; k < work.size(); k += 2) {
           const auto lM(abs(work[k].dot(pinv.first) ));
           if(Midx < 0 || M < lM) {
             M    = lM;
@@ -95,7 +98,7 @@ int main(int argc, const char* argv[]) {
           }
         }
         assert(0 <= Midx && Midx < work.size() );
-        s += char(int(revertProgramInvariant<num_t>(make_pair(work[Midx].dot(pinv.first), num_t(int(1)) /* pinv.second */)) * num_t(int(256)) ));
+        s += char(int(revertProgramInvariant<num_t>(make_pair(work[++ Midx].dot(pinv.first), num_t(int(1)) /* pinv.second */)) * num_t(int(256)) ));
       }
       std::cout << s << std::endl;
     }

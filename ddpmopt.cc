@@ -105,8 +105,11 @@ int main(int argc, const char* argv[]) {
       for(int j = 0; j < sz0; j ++) {
         SimpleVector<num_t> b;
         std::cin >> b;
+        const auto bbb(b[sz * sz]);
         b[sz * sz] = num_t(int(0));
-        L[i].emplace_back(b /= sqrt(b.dot(b)));
+        b /= sqrt(b.dot(b));
+        L[i].emplace_back(b);
+        L[i].emplace_back(b * bbb);
         assert(L[0][0].size() == L[i][j].size());
       }
       assert(L[i].size());
@@ -144,7 +147,7 @@ int main(int argc, const char* argv[]) {
                 else goto next0;
             v[sz * sz] = num_t(int(0));
             vv = makeProgramInvariant<num_t>(v).first;
-            for(int k = 0; k < L[idx].size(); k ++) {
+            for(int k = 0; k < L[idx].size(); k += 2) {
               const auto lM(abs(L[idx][k].dot(vv) ));
               if(Midx < 0 || M < lM) {
                 M    = lM;
@@ -154,7 +157,7 @@ int main(int argc, const char* argv[]) {
             assert(0 <= Midx && Midx < L[idx].size());
             buf[m + idx * shrink[j].rows() * shrink[j].cols() +
                     j * sz * sz * shrink[j].rows() * shrink[j].cols()] =
-              L[idx][Midx].dot(vv);
+              L[idx][++ Midx].dot(vv);
            next0:
             ;
           }
