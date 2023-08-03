@@ -25,16 +25,15 @@ This is because we get better and better result when shrink and shrink in probab
 We cannot denoise topt because they predict one by one to continue.
 In some of the learning programs, they avoid some of the errors, however, this cannot avoid 2/3 limit without large data learning.
 
-However, if we apply topt variant into puts_cc sparse tensor with makeProgramInvariant, we might get better results.
+We recommend you and us to use puts_cc pred option instead of this.
+
 
 # Tips around ddpmopt.
 ddpmopt reduces the noise by categorizing input resize matrix, however, makeProgramInvariant makes sense down to geometric average of the input vector series.
 So we should retry and retry on them by taking subtraction or so on.
 
-# Tips around ddpmopt on single 1 to 1 enlarge.
-ddpmopt enlarges single image into single image 1 to 1.
-So this means multiple of the context they shall have is ignored and we take average context on them with best effort.
-On going ddpm uses some of the GPT result on the text prediction, so they should have better result than us.
+# Tips around ddpmopt
+We apply ddpmopt to double enlarged image, then, shrink half.
 
 # Usage:
     ./ddpmopt + <in0.ppm> ... > cache.txt
@@ -73,5 +72,5 @@ On going ddpm uses some of the GPT result on the text prediction, so they should
 2023/07/08 invariant causes +1. qredg.cc fix crash.
 2023/07/12 update readme.
 2023/08/02 update topt, lieonn as crush to the last.
-2023/08/03 topt, ddpmopt fix on apply.
+2023/08/03 topt, ddpmopt fix on apply. update readme.
 
