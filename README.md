@@ -27,21 +27,17 @@ In some of the learning programs, they avoid some of the errors, however, this c
 
 We recommend you and us to use puts_cc pred option instead of this.
 
-
 # Tips around ddpmopt.
 ddpmopt reduces the noise by categorizing input resize matrix, however, makeProgramInvariant makes sense down to geometric average of the input vector series.
 So we should retry and retry on them by taking subtraction or so on.
 
-# Tips around ddpmopt
-We apply ddpmopt to double enlarged image, then, shrink half.
-
 # Usage:
+    ./predg <in0.ppm> ...
+    ./qredg <inout0.ppm> ...
     ./ddpmopt + <in0.ppm> ... > cache.txt
     ./ddpmopt - <inout0.ppm> ... < cache.txt
     ./topt <dim>? < in.txt > cache.txt
     cat cache.txt - | ./topt -<num>
-    ./predg <in0.ppm> ...
-    ./qredg <inout0.ppm> ...
 
 # Real close
 2023/03/01
@@ -73,4 +69,5 @@ We apply ddpmopt to double enlarged image, then, shrink half.
 2023/07/12 update readme.
 2023/08/02 update topt, lieonn as crush to the last.
 2023/08/03 topt, ddpmopt fix on apply. update readme.
+2023/08/04 update readme. fix predv result norm.
 
