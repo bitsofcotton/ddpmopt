@@ -123,7 +123,7 @@ int main(int argc, const char* argv[]) {
       lwork.O();
       for(int j = 0; j < vwork[i].first.size(); j ++)
         lwork += makeProgramInvariant<num_t>(vwork[i].first[j]).first;
-      cout << lwork;
+      cout << (lwork /= num_t(int(vwork[i].first.size())) );
     }
   }
   return 0;

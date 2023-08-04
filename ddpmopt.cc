@@ -180,7 +180,7 @@ int main(int argc, const char* argv[]) {
         avg.O();
         for(int j = 0; j < c[i].first.size(); j ++)
           avg += makeProgramInvariant<num_t>(c[i].first[j]).first;
-        cout << avg;
+        cout << (avg /= num_t(int(c[i].first.size())) );
       }
     }
   }
