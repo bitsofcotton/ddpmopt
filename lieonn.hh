@@ -1997,7 +1997,9 @@ public:
 #if defined(_FLOAT_BITS_)
     static const auto eps(myfloat(int(1)) >> myint(_FLOAT_BITS_ - 1));
 #else
-    static const auto eps(std::numeric_limits<myfloat>::epsilon());
+    // N.B. conservative.
+    static const auto eps(sqrt(std::numeric_limits<myfloat>::epsilon()));
+    // static const auto eps(std::numeric_limits<myfloat>::epsilon());
 #endif
     return eps;
   }

@@ -72,7 +72,7 @@ int main(int argc, const char* argv[]) {
       for(int k = 0; k < outs[j].rows(); k ++)
         outs[j].row(k) = out[i].subVector(j * outs[j].rows() * outs[j].cols() +
           k * outs[j].cols(), outs[j].cols());
-    if(! savep2or3<num_t>((std::string("predg-") + std::to_string(i / 2) + std::string(".ppm")).c_str(), normalize<num_t>(autoLevel<num_t>(outs, int(num_t(outs.size() * outs[0].rows() * outs[0].cols()) / num_t(int(3)) ) )) ))
+    if(! savep2or3<num_t>((std::string("predg-") + std::to_string(i / 2) + std::string(".ppm")).c_str(), normalize<num_t>(outs) ))
       cerr << "failed to save." << endl;
   }
   cerr << " Done" << endl;
