@@ -31,6 +31,13 @@ We recommend you and us to use puts_cc pred option instead of this.
 ddpmopt reduces the noise by categorizing input resize matrix, however, makeProgramInvariant makes sense down to geometric average of the input vector series.
 So we should retry and retry on them by taking subtraction or so on.
 
+# Tips around [pq]redg
+After doing prediction, we recommend you and us to use ddpmopt them for the touch we need.
+However, the prediction has the upper bound better to geometric average on input pixels.
+
+And, the prediction referes out of the bound {} produces (low of excluded middle).
+So the calculation (prediction) itself needs some of the context they pull back from on calculation entity theirselves.
+
 # Usage:
     ./predg <in0.ppm> ...
     ./qredg <inout0.ppm> ...
@@ -70,4 +77,5 @@ So we should retry and retry on them by taking subtraction or so on.
 2023/08/02 update topt, lieonn as crush to the last.
 2023/08/03 topt, ddpmopt fix on apply. update readme.
 2023/08/04 update readme. fix predv result norm.
+2023/08/26 ddpmopt - option calculation change, update readme.
 

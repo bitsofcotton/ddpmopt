@@ -112,7 +112,8 @@ int main(int argc, const char* argv[]) {
                     (m % shrink[j].cols()) + jj);
                 else goto next0;
             v[sz * sz] = num_t(int(0));
-            vv = makeProgramInvariant<num_t>(v).first;
+            vv  = makeProgramInvariant<num_t>(v).first;
+            vv /= sqrt(vv.dot(vv));
             for(int k = 0; k < L[idx].size(); k ++) {
               const auto lM(abs(L[idx][k].dot(vv) ));
               if(Midx < 0 || M < lM) {
