@@ -32,8 +32,8 @@ The prediction referes out of the bound {} produces (low of excluded middle).
 So the calculation (prediction) itself needs some of the context they pull back from on calculation entity theirselves.
 
 # Usage:
-    ./predg <recur> <in0.ppm> ...
-    ./qredg <recur> <inout0.ppm> ...
+    ./predg <in0.ppm> ...
+    ./qredg <inout0.ppm> ...
     ./ddpmopt + <in0.ppm> ... > cache.txt
     ./ddpmopt - <inout0.ppm> ... < cache.txt
     ./topt <dim>? < in.txt > cache.txt
@@ -71,4 +71,5 @@ So the calculation (prediction) itself needs some of the context they pull back 
 2023/08/03 topt, ddpmopt fix on apply. update readme.
 2023/08/04 update readme. fix predv result norm.
 2023/08/26 ddpmopt - option calculation change, update readme. update [pq]redg for recursive ones to beat with geometric average limit.
+2023/09/04 auto configure predg/qredg param, conservative.
 
