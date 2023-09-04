@@ -32,31 +32,26 @@ using std::istringstream;
 int main(int argc, const char* argv[]) {
 #define int int64_t
 //#define int int32_t
-  assert(2 < argc);
-  for(int i = 2; i < argc; i ++) {
+  assert(1 < argc);
+  for(int i = 1; i < argc; i ++) {
     vector<SimpleMatrix<num_t> > work;
     if(! loadp2or3<num_t>(work, argv[i])) continue;
     vector<vector<SimpleVector<num_t> > > pwork;
     num_t norm2(int(0));
-    pwork.resize(std::atoi(argv[1]));
-    for(int ii = 0; ii < pwork.size(); ii ++) {
+    pwork.emplace_back(vector<SimpleVector<num_t> >());
+    for(int ii = 0; 0 <= ii; ii ++) {
       if(ii) pwork[ii] = pwork[ii - 1];
       else pwork[ii].resize(work[0].rows() * 2 - 1,
              SimpleVector<num_t>(work[0].cols() * work.size()).O());
       if(ii)
         for(int k = 0; k < pwork[ii].size(); k += 2) {
-          num_t mm(pwork[ii][k][0]);
-          auto  MM(mm);
-          for(int kk = 0; kk < pwork[ii][k].size(); kk ++) {
-            mm = min(mm, pwork[ii][k][kk]);
-            MM = max(MM, pwork[ii][k][kk]);
+          const auto ga(revertProgramInvariant<num_t>(make_pair(makeProgramInvariant<num_t>(pwork[ii - 1][k]).second, num_t(int(1)) )) );
+          if(abs(ga) <= sqrt(SimpleMatrix<num_t>().epsilon()) ) {
+            pwork.resize(pwork.size() - 1);
+            goto ga_ok;
           }
-          num_t ga(int(0));
           for(int kk = 0; kk < pwork[ii][k].size(); kk ++)
-            ga += log(pwork[ii][k][kk] - mm + (MM - mm) / num_t(int(2)) );
-          ga = exp(ga / num_t(int(pwork[ii][k].size())));
-          for(int kk = 0; kk < pwork[ii][k].size(); kk ++)
-            pwork[ii][k][kk] = (pwork[ii][k][kk] - mm + (MM - mm) / num_t(int(2))) - ga + (mm - (MM - mm) / num_t(int(2)));
+            pwork[ii][k][kk] -= ga;
           if(0 < k)
             pwork[ii][k - 1] = (pwork[ii][k] + pwork[ii][k - 2]) / num_t(int(2));
         }
@@ -68,8 +63,11 @@ int main(int argc, const char* argv[]) {
             pwork[ii][k - 1] = (pwork[ii][k] + pwork[ii][k - 2]) / num_t(int(2));
           norm2 += pwork[ii][k].dot(pwork[ii][k]);
         }
+      pwork.emplace_back(vector<SimpleVector<num_t> >());
     }
+  ga_ok:
     norm2 /= num_t(int(pwork[0].size()) / 2);
+    cerr << "needs total " << pwork.size() << " loop" << endl;
     auto p(predv<num_t>(pwork[0]));
     vector<SimpleMatrix<num_t> > swork(work.size(),
       SimpleMatrix<num_t>(work[0].rows() + p.first.size() / 2 * 2,
@@ -77,6 +75,7 @@ int main(int argc, const char* argv[]) {
     for(int j = 0; j < work.size(); j ++)
       swork[j].setMatrix(p.first.size() / 2, 0, work[j]);
     for(int ii = 1; ii < pwork.size(); ii ++) {
+      cerr << "loop#" << ii << endl;
       auto q(predv<num_t>(pwork[ii]));
       for(int k = 1; k < p.first.size(); k += 2) {
         p.first[k]  += q.first[k];

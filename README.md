@@ -17,10 +17,6 @@ Also, if we run these programs with openmp, we need large shared memory size.
 They are usually configurable by sysctl on unix-like systems.
 However, openmp costs large enough beat with single core even in multicore because of their (and our) memory architecture.
 
-# Denoise
-We recommend you and us to use goki gokibin denlarge+? ... after doing these operations.
-This is because we get better and better result when shrink and shrink in probable errors.
-
 # Tips around topt
 We cannot denoise topt because they predict one by one to continue.
 In some of the learning programs, they avoid some of the errors, however, this cannot avoid 2/3 limit without large data learning.
@@ -32,10 +28,7 @@ ddpmopt reduces the noise by categorizing input resize matrix, however, makeProg
 So we should retry and retry on them by taking subtraction or so on.
 
 # Tips around [pq]redg
-After doing prediction, we recommend you and us to use ddpmopt them for the touch we need.
-However, the prediction has the upper bound better to geometric average on input pixels.
-
-And, the prediction referes out of the bound {} produces (low of excluded middle).
+The prediction referes out of the bound {} produces (low of excluded middle).
 So the calculation (prediction) itself needs some of the context they pull back from on calculation entity theirselves.
 
 # Usage:
