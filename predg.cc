@@ -42,13 +42,11 @@ int main(int argc, const char* argv[]) {
   for(int ii = 0; 0 <= ii; ii ++) {
     if(ii) in[ii] = in[ii - 1];
     else in[ii].reserve(argc * 2 - 3);
+    int ok_cnt(0);
     for(int i = 1; i < argc; i ++)
       if(ii) {
         const auto ga(revertProgramInvariant<num_t>(make_pair(makeProgramInvariant<num_t>(in[ii - 1][(i - 1) * 2]).second, num_t(int(1)) )) );
-        if(abs(ga) <= sqrt(SimpleMatrix<num_t>().epsilon())) {
-          in.resize(in.size() - 1);
-          goto ga_ok;
-        }
+        if(abs(ga) <= sqrt(SimpleMatrix<num_t>().epsilon())) ok_cnt ++;
         for(int j = 0; j < in[ii][(i - 1) * 2].size(); j ++)
           in[ii][(i - 1) * 2][j] -= ga;
         if(1 < i) in[ii][(i - 1) * 2 - 1] = (in[ii][(i - 1) * 2] + in[ii][(i - 1) * 2 - 2]) / num_t(int(2));
@@ -69,9 +67,11 @@ int main(int argc, const char* argv[]) {
                 k * work[j].cols(), work[j].row(k));
         if(1 < i) in[ii][in[ii].size() - 2] = (in[ii][in[ii].size() - 3] + in[ii][in[ii].size() - 1]) / num_t(int(2));
       }
-    in.emplace_back(vector<SimpleVector<num_t> >());
+    if(ok_cnt < argc - 1)
+      in.emplace_back(vector<SimpleVector<num_t> >());
+    else
+      break;
   }
- ga_ok:
   cerr << "needs total " << in.size() << " loop" << endl;
   vector<SimpleVector<num_t> > out;
   auto p(predv<num_t>(in[0]));

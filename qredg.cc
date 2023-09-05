@@ -43,13 +43,11 @@ int main(int argc, const char* argv[]) {
       if(ii) pwork[ii] = pwork[ii - 1];
       else pwork[ii].resize(work[0].rows() * 2 - 1,
              SimpleVector<num_t>(work[0].cols() * work.size()).O());
+      int ok_cnt(0);
       if(ii)
         for(int k = 0; k < pwork[ii].size(); k += 2) {
           const auto ga(revertProgramInvariant<num_t>(make_pair(makeProgramInvariant<num_t>(pwork[ii - 1][k]).second, num_t(int(1)) )) );
-          if(abs(ga) <= sqrt(SimpleMatrix<num_t>().epsilon()) ) {
-            pwork.resize(pwork.size() - 1);
-            goto ga_ok;
-          }
+          if(abs(ga) <= sqrt(SimpleMatrix<num_t>().epsilon()) ) ok_cnt ++
           for(int kk = 0; kk < pwork[ii][k].size(); kk ++)
             pwork[ii][k][kk] -= ga;
           if(0 < k)
@@ -63,9 +61,11 @@ int main(int argc, const char* argv[]) {
             pwork[ii][k - 1] = (pwork[ii][k] + pwork[ii][k - 2]) / num_t(int(2));
           norm2 += pwork[ii][k].dot(pwork[ii][k]);
         }
-      pwork.emplace_back(vector<SimpleVector<num_t> >());
+      if(ok_cnt < pwork[ii].size() / 2)
+        pwork.emplace_back(vector<SimpleVector<num_t> >());
+      else
+        break;
     }
-  ga_ok:
     norm2 /= num_t(int(pwork[0].size()) / 2);
     cerr << "needs total " << pwork.size() << " loop" << endl;
     auto p(predv<num_t>(pwork[0]));
