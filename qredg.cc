@@ -36,10 +36,14 @@ int main(int argc, const char* argv[]) {
   for(int i = 1; i < argc; i ++) {
     vector<SimpleMatrix<num_t> > work;
     if(! loadp2or3<num_t>(work, argv[i])) continue;
+    if(work[0].rows() * 2 - 1 < work.size() * work[0].cols()) {
+      std::cerr << "2 * rows - 1 < colors * cols: " << argv[i] << std::endl;
+      continue;
+    }
     vector<vector<SimpleVector<num_t> > > pwork;
     num_t norm2(int(0));
     pwork.emplace_back(vector<SimpleVector<num_t> >());
-    for(int ii = 0; 0 <= ii; ii ++) {
+    for(int ii = 0; 0 <= ii && ii < work[0].rows() * 2 - 1; ii ++) {
       if(ii) pwork[ii] = pwork[ii - 1];
       else pwork[ii].resize(work[0].rows() * 2 - 1,
              SimpleVector<num_t>(work[0].cols() * work.size()).O());
@@ -47,7 +51,7 @@ int main(int argc, const char* argv[]) {
       if(ii)
         for(int k = 0; k < pwork[ii].size(); k += 2) {
           const auto ga(revertProgramInvariant<num_t>(make_pair(makeProgramInvariant<num_t>(pwork[ii - 1][k]).second, num_t(int(1)) )) );
-          if(abs(ga) <= sqrt(SimpleMatrix<num_t>().epsilon()) ) ok_cnt ++
+          if(abs(ga) <= num_t(int(1)) / num_t(int(2))) ok_cnt ++;
           for(int kk = 0; kk < pwork[ii][k].size(); kk ++)
             pwork[ii][k][kk] -= ga;
           if(0 < k)
@@ -61,7 +65,7 @@ int main(int argc, const char* argv[]) {
             pwork[ii][k - 1] = (pwork[ii][k] + pwork[ii][k - 2]) / num_t(int(2));
           norm2 += pwork[ii][k].dot(pwork[ii][k]);
         }
-      if(ok_cnt < pwork[ii].size() / 2)
+      if(ii < work[0].rows() * 2 - 1 && ok_cnt < pwork[ii].size() / 2)
         pwork.emplace_back(vector<SimpleVector<num_t> >());
       else
         break;
