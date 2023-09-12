@@ -53,8 +53,10 @@ int main(int argc, const char* argv[]) {
       swork[j].setMatrix(p.first.size(), 0, work[j]);
     for(int k = 0; k < p.first.size(); k ++) {
       for(int j = 0; j < work.size(); j ++) {
-        swork[j].row(p.second.size() - k - 1) = p.second[k][j];
-        swork[j].row(p.first.size()  + work[j].rows() + k) = p.first[k][j];
+        swork[j].row(p.second.size() - k - 1) =
+          p.second[k][j].subVector(0, swork[j].cols());
+        swork[j].row(p.first.size()  + work[j].rows() + k) =
+          p.first[k][j].subVector(0, swork[j].cols());
       }
     }
     if(! savep2or3<num_t>(argv[i], normalize<num_t>(swork)) )
