@@ -36,10 +36,6 @@ int main(int argc, const char* argv[]) {
   for(int i = 1; i < argc; i ++) {
     vector<SimpleMatrix<num_t> > work;
     if(! loadp2or3<num_t>(work, argv[i])) continue;
-    if(work[0].rows() * 2 - 1 < work.size() * work[0].cols()) {
-      std::cerr << "2 * rows - 1 < colors * cols: " << argv[i] << std::endl;
-      continue;
-    }
     vector<vector<SimpleVector<num_t> > > pwork;
     pwork.resize(work[0].rows());
     for(int i = 0; i < pwork.size(); i ++)
