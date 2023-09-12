@@ -73,4 +73,5 @@ So the calculation (prediction) itself needs some of the context they pull back 
 2023/08/26 ddpmopt - option calculation change, update readme. update [pq]redg for recursive ones to beat with geometric average limit.
 2023/09/04 auto configure predg/qredg param, conservative.
 2023/09/11 auto configure predg/qredg size, aggressive ga param.
+2023/09/12 fix last broken predv func and qredg.cc.
 
