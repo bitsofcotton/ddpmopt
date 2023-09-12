@@ -4130,8 +4130,6 @@ template <typename T> pair<vector<vector<SimpleMatrix<T> > >, vector<vector<Simp
   const int  rx(pixels * T(int(in0[0][0].cols())) * sqrt(T(int(in0[0][0].rows() * in0[0][0].rows() + in0[0][0].cols() * in0[0][0].cols() ))) / T(int(in0[0][0].rows() * in0[0][0].cols() )) );
   const auto resizeL((dft<T>(- ry).subMatrix(0, 0, ry, min(ry, in0[0][0].rows())) * dft<T>(in0[0][0].rows()).subMatrix(0, 0, min(ry, in0[0][0].rows()), in0[0][0].rows()) ).template real<T>() * T(ry) / T(int(in0[0][0].rows())) );
   const auto resizeR((dft<T>(- rx).subMatrix(0, 0, rx, min(rx, in0[0][0].cols())) * dft<T>(in0[0][0].cols()).subMatrix(0, 0, min(rx, in0[0][0].cols()), in0[0][0].cols()) ).template real<T>().transpose() * T(rx) / T(int(in0[0][0].cols())) );
-  const auto reverseL((dft<T>(- in0[0][0].rows()).subMatrix(0, 0, in0[0][0].rows(), min(ry, in0[0][0].rows())) * dft<T>(ry).subMatrix(0, 0, min(ry, in0[0][0].rows()), ry) ).template real<T>() * T(int(in0[0][0].rows())) / T(ry) );
-  const auto reverseR((dft<T>(- in0[0][0].cols()).subMatrix(0, 0, in0[0][0].cols(), min(rx, in0[0][0].cols())) * dft<T>(rx).subMatrix(0, 0, min(rx, in0[0][0].cols()), rx) ).template real<T>().transpose() * T(int(in0[0][0].cols())) / T(rx) );
   cerr << "Resize into (" << ry << ", " << rx << ")" << endl;
   vector<SimpleVector<T> > in;
   in.resize(in0.size());
@@ -4151,17 +4149,17 @@ template <typename T> pair<vector<vector<SimpleMatrix<T> > >, vector<vector<Simp
   for(int i = 1; i < p.first.size(); i += 2) {
     res.first[i / 2].resize(in0[i / 2].size());
     for(int j = 0; j < res.first[i / 2].size(); j ++) {
-      SimpleMatrix<T> work(ry, rx);
-      for(int k = 0; k < work.rows(); k ++)
-        work.row(k) = p.first[i].subVector(j * ry * rx + k * rx, rx);
-      res.first[i / 2][j] = reverseL * work * reverseR;
+      res.first[i / 2][j].resize(ry, rx);
+      for(int k = 0; k < ry; k ++)
+        res.first[i / 2][j].row(k) =
+          p.first[i].subVector(j * ry * rx + k * rx, rx);
     }
     res.second[i / 2].resize(in0[i / 2].size());
     for(int j = 0; j < res.second[i / 2].size(); j ++) {
-      SimpleMatrix<T> work(ry, rx);
-      for(int k = 0; k < work.rows(); k ++)
-        work.row(k) = p.second[i].subVector(j * ry * rx + k * rx, rx);
-      res.second[i / 2][j] = reverseL * work * reverseR;
+      res.second[i / 2][j].resize(ry, rx);
+      for(int k = 0; k < ry; k ++)
+        res.second[i / 2][j].row(k) =
+          p.second[i].subVector(j * ry * rx + k * rx, rx);
     }
   }
   return res;
