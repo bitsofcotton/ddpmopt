@@ -1,6 +1,6 @@
 # ddpmopt
 Convert meaning-less image into context meaning-full flavour.
-This isn't useful to get full context meaning-full image by once, but we can apply this for dft-ed curvatures bitmaps and so on. So in general use, we should implement some another layers based on this.
+We can use this for bitsofcotton/i2g filtered images.
 
 # Context
 There exists Denoising Diffusion Probabilistic Models (DDPM; Ho et al. 2020). So this is another try on them.
@@ -18,26 +18,13 @@ They are usually configurable by sysctl on unix-like systems.
 However, openmp costs large enough beat with single core even in multicore because of their (and our) memory architecture.
 
 # Tips around topt
-We cannot denoise topt because they predict one by one to continue.
-In some of the learning programs, they avoid some of the errors, however, this cannot avoid 2/3 limit without large data learning.
-
 We recommend you and us to use puts_cc pred option instead of this.
-
-# Tips around ddpmopt.
-ddpmopt reduces the noise by categorizing input resize matrix, however, makeProgramInvariant makes sense down to geometric average of the input vector series.
-So we should retry and retry on them by taking subtraction or so on.
-
-# Tips around [pq]redg
-The prediction referes out of the bound {} produces (low of excluded middle).
-So the calculation (prediction) itself needs some of the context they pull back from on calculation entity theirselves.
 
 # Usage:
     ./predg <in0.ppm> ...
     ./qredg <inout0.ppm> ...
     ./ddpmopt + <in0.ppm> ... > cache.txt
     ./ddpmopt - <inout0.ppm> ... < cache.txt
-    ./topt <dim>? < in.txt > cache.txt
-    cat cache.txt - | ./topt -<num>
 
 # Real close
 2023/03/01
@@ -74,4 +61,5 @@ So the calculation (prediction) itself needs some of the context they pull back 
 2023/09/04 auto configure predg/qredg param, conservative.
 2023/09/11 auto configure predg/qredg size, aggressive ga param.
 2023/09/12 fix last broken predv func and qredg.cc.
+2023/09/13 change ddpmopt retry and retry on geometric average.
 

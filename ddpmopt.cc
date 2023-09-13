@@ -61,24 +61,30 @@ int main(int argc, const char* argv[]) {
   const auto sz(2);
   const auto m(argv[1][0]);
   if(m == '-') {
-    vector<vector<SimpleVector<num_t> > > L;
-    vector<vector<num_t> > intensity;
+    vector<vector<vector<SimpleVector<num_t> > > > L;
+    vector<vector<vector<num_t> > > intensity;
     L.resize(sz * sz);
     intensity.resize(sz * sz);
-    for(int i = 0; i < L.size(); i ++) {
-      auto sz0(0);
-      std::cin >> sz0;
-      L[i].reserve(sz0);
-      intensity[i].reserve(sz0);
-      for(int j = 0; j < sz0; j ++) {
-        SimpleVector<num_t> b;
-        std::cin >> b;
-        intensity[i].emplace_back(b[sz * sz]);
-        b[sz * sz] = num_t(int(0));
-        L[i].emplace_back(b /= sqrt(b.dot(b)));
-        assert(L[0][0].size() == L[i][j].size());
+    auto sz0(0);
+    std::cin >> sz0;
+    for(int i0 = 0; i0 < sz * sz; i0 ++) {
+      for(int i = 0; 0 <= sz0; i ++) {
+        L[i0].emplace_back(vector<SimpleVector<num_t> >());
+        intensity[i0].emplace_back(vector<num_t>());
+        L[i0][i].reserve(sz0);
+        intensity[i0][i].reserve(sz0);
+        for(int j = 0; j < sz0; j ++) {
+          SimpleVector<num_t> b;
+          std::cin >> b;
+          intensity[i0][i].emplace_back(b[sz * sz]);
+          b[sz * sz] = num_t(int(0));
+          L[i0][i].emplace_back(b /= sqrt(b.dot(b)));
+          assert(L[i0][0][0].size() == L[i0][i][j].size());
+        }
+        assert(L[i0][i].size());
+        std::cin >> sz0;
       }
-      assert(L[i].size());
+      std::cin >> sz0;
     }
     for(int i = 2; i < argc; i ++) {
       cerr << i - 2 << " / " << argc - 2 << endl;
@@ -100,34 +106,39 @@ int main(int argc, const char* argv[]) {
       buf.O();
       for(int j = 0; j < shrink.size(); j ++)
         for(int idx = 0; idx < sz * sz; idx ++)
-          for(int m = 0; m < shrink[j].rows() * shrink[j].cols(); m ++) {
-            int   Midx(- 1);
-            num_t M(int(0));
-            for(int ii = 0; ii < sz; ii ++)
-              for(int jj = 0; jj < sz; jj ++)
-                if((m / shrink[j].cols()) + ii < shrink[j].rows() &&
-                   (m % shrink[j].cols()) + jj < shrink[j].cols())
-                  v[ii * sz + jj] = shrink[j](
-                    (m / shrink[j].cols()) + ii,
-                    (m % shrink[j].cols()) + jj);
-                else goto next0;
-            v[sz * sz] = num_t(int(0));
-            vv  = makeProgramInvariant<num_t>(v).first;
-            vv /= sqrt(vv.dot(vv));
-            for(int k = 0; k < L[idx].size(); k ++) {
-              const auto lM(abs(L[idx][k].dot(vv) ));
-              if(Midx < 0 || M < lM) {
-                M    = lM;
-                Midx = k;
+          for(int i0 = 0; i0 < L[idx].size(); i0 ++)
+            for(int m = 0; m < shrink[j].rows() * shrink[j].cols(); m ++) {
+              int   Midx(- 1);
+              num_t M(int(0));
+              for(int ii = 0; ii < sz; ii ++)
+                for(int jj = 0; jj < sz; jj ++)
+                  if((m / shrink[j].cols()) + ii < shrink[j].rows() &&
+                     (m % shrink[j].cols()) + jj < shrink[j].cols())
+                    v[ii * sz + jj] = shrink[j](
+                      (m / shrink[j].cols()) + ii,
+                      (m % shrink[j].cols()) + jj);
+                  else goto next0;
+              v[sz * sz] = num_t(int(0));
+              vv  = makeProgramInvariant<num_t>(v).first;
+              for(int j0 = 0; j0 < i0; j0 ++) {
+                const auto ga(revertProgramInvariant<num_t>(make_pair(makeProgramInvariant<num_t>(vv).second, num_t(int(1)) )) );
+                for(int k0 = 0; k0 < vv.size(); k0 ++) vv[k0] -= ga;
               }
+              vv /= sqrt(vv.dot(vv));
+              for(int k = 0; k < L[idx][i0].size(); k ++) {
+                const auto lM(abs(L[idx][i0][k].dot(vv) ));
+                if(Midx < 0 || M < lM) {
+                  M    = lM;
+                  Midx = k;
+                }
+              }
+              assert(0 <= Midx && Midx < L[idx][i0].size());
+              buf[m + idx * shrink[j].rows() * shrink[j].cols() +
+                      j * sz * sz * shrink[j].rows() * shrink[j].cols()] +=
+                L[idx][i0][Midx].dot(vv) * intensity[idx][i0][Midx];
+             next0:
+              ;
             }
-            assert(0 <= Midx && Midx < L[idx].size());
-            buf[m + idx * shrink[j].rows() * shrink[j].cols() +
-                    j * sz * sz * shrink[j].rows() * shrink[j].cols()] =
-              L[idx][Midx].dot(vv) * intensity[idx][Midx];
-           next0:
-            ;
-          }
       for(int idx = 0; idx < sz * sz; idx ++)
         for(int j = 0; j < shrink.size(); j ++)
           for(int m = 0; m < shrink[j].rows() * shrink[j].cols(); m ++)
@@ -174,16 +185,30 @@ int main(int argc, const char* argv[]) {
            next1:
             ;
           }
-      auto c(crush(v, v[0].size(), v.size()));
-      cout << c.size() << endl;
-      for(int i = 0; i < c.size(); i ++) {
-        SimpleVector<num_t> avg(c[i].first[0].size() + 1);
-        avg.O();
-        for(int j = 0; j < c[i].first.size(); j ++)
-          avg += makeProgramInvariant<num_t>(c[i].first[j]).first;
-        cout << (avg /= num_t(int(c[i].first.size())) );
+      num_t M(int(0));
+      for(int j = 0; j < v.size(); j ++) {
+        auto c(crush(v, v[0].size(), v.size()));
+        cout << c.size() << endl;
+        for(int i = 0; i < c.size(); i ++) {
+          SimpleVector<num_t> avg(c[i].first[0].size() + 1);
+          avg.O();
+          for(int j = 0; j < c[i].first.size(); j ++)
+            avg += makeProgramInvariant<num_t>(c[i].first[j]).first;
+          cout << (avg /= num_t(int(c[i].first.size())) );
+        }
+        int ok_cnt(0);
+        for(int k = 0; k < v.size(); k ++) {
+          const auto ga(revertProgramInvariant<num_t>(make_pair(makeProgramInvariant<num_t>(v[k]).second, num_t(int(1)) )) );
+          M = max(M, abs(ga));
+          if(abs(ga) <= M * sqrt(SimpleMatrix<num_t>().epsilon()) ) ok_cnt ++;
+          else cerr << "Geometric average " << ga << " is still large." << endl;
+          for(int kk = 0; kk < v[k].size(); kk ++) v[k][kk] -= ga;
+        }
+        if(v.size() <= ok_cnt) break;
       }
+      cout << - 1 << endl;
     }
+    cout << - 1 << endl;
   }
   return 0;
 }
