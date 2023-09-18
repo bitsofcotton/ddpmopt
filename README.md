@@ -17,8 +17,7 @@ Also, if we run these programs with openmp, we need large shared memory size.
 They are usually configurable by sysctl on unix-like systems.
 However, openmp costs large enough beat with single core even in multicore because of their (and our) memory architecture.
 
-# Tips around topt
-We recommend you and us to use puts_cc pred option instead of this.
+Using this with mimalloc can increase memory usage with multi thread on some systems.
 
 # Usage:
     ./predg <in0.ppm> ...
@@ -62,4 +61,5 @@ We recommend you and us to use puts_cc pred option instead of this.
 2023/09/11 auto configure predg/qredg size, aggressive ga param.
 2023/09/12 fix last broken predv func and qredg.cc.
 2023/09/13 change ddpmopt retry and retry on geometric average.
+2023/09/19 autogamma after doing predg. update readme.
 
