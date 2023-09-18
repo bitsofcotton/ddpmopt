@@ -4003,6 +4003,35 @@ template <typename T> static inline SimpleVector<T> autoLevel(const SimpleVector
   return autoLevel<T>(b, count)[0].row(0);
 }
 
+template <typename T> static inline vector<SimpleMatrix<T> > autoGamma(const vector<SimpleMatrix<T> >& data, const T& ratio = T(int(1)) / T(int(2)) ) {
+  T r(int(0));
+  for(int k = 0; k < data.size(); k ++)
+    for(int i = 0; i < data[k].rows(); i ++)
+      for(int j = 0; j < data[k].cols(); j ++) {
+        assert(T(int(0)) <= data[k](i, j) && data[k](i, j) <= T(int(1)) );
+        r += log(data[k](i, j) + T(int(1)) / T(int(65536)) );
+      }
+  r /= T(int(data.size() * data[0].rows() * data[0].cols()));
+  r  = log(ratio) / r;
+  auto result(data);
+#if defined(_OPENMP)
+#pragma omp parallel for schedule(static, 1)
+#endif
+  for(int k = 0; k < data.size(); k ++)
+    for(int i = 0; i < data[k].rows(); i ++)
+      for(int j = 0; j < data[k].cols(); j ++)
+        result[k](i, j) = max(T(int(0)), min(T(int(1)), pow(data[k](i, j) + T(int(1)) / T(int(65536)), r) ));
+  return result;
+}
+
+template <typename T> static inline SimpleVector<T> autoGamma(const SimpleVector<T>& data, const T& r = T(int(1)) / T(int(2)) ) {
+  vector<SimpleMatrix<T> > b;
+  b.resize(1);
+  b[0].resize(1, data.size());
+  b[0].row(0) = data;
+  return autoGamma<T>(b, r)[0].row(0);
+}
+
 template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > predv0(const vector<SimpleVector<T> >& in, int msz = - 1) {
   int p0(0);
   if(msz < 0) msz = in.size();

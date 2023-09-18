@@ -42,9 +42,9 @@ int main(int argc, const char* argv[]) {
   }
   auto p(predvResizeMat<num_t>(in));
   for(int i = 0; i < p.first.size(); i ++) {
-    if(! savep2or3<num_t>((std::string("predg-forward-") + std::to_string(i) + std::string(".ppm")).c_str(), normalize<num_t>(p.first[i])) )
+    if(! savep2or3<num_t>((std::string("predg-forward-") + std::to_string(i) + std::string(".ppm")).c_str(), normalize<num_t>(autoGamma<num_t>(normalize<num_t>(p.first[i]) ))) )
       cerr << "failed to save." << endl;
-    if(! savep2or3<num_t>((std::string("predg-backward-") + std::to_string(i) + std::string(".ppm")).c_str(), normalize<num_t>(p.second[i])) )
+    if(! savep2or3<num_t>((std::string("predg-backward-") + std::to_string(i) + std::string(".ppm")).c_str(), normalize<num_t>(autoGamma<num_t>(normalize<num_t>(p.second[i]) ))) )
       cerr << "failed to save." << endl;
   }
   cerr << " Done" << endl;
