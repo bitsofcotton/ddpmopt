@@ -4122,7 +4122,8 @@ template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > 
 }
 
 template <typename T> pair<vector<vector<SimpleVector<T> > >, vector<vector<SimpleVector<T> > > > predvResizeVec(const vector<vector<SimpleVector<T> > >& in0, int msz = - 1) {
-  const int  rsize(T(int(in0.size() * 2 - 1)) / T(int(in0[0].size())) );
+  // N.B. we need /= 2 align with predv0.
+  const int  rsize(T(int(in0.size() * 2 - 1)) / T(int(in0[0].size())) / T(int(2)) );
   const auto resize((dft<T>(- rsize).subMatrix(0, 0, rsize, min(rsize, in0[0][0].size())) * dft<T>(in0[0][0].size()).subMatrix(0, 0, min(rsize, in0[0][0].size()), in0[0][0].size()) ).template real<T>() * T(rsize) / T(int(in0[0][0].size())) );
   const auto reverse((dft<T>(- in0[0][0].size()).subMatrix(0, 0, in0[0][0].size(), min(rsize, in0[0][0].size())) * dft<T>(rsize).subMatrix(0, 0, min(rsize, in0[0][0].size()), rsize) ).template real<T>() * T(int(in0[0][0].size())) / T(rsize) );
   cerr << "Resize into " << rsize << endl;
@@ -4154,9 +4155,14 @@ template <typename T> pair<vector<vector<SimpleVector<T> > >, vector<vector<Simp
 }
 
 template <typename T> pair<vector<vector<SimpleMatrix<T> > >, vector<vector<SimpleMatrix<T> > > > predvResizeMat(const vector<vector<SimpleMatrix<T> > >& in0, int msz = - 1) {
-  const auto pixels(T(int(in0.size() * 2 - 1)) / T(int(in0[0].size())) );
-  const int  ry(pixels * T(int(in0[0][0].rows())) * sqrt(T(int(in0[0][0].rows() * in0[0][0].rows() + in0[0][0].cols() * in0[0][0].cols() ))) / T(int(in0[0][0].rows() * in0[0][0].cols() )) );
-  const int  rx(pixels * T(int(in0[0][0].cols())) * sqrt(T(int(in0[0][0].rows() * in0[0][0].rows() + in0[0][0].cols() * in0[0][0].cols() ))) / T(int(in0[0][0].rows() * in0[0][0].cols() )) );
+  // N.B. we need this actually. (Whole graphics orthogonality information).
+  // const auto pixels(sqrt(T(int(in0.size() * 2 - 1)) / T(int(in0[0].size())) / T(int(in0[0][0].rows() * in0[0][0].cols() )) ));
+  // N.B. however, we use this because of its tiny output size.
+  //      (Each line orthogonality information.)
+  // N.B. we need /= 2 because of alighment on predv0.
+  const auto pixels(T(int(in0.size() * 2 - 1)) / T(int(in0[0].size())) / sqrt(T(int(in0[0][0].rows() * in0[0][0].cols() )) ) / T(int(2)));
+  const int  ry(pixels * T(int(in0[0][0].rows()) ) );
+  const int  rx(pixels * T(int(in0[0][0].cols()) ) );
   const auto resizeL((dft<T>(- ry).subMatrix(0, 0, ry, min(ry, in0[0][0].rows())) * dft<T>(in0[0][0].rows()).subMatrix(0, 0, min(ry, in0[0][0].rows()), in0[0][0].rows()) ).template real<T>() * T(ry) / T(int(in0[0][0].rows())) );
   const auto resizeR((dft<T>(- rx).subMatrix(0, 0, rx, min(rx, in0[0][0].cols())) * dft<T>(in0[0][0].cols()).subMatrix(0, 0, min(rx, in0[0][0].cols()), in0[0][0].cols()) ).template real<T>().transpose() * T(rx) / T(int(in0[0][0].cols())) );
   cerr << "Resize into (" << ry << ", " << rx << ")" << endl;
@@ -4195,7 +4201,8 @@ template <typename T> pair<vector<vector<SimpleMatrix<T> > >, vector<vector<Simp
 }
 
 template <typename T> pair<vector<SimpleSparseTensor<T> >, vector<SimpleSparseTensor<T> > > predvResizeSTen(const vector<SimpleSparseTensor<T> >& in0, const vector<int>& idx, int msz = - 1) {
-  const int  rsize(pow(T(int(in0.size() * 2 - 1) ), T(int(1)) / T(int(3)) ) );
+  // N.B. we need /=2 aligh with predv0.
+  const int  rsize(pow(T(int(in0.size() * 2 - 1) ) / T(int(2)), T(int(1)) / T(int(3)) ) );
   const auto resize((dft<T>(- rsize).subMatrix(0, 0, rsize, min(rsize, int(idx.size()))) * dft<T>(int(idx.size())).subMatrix(0, 0, min(rsize, int(idx.size())), int(idx.size())) ).template real<T>() * T(rsize) / T(int(idx.size())) );
   const auto reverse((dft<T>(- int(idx.size()) ).subMatrix(0, 0, int(idx.size()), min(rsize, int(idx.size())) ) * dft<T>(rsize).subMatrix(0, 0, min(rsize, int(idx.size())), rsize) ).template real<T>() * T(int(idx.size())) / T(rsize) );
   cerr << "Resize into " << rsize << endl;

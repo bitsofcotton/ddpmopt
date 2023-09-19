@@ -19,6 +19,9 @@ However, openmp costs large enough beat with single core even in multicore becau
 
 Using this with mimalloc can increase memory usage with multi thread on some systems.
 
+# Resize
+We resize probable proper size output, however, we might need convert -resize 70.71% (1/sqrt(2)) after doing these calculations.
+
 # Usage:
     ./predg <in0.ppm> ...
     ./qredg <inout0.ppm> ...
@@ -62,4 +65,5 @@ Using this with mimalloc can increase memory usage with multi thread on some sys
 2023/09/12 fix last broken predv func and qredg.cc.
 2023/09/13 change ddpmopt retry and retry on geometric average.
 2023/09/19 autogamma after doing predg. update readme.
+2023/09/19 predvResizeMat resize size fix to most reasonable one.
 
