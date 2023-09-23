@@ -63,20 +63,18 @@ int main(int argc, const char* argv[]) {
   if(m == '-') {
     vector<vector<SimpleVector<num_t> > > L;
     L.resize(sz * sz);
-    auto sz0(0);
-    std::cin >> sz0;
-    for(int i0 = 0; i0 < sz * sz; i0 ++) {
-      for(int i = 0; 0 <= sz0; i ++) {
+    for(int i0 = 0; i0 < sz * sz; i0 ++)
+      for(int i = 0; ; i ++) {
+        char c;
+        std::cin >> c;
+        if(c != '*') break;
         L[i0].emplace_back(SimpleVector<num_t>());
         std::cin >> L[i0][i];
         L[i0][i] /= num_t(L[i0][i][sz * sz]);
         L[i0][i][sz * sz] = num_t(int(0));
         assert(L[i0][0].size() == L[i0][i].size() &&
                L[i0][i].size());
-        std::cin >> sz0;
       }
-      std::cin >> sz0;
-    }
     for(int i = 2; i < argc; i ++) {
       cerr << i - 2 << " / " << argc - 2 << endl;
       vector<SimpleMatrix<num_t> > out;
@@ -161,7 +159,7 @@ int main(int argc, const char* argv[]) {
                  (m / shrink[i][j].cols()) * sz + i0 / sz),
                min(in[i][j].cols() - 1,
                  (m % shrink[i][j].cols()) * sz + i0 % sz) );
-            v.emplace_back(tv);
+            v.emplace_back(makeProgramInvariant<num_t>(tv).first);
            next1:
             ;
           }
@@ -169,7 +167,7 @@ int main(int argc, const char* argv[]) {
       for(int j = 0; j < v.size(); j ++) {
         SimpleMatrix<num_t> m(v.size(), v[0].size());
         for(int k = 0; k < v.size(); k ++) m.row(k) = v[k];
-        cout << linearInvariant<num_t>(m);
+        cout << "* " << linearInvariant<num_t>(m);
         int ok_cnt(0);
         for(int k = 0; k < v.size(); k ++) {
           const auto ga(revertProgramInvariant<num_t>(make_pair(makeProgramInvariant<num_t>(v[k]).second, num_t(int(1)) )) );
@@ -180,9 +178,8 @@ int main(int argc, const char* argv[]) {
         }
         if(v.size() <= ok_cnt) break;
       }
-      cout << - 1 << endl;
+      cout << "+" << endl;
     }
-    cout << - 1 << endl;
   }
   return 0;
 }
