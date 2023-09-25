@@ -41,7 +41,7 @@ int main(int argc, const char* argv[]) {
     for(int i = 0; i < pwork.size(); i ++)
       for(int j = 0; j < work.size(); j ++)
         pwork[i].emplace_back(work[j].row(i));
-    auto p(predvResizeVec<num_t>(pwork));
+    auto p(predVec<num_t>(pwork));
     vector<SimpleMatrix<num_t> > swork(work.size(),
       SimpleMatrix<num_t>(work[0].rows() + p.first.size() + p.second.size(),
         work[0].cols()).O());

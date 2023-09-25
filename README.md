@@ -68,4 +68,5 @@ We resize probable proper size output, however, we might need convert -resize 70
 2023/09/19 predvResizeMat resize size fix to most reasonable one.
 2023/09/22 ddpmopt change not to use crush but with linearInvariant.
 2023/09/24 fix last up, don't know why they worked well without crash on last debug.
+2023/09/25 change output size strategy, not using resize, preferring complement to predict.
 
