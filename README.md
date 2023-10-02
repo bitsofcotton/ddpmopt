@@ -15,9 +15,13 @@ Also, we need to do ulimit or edit /etc/login.conf for large malloc use cases re
 
 Also, if we run these programs with openmp, we need large shared memory size.
 They are usually configurable by sysctl on unix-like systems.
-However, openmp costs large enough beat with single core even in multicore because of their (and our) memory architecture.
 
 Using this with mimalloc can increase memory usage with multi thread on some systems.
+
+# Practical usage
+(i) if we get the results seems only add some picture a noise, the input picture number or line number is too small.
+
+(ii) if we get the results we take them as only the noise, we need to shrink the output by resizing 25% or so.
 
 # Usage:
     ./predg <in0.ppm> ...
@@ -66,4 +70,5 @@ Using this with mimalloc can increase memory usage with multi thread on some sys
 2023/09/22 ddpmopt change not to use crush but with linearInvariant.
 2023/09/24 fix last up, don't know why they worked well without crash on last debug.
 2023/09/25 change output size strategy, not using resize, preferring complement to predict.
+2023/10/03 update readme.
 
