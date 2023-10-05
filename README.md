@@ -2,26 +2,22 @@
 Convert meaning-less image into context meaning-full flavour.
 We can use this for bitsofcotton/i2g filtered images.
 
+This should behaves deterministic ones, however, some of the condition causes non deterministic flavours even ever in -D_FLOAT_BITS_=... condition.
+
 # Context
 There exists Denoising Diffusion Probabilistic Models (DDPM; Ho et al. 2020). So this is another try on them.
 However, we don't use them because after the some of the implementation, we only focus to enlarge with some categorized learned vector without noise. So we shrink input images to multiple meaning, then, returns one meaning output.
 
 # Tips on malloc options
-Some of the implementation needs to run them with specifying malloc options.
-(cf. jjj&gt;&gt;&gt; on OpenBSD)
-This is because we need huge number of allocations/frees to run.
-
-Also, we need to do ulimit or edit /etc/login.conf for large malloc use cases required by larger than medium sized input.
+We need to do ulimit or edit /etc/login.conf for large malloc use cases required by larger than medium sized input.
 
 Also, if we run these programs with openmp, we need large shared memory size.
 They are usually configurable by sysctl on unix-like systems.
 
-Using this with mimalloc can increase memory usage with multi thread on some systems.
+Using this with mimalloc or so can increase memory usage with multi thread on some systems.
 
 # Practical usage
-(i) if we get the results seems only add some picture a noise, the input picture number or line number is too small.
-
-(ii) if we get the results we take them as only the noise, we need to shrink the output by resizing 25% or so.
+If we get the results seems only add some picture a noise, the input picture number or line number is too small, or, only we should resize them smaller ones (eg. as to be skip &leq; 2).
 
 # Usage:
     ./predg <in0.ppm> ...
@@ -71,4 +67,5 @@ Using this with mimalloc can increase memory usage with multi thread on some sys
 2023/09/24 fix last up, don't know why they worked well without crash on last debug.
 2023/09/25 change output size strategy, not using resize, preferring complement to predict.
 2023/10/03 update readme.
+2023/10/05 update readme, should close except for some of the ddpmopt for pairs of the images.
 
