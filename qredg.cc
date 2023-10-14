@@ -33,6 +33,7 @@ int main(int argc, const char* argv[]) {
 #define int int64_t
 //#define int int32_t
   assert(1 < argc);
+  cerr << "Coherent: sqrt(2): " << sqrt<num_t>(num_t(2)) << endl;
   for(int i = 1; i < argc; i ++) {
     vector<SimpleMatrix<num_t> > work;
     if(! loadp2or3<num_t>(work, argv[i])) continue;
