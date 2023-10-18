@@ -19,7 +19,7 @@ Using this with mimalloc or so can increase memory usage with multi thread on so
 # Practical usage
 If we get the results seems only add some picture a noise, the input picture number or line number is too small, or, only we should resize them smaller ones (eg. cleansq in goki_check_cc).
 
-cf. with 16GB memory without swap, calculatable color image seems not larger and not equal to 500x500 size (sqrt(400) = 20), monochrome image seems not larger and not equal to 900x900 size (sqrt(800) ~ 28.28) so we need some larger size with prediction theirselves however, 2x size causes 8x calculation memory usage.
+cf. with 16GB memory without swap, calculatable color image seems not larger and not equal to 500x500 size (sqrt(400) = 20), monochrome image seems not larger and not equal to 900x900 size (sqrt(800) ~ 28.28) so we need some larger size with prediction theirselves however, 2x size causes 16x calculation memory usage.
 
 # Usage:
     ./predg <in0.ppm> ...
