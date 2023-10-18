@@ -17,7 +17,7 @@ They are usually configurable by sysctl on unix-like systems.
 Using this with mimalloc or so can increase memory usage with multi thread on some systems.
 
 # Practical usage
-If we get the results seems only add some picture a noise, the input picture number or line number is too small, or, only we should resize them smaller ones (eg. as to be skip &leq; 2).
+If we get the results seems only add some picture a noise, the input picture number or line number is too small, or, only we should resize them smaller ones (eg. cleansq in goki_check_cc).
 
 # Usage:
     ./predg <in0.ppm> ...
@@ -68,4 +68,5 @@ If we get the results seems only add some picture a noise, the input picture num
 2023/09/25 change output size strategy, not using resize, preferring complement to predict.
 2023/10/03 update readme.
 2023/10/05 update readme, should close except for some of the ddpmopt for pairs of the images.
+2023/10/18 update readme.
 
