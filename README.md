@@ -7,6 +7,7 @@ This should behaves deterministic ones, however, some of the condition causes no
 # Context
 There exists Denoising Diffusion Probabilistic Models (DDPM; Ho et al. 2020). So this is another try on them.
 However, we don't use them because after the some of the implementation, we only focus to enlarge with some categorized learned vector without noise. So we shrink input images to multiple meaning, then, returns one meaning output.
+We should ddpmopt with each mipmaps on practical.
 
 # Tips on malloc options
 We need to do ulimit or edit /etc/login.conf for large malloc use cases required by larger than medium sized input.
@@ -16,10 +17,10 @@ They are usually configurable by sysctl on unix-like systems.
 
 Using this with mimalloc or so can increase memory usage with multi thread on some systems.
 
-# Practical usage
-If we get the results seems only add some picture a noise, the input picture number or line number is too small, or, only we should resize them smaller ones (eg. cleansq in goki_check_cc).
+# Known bug:
+* P1I predicts rough enough, this is because taking data invariant and predicting same losts invariant geometric mean on prediction.
 
-cf. with 16GB memory without swap, calculatable color image seems not larger and not equal to 500x500 size (sqrt(400) = 20), monochrome image seems not larger and not equal to 900x900 size (sqrt(800) ~ 28.28) so we need some larger size with prediction theirselves however, 2x size causes 16x calculation memory usage.
+* 2-norm on each stage prediction is rough enough, this is avoidable if we add one dimension to divides some.
 
 # Usage:
     ./predg <in0.ppm> ...
@@ -71,4 +72,5 @@ cf. with 16GB memory without swap, calculatable color image seems not larger and
 2023/10/03 update readme.
 2023/10/05 update readme, should close except for some of the ddpmopt for pairs of the images.
 2023/10/18 update readme.
+2023/10/19 mipmap impl, update readme.
 
