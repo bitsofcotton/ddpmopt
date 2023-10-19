@@ -66,7 +66,7 @@ int main(int argc, const char* argv[]) {
     for(int i = mipwork.size() - 1; 0 <= i; i --) {
       std::cerr << "mipwork: " << mipwork.size() - i << " / " << mipwork.size() << std::endl;
       auto mwork(mipwork[i]);
-      if(i < mipwork.size() - 1) {
+      if(p.first.size()) {
         for(int j = 0; j < mwork.size(); j ++)
           for(int k = 0; k < mwork[j].size(); k ++)
             for(int ii = 0; ii < mwork[j][k].size(); ii ++)

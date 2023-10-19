@@ -74,7 +74,7 @@ int main(int argc, const char* argv[]) {
   for(int i = mipmap.size() - 1; 0 <= i; i --) {
     cerr << "mipmap: " << mipmap.size() - i << " / " << mipmap.size() << endl;
     auto work(mipmap[i]);
-    if(i < mipmap.size() - 1) {
+    if(p.first.size()) {
       for(int j = 0; j < work.size(); j ++)
         for(int k = 0; k < work[j].size(); k ++)
           for(int ii = 0; ii < work[j][k].rows(); ii ++)
