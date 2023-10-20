@@ -7,7 +7,6 @@ This should behaves deterministic ones, however, some of the condition causes no
 # Context
 There exists Denoising Diffusion Probabilistic Models (DDPM; Ho et al. 2020). So this is another try on them.
 However, we don't use them because after the some of the implementation, we only focus to enlarge with some categorized learned vector without noise. So we shrink input images to multiple meaning, then, returns one meaning output.
-We should ddpmopt with each mipmaps on practical.
 
 # Tips on malloc options
 We need to do ulimit or edit /etc/login.conf for large malloc use cases required by larger than medium sized input.
@@ -17,10 +16,18 @@ They are usually configurable by sysctl on unix-like systems.
 
 Using this with mimalloc or so can increase memory usage with multi thread on some systems.
 
-# Known bug:
-* P1I predicts rough enough, this is because taking data invariant and predicting same losts invariant geometric mean on prediction.
+# Known tips:
+* P1I predicts a little rough, this is because taking data invariant and predicting same losts invariant geometric mean on prediction. This is avoidable with loop if the map region is decreasing functions.
 
-* 2-norm on each stage prediction is rough enough, this is avoidable if we add one dimension to divides some.
+* 2-norm on each stage prediction is a little rough, this is avoidable if we add one dimension to divides some.
+
+* We need to shrink output images cf. goki_check_cc cleansq command.
+
+* With 16GB memory space, we can calculate not larger than and not equal to 500x500px color, either 800x800px monochrome images. (sqrt(500) ~ 22.36, sqrt(800) ~ 28.28, so only very rough image will be gained.
+
+* 2x image size causes 16x memory usage we need. So if we need 2x detailed output image size, we need 256x memory usage. (And much of calculation time.)
+
+* So 44x44 color nor 56x56 monochrome needs 4TB memory usage. So if we need such size, we should implement to use storage.
 
 # Usage:
     ./predg <in0.ppm> ...
@@ -73,4 +80,5 @@ Using this with mimalloc or so can increase memory usage with multi thread on so
 2023/10/05 update readme, should close except for some of the ddpmopt for pairs of the images.
 2023/10/18 update readme.
 2023/10/19 mipmap impl, update readme.
+2023/10/20 revert, mipmap doesn't work well.
 
