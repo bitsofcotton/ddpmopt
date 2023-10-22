@@ -4099,6 +4099,7 @@ template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > 
 
 template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > predv(const vector<SimpleVector<T> >& in0, int skip = 1) {
   assert(0 < skip);
+  if(skip == 1) return predv0<T>(in0);
   vector<SimpleVector<T> > in;
   in.reserve(in0.size() * skip - skip + 1);
   for(int i = 0; i < in0.size(); i ++)  {
