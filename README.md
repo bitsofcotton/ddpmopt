@@ -21,13 +21,9 @@ Using this with mimalloc or so can increase memory usage with multi thread on so
 
 * 2-norm on each stage prediction is a little rough, this is avoidable if we add one dimension to divides some.
 
-* We need to shrink output images cf. goki_check_cc cleansq command.
+* Instead of complement input traces, we need to shrink output images cf. goki_check_cc cleansq command.
 
-* With 16GB memory space, we can calculate not larger than and not equal to 500x500px color, either 800x800px monochrome images. (sqrt(500) ~ 22.36, sqrt(800) ~ 28.28, so only very rough image will be gained.
-
-* 2x image size causes 16x memory usage we need. So if we need 2x detailed output image size, we need 256x memory usage. (And much of calculation time.)
-
-* So 44x44 color nor 56x56 monochrome needs 4TB memory usage. So if we need such size, we should implement to use storage.
+* Either we select the speed instead of accuracy, so shrinking the image after output is very important.
 
 # Usage:
     ./predg <in0.ppm> ...
@@ -81,4 +77,5 @@ Using this with mimalloc or so can increase memory usage with multi thread on so
 2023/10/18 update readme.
 2023/10/19 mipmap impl, update readme.
 2023/10/20 revert, mipmap doesn't work well.
+2023/10/22 instead of complement trace of input, we should do shrink after output is done. This is from some of the numerical tests, so whole image orthogonality isn't matter even when input data is small enough, instead of them, we try to vanish some prediction errors with geometric mean.
 
