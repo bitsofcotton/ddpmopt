@@ -65,7 +65,9 @@ using std::getline;
   using namespace std;
   typedef uint64_t myuint;
   typedef int64_t  myint;
-  typedef long double myfloat;
+  // XXX:
+  // typedef long double myfloat;
+  typedef float myfloat;
 #else
 
 // Double int to new int class.

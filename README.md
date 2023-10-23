@@ -6,7 +6,7 @@ This should behaves deterministic ones, however, some of the condition causes no
 
 # Context
 There exists Denoising Diffusion Probabilistic Models (DDPM; Ho et al. 2020). So this is another try on them.
-However, we don't use them because after the some of the implementation, we only focus to enlarge with some categorized learned vector without noise. So we shrink input images to multiple meaning, then, returns one meaning output.
+However, we don't use them because after the some of the implementation, we only focus to apply each pixel context to color image into monochrome one.
 
 # Tips on malloc options
 We need to do ulimit or edit /etc/login.conf for large malloc use cases required by larger than medium sized input.
@@ -28,7 +28,7 @@ Using this with mimalloc or so can increase memory usage with multi thread on so
 # Usage:
     ./predg <in0.ppm> ...
     ./qredg <inout0.ppm> ...
-    ./ddpmopt + <in0.ppm> ... > cache.txt
+    ./ddpmopt + <in0in.ppm> <in0out.pgm> ... > cache.txt
     ./ddpmopt - <inout0.ppm> ... < cache.txt
 
 # Real close
@@ -78,4 +78,5 @@ Using this with mimalloc or so can increase memory usage with multi thread on so
 2023/10/19 mipmap impl, update readme.
 2023/10/20 revert, mipmap doesn't work well.
 2023/10/22 instead of complement trace of input, we should do shrink after output is done. This is from some of the numerical tests, so whole image orthogonality isn't matter even when input data is small enough, instead of them, we try to vanish some prediction errors with geometric mean.
+2023/10/23 ddpmopt strategy algorithm in/output large change.
 
