@@ -6,7 +6,7 @@ This should behaves deterministic ones, however, some of the condition causes no
 
 # Context
 There exists Denoising Diffusion Probabilistic Models (DDPM; Ho et al. 2020). So this is another try on them.
-However, we don't use them because after the some of the implementation, we only focus to apply each pixel context to color image into monochrome one.
+However, we don't use them because after the some of the implementation, we only focus to apply each pixel context to color image into monochrome one. We can use this to enlarge with triangle based transformations.
 
 # Tips on malloc options
 We need to do ulimit or edit /etc/login.conf for large malloc use cases required by larger than medium sized input.
@@ -19,11 +19,9 @@ Using this with mimalloc or so can increase memory usage with multi thread on so
 # Known tips:
 * P1I predicts a little rough, this is because taking data invariant and predicting same losts invariant geometric mean on prediction. This is avoidable with loop if the map region is decreasing functions.
 
-* 2-norm on each stage prediction is a little rough, this is avoidable if we add one dimension to divides some.
+* Either we select the speed instead of accuracy, so shrinking the image after output is very important. cf. goki_check_cc cleansq command. Also, doing complement on input trace isn't improve enough beating with shrinking images.
 
-* Instead of complement input traces, we need to shrink output images cf. goki_check_cc cleansq command.
-
-* Either we select the speed instead of accuracy, so shrinking the image after output is very important.
+* After predg, we might need to average all of the backward/forward results. This is the analogy to qredg goki_check_cc pextend methods.
 
 # Usage:
     ./predg <in0.ppm> ...
@@ -79,4 +77,5 @@ Using this with mimalloc or so can increase memory usage with multi thread on so
 2023/10/20 revert, mipmap doesn't work well.
 2023/10/22 instead of complement trace of input, we should do shrink after output is done. This is from some of the numerical tests, so whole image orthogonality isn't matter even when input data is small enough, instead of them, we try to vanish some prediction errors with geometric mean.
 2023/10/23 ddpmopt strategy algorithm in/output large change.
+2023/10/26 update readme.
 
