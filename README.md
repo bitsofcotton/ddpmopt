@@ -78,4 +78,5 @@ Either or not we select the speed instead of accuracy, so shrinking the image af
 2023/10/23 ddpmopt strategy algorithm in/output large change.
 2023/10/26 update readme.
 2023/10/27 update readme. close.
+2023/10/30 copy structure reliably with randtools meaning.
 
