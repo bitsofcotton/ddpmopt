@@ -2263,6 +2263,7 @@ template <typename T> inline SimpleVector<T> SimpleMatrix<T>::zeroFix(const Simp
       continue;
     if(T(int(0)) < fidx[idx].first &&
        fidx[idx].first < sqrt(one.dot(one)) * epsilon()) {
+      assert(i && "linearInvariant: P matrix is orthogonal to 1 vector.");
       *this = Pb;
       break;
     }

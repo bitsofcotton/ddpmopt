@@ -17,6 +17,9 @@ They are usually configurable by sysctl on unix-like systems.
 
 Using this with mimalloc or so can increase memory usage with multi thread on some systems.
 
+# Tips after [pq]redg.
+We recommend you ans us to use: equalize, goki_check_cc:cleans, despeckle, normalize chain.
+
 # Known tips:
 P1I predicts a little rough, this is because taking data invariant and predicting same losts invariant geometric mean on prediction. This is avoidable with loop if the map region is decreasing functions.
 
@@ -79,4 +82,5 @@ Either or not we select the speed instead of accuracy, so shrinking the image af
 2023/10/26 update readme.
 2023/10/27 update readme. close.
 2023/10/30 copy structure reliably with randtools meaning.
+2023/11/13 update readme.
 
