@@ -30,10 +30,10 @@ We recommend you ans us to use: equalize, goki_check_cc:cleans, despeckle, norma
 P1I predicts a little rough, this is because taking data invariant and predicting same losts invariant geometric mean on prediction. This is avoidable with loop if the map region is decreasing functions.
 
 # Usage:
-    ./predg(n)?(32|64)?(mp)? <in0.ppm> ...
-    ./qredg(n)?(32|64)?(mp)? <inout0.ppm> ...
-    ./ddpmopt(32|64)? + <in0in.ppm> <in0out.pgm> ... > cache.txt
-    ./ddpmopt(32|64)? - <inout0.ppm> ... < cache.txt
+    ./predg(32|64)?(mp)? <in0.ppm> ...
+    ./qredg(32|64)?(mp)? <inout0.ppm> ...
+    ./ddpmopt(32|64)?(mp)? + <in0in.ppm> <in0out.pgm> ... > cache.txt
+    ./ddpmopt(32|64)?(mp)? - <inout0.ppm> ... < cache.txt
 
 # Real close
 2023/03/01
@@ -87,5 +87,5 @@ P1I predicts a little rough, this is because taking data invariant and predictin
 2023/10/27 update readme. close.
 2023/10/30 copy structure reliably with randtools meaning.
 2023/11/13 update readme.
-2023/11/19 revert each line complement condition, complement ones uses predgn, qredgn.
+2023/11/19 revert each line complement condition, force to use complement.
 

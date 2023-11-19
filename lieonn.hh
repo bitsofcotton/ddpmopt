@@ -4047,13 +4047,8 @@ template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > 
                                   / T(skip)).second;
     ratio[i * skip] = makeProgramInvariant<T>(in[i]).second;
   }
-/*
-  int p0(0);
-  for( ; p0 < int(in.size()); p0 ++)
-    if(in.size() - 4 - p0 - 1 + 2 < 4 + 2) break;
-*/
-  // const auto p0(int(in.size() - 4 - 1 + 2 - 4 - 2) / skip);
-  const int p0(ceil(sqrt(T(int(in.size() - 4 - 1 + 2 - 4 - 2) / skip) )) );
+  // N.B. we need rich internal status.
+  const int p0(ceil(sqrt(T(int(in.size() - 4 - 1 + 2 - 4 - 2 - skip)) )) );
   const auto& secondsf(ratio);
   SimpleVector<T> secondsb(secondsf.size());
   secondsb.O();
@@ -4121,7 +4116,7 @@ template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > 
   return make_pair(move(p), move(q));
 }
 
-template <typename T> pair<vector<vector<SimpleVector<T> > >, vector<vector<SimpleVector<T> > > > predVec(const vector<vector<SimpleVector<T> > >& in0, const bool& nocomp = false) {
+template <typename T> pair<vector<vector<SimpleVector<T> > >, vector<vector<SimpleVector<T> > > > predVec(const vector<vector<SimpleVector<T> > >& in0) {
   assert(in0.size() && in0[0].size() && in0[0][0].size());
   const int ratio(ceil(T(int(in0[0].size() * in0[0][0].size())) / T(int(in0.size())) ));
   cerr << "ratio: " << ratio << endl;
@@ -4136,7 +4131,7 @@ template <typename T> pair<vector<vector<SimpleVector<T> > >, vector<vector<Simp
       in[i].setVector(j * in0[i][0].size(), in0[i][j]);
     }
   }
-  const auto p(predv<T>(in, nocomp ? 1 : ratio));
+  const auto p(predv<T>(in, ratio));
   pair<vector<vector<SimpleVector<T> > >, vector<vector<SimpleVector<T> > > > res;
   res.first.resize( p.first.size() );
   res.second.resize(p.second.size());
@@ -4151,10 +4146,15 @@ template <typename T> pair<vector<vector<SimpleVector<T> > >, vector<vector<Simp
   return res;
 }
 
-template <typename T> pair<vector<vector<SimpleMatrix<T> > >, vector<vector<SimpleMatrix<T> > > > predMat(const vector<vector<SimpleMatrix<T> > >& in0, const bool& nocomp = false) {
+template <typename T> pair<vector<vector<SimpleMatrix<T> > >, vector<vector<SimpleMatrix<T> > > > predMat(const vector<vector<SimpleMatrix<T> > >& in0) {
   assert(in0.size() && in0[0].size() && in0[0][0].rows() && in0[0][0].cols());
   // N.B. each line condition, whole matrix causes too small output.
-  const int ratio(ceil(sqrt(T(int(in0[0].size() * in0[0][0].rows() * in0[0][0].cols())) ) / T(int(in0.size())) ));
+  //      in fact, we need:
+  // const int ratio(ceil(sqrt(T(int(in0[0].size() * in0[0][0].rows() * in0[0][0].cols()))) / T(int(in0.size())) ));
+  // N.B. we need larger output, this is the trade off between output-number
+  //      and complement accuracy. We select geometric mean between
+  //      no complement and best complement.
+  const int ratio(ceil(sqrt(sqrt(T(int(in0[0].size() * in0[0][0].rows() * in0[0][0].cols()))) / T(int(in0.size())) )) );
   cerr << "ratio: " << ratio << endl;
   vector<SimpleVector<T> > in;
   in.resize(in0.size());
@@ -4169,7 +4169,7 @@ template <typename T> pair<vector<vector<SimpleMatrix<T> > >, vector<vector<Simp
                         k * in0[i][0].cols(), in0[i][j].row(k));
     }
   }
-  const auto p(predv<T>(in, nocomp ? 1 : ratio));
+  const auto p(predv<T>(in, ratio));
   pair<vector<vector<SimpleMatrix<T> > >, vector<vector<SimpleMatrix<T> > > > res;
   res.first.resize( p.first.size() );
   res.second.resize(p.second.size());
@@ -4194,10 +4194,12 @@ template <typename T> pair<vector<vector<SimpleMatrix<T> > >, vector<vector<Simp
   return res;
 }
 
-template <typename T> pair<vector<SimpleSparseTensor<T> >, vector<SimpleSparseTensor<T> > > predSTen(const vector<SimpleSparseTensor<T> >& in0, const vector<int>& idx, const bool& nocomp = false) {
+template <typename T> pair<vector<SimpleSparseTensor<T> >, vector<SimpleSparseTensor<T> > > predSTen(const vector<SimpleSparseTensor<T> >& in0, const vector<int>& idx) {
   assert(idx.size() && in0.size());
   // N.B. each line condition, whole object causes too small output.
-  const int ratio(ceil(T(int(idx.size())) / T(int(in0.size())) ));
+  // const int ratio(ceil(T(int(idx.size())) / T(int(in0.size())) ));
+  // N.B. same as predMat ratio.
+  const int ratio(ceil(sqrt(sqrt(T(int(idx.size())) ) / T(int(in0.size())) )) );
   cerr << "ratio: " << ratio << endl;
   vector<SimpleVector<T> > in;
   in.resize(in0.size());
@@ -4209,7 +4211,7 @@ template <typename T> pair<vector<SimpleSparseTensor<T> >, vector<SimpleSparseTe
           in[i][j * idx.size() * idx.size() + k * idx.size() + m] =
             in0[i][idx[j]][idx[k]][idx[m]];
   }
-  const auto p(predv<T>(in, nocomp ? 1 : ratio));
+  const auto p(predv<T>(in, ratio));
   pair<vector<SimpleSparseTensor<T> >, vector<SimpleSparseTensor<T> > > res;
   res.first.resize( p.first.size() );
   res.second.resize(p.second.size());

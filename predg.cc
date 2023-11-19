@@ -43,19 +43,15 @@ int main(int argc, const char* argv[]) {
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
-    for(int i = 0; i < work.size(); i ++)
-      for(int j = 0; j < work[i].rows(); j ++)
-        for(int k = 0; k < work[i].cols(); k ++) {
-          work[i](j, k) += num_t(int(1)) / num_t(int(65536));
-          work[i](j, k) /= num_t(int(1)) + num_t(int(1)) / num_t(int(256));
+    for(int ii = 0; ii < work.size(); ii ++)
+      for(int j = 0; j < work[ii].rows(); j ++)
+        for(int k = 0; k < work[ii].cols(); k ++) {
+          work[ii](j, k) += num_t(int(1)) / num_t(int(65536));
+          work[ii](j, k) /= num_t(int(1)) + num_t(int(1)) / num_t(int(256));
         }
     in.emplace_back(work);
   }
-#if defined(NOCOMP)
-  const auto p(predMat<num_t>(in, true));
-#else
   const auto p(predMat<num_t>(in));
-#endif
   for(int i = 0; i < p.first.size(); i ++) {
     if(! savep2or3<num_t>((std::string("predg-forward-") + std::to_string(i) + std::string(".ppm")).c_str(), normalize<num_t>(autoGamma<num_t>(normalize<num_t>(p.first[i]) ))) )
       cerr << "failed to save." << endl;

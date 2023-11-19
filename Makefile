@@ -14,12 +14,12 @@ CXXFLAGS+=	-std=c++11
 LDFLAGS+=	-lc++ -L/usr/local/lib
 #LDFLAGS+=	-lestdc++ -L/usr/local/lib
 
-CLEANFILES= *.o ddpmopt ddpmopt32 predg predg32 predgn predgn32 qredg qredg32 qredgn qredgn32 ddpmoptmp ddpmopt32mp predgmp predg32mp predgnmp predgn32mp qredgmp qredg32mp qredgnmp qredgn32mp
+CLEANFILES= *.o ddpmopt ddpmopt32 predg predg32 qredg qredg32 ddpmoptmp ddpmopt32mp predgmp predg32mp qredgmp qredg32mp
 
 clean:
 	@rm -rf ${CLEANFILES}
 
-all:	ddpmopt ddpmopt32 predg predg32 predgn predgn32 qredg qredg32 qredgn qredgn32 ddpmoptmp ddpmopt32mp predgmp predg32mp predgnmp predgn32mp qredgmp qredg32mp qredgnmp qredgn32mp
+all:	ddpmopt ddpmopt32 predg predg32 qredg qredg32 ddpmoptmp ddpmopt32mp predgmp predg32mp qredgmp qredg32mp
 
 ddpmopt:
 	${CXX} ${CXXFLAGS} -static -o ddpmopt ddpmopt.cc
@@ -45,18 +45,6 @@ predg32mp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=32 -o predg32mp predg.cc
 predg64mp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=64 -o predg64mp predg.cc
-predgn:
-	${CXX} ${CXXFLAGS} -static -DNOCOMP -o predgn predg.cc
-predgn32:
-	${CXX} ${CXXFLAGS} -static -DNOCOMP -D_FLOAT_BITS_=32 -o predgn32 predg.cc
-predgn64:
-	${CXX} ${CXXFLAGS} -static -DNOCOMP -D_FLOAT_BITS_=64 -o predgn64 predg.cc
-predgnmp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -DNOCOMP -o predgnmp predg.cc
-predgn32mp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -DNOCOMP -D_FLOAT_BITS_=32 -o predgn32mp predg.cc
-predgn64mp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -DNOCOMP -D_FLOAT_BITS_=64 -o predgn64mp predg.cc
 qredg:
 	${CXX} ${CXXFLAGS} -static -o qredg qredg.cc
 qredg32:
@@ -69,16 +57,4 @@ qredg32mp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=32 -o qredg32mp qredg.cc
 qredg64mp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=64 -o qredg64mp qredg.cc
-qredgn:
-	${CXX} ${CXXFLAGS} -static -DNOCOMP -o qredgn qredg.cc
-qredgn32:
-	${CXX} ${CXXFLAGS} -static -DNOCOMP -D_FLOAT_BITS_=32 -o qredgn32 qredg.cc
-qredgn64:
-	${CXX} ${CXXFLAGS} -static -DNOCOMP -D_FLOAT_BITS_=64 -o qredgn64 qredg.cc
-qredgnmp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -DNOCOMP -o qredgnmp qredg.cc
-qredgn32mp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -DNOCOMP -D_FLOAT_BITS_=32 -o qredgn32mp qredg.cc
-qredgn64mp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -DNOCOMP -D_FLOAT_BITS_=64 -o qredgn64mp qredg.cc
 
