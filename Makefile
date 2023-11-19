@@ -3,58 +3,36 @@ CXX=	clang++
 
 # compiler flags.
 CXXFLAGS+=	-Ofast -mtune=native -gfull
-#CXXFLAGS+=	-O3 -mtune=native -g3
+#CXXFLAGS+=	-O2 -mtune=native -g3
 #CXXFLAGS+=	-Oz -mtune=native -gfull
-#CXXFLAGS+=	-O2 -mtune=native -gfull
-#CXXFLAGS+=	-O0 -mtune=native -gfull
-#CXXFLAGS+=	-pg
 MPFLAGS=	-I/usr/local/include -L/usr/local/lib -lomp -fopenmp
-#MPFLAGS=	-I/usr/local/include -L/usr/local/lib -lgomp -fopenmp
+#CXXFLAGS+=	-pg
 CXXFLAGS+=	-std=c++11
 LDFLAGS+=	-lc++ -L/usr/local/lib
 #LDFLAGS+=	-lestdc++ -L/usr/local/lib
 
-CLEANFILES= *.o ddpmopt ddpmopt32 predg predg32 qredg qredg32 ddpmoptmp ddpmopt32mp predgmp predg32mp qredgmp qredg32mp
+CLEANFILES= *.o gokibin gokibin32 gokibinmp gokibin32mp
 
 clean:
 	@rm -rf ${CLEANFILES}
 
-all:	ddpmopt ddpmopt32 predg predg32 qredg qredg32 ddpmoptmp ddpmopt32mp predgmp predg32mp qredgmp qredg32mp
-
-ddpmopt:
-	${CXX} ${CXXFLAGS} -static -o ddpmopt ddpmopt.cc
-ddpmopt32:
-	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=32 -o ddpmopt32 ddpmopt.cc
-ddpmopt64:
-	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=64 -o ddpmopt64 ddpmopt.cc
-ddpmoptmp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -o ddpmoptmp ddpmopt.cc
-ddpmopt32mp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=32 -o ddpmopt32mp ddpmopt.cc
-ddpmopt64mp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=64 -o ddpmopt64mp ddpmopt.cc
-predg:
-	${CXX} ${CXXFLAGS} -static -o predg predg.cc
-predg32:
-	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=32 -o predg32 predg.cc
-predg64:
-	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=64 -o predg64 predg.cc
-predgmp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -o predgmp predg.cc
-predg32mp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=32 -o predg32mp predg.cc
-predg64mp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=64 -o predg64mp predg.cc
-qredg:
-	${CXX} ${CXXFLAGS} -static -o qredg qredg.cc
-qredg32:
-	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=32 -o qredg32 qredg.cc
-qredg64:
-	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=64 -o qredg64 qredg.cc
-qredgmp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -o qredgmp qredg.cc
-qredg32mp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=32 -o qredg32mp qredg.cc
-qredg64mp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=64 -o qredg64mp qredg.cc
+all:	gokibin gokibin32 gokibinmp gokibin32mp
+gokibin:
+	${CXX} ${CXXFLAGS} -static -o gokibin tools.cc
+gokibinO0:
+	${CXX} ${CXXFLAGS} -static -O0 -o gokibinO0 tools.cc
+gokibin16:
+	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=16 -o gokibin16 tools.cc
+gokibin32:
+	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=32 -o gokibin32 tools.cc
+gokibin64:
+	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=64 -o gokibin64 tools.cc
+gokibin128:
+	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=128 -o gokibin128 tools.cc
+gokibinmp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -o gokibinmp tools.cc
+gokibin32mp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=32 -o gokibin32mp tools.cc
+gokibin64mp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=64 -o gokibin64mp tools.cc
 
