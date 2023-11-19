@@ -24,7 +24,7 @@ Please use gcc or so to compile and work them.
 This might be clang's bug.
 
 # Tips after [pq]redg.
-We recommend you ans us to use: equalize, goki_check_cc:cleans, despeckle, normalize chain. Either or not we select the speed instead of accuracy, shrinking is important to improve output. Doing persistent complement doesn't improve enough.
+We recommend you ans us to use: equalize, resize, despeckle, normalize chain. Either or not we select the speed instead of accuracy, shrinking is important to improve output. Doing persistent complement doesn't improve enough.
 
 # Known tips:
 P1I predicts a little rough, this is because taking data invariant and predicting same losts invariant geometric mean on prediction. This is avoidable with loop if the map region is decreasing functions.
