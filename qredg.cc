@@ -39,10 +39,20 @@ int main(int argc, const char* argv[]) {
     if(! loadp2or3<num_t>(work, argv[i0])) continue;
     vector<vector<SimpleVector<num_t> > > pwork;
     pwork.resize(work[0].rows());
-    for(int i = 0; i < pwork.size(); i ++)
-      for(int j = 0; j < work.size(); j ++)
+    for(int i = 0; i < pwork.size(); i ++) {
+      for(int j = 0; j < work.size(); j ++) {
         pwork[i].emplace_back(work[j].row(i));
+        for(int k = 0; k < pwork[i][j].size(); k ++) {
+          pwork[i][j][k] += num_t(int(1)) / num_t(int(65536));
+          pwork[i][j][k] /= num_t(int(1)) + num_t(int(1)) / num_t(int(256));
+        }
+      }
+    }
+#if defined(NOCOMP)
+    const auto p(predVec<num_t>(pwork, true));
+#else
     const auto p(predVec<num_t>(pwork));
+#endif
     vector<SimpleMatrix<num_t> > swork(work.size(),
       SimpleMatrix<num_t>(work[0].rows() + p.first.size() + p.second.size(),
         work[0].cols()).O());

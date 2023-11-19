@@ -17,19 +17,23 @@ They are usually configurable by sysctl on unix-like systems.
 
 Using this with mimalloc or so can increase memory usage with multi thread on some systems.
 
+# Tips around clang compiler
+Some of the lieonn.hh operator \<\< class doesn't works as expected.
+
+Please use gcc or so to compile and work them.
+This might be clang's bug.
+
 # Tips after [pq]redg.
-We recommend you ans us to use: equalize, goki_check_cc:cleans, despeckle, normalize chain.
+We recommend you ans us to use: equalize, goki_check_cc:cleans, despeckle, normalize chain. Either or not we select the speed instead of accuracy, shrinking is important to improve output. Doing persistent complement doesn't improve enough.
 
 # Known tips:
 P1I predicts a little rough, this is because taking data invariant and predicting same losts invariant geometric mean on prediction. This is avoidable with loop if the map region is decreasing functions.
 
-Either or not we select the speed instead of accuracy, so shrinking the image after output is very important. cf. goki_check_cc cleansq command. Also, doing complement on input trace isn't improve enough beating with shrinking images.
-
 # Usage:
-    ./predg <in0.ppm> ...
-    ./qredg <inout0.ppm> ...
-    ./ddpmopt + <in0in.ppm> <in0out.pgm> ... > cache.txt
-    ./ddpmopt - <inout0.ppm> ... < cache.txt
+    ./predg(n)?(32|64)?(mp)? <in0.ppm> ...
+    ./qredg(n)?(32|64)?(mp)? <inout0.ppm> ...
+    ./ddpmopt(32|64)? + <in0in.ppm> <in0out.pgm> ... > cache.txt
+    ./ddpmopt(32|64)? - <inout0.ppm> ... < cache.txt
 
 # Real close
 2023/03/01
@@ -83,4 +87,5 @@ Either or not we select the speed instead of accuracy, so shrinking the image af
 2023/10/27 update readme. close.
 2023/10/30 copy structure reliably with randtools meaning.
 2023/11/13 update readme.
+2023/11/19 revert each line complement condition, complement ones uses predgn, qredgn.
 
