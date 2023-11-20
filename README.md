@@ -88,4 +88,5 @@ P1I predicts a little rough, this is because taking data invariant and predictin
 2023/10/30 copy structure reliably with randtools meaning.
 2023/11/13 update readme.
 2023/11/19 revert each line complement condition, force to use complement.
+2023/11/20 only complement with 2, they smoothes output enough with our measure (&gt; 2/3).
 
