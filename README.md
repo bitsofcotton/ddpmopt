@@ -26,9 +26,6 @@ This might be clang's bug.
 # Tips after [pq]redg.
 We recommend you ans us to use: normalize, goki_check_cc:cleans, despeckle, equalize chain. Either or not we select the speed instead of accuracy, shrinking is important to improve output. Doing persistent complement doesn't improve enough.
 
-# Known tips:
-P1I predicts a little rough, this is because taking data invariant and predicting same losts invariant geometric mean on prediction. This is avoidable with loop if the map region is decreasing functions.
-
 # Usage:
     ./predg(32|64)?(mp)? <in0.ppm> ...
     ./qredg(32|64)?(mp)? <inout0.ppm> ...
@@ -90,4 +87,5 @@ P1I predicts a little rough, this is because taking data invariant and predictin
 2023/11/19 revert each line complement condition, force to use complement.
 2023/11/20 only complement with 2, they smoothes output enough with our measure (&gt; 2/3).
 2023/11/21 update readme.
+2023/11/23 fix known tips, there was at most double error.
 

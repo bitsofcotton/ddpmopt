@@ -3453,11 +3453,17 @@ public:
     for(int i = 1; i < work.size(); i ++)
       work[i - 1] = in[i - work.size() + in.size()];
     work[work.size() - 1] = zero;
-    const auto work2(makeProgramInvariant<T>(work, T(1)));
-    return revertProgramInvariant<T>(make_pair(
-             - (invariant.dot(work2.first) -
-                    invariant[varlen - 1] * work2.first[varlen - 1]) /
-               invariant[varlen - 1], work2.second));
+    auto last(sqrt(work.dot(work)));
+    while(sqrt(work.dot(work) * SimpleMatrix<T>().epsilon()) <
+            abs(work[work.size() - 1] - last)) {
+      last = work[work.size() - 1];
+      const auto work2(makeProgramInvariant<T>(work, T(1)));
+      work[work.size() - 1] = revertProgramInvariant<T>(make_pair(
+               - (invariant.dot(work2.first) -
+                      invariant[varlen - 1] * work2.first[varlen - 1]) /
+                 invariant[varlen - 1], work2.second));
+    }
+    return work[work.size() - 1];
   }
 private:
   int varlen;
