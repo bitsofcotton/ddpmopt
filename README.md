@@ -20,11 +20,11 @@ Using this with mimalloc or so can increase memory usage with multi thread on so
 # Tips around clang compiler
 Some of the lieonn.hh operator \<\< class doesn't works as expected.
 
-Please use gcc or so to compile and work them.
+Please use gcc or so to compile and work with them.
 This might be clang's bug.
 
 # Tips after [pq]redg.
-We recommend you ans us to use: normalize, goki_check_cc:cleans, despeckle, equalize chain. Either or not we select the speed instead of accuracy, shrinking is important to improve output. Doing persistent complement doesn't improve enough.
+We recommend you and us to use: normalize, goki_check_cc:cleans, despeckle, equalize chain. Shrinking is important to improve output rather than persistent complement.
 
 # Usage:
     ./predg(32|64)?(mp)? <in0.ppm> ...
@@ -88,4 +88,5 @@ We recommend you ans us to use: normalize, goki_check_cc:cleans, despeckle, equa
 2023/11/20 only complement with 2, they smoothes output enough with our measure (&gt; 2/3).
 2023/11/21 update readme.
 2023/11/23 fix known tips, there was at most double error.
+2023/11/25 implement and revert the test to complement before to revertProgramInvariant, they doesn't improve well differed to shrinking.
 
