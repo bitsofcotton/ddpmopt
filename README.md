@@ -90,4 +90,5 @@ Or, we also recommend you and us to use: goki_check_cc:shrinklearn, goki_check_c
 2023/11/21 update readme.
 2023/11/23 fix known tips, there was at most double error.
 2023/11/25 implement and revert the test to complement before to revertProgramInvariant, they doesn't improve well differed to shrinking.
+2023/12/06 fix ddpmopt.cc as makeProgramInvariant, revertProgramInvariant to better compatible with [0,1].
 

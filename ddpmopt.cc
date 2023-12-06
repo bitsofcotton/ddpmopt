@@ -37,6 +37,8 @@ int main(int argc, const char* argv[]) {
   assert(1 < argc);
   const auto sz(2);
   const auto m(argv[1][0]);
+  const auto one65536(num_t(int(1)) / num_t(int(65536)));
+  const auto r_upper(num_t(int(1)) / (num_t(int(1)) + num_t(int(1)) / num_t(int(256))));
   if(m == '-') {
     vector<SimpleVector<num_t> > L;
     std::string s;
@@ -44,11 +46,13 @@ int main(int argc, const char* argv[]) {
       SimpleVector<num_t> l;
       std::stringstream ins(s);
       ins >> l;
+      if(l.size() != sz * sz + 1) break;
       L.emplace_back(l / sqrt(l.dot(l)));
       l /= - num_t(l[3]);
       l[3] = num_t(int(0));
       L.emplace_back(l);
     }
+    assert(L.size() && ! (L.size() & 1));
     for(int i0 = 2; i0 < argc; i0 ++) {
       cerr << i0 - 2 << " / " << argc - 2 << endl;
       vector<SimpleMatrix<num_t> > in;
@@ -63,14 +67,28 @@ int main(int argc, const char* argv[]) {
       for(int i = 0; i < in[0].rows(); i ++)
         for(int j = 0; j < in[0].cols(); j ++) {
           SimpleVector<num_t> work(4);
-          for(int m = 0; m < in.size(); m ++) work[m] = in[m](i, j);
-          work[3] = num_t(int(0));
-          work = makeProgramInvariant<num_t>(work).first;
+          for(int m = 0; m < in.size(); m ++)
+            work[m] = (in[m](i, j) + one65536) * r_upper;
+          work[3] = num_t(int(1)) / num_t(int(2));
+          auto work2(makeProgramInvariant<num_t>(work, - num_t(int(1)), true).first);
+          assert(work2.size() == L[0].size());
           int idx(0);
           for(int m = 2; m < L.size(); m += 2) {
-            if(abs(L[idx].dot(work)) <= abs(L[m].dot(work))) idx = m;
+            assert(L[m].size()   == work2.size());
+            assert(L[idx].size() == work2.size());
+            if(abs(L[idx].dot(work2)) <= abs(L[m].dot(work2)))
+              idx = m;
           }
-          out[0](i, j) = L[idx + 1].dot(work) * sgn<num_t>(L[idx].dot(work));
+          auto last(sqrt(work.dot(work)));
+          for(int ii = 0;
+                  ii < 2 * int(- log(SimpleMatrix<num_t>().epsilon()) / log(num_t(int(2))) )
+                  && sqrt(work.dot(work) * SimpleMatrix<num_t>().epsilon()) <
+                       abs(work[3] - last); ii ++) {
+            last = work[3];
+            const auto work2(makeProgramInvariant<num_t>(work, - num_t(int(1)), true));
+            work[3] = revertProgramInvariant<num_t>(make_pair(L[idx + 1].dot(work2.first) * sgn<num_t>(L[idx].dot(work2.first)), work2.second), true);
+          }
+          out[0](i, j) = work[3];
         }
       if(! savep2or3<num_t>(argv[i0], normalize<num_t>(out)) )
         cerr << "failed to save." << endl;
@@ -102,9 +120,10 @@ int main(int argc, const char* argv[]) {
       for(int j = 0; j < out[i].rows(); j ++)
         for(int k = 0; k < out[i].cols(); k ++) {
           SimpleVector<num_t> work(4);
-          for(int m = 0; m < 3; m ++) work[m] = in[i][m](j, k);
-          work[3] = out[i](j, k);
-          v.emplace_back(makeProgramInvariant<num_t>(work).first);
+          for(int m = 0; m < 3; m ++)
+            work[m] = (in[i][m](j, k) + one65536) * r_upper;
+          work[3] = (out[i](j, k) + one65536) * r_upper;
+          v.emplace_back(makeProgramInvariant<num_t>(work, - num_t(int(1)), true).first);
         }
     const auto c(crush<num_t>(v));
     for(int i = 0; i < c.size(); i ++) {
@@ -115,6 +134,7 @@ int main(int argc, const char* argv[]) {
       vv /= num_t(c[i].first.size());
       if(vv.dot(vv) != num_t(int(0))) cout << vv;
     }
+    cout << endl;
   }
   return 0;
 }
