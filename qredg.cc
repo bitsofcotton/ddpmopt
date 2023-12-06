@@ -61,7 +61,7 @@ int main(int argc, const char* argv[]) {
         swork[j].row(p.first.size()  + work[j].rows() + k) =
           p.first[k][j].subVector(0, swork[j].cols());
       }
-    if(! savep2or3<num_t>(argv[i0], normalize<num_t>(swork)) )
+    if(! savep2or3<num_t>(argv[i0], swork) )
       cerr << "failed to save." << endl;
   }
   cerr << " Done" << endl;

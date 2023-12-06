@@ -25,6 +25,7 @@ This might be clang's bug.
 
 # Tips after [pq]redg.
 We recommend you and us to use: normalize, goki_check_cc:cleans, despeckle, equalize chain. Shrinking is important to improve output rather than persistent complement.
+Or, we also recommend you and us to use: goki_check_cc:shrinklearn, goki_check_cc:shrinkapply chain. This reduces complexity of the output.
 
 # Usage:
     ./predg(32|64)?(mp)? <in0.ppm> ...
