@@ -90,7 +90,7 @@ int main(int argc, const char* argv[]) {
           }
           out[0](i, j) = work[3];
         }
-      if(! savep2or3<num_t>(argv[i0], normalize<num_t>(out)) )
+      if(! savep2or3<num_t>(argv[i0], out) )
         cerr << "failed to save." << endl;
     }
   } else if(m == '+') {
@@ -123,14 +123,14 @@ int main(int argc, const char* argv[]) {
           for(int m = 0; m < 3; m ++)
             work[m] = (in[i][m](j, k) + one65536) * r_upper;
           work[3] = (out[i](j, k) + one65536) * r_upper;
-          v.emplace_back(makeProgramInvariant<num_t>(work, - num_t(int(1)), true).first);
+          v.emplace_back(move(work));
         }
     const auto c(crush<num_t>(v));
     for(int i = 0; i < c.size(); i ++) {
       if(! c[i].first.size()) continue;
-      auto vv(c[i].first[0]);
+      auto vv(makeProgramInvariant<num_t>(c[i].first[0], - num_t(int(1)), true).first);
       for(int j = 1; j < c[i].first.size(); j ++)
-        vv += c[i].first[j];
+        vv += makeProgramInvariant<num_t>(c[i].first[j], - num_t(int(1)), true).first;
       vv /= num_t(c[i].first.size());
       if(vv.dot(vv) != num_t(int(0))) cout << vv;
     }
