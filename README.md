@@ -1,31 +1,22 @@
 # ddpmopt
-Convert meaning-less image into context meaning-full flavour.
+Apply some of the filter to input stream.
 We can use this for bitsofcotton/i2g filtered images.
 
 This should behaves deterministic ones, however, some of the condition causes non deterministic flavours even ever in -D_FLOAT_BITS_=... condition.
 
 # Context
-There exists Denoising Diffusion Probabilistic Models (DDPM; Ho et al. 2020). So this is another try on them.
-
-However, we don't use them because after the some of the implementation, we only focus to apply each pixel context to color image into monochrome one. We can use this to enlarge with triangle based transformations.
+There exists Denoising Diffusion Probabilistic Models (DDPM; Ho et al. 2020). So this is another try on them but different flavoured one, we only focus to apply each pixel context to color image into monochrome one, which have the structure completely depends on filters' multiple meaning or complexity.
 
 # Tips on malloc options
 We need to do ulimit or edit /etc/login.conf for large malloc use cases required by larger than medium sized input.
 
-Also, if we run these programs with openmp, we need large shared memory size.
-They are usually configurable by sysctl on unix-like systems.
-
 Using this with mimalloc or so can increase memory usage with multi thread on some systems.
 
-# Tips around clang compiler
-Some of the lieonn.hh operator \<\< class doesn't works as expected.
-
-Please use gcc or so to compile and work with them.
-This might be clang's bug.
+# Tips around c++ compilers
+Some of the lieonn.hh operator \>\> class doesn't works as expected, might be compilers' bug.
 
 # Tips after [pq]redg.
-We recommend you and us to use: normalize, goki_check_cc:cleans, despeckle, equalize chain. Shrinking is important to improve output rather than persistent complement.
-Or, we also recommend you and us to use: goki_check_cc:shrinklearn, goki_check_cc:shrinkapply chain. This reduces complexity of the output.
+We recommend you and us to use: normalize, goki_check_cc:cleans, despeckle, equalize chain. Shrinking is important to improve output rather than persistent complement in the meaning we have on raw all-of-the-possible-context-per-image each pixel predictions.
 
 # Usage:
     ./predg(32|64)?(mp)? <in0.ppm> ...
@@ -91,5 +82,5 @@ Or, we also recommend you and us to use: goki_check_cc:shrinklearn, goki_check_c
 2023/11/23 fix known tips, there was at most double error.
 2023/11/25 implement and revert the test to complement before to revertProgramInvariant, they doesn't improve well differed to shrinking.
 2023/12/06 fix ddpmopt.cc as makeProgramInvariant, revertProgramInvariant to better compatible with [0,1].
-2023/12/07 fix ddpmopt.cc makeProgramInvariant double apply serious bug in crush.
+2023/12/07 fix ddpmopt.cc makeProgramInvariant double apply serious bug in crush. Also, update readme as compatible with in/output. realclose.
 
