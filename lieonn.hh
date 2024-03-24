@@ -3503,10 +3503,10 @@ public:
     for(int i0 = 0; i0 < invariants.rows(); i0 ++) {
       SimpleMatrix<T> toeplitz(in.size() - varlen - step + 2
                                - invariants.rows(), invariants.cols());
-      for(int i = i0; i <= toeplitz.rows() - invariants.rows() + i0; i ++) {
+      for(int i = i0; i < toeplitz.rows() + i0; i ++) {
         auto work(in.subVector(i, varlen));
         work[work.size() - 1] = in[i + varlen + step - 2];
-        toeplitz.row(i) = nonlinear ? makeProgramInvariant<T>(move(work),
+        toeplitz.row(i - i0) = nonlinear ? makeProgramInvariant<T>(move(work),
           T(i + 1) / T(toeplitz.rows() + 1) ).first : move(work);
       }
       invariants.row(i0) = linearInvariant<T>(toeplitz);
