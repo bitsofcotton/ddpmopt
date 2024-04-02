@@ -48,11 +48,7 @@ int main(int argc, const char* argv[]) {
         }
       }
     }
-#if defined(_CONTINUOUS_)
-    const auto p(predVec<num_t, true>(pwork));
-#else
     const auto p(predVec<num_t>(pwork));
-#endif
     vector<SimpleMatrix<num_t> > swork(work.size(),
       SimpleMatrix<num_t>(work[0].rows() + p.first.size() + p.second.size(),
         work[0].cols()).O());

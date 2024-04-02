@@ -51,11 +51,7 @@ int main(int argc, const char* argv[]) {
         }
     in.emplace_back(work);
   }
-#if defined(_CONTINUOUS_)
-  const auto p(predMat<num_t, true>(in));
-#else
   const auto p(predMat<num_t>(in));
-#endif
   for(int i = 0; i < p.first.size(); i ++) {
     if(! savep2or3<num_t>((std::string("predg-forward-") + std::to_string(i) + std::string(".ppm")).c_str(), p.first[i]) )
       cerr << "failed to save." << endl;
