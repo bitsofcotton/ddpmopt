@@ -33,10 +33,17 @@ int main(int argc, const char* argv[]) {
 #define int int64_t
 //#define int int32_t
   assert(1 < argc);
-  cerr << "Coherent: sqrt(2): " << sqrt<num_t>(num_t(2)) << endl;
+  cerr << "Coherent: sqrt(2): " << sqrt<num_t>(Complex<num_t>(num_t(2))) << endl;
   for(int i0 = 1; i0 < argc; i0 ++) {
     vector<SimpleMatrix<num_t> > work;
     if(! loadp2or3<num_t>(work, argv[i0])) continue;
+    if(work.size() == 3) {
+      work = rgb2xyz<num_t>(work);
+      for(int ii = 0; ii < work.size(); ii ++)
+        for(int jj = 0; jj < work[ii].rows(); jj ++)
+          for(int kk = 0; kk < work[ii].cols(); kk ++)
+            work[ii](jj, kk) = max(num_t(int(0)), min(num_t(int(1)), work[ii](jj, kk) ));
+    }
     vector<vector<SimpleVector<num_t> > > pwork;
     pwork.resize(work[0].rows());
     for(int i = 0; i < pwork.size(); i ++) {
@@ -61,7 +68,7 @@ int main(int argc, const char* argv[]) {
         swork[j].row(p.first.size()  + work[j].rows() + k) =
           p.first[k][j].subVector(0, swork[j].cols());
       }
-    if(! savep2or3<num_t>(argv[i0], swork) )
+    if(! savep2or3<num_t>(argv[i0], swork.size() == 3 ? normalize<num_t>(xyz2rgb<num_t>(swork)) : swork) )
       cerr << "failed to save." << endl;
   }
   cerr << " Done" << endl;
