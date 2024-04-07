@@ -40,13 +40,8 @@ int main(int argc, const char* argv[]) {
   for(int i = 1; i < argc; i ++) {
     vector<SimpleMatrix<num_t> > work;
     if(! loadp2or3<num_t>(work, argv[i])) continue;
-    if(work.size() == 3) {
+    if(work.size() == 3)
       work = rgb2xyz<num_t>(work);
-      for(int ii = 0; ii < work.size(); ii ++)
-        for(int jj = 0; jj < work[ii].rows(); jj ++)
-          for(int kk = 0; kk < work[ii].cols(); kk ++)
-            work[ii](jj, kk) = max(num_t(int(0)), min(num_t(int(1)), work[ii](jj, kk) ));
-    }
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
@@ -58,6 +53,7 @@ int main(int argc, const char* argv[]) {
         }
     in.emplace_back(work);
   }
+  in = normalize<num_t>(in);
   const auto p(predMat<num_t>(in));
   for(int i = 0; i < p.first.size(); i ++) {
     if(! savep2or3<num_t>((std::string("predg-forward-") + std::to_string(i) + std::string(".ppm")).c_str(), p.first[i].size() == 3 ? normalize<num_t>(xyz2rgb<num_t>(p.first[i])) : p.first[i]) )

@@ -37,13 +37,8 @@ int main(int argc, const char* argv[]) {
   for(int i0 = 1; i0 < argc; i0 ++) {
     vector<SimpleMatrix<num_t> > work;
     if(! loadp2or3<num_t>(work, argv[i0])) continue;
-    if(work.size() == 3) {
-      work = rgb2xyz<num_t>(work);
-      for(int ii = 0; ii < work.size(); ii ++)
-        for(int jj = 0; jj < work[ii].rows(); jj ++)
-          for(int kk = 0; kk < work[ii].cols(); kk ++)
-            work[ii](jj, kk) = max(num_t(int(0)), min(num_t(int(1)), work[ii](jj, kk) ));
-    }
+    if(work.size() == 3)
+      work = normalize<num_t>(rgb2xyz<num_t>(work));
     vector<vector<SimpleVector<num_t> > > pwork;
     pwork.resize(work[0].rows());
     for(int i = 0; i < pwork.size(); i ++) {
