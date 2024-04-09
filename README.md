@@ -15,8 +15,14 @@ Using this with mimalloc or so can increase memory usage with multi thread on so
 # Tips around c++ compilers
 Some of the lieonn.hh operator \>\> class doesn't works as expected, might be compilers' bug.
 
-# Tips after [pq]redg.
-We recommend you and us to use: normalize, goki_check_cc:cleans, despeckle, equalize chain. Shrinking is important to improve output rather than persistent complement in the meaning we have on raw all-of-the-possible-context-per-image each pixel predictions.
+# Tips on [pq]redg
+The heavy optimized program on [pq]redg.cc has a upper limit around 2.5kbit entropy to output. This is the fundaemental constraint on parsing once and by 1 layered calculation on each pixel condition as expecting whole of the input as tracing once.
+So we should adjust in/output by them. eg. goki_check_cc:cleans after doing them.
+
+# Bug on [pq]redg
+In fact, we need to input some smooth nor average slide into [pq]redg predv predictor.
+Since we're omitting such implementation, to get some better result on this needs some wrappers.
+N.B. the average needs correct length for each pixels. We cannot determine this other than some pnext-based continuous number test.
 
 # Usage:
     ./predg(32|64)?(mp)? <in0.ppm> ...
@@ -89,4 +95,5 @@ We recommend you and us to use: normalize, goki_check_cc:cleans, despeckle, equa
 2024/04/04 only use large accuracy on calculating pnextcache, but this is broken with cache naming.
 2024/04/07 rgb2xyz, xyz2rgb on first/last of predg/qredg if color is 3ch.
 2024/04/09 fix maeProgramInvariant x_k==0 to wrap into x_k:=1, refix pnext with lower digits.
+2024/04/10 we count the function entropy enough beat with in/output on [pq]redg.
 
