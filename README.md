@@ -88,4 +88,5 @@ We recommend you and us to use: normalize, goki_check_cc:cleans, despeckle, equa
 2024/04/02 fix P01, vanish predvc.
 2024/04/04 only use large accuracy on calculating pnextcache, but this is broken with cache naming.
 2024/04/07 rgb2xyz, xyz2rgb on first/last of predg/qredg if color is 3ch.
+2024/04/09 fix maeProgramInvariant x_k==0 to wrap into x_k:=1, refix pnext with lower digits.
 

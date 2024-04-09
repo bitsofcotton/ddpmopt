@@ -2709,6 +2709,7 @@ template <typename T> static inline SimpleVector<T> linearInvariant(const Simple
 template <typename T> static inline T makeProgramInvariantPartial(const T& in, const T& ratio, const bool& on01 = false) {
   auto res(on01 ? in :
     ((atan(- in) / atan(T(int(1))) / T(int(2))) + T(int(1))) / T(int(2)) );
+  if(res == T(int(0)) ) res = T(int(1));
   assert(T(int(0)) < res && res <= T(int(1)));
   return res /= ratio;
 }
@@ -3198,7 +3199,7 @@ template <typename T> SimpleVector<T> pnext(const int& size, const int& step = 1
     for(int j = 0; j < 512 / 16; j ++) {
       abspni -= floor(abspni);
       abspni *= pnext_float(int(65536));
-      res[i] += T(abspni.operator int()) / T(int(65536));
+      res[i] += T(abspni.operator int()) / pow(T(int(65536)), T(int(j + 1)) );
     }
     if(pn[i] < pnext_float(int(0))) res[i] = - res[i];
   }
