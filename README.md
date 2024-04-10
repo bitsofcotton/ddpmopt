@@ -16,8 +16,8 @@ Using this with mimalloc or so can increase memory usage with multi thread on so
 Some of the lieonn.hh operator \>\> class doesn't works as expected, might be compilers' bug.
 
 # Tips on [pq]redg
-The heavy optimized program on [pq]redg.cc has a upper limit around 2.5kbit entropy to output. This is the fundaemental constraint on parsing once and by 1 layered calculation on each pixel condition as expecting whole of the input as tracing once.
-So we should adjust in/output by them. eg. goki_check_cc:cleans after doing them.
+The heavy optimized program on [pq]redg.cc has a upper limit around 20kbit entropy to output. This is the fundaemental constraint on parsing once and by 1 layered calculation on each pixel condition as expecting whole of the input as tracing once.
+So we should adjust in/output by them. eg. goki_check_cc:cleans\[tlm\]\? before and after doing them.
 
 # Bug on [pq]redg
 In fact, we need to input some smooth nor average slide into [pq]redg predv predictor.
