@@ -17,7 +17,7 @@ Some of the lieonn.hh operator \>\> class doesn't works as expected, might be co
 
 # Tips on [pq]redg
 The heavy optimized program on [pq]redg.cc has a upper limit around 20kbit entropy to output. This is the fundaemental constraint on parsing once and by 1 layered calculation on each pixel condition as expecting whole of the input as tracing once.
-So we should adjust in/output by them. eg. goki_check_cc:cleans\[tlmc\]\? before and after doing them.
+So we should adjust in/output by them. eg. goki_check_cc:cleans\[lc\]\? before and after doing them.
 
 # Bug on [pq]redg
 In fact, we need to input some smooth nor average slide into [pq]redg predv predictor.
@@ -101,4 +101,5 @@ Around this, please refer bitsofcotton/p8 for extends.
 2024/04/09 fix maeProgramInvariant x_k==0 to wrap into x_k:=1, refix pnext with lower digits.
 2024/04/10 we count the function entropy enough beat with in/output on [pq]redg.
 2024/04/12 update readme.
+2024/04/14 take a median after predv before revertProgramInvariant.
 
