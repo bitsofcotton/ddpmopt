@@ -37,8 +37,6 @@ int main(int argc, const char* argv[]) {
   assert(1 < argc);
   const auto sz(2);
   const auto m(argv[1][0]);
-  const auto one65536(num_t(int(1)) / num_t(int(65536)));
-  const auto r_upper(num_t(int(1)) / (num_t(int(1)) + num_t(int(1)) / num_t(int(256))));
   if(m == '-') {
     vector<SimpleVector<num_t> > L;
     std::string s;
@@ -68,7 +66,7 @@ int main(int argc, const char* argv[]) {
         for(int j = 0; j < in[0].cols(); j ++) {
           SimpleVector<num_t> work(4);
           for(int m = 0; m < in.size(); m ++)
-            work[m] = (in[m](i, j) + one65536) * r_upper;
+            work[m] = in[m](i, j);
           work[3] = num_t(int(1)) / num_t(int(2));
           auto work2(makeProgramInvariant<num_t>(work, - num_t(int(1)), true).first);
           assert(work2.size() == L[0].size());
@@ -121,8 +119,8 @@ int main(int argc, const char* argv[]) {
         for(int k = 0; k < out[i].cols(); k ++) {
           SimpleVector<num_t> work(4);
           for(int m = 0; m < 3; m ++)
-            work[m] = (in[i][m](j, k) + one65536) * r_upper;
-          work[3] = (out[i](j, k) + one65536) * r_upper;
+            work[m] = in[i][m](j, k);
+          work[3] = out[i](j, k);
           v.emplace_back(move(work));
         }
     const auto c(crush<num_t>(v));

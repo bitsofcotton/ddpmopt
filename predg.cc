@@ -37,7 +37,7 @@ int main(int argc, const char* argv[]) {
   assert(1 < argc);
   cerr << "Coherent: sqrt(2): " << sqrt<num_t>(Complex<num_t>(num_t(2))) << endl;
   vector<vector<SimpleMatrix<num_t> > > in;
-  for(int i = 1; i < argc; i ++) {
+  for(int i = 2; i < argc; i ++) {
     vector<SimpleMatrix<num_t> > work;
     if(! loadp2or3<num_t>(work, argv[i])) continue;
     if(work.size() == 3)
@@ -54,11 +54,11 @@ int main(int argc, const char* argv[]) {
     in.emplace_back(work);
   }
   in = normalize<num_t>(in);
-  const auto p(predMat<num_t>(in));
+  const auto p(predMat<num_t>(in, std::atoi(argv[1])));
   for(int i = 0; i < p.first.size(); i ++) {
-    if(! savep2or3<num_t>((std::string("predg-forward-") + std::to_string(i) + std::string(".ppm")).c_str(), p.first[i].size() == 3 ? normalize<num_t>(xyz2rgb<num_t>(p.first[i])) : p.first[i]) )
+    if(! savep2or3<num_t>((std::string("predg-forward-") + std::string(argv[1]) + std::string("-") + std::to_string(i) + std::string(".ppm")).c_str(), p.first[i].size() == 3 ? normalize<num_t>(xyz2rgb<num_t>(p.first[i])) : p.first[i]) )
       cerr << "failed to save." << endl;
-    if(! savep2or3<num_t>((std::string("predg-backward-") + std::to_string(i) + std::string(".ppm")).c_str(), p.second[i].size() == 3 ? normalize<num_t>(xyz2rgb<num_t>(p.second[i])) : p.second[i]) )
+    if(! savep2or3<num_t>((std::string("predg-backward-") + std::string(argv[1]) + std::string("-") + std::to_string(i) + std::string(".ppm")).c_str(), p.second[i].size() == 3 ? normalize<num_t>(xyz2rgb<num_t>(p.second[i])) : p.second[i]) )
       cerr << "failed to save." << endl;
   }
   cerr << " Done" << endl;

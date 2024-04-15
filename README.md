@@ -18,8 +18,7 @@ Some of the lieonn.hh operator \>\> class doesn't works as expected, might be co
 # Tips around input sizes on this
 We get function entropy depend result with [pq]redg, this is because we treat each pixel as equally treated ones.
 So we should adjust in/output by them. eg. goki_check_cc:cleans\[lc\]\? before and after doing them.
-better sized result
-Around this, please refer bitsofcotton/p8 for extends.
+Around better size of this, please refer bitsofcotton/p8 for extends.
 
 # When we have broken result on some of the [pq]redg output
 The P01 predictor makes the hypothesis the structure is continuous enough and timing aligned input.
@@ -27,9 +26,11 @@ If in the best case, it's around 2/3, if in the worst case, it's around 1/3, so 
 So in the case some of the gulf appears to the next step or in the case some timing attack counter measures appears on input stream, some step previous/next seems to break.
 This is specification of this implementation, so is intended to be so.
 
+We can specify skip number to [pq]redg.
+
 # Usage:
-    ./predg(32|64)?(mp)? <in0.ppm> ...
-    ./qredg(32|64)?(mp)? <inout0.ppm> ...
+    ./predg(32|64)?(mp)? <skip number integer> <in0.ppm> ...
+    ./qredg(32|64)?(mp)? <skip number integer> <inout0.ppm> ...
     ./ddpmopt(32|64)?(mp)? + <in0in.ppm> <in0out.pgm> ... > cache.txt
     ./ddpmopt(32|64)?(mp)? - <inout0.ppm> ... < cache.txt
 
