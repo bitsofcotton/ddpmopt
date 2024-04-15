@@ -15,18 +15,17 @@ Using this with mimalloc or so can increase memory usage with multi thread on so
 # Tips around c++ compilers
 Some of the lieonn.hh operator \>\> class doesn't works as expected, might be compilers' bug.
 
-# Tips on [pq]redg
-The heavy optimized program on [pq]redg.cc has a upper limit around 20kbit entropy to output. This is the fundaemental constraint on parsing once and by 1 layered calculation on each pixel condition as expecting whole of the input as tracing once.
-So we should adjust in/output by them. eg. goki_check_cc:cleans\[lc\]\? before and after doing them.
-
-# Bug on [pq]redg
-In fact, we need to input some smooth nor average slide into [pq]redg predv predictor.
-Since we're omitting such implementation, to get some better result on this needs some wrappers.
-N.B. the average needs correct length for each pixels. We cannot determine this other than some pnext-based continuous number test.
-
-# Tips around better sized result
+# Tips around input sizes on this
 We get function entropy depend result with [pq]redg, this is because we treat each pixel as equally treated ones.
+So we should adjust in/output by them. eg. goki_check_cc:cleans\[lc\]\? before and after doing them.
+better sized result
 Around this, please refer bitsofcotton/p8 for extends.
+
+# When we have broken result on some of the [pq]redg output
+The P01 predictor makes the hypothesis the structure is continuous enough and timing aligned input.
+If in the best case, it's around 2/3, if in the worst case, it's around 1/3, so sometimes negated image also works well. However, in the worst on prediction case, it's 1/2, we cannot predict this with such of the timing value.
+So in the case some of the gulf appears to the next step or in the case some timing attack counter measures appears on input stream, some step previous/next seems to break.
+This is specification of this implementation, so is intended to be so.
 
 # Usage:
     ./predg(32|64)?(mp)? <in0.ppm> ...
@@ -102,4 +101,5 @@ Around this, please refer bitsofcotton/p8 for extends.
 2024/04/10 we count the function entropy enough beat with in/output on [pq]redg.
 2024/04/12 update readme.
 2024/04/14 take a median after predv before revertProgramInvariant.
+2024/04/15 update readme, it is the specification of this some output to be broken.
 
