@@ -51,7 +51,7 @@ int main(int argc, const char* argv[]) {
       }
     }
     for(int j0 = 1; 0 < j0; j0 ++) {
-      const auto p(predVec<num_t>(pwork, std::atoi(argv[1])));
+      const auto p(predVec<num_t>(pwork, j0));
       if(! p.first.size () || p.second.size()) break;
       vector<SimpleMatrix<num_t> > swork(work.size(),
         SimpleMatrix<num_t>(work[0].rows() + p.first.size() + p.second.size(),
