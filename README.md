@@ -29,10 +29,10 @@ This is specification of this implementation, so is intended to be so.
 We can specify skip number to [pq]redg.
 
 # Usage:
-    ./predg(32|64)?(mp)? <skip number integer> <in0.ppm> ...
-    ./qredg(32|64)?(mp)? <skip number integer> <inout0.ppm> ...
+    ./predg(32|64)?(mp)? <in0.ppm> ...
+    ./qredg(32|64)?(mp)? <in0.ppm> ...
     ./ddpmopt(32|64)?(mp)? + <in0in.ppm> <in0out.pgm> ... > cache.txt
-    ./ddpmopt(32|64)?(mp)? - <inout0.ppm> ... < cache.txt
+    ./ddpmopt(32|64)?(mp)? - <in0.ppm> ... < cache.txt
 
 # Real close
 2023/03/01

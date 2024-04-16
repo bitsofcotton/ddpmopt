@@ -88,7 +88,7 @@ int main(int argc, const char* argv[]) {
           }
           out[0](i, j) = work[3];
         }
-      if(! savep2or3<num_t>(argv[i0], out) )
+      if(! savep2or3<num_t>((std::string(argv[i0]) + std::string(".pgm")).c_str(), out) )
         cerr << "failed to save." << endl;
     }
   } else if(m == '+') {
