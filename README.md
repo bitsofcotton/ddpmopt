@@ -16,12 +16,12 @@ Using this with mimalloc or so can increase memory usage with multi thread on so
 Some of the lieonn.hh operator \>\> class doesn't works as expected, might be compilers' bug.
 
 # Tips around input sizes on this
-We get function entropy depend result with [pq]redg, this is because we treat each pixel as equally treated ones.
+We get function entropy depend result with [pq]redg, this is because we treat each pixel as equally treated ones without any of the internal states.
 So we should adjust in/output by them. eg. goki_check_cc:cleans\[lc\]\? before and after doing them.
 Around better size of this, please refer bitsofcotton/p8 for extends.
 
 # When we have broken result on some of the [pq]redg output
-The P01 predictor makes the hypothesis the structure is continuous enough and timing aligned input.
+The P01 predictor makes the hypothesis the structure is continuous enough, in another words, timing aligned input (even for huge matrix the original stream have).
 If in the best case, it's around 2/3, if in the worst case, it's around 1/3, so sometimes negated image also works well. However, in the worst on prediction case, it's 1/2, we cannot predict this with such of the timing value.
 So in the case some of the gulf appears to the next step or in the case some timing attack counter measures appears on input stream, some step previous/next seems to break.
 This is specification of this implementation, so is intended to be so.
