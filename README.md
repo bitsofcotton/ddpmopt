@@ -25,14 +25,16 @@ The P01 predictor makes the hypothesis the structure is continuous enough, in an
 If in the best case, it's around 2/3, if in the worst case, it's around 1/3, so sometimes negated image also works well. However, in the worst on prediction case, it's 1/2, we cannot predict this with such of the timing value.
 So in the case some of the gulf appears to the next step or in the case some timing attack counter measures appears on input stream, some step previous/next seems to break.
 This is specification of this implementation, so is intended to be so.
-
-We can specify skip number to [pq]redg.
+Also, we output all of the possible skip length output up to sqrt of entropy.
+We can check the output by './tcont i' command.
 
 # Usage:
     ./predg(32|64)?(mp)? <in0.ppm> ...
     ./qredg(32|64)?(mp)? <in0.ppm> ...
     ./ddpmopt(32|64)?(mp)? + <in0in.ppm> <in0out.pgm> ... > cache.txt
     ./ddpmopt(32|64)?(mp)? - <in0.ppm> ... < cache.txt
+    ./tcont [xyit] <in0.ppm> ...
+    cp `./tcont i <in0.ppm> ... | sort | head -n ... | tr '\n' ' '` outdir
 
 # Real close
 2023/03/01
@@ -103,4 +105,7 @@ We can specify skip number to [pq]redg.
 2024/04/12 update readme.
 2024/04/14 take a median after predv before revertProgramInvariant.
 2024/04/15 update readme, it is the specification of this some output to be broken.
+2024/04/17 update readme.
+2024/04/18 add tcont.cc, real close with omake.
+2024/04/18 won't update without lieonn.hh change.
 

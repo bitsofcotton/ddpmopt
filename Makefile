@@ -14,12 +14,12 @@ CXXFLAGS+=	-std=c++11
 LDFLAGS+=	-lc++ -L/usr/local/lib
 #LDFLAGS+=	-lestdc++ -L/usr/local/lib
 
-CLEANFILES= *.o ddpmopt ddpmopt32 predg predg32 qredg qredg32 ddpmoptmp ddpmopt32mp predgmp predg32mp qredgmp qredg32mp
+CLEANFILES= *.o ddpmopt ddpmopt32 predg predg32 qredg qredg32 ddpmoptmp ddpmopt32mp predgmp predg32mp qredgmp qredg32mp tcont tcont32
 
 clean:
 	@rm -rf ${CLEANFILES}
 
-all:	ddpmopt ddpmopt32 predg predg32 qredg qredg32 ddpmoptmp ddpmopt32mp predgmp predg32mp qredgmp qredg32mp
+all:	ddpmopt ddpmopt32 predg predg32 qredg qredg32 ddpmoptmp ddpmopt32mp predgmp predg32mp qredgmp qredg32mp tcont tcont32
 
 ddpmopt:
 	${CXX} ${CXXFLAGS} -static -D_ADVANCE_PNEXT_BITS_ -o ddpmopt ddpmopt.cc
@@ -61,4 +61,8 @@ qredg64mp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_ADVANCE_PNEXT_BITS_ -D_FLOAT_BITS_=64 -o qredg64mp qredg.cc
 qredg128mp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_ADVANCE_PNEXT_BITS_ -D_FLOAT_BITS_=128 -o qredg128mp qredg.cc
+tcont:
+	${CXX} ${CXXFLAGS} -static -o tcont tcont.cc
+tcont32:
+	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=32 -o tcont32 tcont.cc
 
