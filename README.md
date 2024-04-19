@@ -17,7 +17,7 @@ Some of the lieonn.hh operator \>\> class doesn't works as expected, might be co
 
 # Tips around input sizes on this
 We get function entropy depend result with [pq]redg, this is because we treat each pixel as equally treated ones without any of the internal states.
-So we should adjust in/output by them. eg. goki_check_cc:cleans\[lc\]\? before and after doing them.
+So we should adjust in/output by them. eg. goki_check_cc:clean\[lcC\] before and after doing them.
 Around better size of this, please refer bitsofcotton/p8 for extends.
 
 # When we have broken result on some of the [pq]redg output
