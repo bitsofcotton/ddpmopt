@@ -2,7 +2,7 @@
 Apply some of the filter to input stream.
 We can use this for bitsofcotton/i2g filtered images.
 
-This should behaves deterministic ones, however, some of the condition causes non deterministic flavours even ever in -D_FLOAT_BITS_=... condition.
+This should behaves deterministic ones, however, these are very sensitive on accuracy, so only lower bit has a difference condition, we get whole image different condition.
 
 # Context
 There exists Denoising Diffusion Probabilistic Models (DDPM; Ho et al. 2020). So this is another try on them but different flavoured one, we only focus to apply each pixel context to color image into monochrome one, which have the structure completely depends on filters' multiple meaning or complexity.
@@ -108,4 +108,5 @@ We can check the output by './tcont i' command.
 2024/04/17 update readme.
 2024/04/18 add tcont.cc, real close with omake.
 2024/04/18 won't update without lieonn.hh change.
+2024/04/29 update readme.
 
