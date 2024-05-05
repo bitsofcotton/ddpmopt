@@ -3501,7 +3501,7 @@ public:
     SimpleVector<T> invariant(invariants.cols());
     invariant.O();
     for(int i = 0; i < invariants.cols(); i ++)
-      invariant[i] = P0maxRank0<T>(step).next(invariants.col(i));
+      invariant[i] = P0maxRank0<T>().next(invariants.col(i));
     if(invariant[varlen - 1] == zero) return zero;
     SimpleVector<T> work(varlen);
     for(int i = 1; i < work.size(); i ++)
@@ -4123,17 +4123,9 @@ template <typename T> pair<pair<vector<SimpleVector<T> >, vector<T> >, pair<vect
   SimpleVector<T> init(3);
   for(int i = 0; i < init.size(); i ++)
     init[i] = T(int(i));
+  cerr << "P0 initialize: " << P0maxRank0<T>(1).next(init) << endl;
   // N.B. we need rich internal status.
   int p0(floor(sqrt(T(int(in.size() - 4 - 1 + 2 - 4 - 2 - 3)) ) / T(skip) ));
-  // N.B. we need large accuracy to continue much more.
-  for(int i = 0; i < p0; i ++) {
-    const auto pp(pnextcacher<T>(3, i + 1, 4));
-    if(T(int(in.size())) < sqrt(pp.dot(pp))) {
-      p0 = i + 1;
-      break;
-    }
-    cerr << "P0 initialize: " << P0maxRank0<T>(i + 1).next(init) << endl;
-  }
   vector<SimpleVector<T> > p;
   vector<T> psec;
   if(p0 < 1) return make_pair(make_pair(p, psec), make_pair(p, psec));
