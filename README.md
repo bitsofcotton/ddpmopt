@@ -26,6 +26,13 @@ The P01 predictor makes the hypothesis the structure is continuous enough.
 In the case there's brand new observation on the states on each pixel/image context should have the next image condition, we fail with this predictor.
 This is specification of this implementation, so is intended to be so.
 
+N.B.
+However, the purpose what is the brand new observation on the stream is obscure, so it's some of the quantity counting on continuous structure.
+So to predict, separating meaning into many much of the dimension causes {0,...,0} cannot grow some another values, so it's not a better tactics for us.
+So blending some of the meaning into some dictionary based or statistics based representation dimensions and predict with them, then, re-separate them is better for us. However, the blended image nor separated meaning is the matter if such of occasions work with to be correctly working.
+These predg/qredg has a context of each pixel/each image with function entropy depend size image, so to improve this, we need some of the context or some of the dictionaries or some of the pattern to complement with.
+The randtools compression/decompression depends on factor matrix sparsity, however, they depends on observation/heat could be after of the calculation, so we should have some of the dictionary based functions, however, they're already done by deep learning recent days.
+
 # Usage:
     ./predg(32|64)?(mp)? <in0.ppm> ...
     ./qredg(32|64)?(mp)? <in0.ppm> ...
