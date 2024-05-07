@@ -23,7 +23,7 @@ Around better size of this, please refer bitsofcotton/p8 for extends.
 # P01 hypothesis
 The P01 predictor makes the hypothesis the structure is continuous enough.
 
-In the case there's brand new observation on the states on each pixel context should have the next image condition, we fail with this predictor.
+In the case there's brand new observation on the states on each pixel/image context should have the next image condition, we fail with this predictor.
 This is specification of this implementation, so is intended to be so.
 
 # Usage:
