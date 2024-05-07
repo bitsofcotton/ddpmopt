@@ -56,12 +56,14 @@ int main(int argc, const char* argv[]) {
   }
   in = normalize<num_t>(in);
   for(int i0 = 1; 0 < i0; i0 ++) {
+    const int  color0(8 * in.size() / i0);
     const auto p(predMat<num_t>(in, i0));
     if(! p.first.size() || ! p.second.size()) break;
     for(int i = 0; i < p.first.size(); i ++) {
-      if(! savep2or3<num_t>((std::string("predg-forward-") + std::to_string(i) + std::string("-") + std::to_string(i0) + std::string(".ppm")).c_str(), p.first[i].size() == 3 ? normalize<num_t>(xyz2rgb<num_t>(p.first[i])) : p.first[i]) )
+      const int color(max(int(1), min(int(65535), color0 - i)) );
+      if(! savep2or3<num_t>((std::string("predg-forward-") + std::to_string(i) + std::string("-") + std::to_string(i0) + std::string(".ppm")).c_str(), p.first[i].size() == 3 ? normalize<num_t>(xyz2rgb<num_t>(p.first[i])) : p.first[i], color) )
         cerr << "failed to save." << endl;
-      if(! savep2or3<num_t>((std::string("predg-backward-") + std::to_string(i) + std::string("-") + std::to_string(i0) + std::string(".ppm")).c_str(), p.second[i].size() == 3 ? normalize<num_t>(xyz2rgb<num_t>(p.second[i])) : p.second[i]) )
+      if(! savep2or3<num_t>((std::string("predg-backward-") + std::to_string(i) + std::string("-") + std::to_string(i0) + std::string(".ppm")).c_str(), p.second[i].size() == 3 ? normalize<num_t>(xyz2rgb<num_t>(p.second[i])) : p.second[i], color) )
         cerr << "failed to save." << endl;
     }
   }

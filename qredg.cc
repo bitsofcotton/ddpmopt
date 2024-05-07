@@ -52,6 +52,8 @@ int main(int argc, const char* argv[]) {
     }
     for(int j0 = 1; 0 < j0; j0 ++) {
       const auto p(predVec<num_t>(pwork, j0));
+      const int  color(max(int(1), min(int(65535), 8 * work[0].rows() / j0
+        - int(p.first.size()) )) );
       if(! p.first.size () || ! p.second.size()) break;
       vector<SimpleMatrix<num_t> > swork(work.size(),
         SimpleMatrix<num_t>(work[0].rows() + p.first.size() + p.second.size(),
@@ -65,7 +67,7 @@ int main(int argc, const char* argv[]) {
           swork[j].row(p.first.size()  + work[j].rows() + k) =
             p.first[k][j].subVector(0, swork[j].cols());
         }
-      if(! savep2or3<num_t>((std::string(argv[i0]) + std::string("-") + std::to_string(j0) + std::string(".ppm")).c_str(), swork.size() == 3 ? normalize<num_t>(xyz2rgb<num_t>(swork)) : swork) )
+      if(! savep2or3<num_t>((std::string(argv[i0]) + std::string("-") + std::to_string(j0) + std::string(".ppm")).c_str(), swork.size() == 3 ? normalize<num_t>(xyz2rgb<num_t>(swork)) : swork, color) )
         cerr << "failed to save." << endl;
     }
   }

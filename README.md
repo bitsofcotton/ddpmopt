@@ -2,7 +2,7 @@
 Apply some of the filter to input stream.
 We can use this for bitsofcotton/i2g filtered images.
 
-This should behaves deterministic ones, however, these are very sensitive on accuracy, so only lower bit has a difference condition, we get whole image different condition.
+This should behaves deterministic ones, however, these are very sensitive on accuracy, so only lowest bit has a difference condition, we get whole image different condition.
 
 # Context
 There exists Denoising Diffusion Probabilistic Models (DDPM; Ho et al. 2020). So this is another try on them but different flavoured one, we only focus to apply each pixel context to color image into monochrome one, which have the structure completely depends on filters' multiple meaning or complexity.
@@ -20,13 +20,11 @@ We get function entropy depend result with [pq]redg, this is because we treat ea
 So we should adjust in/output by them. eg. goki_check_cc:clean\[lcC\] before and after doing them.
 Around better size of this, please refer bitsofcotton/p8 for extends.
 
-# When we have broken result on some of the [pq]redg output
-The P01 predictor makes the hypothesis the structure is continuous enough, in another words, timing aligned input (even for huge matrix the original stream have).
-If in the best case, it's around 2/3, if in the worst case, it's around 1/3, so sometimes negated image also works well. However, in the worst on prediction case, it's 1/2, we cannot predict this with such of the timing value.
-So in the case some of the gulf appears to the next step or in the case some timing attack counter measures appears on input stream, some step previous/next seems to break.
+# P01 hypothesis
+The P01 predictor makes the hypothesis the structure is continuous enough.
+
+In the case there's brand new observation on the states on each pixel context should have the next image condition, we fail with this predictor.
 This is specification of this implementation, so is intended to be so.
-Also, we output all of the possible skip length output up to sqrt of entropy.
-We can check the output by './tcont i' command.
 
 # Usage:
     ./predg(32|64)?(mp)? <in0.ppm> ...
@@ -110,4 +108,5 @@ We can check the output by './tcont i' command.
 2024/04/18 won't update without lieonn.hh change.
 2024/04/29 update readme.
 2024/05/05 p01 class fix step-step to 1-step correction.
+2024/05/07 correct output depth limit to have a meaning. update readme.
 
