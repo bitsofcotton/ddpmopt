@@ -51,7 +51,7 @@ int main(int argc, const char* argv[]) {
       }
     }
     for(int j0 = 1; 0 < j0; j0 ++) {
-      const auto p(predVec<num_t>(pwork, j0));
+      const auto p(predVec<num_t, P0J>(pwork, j0));
       const int  color(max(int(1), min(int(65535), 8 * work[0].rows() / j0
         - int(p.first.size()) )) );
       if(! p.first.size () || ! p.second.size()) break;
