@@ -57,7 +57,7 @@ int main(int argc, const char* argv[]) {
   in = normalize<num_t>(in);
   for(int i0 = 1; 0 < i0; i0 ++) {
     const int  color0(8 * in.size() / i0);
-    const auto p(predMat<num_t, P0J>(in, i0));
+    const auto p(predMat<num_t>(in, i0));
     if(! p.first.size() || ! p.second.size()) break;
     for(int i = 0; i < p.first.size(); i ++) {
       const int color(max(int(1), min(int(65535), color0 - i)) );

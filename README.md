@@ -26,9 +26,6 @@ The P01 predictor makes the hypothesis the structure is continuous enough.
 In the case there's brand new observation on the states on each pixel/image context should have the next image condition, we fail with this predictor.
 This is specification of this implementation, so is intended to be so.
 
-# P2100 hypothesis
-P2100 makes the hypothesis the jammer parts can be improved by p2,p1,p0 predictors for their meaning. The \*PARTIAL\* numerical tests we met is better to describe, however, some of the prediction result on predg0... qredg0... causes we believe our computer nor computation system is fully infected.
-
 N.B.
 However, the purpose what is the brand new observation on the stream is obscure, so it's some of the quantity counting on continuous structure.
 So to predict, separating meaning into many much of the dimension causes {0,...,0} cannot grow some another values, so it's not a better tactics for us.
@@ -120,4 +117,5 @@ The randtools compression/decompression depends on factor matrix sparsity, howev
 2024/05/05 p01 class fix step-step to 1-step correction.
 2024/05/07 correct output depth limit to have a meaning. update readme.
 2024/06/01 add predg0... qredg0... compile option, these using latest results on \{p0,p1,p2\}.
+2024/06/02 revert. it's nonsense.
 

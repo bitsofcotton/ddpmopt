@@ -3562,54 +3562,6 @@ public:
   T M;
 };
 
-template <typename T> class P2100 {
-public:
-  inline P2100() {
-    catgpj = PBond<T, P012L<T> >(P012L<T>(4), 124);
-    p1j    = PBond<T, P01<T> >(P01<T>(4), 28);
-    p0j    = PBond<T, P0maxRank<T> >(P0maxRank<T>(2), 54);
-    p    = PBond<T, P0maxRank<T> >(P0maxRank<T>(), 3);
-    q    = PBond<T, P0maxRank<T> >(P0maxRank<T>(), 3);
-    M0   = M1 = M2 = bM2 = M3 = T(int(1));
-    bin1 = T(int(0));
-  }
-  inline ~P2100() { ; }
-  inline T next(const T& in) {
-    const T zero(int(0));
-    const T one(int(1));
-    const auto in0(M0 * in);
-    const auto in1(M0 * M1 * in);
-    const auto in2(M0 * M1 * M2 * in);
-    const auto in3(M0 * M1 * M2 * M3 * in);
-    const auto p0(M0 = catgpj.next(in));
-    M0 = sgn<T>(arc4random_uniform(2) & 1 ? - M0 : M0);
-    if(M0 == zero) M0 = one;
-    M1 = p1j.next(in0);
-    M1 = sgn<T>(arc4random_uniform(2) & 1 ? - M1 : M1);
-    if(M1 == zero) M1 = one;
-    M2   = p0j.next((in1 + bin1) / T(int(2)));
-    auto bcM2(M2);
-    M2   = sgn<T>(arc4random_uniform(2) & 1 ? - (M2 + bM2) : (M2 + bM2));
-    bM2  = move(bcM2);
-    bin1 = in1;
-    if(M2 == zero) M2 = one;
-    M3 = p.next(in2);
-    const auto M(q.next(in3) * M0 * M1 * M2 * M3);
-    return M;
-  }
-  PBond<T, P012L<T> > catgpj;
-  PBond<T, P01<T> >   p1j;
-  PBond<T, P0maxRank<T> > p0j;
-  PBond<T, P0maxRank<T> > p;
-  PBond<T, P0maxRank<T> > q;
-  T M0;
-  T M1;
-  T M2;
-  T bM2;
-  T M3;
-  T bin1;
-};
-
 // N.B. invariant gathers some of the group on the input pattern.
 template <typename T> SimpleMatrix<T> concat(const SimpleMatrix<T>& m0, const SimpleMatrix<T>& m1) {
   // det diag result = det diag m0 + det diag m1
@@ -4165,24 +4117,15 @@ template <typename T> static inline T getImgPt(const T& y, const T& h) {
   return yy % h;
 }
 
-template <typename T, bool p0j = false> pair<pair<vector<SimpleVector<T> >, vector<T> >, pair<vector<SimpleVector<T> >, vector<T> > > predv(const vector<SimpleVector<T> >& in, const int& skip = 1) {
+template <typename T> pair<pair<vector<SimpleVector<T> >, vector<T> >, pair<vector<SimpleVector<T> >, vector<T> > > predv(const vector<SimpleVector<T> >& in, const int& skip = 1) {
   assert(0 < skip);
   // N.B. we need to initialize p0 vector.
   SimpleVector<T> init(3);
   for(int i = 0; i < init.size(); i ++)
     init[i] = T(int(i));
   cerr << "P0 initialize: " << P0maxRank0<T>(1).next(init) << endl;
-  if(p0j) {
-    init.resize(54);
-    for(int i = 0; i < init.size(); i ++)
-      init[i] = T(int(i));
-    cerr << "P0 initialize (2nd): " << P0maxRank<T>(2).next(init) << endl;
-  }
   // N.B. we need rich internal status.
-  // N.B. in p0j case, we use in.size / 60 from our unreliable numerical calc.
-  //      also, we don't /= skip because of some better output could be gained.
-  int p0(p0j ? T(in.size() / 60) :
-    floor(sqrt(T(int(in.size() - 4 - 1 + 2 - 4 - 2 - 3)) ) / T(skip) ));
+  int p0(floor(sqrt(T(int(in.size() - 4 - 1 + 2 - 4 - 2 - 3)) ) / T(skip) ));
   vector<SimpleVector<T> > p;
   vector<T> psec;
   if(p0 < 1) return make_pair(make_pair(p, psec), make_pair(p, psec));
@@ -4217,40 +4160,22 @@ template <typename T, bool p0j = false> pair<pair<vector<SimpleVector<T> >, vect
     idFeeder<T> pb(secondsf.size());
     idFeeder<T> pf(secondsf.size());
     for(int i = 0; i < in.size(); i ++)
-      pf.next(p0j ? in[i][j] : makeProgramInvariantPartial<T>(in[i][j], secondsf[i], true));
+      pf.next(makeProgramInvariantPartial<T>(in[i][j], secondsf[i], true));
     assert(pf.full);
     for(int k = 0; k < pf.res.size(); k ++)
       pb.next(pf.res[pf.res.size() - 1 - k]);
     assert(pb.full);
     for(int i = 0; i < p0; i ++) {
-      if(p0j) {
-        P2100<T> p0j0;
-        P2100<T> p0j1;
-        for(int k = pb.res.size() % skip; k < pb.res.size(); k += skip) {
-          q[i][j] = p0j0.next(pb.res[k]);
-          p[i][j] = p0j1.next(pf.res[k]);
-        }
-      } else {
-        q[i][j] = P01<T, false>(4, i + 1).next(pb.res, skip);
-        p[i][j] = P01<T, false>(4, i + 1).next(pf.res, skip);
-      }
+      q[i][j] = P01<T, false>(4, i + 1).next(pb.res, skip);
+      p[i][j] = P01<T, false>(4, i + 1).next(pf.res, skip);
     }
   }
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
   for(int i = 0; i < p.size(); i ++) {
-    if(p0j) {
-      P2100<T> p0j0;
-      P2100<T> p0j1;
-      for(int k = secondsb.size() % skip; k < secondsb.size(); k += skip) {
-        qsec[i] = p0j0.next(secondsb[k]);
-        psec[i] = p0j1.next(secondsf[k]);
-      }
-    } else {
-      qsec[i] = P01<T, false>(4, i + 1).next(secondsb, skip);
-      psec[i] = P01<T, false>(4, i + 1).next(secondsf, skip);
-    }
+    qsec[i] = P01<T, false>(4, i + 1).next(secondsb, skip);
+    psec[i] = P01<T, false>(4, i + 1).next(secondsf, skip);
     // p[i][j] = revertProgramInvariant<T>(make_pair(rres[5], psec), true);
     // q[i][j] = revertProgramInvariant<T>(make_pair(rres[5], qsec), true);
   }
@@ -4258,7 +4183,7 @@ template <typename T, bool p0j = false> pair<pair<vector<SimpleVector<T> >, vect
                    make_pair(move(q), move(qsec)));
 }
 
-template <typename T, bool p0j = false> pair<vector<vector<SimpleVector<T> > >, vector<vector<SimpleVector<T> > > > predVec(const vector<vector<SimpleVector<T> > >& in0, const int& skip = 1, const int& cj = 11) {
+template <typename T> pair<vector<vector<SimpleVector<T> > >, vector<vector<SimpleVector<T> > > > predVec(const vector<vector<SimpleVector<T> > >& in0, const int& skip = 1, const int& cj = 11) {
   assert(0 < skip && in0.size() / skip && in0[0].size() && in0[0][0].size() && 0 < cj);
   if(19683 * cj < in0[0].size() * in0[0][0].size())
     cerr << "predVec : elements larger than 19683, exceeds function entropy." << endl;
@@ -4273,7 +4198,7 @@ template <typename T, bool p0j = false> pair<vector<vector<SimpleVector<T> > >, 
       in[i].setVector(j * in0[i][0].size(), in0[i][j]);
     }
   }
-  const auto p(predv<T, p0j>(in, skip));
+  const auto p(predv<T>(in, skip));
   pair<vector<vector<SimpleVector<T> > >, vector<vector<SimpleVector<T> > > > res;
   res.first.resize( p.first.first.size() );
   res.second.resize(p.second.first.size());
@@ -4290,7 +4215,7 @@ template <typename T, bool p0j = false> pair<vector<vector<SimpleVector<T> > >, 
           rres[m] = p.first.first[i][j * in0[0][0].size() +
             getImgPt<int>(k + m - rres.size() / 2, in0[0][0].size())];
         sort(rres.begin(), rres.end());
-        res.first[i][j][k] = p0j ? rres[rres.size() / 2] :
+        res.first[i][j][k] =
           revertProgramInvariant<T>(make_pair(
             rres[rres.size() / 2], p.first.second[i]), true);
       }
@@ -4299,7 +4224,7 @@ template <typename T, bool p0j = false> pair<vector<vector<SimpleVector<T> > >, 
           rres[m] = p.second.first[i][j * in0[0][0].size() +
             getImgPt<int>(k + m - rres.size() / 2, in0[0][0].size())];
         sort(rres.begin(), rres.end());
-        res.second[i][j][k] = p0j ? rres[rres.size() / 2] :
+        res.second[i][j][k] =
           revertProgramInvariant<T>(make_pair(
             rres[rres.size() / 2], p.second.second[i]), true);
       }
@@ -4308,7 +4233,7 @@ template <typename T, bool p0j = false> pair<vector<vector<SimpleVector<T> > >, 
   return res;
 }
 
-template <typename T, bool p0j = false> pair<vector<vector<SimpleMatrix<T> > >, vector<vector<SimpleMatrix<T> > > > predMat(const vector<vector<SimpleMatrix<T> > >& in0, const int& skip = 1, const int& cj = 11) {
+template <typename T> pair<vector<vector<SimpleMatrix<T> > >, vector<vector<SimpleMatrix<T> > > > predMat(const vector<vector<SimpleMatrix<T> > >& in0, const int& skip = 1, const int& cj = 11) {
   assert(0 < skip && in0.size() / skip && in0[0].size() && in0[0][0].rows() && in0[0][0].cols());
   const int ccj(ceil(sqrt(T(cj))));
   assert(0 < ccj);
@@ -4327,7 +4252,7 @@ template <typename T, bool p0j = false> pair<vector<vector<SimpleMatrix<T> > >, 
                         k * in0[i][0].cols(), in0[i][j].row(k));
     }
   }
-  const auto p(predv<T, p0j>(in, skip));
+  const auto p(predv<T>(in, skip));
   pair<vector<vector<SimpleMatrix<T> > >, vector<vector<SimpleMatrix<T> > > > res;
   res.first.resize( p.first.first.size() );
   res.second.resize(p.second.first.size());
@@ -4350,7 +4275,7 @@ template <typename T, bool p0j = false> pair<vector<vector<SimpleMatrix<T> > >, 
                   in0[0][0].cols() +
                 getImgPt<int>(m + mm - ccj / 2, in0[0][0].cols())];
           sort(rres.begin(), rres.end());
-          res.first[i][j](k, m) = p0j ? rres[rres.size() / 2] :
+          res.first[i][j](k, m) =
             revertProgramInvariant<T>(make_pair(
               rres[rres.size() / 2], p.first.second[i]), true);
         }
@@ -4364,7 +4289,7 @@ template <typename T, bool p0j = false> pair<vector<vector<SimpleMatrix<T> > >, 
                   in0[0][0].cols() +
                 getImgPt<int>(m + mm - ccj / 2, in0[0][0].cols())];
           sort(rres.begin(), rres.end());
-          res.second[i][j](k, m) = p0j ? rres[rres.size() / 2] :
+          res.second[i][j](k, m) =
             revertProgramInvariant<T>(make_pair(
               rres[rres.size() / 2], p.second.second[i]), true);
         }
@@ -4373,7 +4298,7 @@ template <typename T, bool p0j = false> pair<vector<vector<SimpleMatrix<T> > >, 
   return res;
 }
 
-template <typename T, bool p0j = false> pair<vector<SimpleSparseTensor<T> >, vector<SimpleSparseTensor<T> > > predSTen(const vector<SimpleSparseTensor<T> >& in0, const vector<int>& idx, const int& skip = 1) {
+template <typename T> pair<vector<SimpleSparseTensor<T> >, vector<SimpleSparseTensor<T> > > predSTen(const vector<SimpleSparseTensor<T> >& in0, const vector<int>& idx, const int& skip = 1) {
   assert(idx.size() && 0 < skip && in0.size() / skip);
   // N.B. we don't do input scaling.
   // N.B. the data we target is especially string stream corpus.
@@ -4405,7 +4330,7 @@ template <typename T, bool p0j = false> pair<vector<SimpleSparseTensor<T> >, vec
             in[i][cnt ++] =
               (in0[i][idx[j]][idx[k]][idx[m]] + T(int(1))) / T(int(2));
   }
-  auto p(predv<T, p0j>(in, skip));
+  auto p(predv<T>(in, skip));
   in.resize(0);
   pair<vector<SimpleSparseTensor<T> >, vector<SimpleSparseTensor<T> > > res;
   res.first.resize( p.first.first.size() );
@@ -4418,12 +4343,10 @@ template <typename T, bool p0j = false> pair<vector<SimpleSparseTensor<T> >, vec
                make_pair(j, make_pair(k, m))))
             continue;
           res.first[i][idx[j]][idx[k]][idx[m]] =
-            p0j ? p.first.first[i][cnt ++] * T(int(2)) - T(int(1)) :
             revertProgramInvariant<T>(make_pair(
               p.first.first[i][cnt] * T(int(2)) - T(int(1)),
                 p.first.second[i]), true);
           res.second[i][idx[j]][idx[k]][idx[m]] =
-            p0j ? p.second.first[i][cnt ++] * T(int(2)) - T(int(1)) :
             revertProgramInvariant<T>(make_pair(
               p.second.first[i][cnt ++] * T(int(2)) - T(int(1)),
                 p.second.second[i]), true);
