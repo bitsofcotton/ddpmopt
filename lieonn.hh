@@ -3161,7 +3161,7 @@ template <typename T> inline T P012L<T>::next(const SimpleVector<T>& d) {
             ii < 2 * int(- log(SimpleMatrix<T>().epsilon()) / log(T(int(2))) )
             && sqrt(work.dot(work) * SimpleMatrix<T>().epsilon()) <
                  abs(work[work.size() - 1] - last); ii ++) {
-      last = work[work.size() - 1];
+      last  = work[work.size() - 1];
       const auto vdp(makeProgramInvariant<T>(work));
       avg  = avg0 * sqrt(vdp.first.dot(vdp.first) / avg0.dot(avg0));
       work[work.size() - 1] =
@@ -3488,7 +3488,7 @@ public:
     SimpleMatrix<T> invariants(3, nonlinear ? varlen + 2 : varlen);
     invariants.O();
     for(int i0 = 0; i0 < invariants.rows(); i0 ++) {
-      SimpleMatrix<T> toeplitz((in.size() - varlen - step + 2) / skip
+      SimpleMatrix<T> toeplitz((in.size() - varlen - step + 2 - 1) / skip
                                - invariants.rows() + 1, invariants.cols());
       for(int i = i0; i < toeplitz.rows() + i0; i ++) {
         auto work(in.subVector(i * skip, varlen));

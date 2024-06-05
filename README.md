@@ -118,4 +118,5 @@ The randtools compression/decompression depends on factor matrix sparsity, howev
 2024/05/07 correct output depth limit to have a meaning. update readme.
 2024/06/01 add predg0... qredg0... compile option, these using latest results on \{p0,p1,p2\}.
 2024/06/02 revert. it's nonsense.
+2024/06/05 fix p01 crash in rare cases.
 
