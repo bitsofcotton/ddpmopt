@@ -4125,7 +4125,7 @@ template <typename T> pair<pair<vector<SimpleVector<T> >, vector<T> >, pair<vect
     init[i] = T(int(i));
   cerr << "P0 initialize: " << P0maxRank0<T>(1).next(init) << endl;
   // N.B. we need rich internal status.
-  int p0(floor(sqrt(T(int(in.size() - 4 - 1 + 2 - 4 - 2 - 3)) ) / T(skip) ));
+  auto p0(min(int(floor(sqrt(T(int(in.size() - 4 - 1 + 2 - 4 - 2 - 3)) ) / T(skip) )), int(in.size() - 2) / skip / 26));
   vector<SimpleVector<T> > p;
   vector<T> psec;
   if(p0 < 1) return make_pair(make_pair(p, psec), make_pair(p, psec));

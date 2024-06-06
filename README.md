@@ -13,7 +13,7 @@ We need to do ulimit or edit /etc/login.conf for large malloc use cases required
 Using this with mimalloc or so can increase memory usage with multi thread on some systems.
 
 # Tips around c++ compilers
-Some of the lieonn.hh operator \>\> class doesn't works as expected, might be compilers' bug.
+Some of the lieonn.hh operator \>\> class doesn't work as expected, might be compilers' bug.
 
 # Tips around input sizes on this
 We get function entropy depend result with [pq]redg, this is because we treat each pixel as equally treated ones without any of the internal states.
@@ -34,8 +34,8 @@ These predg/qredg has a context of each pixel/each image with function entropy d
 The randtools compression/decompression depends on factor matrix sparsity, however, they depends on observation/heat could be after of the calculation, so we should have some of the dictionary based functions, however, they're already done by deep learning recent days.
 
 # Usage:
-    ./predg0?(32|64)?(mp)? <in0.ppm> ...
-    ./qredg0?(32|64)?(mp)? <in0.ppm> ...
+    ./predg(32|64)?(mp)? <in0.ppm> ...
+    ./qredg(32|64)?(mp)? <in0.ppm> ...
     ./ddpmopt(32|64)?(mp)? + <in0in.ppm> <in0out.pgm> ... > cache.txt
     ./ddpmopt(32|64)?(mp)? - <in0.ppm> ... < cache.txt
     ./tcont [xyit] <in0.ppm> ...
@@ -119,4 +119,5 @@ The randtools compression/decompression depends on factor matrix sparsity, howev
 2024/06/01 add predg0... qredg0... compile option, these using latest results on \{p0,p1,p2\}.
 2024/06/02 revert. it's nonsense.
 2024/06/05 fix p01 crash in rare cases.
+2024/06/07 fix number of predictions to reasonable one. add another implementation on python predg.cc, only QR decomposition is differ but this has a better results?? update readme.
 
