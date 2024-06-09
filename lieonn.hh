@@ -4233,7 +4233,8 @@ template <typename T> pair<vector<vector<SimpleVector<T> > >, vector<vector<Simp
   return res;
 }
 
-template <typename T> pair<vector<vector<SimpleMatrix<T> > >, vector<vector<SimpleMatrix<T> > > > predMat(const vector<vector<SimpleMatrix<T> > >& in0, const int& skip = 1, const int& cj = 11) {
+// N.B. cj == ceil(sqrt(11)) + 1
+template <typename T> pair<vector<vector<SimpleMatrix<T> > >, vector<vector<SimpleMatrix<T> > > > predMat(const vector<vector<SimpleMatrix<T> > >& in0, const int& skip = 1, const int& cj = 5) {
   assert(0 < skip && in0.size() / skip && in0[0].size() && in0[0][0].rows() && in0[0][0].cols());
   const int ccj(ceil(sqrt(T(cj))));
   assert(0 < ccj);

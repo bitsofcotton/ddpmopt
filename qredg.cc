@@ -28,6 +28,8 @@ using std::binary_search;
 using std::make_pair;
 using std::istringstream;
 
+#define IMG_BITS 8
+
 #undef int
 int main(int argc, const char* argv[]) {
 #define int int64_t
@@ -42,11 +44,11 @@ int main(int argc, const char* argv[]) {
     vector<vector<SimpleVector<num_t> > > pwork;
     pwork.resize(work[0].rows());
     for(int i = 0; i < pwork.size(); i ++) {
-      for(int j = 0; j < work.size(); j ++) {
-        pwork[i].emplace_back(work[j].row(i));
+      for(int j = 0; j < work.size() * IMG_BITS; j ++) {
+        pwork[i].emplace_back(work[j / IMG_BITS].row(i));
         for(int k = 0; k < pwork[i][j].size(); k ++) {
-          pwork[i][j][k] += num_t(int(1)) / num_t(int(65536));
-          pwork[i][j][k] /= num_t(int(1)) + num_t(int(1)) / num_t(int(256));
+          pwork[i][j][k] *= num_t(j % IMG_BITS ? int(1) << (j % IMG_BITS) : int(1));
+          pwork[i][j][k] -= floor(pwork[i][j][k]);
         }
       }
     }
@@ -61,12 +63,22 @@ int main(int argc, const char* argv[]) {
       for(int j = 0; j < work.size(); j ++)
         swork[j].setMatrix(p.first.size(), 0, work[j]);
       for(int k = 0; k < p.first.size(); k ++)
-        for(int j = 0; j < work.size(); j ++) {
-          swork[j].row(p.second.size() - k - 1) =
-            p.second[k][j].subVector(0, swork[j].cols());
-          swork[j].row(p.first.size()  + work[j].rows() + k) =
-            p.first[k][j].subVector(0, swork[j].cols());
-        }
+        for(int j = 0; j < work.size() * IMG_BITS; j ++)
+          if(! (j % IMG_BITS)) {
+            swork[j / IMG_BITS].row(p.second.size() - k - 1) =
+              p.second[k][j].subVector(0, swork[j / IMG_BITS].cols());
+            swork[j / IMG_BITS].row(p.first.size() +
+                work[j / IMG_BITS].rows() + k) =
+              p.first[k][j].subVector(0, swork[j / IMG_BITS].cols());
+          } else {
+            swork[j / IMG_BITS].row(p.second.size() - k - 1) +=
+              p.second[k][j].subVector(0, swork[j / IMG_BITS].cols()) /
+              num_t(int(1) << (j % IMG_BITS));
+            swork[j / IMG_BITS].row(p.first.size() +
+                work[j / IMG_BITS].rows() + k) +=
+              p.first[k][j].subVector(0, swork[j / IMG_BITS].cols()) /
+              num_t(int(1) << (j % IMG_BITS));
+          }
       if(! savep2or3<num_t>((std::string(argv[i0]) + std::string("-") + std::to_string(j0) + std::string(".ppm")).c_str(), swork.size() == 3 ? normalize<num_t>(xyz2rgb<num_t>(swork)) : swork, color) )
         cerr << "failed to save." << endl;
     }

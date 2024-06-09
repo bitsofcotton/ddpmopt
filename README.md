@@ -120,4 +120,5 @@ The randtools compression/decompression depends on factor matrix sparsity, howev
 2024/06/02 revert. it's nonsense.
 2024/06/05 fix p01 crash in rare cases.
 2024/06/07 fix number of predictions to reasonable one. add another implementation on python predg.cc, only QR decomposition is differ but this has a better results?? update readme.
+2024/06/09 factorize into each bit and predict with them. leave with this but this have color intensity == {0,1} confusion bug.
 
