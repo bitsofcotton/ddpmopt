@@ -65,12 +65,14 @@ int main(int argc, const char* argv[]) {
   for(int i = 0; i < in.size(); i ++)
     for(int j = 0; j < in[i].size(); j ++)
       in[i][j] /= num_t(int(2));
+  pair<vector<vector<SimpleMatrix<num_t> > >, vector<vector<SimpleMatrix<num_t> > > > pw;
+  int color(65535);
   for(int i0 = 1; 0 < i0; i0 ++) {
     const int  color0(IMG_BITS * in.size() / i0);
           auto p(predMat<num_t>(in, i0));
     if(! p.first.size() || ! p.second.size()) break;
     for(int i = 0; i < p.first.size(); i ++) {
-      const int color(max(int(1), min(int(65535), color0 - i)) );
+      color = min(color, max(int(1), min(int(65535), color0 - i)));
       vector<SimpleMatrix<num_t> > bm;
       vector<SimpleMatrix<num_t> > fm;
       bm.resize(p.first[i].size() / IMG_BITS);
@@ -83,13 +85,21 @@ int main(int argc, const char* argv[]) {
           bm[j / IMG_BITS] += p.first[i][j]  / num_t(int(1) << (j % IMG_BITS));
           fm[j / IMG_BITS] += p.second[i][j] / num_t(int(1) << (j % IMG_BITS));
         }
-      p.first[i]  = bm;
-      p.second[i] = fm;
-      if(! savep2or3<num_t>((std::string("predg-forward-") + std::to_string(i) + std::string("-") + std::to_string(i0) + std::string(".ppm")).c_str(), p.first[i].size() == 3 ? normalize<num_t>(xyz2rgb<num_t>(p.first[i])) : p.first[i], color) )
-        cerr << "failed to save." << endl;
-      if(! savep2or3<num_t>((std::string("predg-backward-") + std::to_string(i) + std::string("-") + std::to_string(i0) + std::string(".ppm")).c_str(), p.second[i].size() == 3 ? normalize<num_t>(xyz2rgb<num_t>(p.second[i])) : p.second[i], color) )
-        cerr << "failed to save." << endl;
+      if(pw.first.size() <= i) {
+        pw.first.emplace_back(bm);
+        pw.second.emplace_back(fm);
+      } else
+        for(int j = 0; j < pw.first[i].size(); j ++) {
+          pw.first[i][j]  += bm[j];
+          pw.second[i][j] += fm[j];
+        }
     }
+  }
+  for(int i = 0; i < pw.first.size(); i ++) {
+    if(! savep2or3<num_t>((std::string("predg-forward-") + std::to_string(i) + std::string(".ppm")).c_str(), pw.first[i].size() == 3 ? normalize<num_t>(xyz2rgb<num_t>(pw.first[i])) : pw.first[i], color) )
+      cerr << "failed to save." << endl;
+    if(! savep2or3<num_t>((std::string("predg-backward-") + std::to_string(i) + std::string(".ppm")).c_str(), pw.second[i].size() == 3 ? normalize<num_t>(xyz2rgb<num_t>(pw.second[i])) : pw.second[i], color) )
+      cerr << "failed to save." << endl;
   }
   cerr << " Done" << endl;
   return 0;

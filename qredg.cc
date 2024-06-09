@@ -52,9 +52,12 @@ int main(int argc, const char* argv[]) {
         }
       }
     }
+    vector<SimpleMatrix<num_t> > wwork;
+    SimpleVector<int> cwork;
+    int color(65535);
     for(int j0 = 1; 0 < j0; j0 ++) {
       const auto p(predVec<num_t>(pwork, j0));
-      const int  color(max(int(1), min(int(65535), 8 * work[0].rows() / j0
+      color = min(color, max(int(1), min(int(65535), 8 * work[0].rows() / j0
         - int(p.first.size()) )) );
       if(! p.first.size () || ! p.second.size()) break;
       vector<SimpleMatrix<num_t> > swork(work.size(),
@@ -62,6 +65,11 @@ int main(int argc, const char* argv[]) {
           work[0].cols()).O());
       for(int j = 0; j < work.size(); j ++)
         swork[j].setMatrix(p.first.size(), 0, work[j]);
+      if(j0 == 1) {
+        wwork = vector<SimpleMatrix<num_t> >(swork);
+        cwork.resize(wwork[0].rows());
+        cwork.O(0);
+      }
       for(int k = 0; k < p.first.size(); k ++)
         for(int j = 0; j < work.size() * IMG_BITS; j ++)
           if(! (j % IMG_BITS)) {
@@ -79,9 +87,18 @@ int main(int argc, const char* argv[]) {
               p.first[k][j].subVector(0, swork[j / IMG_BITS].cols()) /
               num_t(int(1) << (j % IMG_BITS));
           }
-      if(! savep2or3<num_t>((std::string(argv[i0]) + std::string("-") + std::to_string(j0) + std::string(".ppm")).c_str(), swork.size() == 3 ? normalize<num_t>(xyz2rgb<num_t>(swork)) : swork, color) )
-        cerr << "failed to save." << endl;
+      const auto ustart((cwork.size() - swork[0].rows()) / 2);
+      for(int j = ustart; j < cwork.size() - ustart; j ++) {
+        for(int m = 0; m < wwork.size(); m ++)
+          wwork[m].row(j) += swork[m].row(j - ustart);
+        cwork[j] ++;
+      }
     }
+    for(int j = 0; j < cwork.size(); j ++)
+      for(int m = 0; m < wwork.size(); m ++)
+        wwork[m].row(j) /= num_t(cwork[j]);
+    if(! savep2or3<num_t>(argv[i0], wwork.size() == 3 ? normalize<num_t>(xyz2rgb<num_t>(wwork)) : wwork, color) )
+        cerr << "failed to save." << endl;
   }
   cerr << " Done" << endl;
   return 0;

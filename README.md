@@ -20,6 +20,8 @@ We get function entropy depend result with [pq]redg, this is because we treat ea
 So we should adjust in/output by them. eg. goki_check_cc:clean\[lcC\] before and after doing them.
 Around better size of this, please refer bitsofcotton/p8 for extends.
 
+However, cleanl input and despeckle or negate output also could work.
+
 # P01 hypothesis
 The P01 predictor makes the hypothesis the structure is continuous enough.
 
@@ -33,9 +35,11 @@ So blending some of the meaning into some dictionary based or statistics based r
 These predg/qredg has a context of each pixel/each image with function entropy depend size image, so to improve this, we need some of the context or some of the dictionaries or some of the pattern to complement with.
 The randtools compression/decompression depends on factor matrix sparsity, however, they depends on observation/heat could be after of the calculation, so we should have some of the dictionary based functions, however, they're already done by deep learning recent days.
 
+So tips on predicting graphics set, if there's some of the continuity we can recognize, we get better result for us however, if there's no continuity we can recognize, we will get some continuous result on the place we cannot recognize, so to recognize the one is harder and harder than former ones.
+
 # Usage:
     ./predg(32|64)?(mp)? <in0.ppm> ...
-    ./qredg(32|64)?(mp)? <in0.ppm> ...
+    ./qredg(32|64)?(mp)? <in0out.ppm> ...
     ./ddpmopt(32|64)?(mp)? + <in0in.ppm> <in0out.pgm> ... > cache.txt
     ./ddpmopt(32|64)?(mp)? - <in0.ppm> ... < cache.txt
     ./tcont [xyit] <in0.ppm> ...
@@ -121,4 +125,5 @@ The randtools compression/decompression depends on factor matrix sparsity, howev
 2024/06/05 fix p01 crash in rare cases.
 2024/06/07 fix number of predictions to reasonable one. add another implementation on python predg.cc, only QR decomposition is differ but this has a better results?? update readme.
 2024/06/09 factorize into each bit and predict with them. leave with this but this have color intensity == {0,1} confusion bug.
+2024/06/09 fix last bug. average step skips. add readme.
 
