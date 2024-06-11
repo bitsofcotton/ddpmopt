@@ -37,6 +37,8 @@ The randtools compression/decompression depends on factor matrix sparsity, howev
 
 So tips on predicting graphics set, if there's some of the continuity we can recognize, we get better result for us however, if there's no continuity we can recognize, we will get some continuous result on the place we cannot recognize, so to recognize the one is harder and harder than former ones.
 
+So around them, we can re-emphasis original meanings they satisfies and enlarge them by ongoing deep learning methods from some of the groups on inet s.t. GPTn-based graphics translators. So we recommend to use them s.t. img2img on them after predicting graphics set by ours.
+
 # Usage:
     ./predg(32|64)?(mp)? <in0.ppm> ...
     ./qredg(32|64)?(mp)? <in0out.ppm> ...
@@ -126,4 +128,5 @@ So tips on predicting graphics set, if there's some of the continuity we can rec
 2024/06/07 fix number of predictions to reasonable one. add another implementation on python predg.cc, only QR decomposition is differ but this has a better results?? update readme.
 2024/06/09 factorize into each bit and predict with them. leave with this but this have color intensity == {0,1} confusion bug.
 2024/06/09 fix last bug. average step skips. add readme.
+2024/06/11 update readme.
 
