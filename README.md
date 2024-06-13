@@ -43,7 +43,11 @@ However, our predictor is being jammed condition now, even the base system/compi
 This is because we test P01 predictor with bitsofcotton/p1:p1.cc with -28, 28 argv with bitsofcotton/p2:cr.py with s for each by raw .cc file and predict some of the PRNG on this machine, even the first argument often goes well if another predictors are filtering condition, output can be controlled as to be return to origin point condition, so p1 28 \| p1 -28 \| cr.py s pseudo condition after applying the raw .cc filter can work well on my machie before this post.
 So after posting this, the condition can be broken from our experiences.
 
+Either we can use catgp instead of p1 -28 \| cr.py s and catgp \| p1 \| cr.py s instead of p1 28 for another raw .cc predictor.
+
 So if this is the jamming from clang++ nor base system nor function saturation to P01 predictor, the result can be broken any which in the meaning on the prediction. We observe this especially some graphics set prediction with only the first predicted graphics going to be most of the null condition graphics. We didn't discriminate whether this is from the graphics theirselves condition with our predictor nor, it's from the intension from the jammer intent selves.
+
+Whether this is true or not, we need some restraint output to exclude some of the jammer on our environment instead of raw pipes. Either, we cannot test the predictor of this repository is valid or not on our environment.
 
 # Usage:
     ./predg(32|64)?(mp)? <in0.ppm> ...
@@ -136,4 +140,5 @@ So if this is the jamming from clang++ nor base system nor function saturation t
 2024/06/09 fix last bug. average step skips. add readme.
 2024/06/11 update readme.
 2024/06/12 update readme.
+2024/06/13 update readme.
 
