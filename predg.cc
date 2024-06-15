@@ -68,7 +68,12 @@ int main(int argc, const char* argv[]) {
   pair<vector<SimpleMatrix<num_t> >, vector<SimpleMatrix<num_t> > > pw;
   const auto color(max(int(1), min(int(65535), int(IMG_BITS * in.size()) )));
         auto p(predMat<num_t>(in));
-  for(int j = 0; j < p.first.size(); j ++)
+  for(int j = 0; j < p.first.size(); j ++) {
+    for(int ii = 0; ii < p.first[j].rows(); ii ++)
+      for(int jj = 0; jj < p.first[j].cols(); jj ++) {
+        p.first[j](ii, jj) = sgn<num_t>(p.first[j](ii, jj));
+        p.second[j](ii, jj) = sgn<num_t>(p.second[j](ii, jj));
+      }
     if(! (j % IMG_BITS)) {
       pw.first.emplace_back( move(p.first[ j]));
       pw.second.emplace_back(move(p.second[j]));
@@ -76,6 +81,7 @@ int main(int argc, const char* argv[]) {
       pw.first[j / IMG_BITS]  += p.first[j]  / num_t(int(1) << (j % IMG_BITS));
       pw.second[j / IMG_BITS] += p.second[j] / num_t(int(1) << (j % IMG_BITS));
     }
+  }
   if(! savep2or3<num_t>("predg-forward.ppm", pw.first.size() == 3 ? normalize<num_t>(xyz2rgb<num_t>(pw.first)) : pw.first, color) )
     cerr << "failed to save." << endl;
   if(! savep2or3<num_t>("predg-backward.ppm", pw.second.size() == 3 ? normalize<num_t>(xyz2rgb<num_t>(pw.second)) : pw.second, color) )

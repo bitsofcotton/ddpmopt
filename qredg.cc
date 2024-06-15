@@ -53,14 +53,18 @@ int main(int argc, const char* argv[]) {
       }
     }
     vector<SimpleMatrix<num_t> > wwork;
-    const int  color(min(color, max(int(1), min(int(65535), 8 * work[0].rows())) ));
-    const auto p(predVec<num_t>(pwork));
+    const auto color(max(int(1), min(int(65535), int(8 * work[0].rows()) )) );
+          auto p(predVec<num_t>(pwork));
     if(! p.first.size() || ! p.second.size()) break;
     wwork.resize(work.size(),
       SimpleMatrix<num_t>(work[0].rows() + 2, work[0].cols()).O());
     for(int j = 0; j < work.size(); j ++)
       wwork[j].setMatrix(1, 0, work[j]);
-    for(int j = 0; j < work.size() * IMG_BITS; j ++)
+    for(int j = 0; j < work.size() * IMG_BITS; j ++) {
+      for(int k = 0; k < p.first[j].size(); k ++) {
+        p.first[j][k]  = sgn<num_t>(p.first[j][k]);
+        p.second[j][k] = sgn<num_t>(p.second[j][k]);
+      }
       if(! (j % IMG_BITS)) {
         wwork[j / IMG_BITS].row(0) =
           p.second[j].subVector(0, wwork[j / IMG_BITS].cols());
@@ -74,6 +78,7 @@ int main(int argc, const char* argv[]) {
           p.first[j].subVector(0, wwork[j / IMG_BITS].cols()) /
             num_t(int(1) << (j % IMG_BITS));
       }
+    }
     if(! savep2or3<num_t>(argv[i0], wwork.size() == 3 ? normalize<num_t>(xyz2rgb<num_t>(wwork)) : normalize<num_t>(wwork), color) )
         cerr << "failed to save." << endl;
   }
