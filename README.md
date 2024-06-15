@@ -22,26 +22,13 @@ Around better size of this, please refer bitsofcotton/p8 for extends.
 
 However, cleanl input and despeckle or negate output also could work.
 
-# P01 hypothesis
-The P01 predictor makes the hypothesis the structure is continuous enough.
+# P210 hypothesis
+The P210 predictor makes the hypothesis the structure converges in some of the internal states meaning.
 
 In the case there's brand new observation on the states on each pixel/image context should have the next image condition, we fail with this predictor.
 This is specification of this implementation, so is intended to be so.
 
-N.B.
-However, the purpose what is the brand new observation on the stream is obscure, so it's some of the quantity counting on continuous structure.
-So to predict, separating meaning into many much of the dimension causes {0,...,0} cannot grow some another values, so it's not a better tactics for us.
-So blending some of the meaning into some dictionary based or statistics based representation dimensions and predict with them, then, re-separate them is better for us. However, the blended image nor separated meaning is the matter if such of occasions work with to be correctly working.
-These predg/qredg has a context of each pixel/each image with function entropy depend size image, so to improve this, we need some of the context or some of the dictionaries or some of the pattern to complement with.
-The randtools compression/decompression depends on factor matrix sparsity, however, they depends on observation/heat could be after of the calculation, so we should have some of the dictionary based functions, however, they're already done by deep learning recent days.
-
-So tips on predicting graphics set, if there's some of the continuity we can recognize, we get better result for us however, if there's no continuity we can recognize, we will get some continuous result on the place we cannot recognize, so to recognize the one is harder and harder than former ones.
-
-So around them, we can re-emphasis original meanings they satisfies and enlarge them by ongoing deep learning methods from some of the groups on inet s.t. GPTn-based graphics translators. So we recommend to use them s.t. img2img on them after predicting graphics set by ours.
-
-However, our predictor is being jammed condition now, even the base system/compiler is correct case, there's some of the saturation on function pattern max number concern switch by intent can occur.
-
-Once find the PRNG predictor goes well, then, we're always jammed with some balancing methods. However, arc4random_uniform with p1 nor catgp can work well if they're raw coded in the binary, so adding noise and denoise method seems to work well if the condition is true if raw PRNGs are well baked by our predictors if original graphics set stream is random enough with many of some unknown internal states.
+Once finding the PRNG predictor goes well, we're always jammed with some balancing methods. So we cannot test this enough better than this without new hypothesis.
 
 # Usage:
     ./predg(32|64)?(mp)? <in0.ppm> ...
