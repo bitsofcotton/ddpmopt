@@ -22,13 +22,11 @@ Around better size of this, please refer bitsofcotton/p8 for extends.
 
 However, cleanl input and despeckle or negate output also could work.
 
-# P210 hypothesis
-The P210 predictor makes the hypothesis the structure converges in some of the internal states meaning.
+# P01, P0 hypothesis
+The P01, P0 predictor makes the hypothesis the structure converges in some of the internal states meaning.
 
 In the case there's brand new observation on the states on each pixel/image context should have the next image condition, we fail with this predictor.
 This is specification of this implementation, so is intended to be so.
-
-Once finding the PRNG predictor goes well, we're always jammed with some balancing methods. So we cannot test this enough better than this without new hypothesis.
 
 # Usage:
     ./predg(32|64)?(mp)? <in0.ppm> ...
@@ -124,4 +122,5 @@ Once finding the PRNG predictor goes well, we're always jammed with some balanci
 2024/06/13 update readme.
 2024/06/14 update readme.
 2024/06/15 conclude 2024/06/11-2024/06/14 conditions readme.
+2024/06/16 revert P210 to original, then, P01, P0 pred temporarily, update readme.
 

@@ -3568,7 +3568,9 @@ public:
 template <typename T, typename P> class Pprogression {
 public:
   inline Pprogression() { ; }
-  inline Pprogression(const P& p, const int& loop = 1) {
+  inline Pprogression(const P& p, const int& loop0 = 1) {
+    assert(loop0);
+    const auto loop(abs(loop0));
     (this->p).resize(loop);
     for(int i = 0; i < (this->p).size(); i ++)
       (this->p)[i].resize(i + 1, p);
@@ -3583,7 +3585,8 @@ public:
     }
     bb.reserve(loop);
     for(int i = 0; i < loop; i ++)
-      bb.emplace_back(idFeeder<T>(i + 1));
+      bb.emplace_back(idFeeder<T>(loop0 < 0 ? 1 : i + 1));
+    addp = 0 < loop0;
     t ^= t;
   }
   inline ~Pprogression() { ; }
@@ -3600,7 +3603,7 @@ public:
     if(! h.full) return zero;
     auto M(zero);
     for(int i = 0; i < p.size(); i ++)
-      M += bb[i].next(p[i][t % p[i].size()].next(progression(hh, hh.size() - 1, i)))[0] + (i ? progression(hh, hh.size() - 2, i - 1) : zero);
+      M += bb[i].next(p[i][t % p[i].size()].next(progression(hh, hh.size() - 1, i)))[0] + (i && addp ? progression(hh, hh.size() - 2, i - 1) : zero);
     t ++;
     for(int i = 0; i < ph.size(); i ++)
       for(int j = 0; j < ph[i].size(); j ++)
@@ -3613,6 +3616,7 @@ public:
   vector<vector<T> > eh;
   vector<idFeeder<T> > bb;
   int t;
+  bool addp;
 };
 
 template <typename T, typename P, typename Q> class PAthenB {
@@ -4189,70 +4193,87 @@ template <typename T> static inline T getImgPt(const T& y, const T& h) {
   return yy % h;
 }
 
-template <typename T> pair<pair<SimpleVector<T>, SimpleVector<T> >, pair<T, T> > predv(const vector<SimpleVector<T> >& in) {
+template <typename T> pair<pair<vector<SimpleVector<T> >, vector<T> >, pair<vector<SimpleVector<T> >, vector<T> > > predv(const vector<SimpleVector<T> >& in, const int& skip = 1) {
+  assert(0 < skip);
   // N.B. we need to initialize p0 vector.
   SimpleVector<T> init(3);
   for(int i = 0; i < init.size(); i ++)
     init[i] = T(int(i));
   cerr << "P0 initialize: " << P0maxRank0<T>(1).next(init) << endl;
-  const int progression(in.size() / (124 + 28 + 3) * 2);
   // N.B. we need rich internal status.
-  pair<SimpleVector<T>, SimpleVector<T> > p;
-  pair<T, T> pt;
-  if(progression <= 0) return make_pair(p, pt);
-  SimpleVector<T> seconds(in.size());
-  seconds.O();
+  const auto p0(1);
+  const auto progression(int(in.size()) / (28 + 3));
+  vector<SimpleVector<T> > p;
+  vector<T> psec;
+  if(progression <= 2) return make_pair(make_pair(p, psec), make_pair(p, psec));
+  SimpleVector<T> secondsf(in.size());
+  secondsf.O();
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
   for(int i = 0; i < in.size(); i ++)  {
-    seconds[i] = makeProgramInvariant<T>(in[i], - T(int(1)), true).second;
+    secondsf[i] = makeProgramInvariant<T>(in[i], - T(int(1)), true).second;
   }
-  p.first.resize(in[0].size());
-  p.second.resize(in[0].size());
-  p.first.O();
-  p.second.O();
-  pt.first = pt.second = T(int(0));
+  SimpleVector<T> secondsb(secondsf.size());
+  secondsb.O();
+  for(int i = 0; i < secondsf.size(); i ++)
+    secondsb[i] = secondsf[secondsf.size() - 1 - i];
+  p.resize(p0);
+  psec.resize(p0);
+  auto q(p);
+  auto qsec(psec);
+  for(int i = 0; i < p0; i ++) {
+    p[i].resize(in[0].size());
+    q[i].resize(in[0].size());
+    p[i].O();
+    q[i].O();
+    psec[i] = qsec[i] = T(int(0));
+  }
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
   for(int j = 0; j < in[0].size(); j ++) {
     cerr << j << " / " << in[0].size() << endl;
-    P210<T> pf(Pprogression<T, PBond<T, P012L<T> > >(PBond<T, P012L<T> >(
-        P012L<T>(4), 124), progression),
-      PAthenB<T, Pprogression<T, PBond<T, P01<T> > >,
-        Pprogression<T, PBond<T, P0maxRank<T> > > >(
-        Pprogression<T, PBond<T, P01<T> > >(PBond<T, P01<T> >(P01<T>(4), 28),
-          progression),
-        Pprogression<T, PBond<T, P0maxRank<T> > >(PBond<T, P0maxRank<T> >(
-          P0maxRank<T>(), 3), progression) ) );
+    PAthenB<T, Pprogression<T, PBond<T, P01<T> > >, PBond<T, P0maxRank<T> > > pf(
+      Pprogression<T, PBond<T, P01<T> > >(PBond<T, P01<T> >(P01<T>(4), 28),
+        progression), PBond<T, P0maxRank<T> >(P0maxRank<T>(), 3) );
     auto pb(pf);
     for(int i = 0; i < in.size(); i ++) {
-      p.first[j]  = pf.next(makeProgramInvariantPartial<T>(in[i][j], seconds[i], true));
-      p.second[j] = pb.next(makeProgramInvariantPartial<T>(in[in.size() - i - 1][j], seconds[in.size() - i - 1], true));
+      p[i][j] = pf.next(makeProgramInvariantPartial<T>(in[i][j], secondsf[i], true));
+      q[i][j] = pb.next(makeProgramInvariantPartial<T>(in[in.size() - 1 - i][j], secondsf[secondsf.size() - 1 - i], true));
     }
+/*
+    idFeeder<T> pb(secondsf.size());
+    idFeeder<T> pf(secondsf.size());
+    for(int i = 0; i < in.size(); i ++)
+      pf.next(makeProgramInvariantPartial<T>(in[i][j], secondsf[i], true));
+    assert(pf.full);
+    for(int k = 0; k < pf.res.size(); k ++)
+      pb.next(pf.res[pf.res.size() - 1 - k]);
+    assert(pb.full);
+    for(int i = 0; i < p0; i ++) {
+      q[i][j] = P01<T, false>(4, i + 1).next(pb.res, skip);
+      p[i][j] = P01<T, false>(4, i + 1).next(pf.res, skip);
+    }
+*/
   }
-  P210<T> pf(Pprogression<T, PBond<T, P012L<T> > >(PBond<T, P012L<T> >(
-      P012L<T>(4), 124), progression),
-    PAthenB<T, Pprogression<T, PBond<T, P01<T> > >,
-      Pprogression<T, PBond<T, P0maxRank<T> > > >(
-      Pprogression<T, PBond<T, P01<T> > >(PBond<T, P01<T> >(P01<T>(4), 28),
-        progression),
-      Pprogression<T, PBond<T, P0maxRank<T> > >(PBond<T, P0maxRank<T> >(
-        P0maxRank<T>(), 3), progression) ) );
+  PAthenB<T, Pprogression<T, PBond<T, P01<T> > >, PBond<T, P0maxRank<T> > > pf(
+    Pprogression<T, PBond<T, P01<T> > >(PBond<T, P01<T> >(P01<T>(4), 28),
+      progression), PBond<T, P0maxRank<T> >(P0maxRank<T>(), 3) );
   auto pb(pf);
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
-  for(int i = 0; i < in.size(); i ++) {
-    pt.first  = pf.next(seconds[i]);
-    pt.second = pb.next(seconds[in.size() - i - 1]);
+  for(int i = 0; i < p.size(); i ++) {
+    qsec[i] = pb.next(secondsb[i]);
+    psec[i] = pf.next(secondsf[i]);
   }
-  return make_pair(move(p), move(pt));
+  return make_pair(make_pair(move(p), move(psec)),
+                   make_pair(move(q), move(qsec)));
 }
 
-template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > predVec(const vector<vector<SimpleVector<T> > >& in0, const int& cj = 11) {
-  assert(in0[0].size() && in0[0][0].size() && 0 < cj);
+template <typename T> pair<vector<vector<SimpleVector<T> > >, vector<vector<SimpleVector<T> > > > predVec(const vector<vector<SimpleVector<T> > >& in0, const int& skip = 1, const int& cj = 11) {
+  assert(0 < skip && in0.size() / skip && in0[0].size() && in0[0][0].size() && 0 < cj);
   if(19683 * cj < in0[0].size() * in0[0][0].size())
     cerr << "predVec : elements larger than 19683, exceeds function entropy." << endl;
   vector<SimpleVector<T> > in;
@@ -4266,40 +4287,43 @@ template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > 
       in[i].setVector(j * in0[i][0].size(), in0[i][j]);
     }
   }
-  const auto p(predv<T>(in));
-  pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > res;
-  if(! p.first.first.size()) return res;
+  const auto p(predv<T>(in, skip));
+  pair<vector<vector<SimpleVector<T> > >, vector<vector<SimpleVector<T> > > > res;
+  res.first.resize( p.first.first.size() );
+  res.second.resize(p.second.first.size());
   vector<T> rres;
   rres.resize(cj);
-  res.first.resize(in0[0].size());
-  res.second.resize(in0[0].size());
-  for(int j = 0; j < res.first.size(); j ++) {
-    res.first[j].resize(in0[0][0].size());
-    res.second[j].resize(in0[0][0].size());
-    for(int k = 0; k < in0[0][0].size(); k ++) {
-      for(int m = 0; m < rres.size(); m ++)
-        rres[m] = p.first.first[j * in0[0][0].size() +
-          getImgPt<int>(k + m - rres.size() / 2, in0[0][0].size())];
-      sort(rres.begin(), rres.end());
-      res.first[j][k] =
-        revertProgramInvariant<T>(make_pair(
-          rres[rres.size() / 2], p.second.first), true);
+  for(int i = 0; i < p.first.first.size(); i ++) {
+    res.first[i].resize(in0[0].size());
+    res.second[i].resize(in0[0].size());
+    for(int j = 0; j < res.first[i].size(); j ++) {
+      res.first[i][j].resize(in0[0][0].size());
+      res.second[i][j].resize(in0[0][0].size());
+      for(int k = 0; k < in0[0][0].size(); k ++) {
+        for(int m = 0; m < rres.size(); m ++)
+          rres[m] = p.first.first[i][j * in0[0][0].size() +
+            getImgPt<int>(k + m - rres.size() / 2, in0[0][0].size())];
+        sort(rres.begin(), rres.end());
+        res.first[i][j][k] =
+          revertProgramInvariant<T>(make_pair(
+            rres[rres.size() / 2], p.first.second[i]), true);
+      }
+      for(int k = 0; k < in0[0][0].size(); k ++) {
+        for(int m = 0; m < rres.size(); m ++)
+          rres[m] = p.second.first[i][j * in0[0][0].size() +
+            getImgPt<int>(k + m - rres.size() / 2, in0[0][0].size())];
+        sort(rres.begin(), rres.end());
+        res.second[i][j][k] =
+          revertProgramInvariant<T>(make_pair(
+            rres[rres.size() / 2], p.second.second[i]), true);
+      }
     }
-    for(int k = 0; k < in0[0][0].size(); k ++) {
-      for(int m = 0; m < rres.size(); m ++)
-        rres[m] = p.first.second[j * in0[0][0].size() +
-          getImgPt<int>(k + m - rres.size() / 2, in0[0][0].size())];
-      sort(rres.begin(), rres.end());
-      res.second[j][k] =
-        revertProgramInvariant<T>(make_pair(
-          rres[rres.size() / 2], p.second.second), true);
-    }
-  } 
+  }
   return res;
 }
 
-template <typename T> pair<vector<SimpleMatrix<T> >, vector<SimpleMatrix<T> > > predMat(const vector<vector<SimpleMatrix<T> > >& in0, const int& cj = 11) {
-  assert(in0[0].size() && in0[0][0].rows() && in0[0][0].cols());
+template <typename T> pair<vector<vector<SimpleMatrix<T> > >, vector<vector<SimpleMatrix<T> > > > predMat(const vector<vector<SimpleMatrix<T> > >& in0, const int& skip = 1, const int& cj = 11) {
+  assert(0 < skip && in0.size() / skip && in0[0].size() && in0[0][0].rows() && in0[0][0].cols());
   const auto ccj(int(ceil(sqrt(T(cj)))) | int(1));
   assert(0 < ccj);
   if(ccj * ccj * 19683 < in0[0].size() * in0[0][0].rows() * in0[0][0].cols())
@@ -4317,50 +4341,53 @@ template <typename T> pair<vector<SimpleMatrix<T> >, vector<SimpleMatrix<T> > > 
                         k * in0[i][0].cols(), in0[i][j].row(k));
     }
   }
-  const auto p(predv<T>(in));
-  pair<vector<SimpleMatrix<T> >, vector<SimpleMatrix<T> > > res;
-  if(! p.first.first.size()) return res;
+  const auto p(predv<T>(in, skip));
+  pair<vector<vector<SimpleMatrix<T> > >, vector<vector<SimpleMatrix<T> > > > res;
+  res.first.resize( p.first.first.size() );
+  res.second.resize(p.second.first.size());
   vector<T> rres;
   rres.resize(ccj * ccj);
-  res.first.resize(in0[0].size());
-  res.second.resize(in0[0].size());
-  for(int j = 0; j < res.first.size(); j ++) {
-    res.first[j].resize(in0[0][0].rows(), in0[0][0].cols());
-    res.second[j].resize(in0[0][0].rows(), in0[0][0].cols());
-    for(int k = 0; k < in0[0][0].rows(); k ++)
-      for(int m = 0; m < in0[0][0].cols(); m ++) {
-        for(int kk = 0; kk < ccj; kk ++)
-          for(int mm = 0; mm < ccj; mm ++)
-              rres[kk * ccj + mm] = p.first.first[
+  for(int i = 0; i < p.first.first.size(); i ++) {
+    res.first[i].resize(in0[i].size());
+    res.second[i].resize(in0[i].size());
+    for(int j = 0; j < res.first[i].size(); j ++) {
+      res.first[i][j].resize(in0[0][0].rows(), in0[0][0].cols());
+      res.second[i][j].resize(in0[0][0].rows(), in0[0][0].cols());
+      for(int k = 0; k < in0[0][0].rows(); k ++)
+        for(int m = 0; m < in0[0][0].cols(); m ++) {
+          for(int kk = 0; kk < ccj; kk ++)
+            for(int mm = 0; mm < ccj; mm ++)
+              rres[kk * ccj + mm] = p.first.first[i][
                 j * in0[0][0].rows() * in0[0][0].cols() +
                 getImgPt<int>(k + kk - ccj / 2, in0[0][0].rows()) *
                   in0[0][0].cols() +
                 getImgPt<int>(m + mm - ccj / 2, in0[0][0].cols())];
-        sort(rres.begin(), rres.end());
-        res.first[j](k, m) =
-          revertProgramInvariant<T>(make_pair(
-            rres[rres.size() / 2], p.second.first), true);
-      }
-    for(int k = 0; k < in0[0][0].rows(); k ++)
-      for(int m = 0; m < in0[0][0].cols(); m ++) {
-        for(int kk = 0; kk < ccj; kk ++)
-          for(int mm = 0; mm < ccj; mm ++)
-            rres[kk * ccj + mm] = p.first.second[
-              j * in0[0][0].rows() * in0[0][0].cols() +
-              getImgPt<int>(k + kk - ccj / 2, in0[0][0].rows()) *
-                in0[0][0].cols() +
-              getImgPt<int>(m + mm - ccj / 2, in0[0][0].cols())];
-        sort(rres.begin(), rres.end());
-        res.second[j](k, m) =
-          revertProgramInvariant<T>(make_pair(
-            rres[rres.size() / 2], p.second.second), true);
-      }
+          sort(rres.begin(), rres.end());
+          res.first[i][j](k, m) =
+            revertProgramInvariant<T>(make_pair(
+              rres[rres.size() / 2], p.first.second[i]), true);
+        }
+      for(int k = 0; k < in0[0][0].rows(); k ++)
+        for(int m = 0; m < in0[0][0].cols(); m ++) {
+          for(int kk = 0; kk < ccj; kk ++)
+            for(int mm = 0; mm < ccj; mm ++)
+              rres[kk * ccj + mm] = p.second.first[i][
+                j * in0[0][0].rows() * in0[0][0].cols() +
+                getImgPt<int>(k + kk - ccj / 2, in0[0][0].rows()) *
+                  in0[0][0].cols() +
+                getImgPt<int>(m + mm - ccj / 2, in0[0][0].cols())];
+          sort(rres.begin(), rres.end());
+          res.second[i][j](k, m) =
+            revertProgramInvariant<T>(make_pair(
+              rres[rres.size() / 2], p.second.second[i]), true);
+        }
+    }
   }
   return res;
 }
 
-template <typename T> pair<SimpleSparseTensor<T>, SimpleSparseTensor<T> > predSTen(const vector<SimpleSparseTensor<T> >& in0, const vector<int>& idx) {
-  assert(idx.size());
+template <typename T> pair<vector<SimpleSparseTensor<T> >, vector<SimpleSparseTensor<T> > > predSTen(const vector<SimpleSparseTensor<T> >& in0, const vector<int>& idx, const int& skip = 1) {
+  assert(idx.size() && 0 < skip && in0.size() / skip);
   // N.B. we don't do input scaling.
   // N.B. the data we target is especially string stream corpus.
   //      they are incontinuous one, so complementing with continuous stream
@@ -4392,25 +4419,27 @@ template <typename T> pair<SimpleSparseTensor<T>, SimpleSparseTensor<T> > predST
             in[i][cnt ++] =
               (in0[i][idx[j]][idx[k]][idx[m]] + T(int(1))) / T(int(2));
   }
-  auto p(predv<T>(in));
+  auto p(predv<T>(in, skip));
   in.resize(0);
-  pair<SimpleSparseTensor<T>, SimpleSparseTensor<T> > res;
-  if(! p.first.first.size()) return res;
-  for(int j = 0, cnt = 0; j < idx.size(); j ++)
-    for(int k = 0; k < idx.size(); k ++)
-      for(int m = 0; m < idx.size(); m ++) {
-        if(binary_search(absent.begin(), absent.end(),
-             make_pair(j, make_pair(k, m))))
-          continue;
-        res.first[idx[j]][idx[k]][idx[m]] =
-          revertProgramInvariant<T>(make_pair(
-            p.first.first[cnt] * T(int(2)) - T(int(1)),
-              p.second.first), true);
-        res.second[idx[j]][idx[k]][idx[m]] =
-          revertProgramInvariant<T>(make_pair(
-            p.first.second[cnt ++] * T(int(2)) - T(int(1)),
-              p.second.second), true);
-      }
+  pair<vector<SimpleSparseTensor<T> >, vector<SimpleSparseTensor<T> > > res;
+  res.first.resize( p.first.first.size() );
+  res.second.resize(p.second.first.size());
+  for(int i = 0; i < p.first.first.size(); i ++)
+    for(int j = 0, cnt = 0; j < idx.size(); j ++)
+      for(int k = 0; k < idx.size(); k ++)
+        for(int m = 0; m < idx.size(); m ++) {
+          if(binary_search(absent.begin(), absent.end(),
+               make_pair(j, make_pair(k, m))))
+            continue;
+          res.first[i][idx[j]][idx[k]][idx[m]] =
+            revertProgramInvariant<T>(make_pair(
+              p.first.first[i][cnt] * T(int(2)) - T(int(1)),
+                p.first.second[i]), true);
+          res.second[i][idx[j]][idx[k]][idx[m]] =
+            revertProgramInvariant<T>(make_pair(
+              p.second.first[i][cnt ++] * T(int(2)) - T(int(1)),
+                p.second.second[i]), true);
+        }
   return res;
 }
 
