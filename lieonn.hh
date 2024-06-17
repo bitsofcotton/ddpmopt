@@ -4282,8 +4282,9 @@ template <typename T> pair<pair<vector<SimpleVector<T> >, SimpleVector<T> >, pai
   for(int i = 0; i < init.size(); i ++)
     init[i] = T(int(i));
   cerr << "P0 initialize: " << P0maxRank0<T>(1).next(init) << endl;
-  // N.B. we need rich internal status.
-  const auto p0(int(in.size()) / (5 * 5 - 4 + 2));
+  // N.B. we need p10 because of short internal states length.
+  //      in fact, we need p210 for them.
+  const auto p0(int(in.size()) / (5 * 5 - 4 + 2 + 2));
   vector<SimpleVector<T> > p;
   if(p0 < 2) return make_pair(make_pair(p, SimpleVector<T>()),
     make_pair(p, SimpleVector<T>()));
@@ -4348,12 +4349,13 @@ template <typename T> pair<pair<vector<SimpleVector<T> >, SimpleVector<T> >, pai
   }
   const auto epb1(pb.q.getAll());
   const auto epf1(pf.q.getAll());
+  assert(p0 == epb.size() && p0 == epb1.size());
   for(int i = 0; i < epb.size(); i ++) {
     epb[i] *= epb1[i];
     epf[i] *= epf1[i];
   }
-  return make_pair(make_pair(move(p), epf.subVector(0, p0)),
-                   make_pair(move(q), epb.subVector(0, p0)) );
+  return make_pair(make_pair(move(p), move(epf)),
+                   make_pair(move(q), move(epb)) );
 }
 
 template <typename T> pair<vector<vector<SimpleVector<T> > >, vector<vector<SimpleVector<T> > > > predVec(const vector<vector<SimpleVector<T> > >& in0, const int& cj = 11) {

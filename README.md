@@ -15,18 +15,13 @@ Using this with mimalloc or so can increase memory usage with multi thread on so
 # Tips around c++ compilers
 Some of the lieonn.hh operator \>\> class doesn't work as expected, might be compilers' bug.
 
-# Tips around input sizes on this
-We get function entropy depend result with [pq]redg, this is because we treat each pixel as equally treated ones without any of the internal states.
-So we should adjust in/output by them. eg. goki_check_cc:clean\[lcC\] before and after doing them.
-Around better size of this, please refer bitsofcotton/p8 for extends.
-
-However, cleanl input and despeckle or negate output also could work.
-
 # P01, P0 hypothesis
-The P01, P0 predictor makes the hypothesis the structure converges in some of the internal states meaning.
+The P01 then P0 predictor makes the hypothesis the structure converges in some of the internal states meaning.
 
 In the case there's brand new observation on the states on each pixel/image context should have the next image condition, we fail with this predictor.
 This is specification of this implementation, so is intended to be so.
+
+Even then, we can get the better results by using ongoing deep learning things found somewhere on the internet. This is because they results the text-based structure valid images.
 
 # Usage:
     ./predg(32|64)?(mp)? <in0.ppm> ...
@@ -124,4 +119,5 @@ This is specification of this implementation, so is intended to be so.
 2024/06/15 conclude 2024/06/11-2024/06/14 conditions readme.
 2024/06/16 revert P210 to original, then, P01, P0 pred temporarily, update readme.
 2024/06/17 merge p2 logic with p10 class.
+2024/06/18 code cleaning, update readme.
 

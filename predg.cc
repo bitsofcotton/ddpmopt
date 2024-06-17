@@ -81,14 +81,8 @@ int main(int argc, const char* argv[]) {
         bm[j / IMG_BITS] += p.first[i][j]  / num_t(int(1) << (j % IMG_BITS));
         fm[j / IMG_BITS] += p.second[i][j] / num_t(int(1) << (j % IMG_BITS));
       }
-    if(pw.first.size() <= i) {
-      pw.first.emplace_back(bm);
-      pw.second.emplace_back(fm);
-    } else
-      for(int j = 0; j < pw.first[i].size(); j ++) {
-        pw.first[i][j]  += bm[j];
-        pw.second[i][j] += fm[j];
-      }
+    pw.first.emplace_back(move(bm));
+    pw.second.emplace_back(move(fm));
   }
   for(int i = 0; i < pw.first.size(); i ++) {
     if(! savep2or3<num_t>((std::string("predg-forward-") + std::to_string(i) + std::string(".ppm")).c_str(), pw.first[i].size() == 3 ? normalize<num_t>(xyz2rgb<num_t>(pw.first[i])) : pw.first[i], color) )
