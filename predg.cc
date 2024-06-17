@@ -66,34 +66,29 @@ int main(int argc, const char* argv[]) {
     for(int j = 0; j < in[i].size(); j ++)
       in[i][j] /= num_t(int(2));
   pair<vector<vector<SimpleMatrix<num_t> > >, vector<vector<SimpleMatrix<num_t> > > > pw;
-  int color(65535);
-  for(int i0 = 1; 0 < i0; i0 ++) {
-    const int  color0(IMG_BITS * in.size() / i0);
-          auto p(predMat<num_t>(in, i0));
-    if(! p.first.size() || ! p.second.size()) break;
-    for(int i = 0; i < p.first.size(); i ++) {
-      color = min(color, max(int(1), min(int(65535), color0 - i)));
-      vector<SimpleMatrix<num_t> > bm;
-      vector<SimpleMatrix<num_t> > fm;
-      bm.resize(p.first[i].size() / IMG_BITS);
-      fm.resize(p.second[i].size() / IMG_BITS);
-      for(int j = 0; j < p.first[i].size(); j ++)
-        if(! (j % IMG_BITS)) {
-          bm[j / IMG_BITS] = p.first[i][j];
-          fm[j / IMG_BITS] = p.second[i][j];
-        } else {
-          bm[j / IMG_BITS] += p.first[i][j]  / num_t(int(1) << (j % IMG_BITS));
-          fm[j / IMG_BITS] += p.second[i][j] / num_t(int(1) << (j % IMG_BITS));
-        }
-      if(pw.first.size() <= i) {
-        pw.first.emplace_back(bm);
-        pw.second.emplace_back(fm);
-      } else
-        for(int j = 0; j < pw.first[i].size(); j ++) {
-          pw.first[i][j]  += bm[j];
-          pw.second[i][j] += fm[j];
-        }
-    }
+  const int  color(IMG_BITS * in.size());
+        auto p(predMat<num_t>(in));
+  for(int i = 0; i < p.first.size(); i ++) {
+    vector<SimpleMatrix<num_t> > bm;
+    vector<SimpleMatrix<num_t> > fm;
+    bm.resize(p.first[i].size() / IMG_BITS);
+    fm.resize(p.second[i].size() / IMG_BITS);
+    for(int j = 0; j < p.first[i].size(); j ++)
+      if(! (j % IMG_BITS)) {
+        bm[j / IMG_BITS] = p.first[i][j];
+        fm[j / IMG_BITS] = p.second[i][j];
+      } else {
+        bm[j / IMG_BITS] += p.first[i][j]  / num_t(int(1) << (j % IMG_BITS));
+        fm[j / IMG_BITS] += p.second[i][j] / num_t(int(1) << (j % IMG_BITS));
+      }
+    if(pw.first.size() <= i) {
+      pw.first.emplace_back(bm);
+      pw.second.emplace_back(fm);
+    } else
+      for(int j = 0; j < pw.first[i].size(); j ++) {
+        pw.first[i][j]  += bm[j];
+        pw.second[i][j] += fm[j];
+      }
   }
   for(int i = 0; i < pw.first.size(); i ++) {
     if(! savep2or3<num_t>((std::string("predg-forward-") + std::to_string(i) + std::string(".ppm")).c_str(), pw.first[i].size() == 3 ? normalize<num_t>(xyz2rgb<num_t>(pw.first[i])) : pw.first[i], color) )
