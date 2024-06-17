@@ -3583,10 +3583,10 @@ public:
       eh0.resize(loop, T(int(0)));
       eh.resize(loop, eh0);
     }
+    addp = 0 < loop0;
     bb.reserve(loop);
     for(int i = 0; i < loop; i ++)
-      bb.emplace_back(idFeeder<T>(loop0 < 0 ? 1 : i + 1));
-    addp = 0 < loop0;
+      bb.emplace_back(idFeeder<T>(addp ? i + 1 : 1));
     t ^= t;
   }
   inline ~Pprogression() { ; }
@@ -3622,7 +3622,7 @@ public:
   }
   inline SimpleVector<T> getAll() {
     static const T zero(int(0));
-    if(addp) return SimpleVector<T>();
+    if(! addp) return SimpleVector<T>();
     const auto& hh(h.res);
     SimpleVector<T> res(bb.size());
     for(int i = 0; i < res.size(); i ++) {
@@ -4309,9 +4309,9 @@ template <typename T> pair<pair<vector<SimpleVector<T> >, SimpleVector<T> >, pai
   for(int j = 0; j < in[0].size(); j ++) {
     cerr << j << " / " << in[0].size() << endl;
     P10<T> pf(Pprogression<T, PBond<T, P01<T> > >(PBond<T, P01<T> >(
-        P01<T>(4), 5 * 5 - 4 + 2), - p0),
+        P01<T>(4), 5 * 5 - 4 + 2), p0),
       Pprogression<T, PBond<T, P0maxRank<T> > >(PBond<T, P0maxRank<T> >(
-        P0maxRank<T>(), 3), - p0) );
+        P0maxRank<T>(), 3), p0) );
     auto pb(pf);
     SimpleVector<T> epb0;
     SimpleVector<T> epf0;
@@ -4332,9 +4332,9 @@ template <typename T> pair<pair<vector<SimpleVector<T> >, SimpleVector<T> >, pai
     }
   }
   P10<T> pf(Pprogression<T, PBond<T, P01<T> > >(PBond<T, P01<T> >(
-      P01<T>(4), 5 * 5 - 4 + 2), - p0),
+      P01<T>(4), 5 * 5 - 4 + 2), p0),
     Pprogression<T, PBond<T, P0maxRank<T> > >(PBond<T, P0maxRank<T> >(
-      P0maxRank<T>(), 3), - p0) );
+      P0maxRank<T>(), 3), p0) );
   auto pb(pf);
   SimpleVector<T> epb;
   SimpleVector<T> epf;

@@ -1,0 +1,12 @@
+f(x,y):=x+%i*y;
+diff(realpart(f(x,y)),x)-diff(imagpart(f(x,y)),y);
+trigsimp(ev(%,expand,diff,x=%pi/4,y=%pi/4));
+diff(realpart(f(x,y)),y)+diff(imagpart(f(x,y)),x);
+trigsimp(ev(%,expand,diff,x=%pi/4,y=%pi/4));
+/*f(x,y,eps):=(1+%i)*((x-cos(%pi/4+eps)+%i*(y-sin(%pi/4+eps)))*(x-cos(%pi/4-eps)+%i*(y-sin(%pi/4-eps))))*realpart(F(x,y));*/
+f(x,y,eps):=(1+%i)*((x-cos(%pi/4+eps)+%i*(y-sin(%pi/4+eps)))*(x-cos(%pi/4-eps)+%i*(y-sin(%pi/4-eps))));
+diff(realpart(f(x,y,eps)),x)-diff(imagpart(f(x,y,eps)),y);
+trigsimp(ev(%,expand,diff,x=%pi/4,y=%pi/4));
+diff(realpart(f(x,y,eps)),y)+diff(imagpart(f(x,y,eps)),x);
+trigsimp(ev(%,expand,diff,x=%pi/4,y=%pi/4));
+
