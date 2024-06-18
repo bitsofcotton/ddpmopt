@@ -78,8 +78,8 @@ int main(int argc, const char* argv[]) {
         }
     for(int m = 0; m < wwork.size(); m ++)
       for(int j = 0; j < p.first.size(); j ++) {
-        wwork[m].row(j) /= num_t((int(1) << IMG_BITS) - int(1));
-        wwork[m].row(wwork[m].rows() - j - 1) /= num_t((int(1) << IMG_BITS) - int(1));
+        wwork[m].row(j) *= num_t(int(1) << IMG_BITS) / num_t((int(1) << IMG_BITS) - int(1));
+        wwork[m].row(wwork[m].rows() - j - 1) *= num_t(int(1) << IMG_BITS) / num_t((int(1) << IMG_BITS) - int(1));
       }
     if(! savep2or3<num_t>(argv[i0], wwork.size() == 3 ? normalize<num_t>(xyz2rgb<num_t>(wwork)) : wwork, color) )
         cerr << "failed to save." << endl;

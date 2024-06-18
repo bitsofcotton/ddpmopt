@@ -120,4 +120,5 @@ Even then, we can get the better results by using ongoing deep learning things f
 2024/06/16 revert P210 to original, then, P01, P0 pred temporarily, update readme.
 2024/06/17 merge p2 logic with p10 class.
 2024/06/18 code cleaning, update readme.
+2024/06/18 speed remedy.
 
