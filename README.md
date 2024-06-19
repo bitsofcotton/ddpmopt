@@ -23,6 +23,9 @@ This is specification of this implementation, so is intended to be so.
 
 Even then, we can get the better results by using ongoing deep learning things found somewhere on the internet. This is because they results the text-based structure valid images.
 
+# Our computer might being jammed
+However below, our computer might being jammed condition, so the test on real images can be always jammed on our computer. (Also yours if the repository and inet and some backdoor is being controlled.)
+
 # Usage:
     ./predg(32|64)?(mp)? <in0.ppm> ...
     ./qredg(32|64)?(mp)? <in0out.ppm> ...

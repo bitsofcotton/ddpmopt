@@ -57,6 +57,8 @@ int main(int argc, const char* argv[]) {
         for(int k = 0; k < work2[ii].cols(); k ++) {
           work2[ii](j, k) = work[ii / IMG_BITS](j, k) * num_t(ii % IMG_BITS ? int(1) << (ii % IMG_BITS) : int(1));
           work2[ii](j, k) -= floor(work2[ii](j, k));
+          work2[ii](j, k) *= num_t(int(2));
+          work2[ii](j, k) -= floor(work2[ii](j, k));
         }
     }
     in.emplace_back(work2);

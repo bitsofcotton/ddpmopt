@@ -49,6 +49,8 @@ int main(int argc, const char* argv[]) {
         for(int k = 0; k < pwork[i][j].size(); k ++) {
           pwork[i][j][k] *= num_t(j % IMG_BITS ? int(1) << (j % IMG_BITS) : int(1));
           pwork[i][j][k] -= floor(pwork[i][j][k]);
+          pwork[i][j][k] *= num_t(int(2));
+          pwork[i][j][k] -= floor(pwork[i][j][k]);
         }
       }
     const auto p(predVec<num_t>(pwork));
