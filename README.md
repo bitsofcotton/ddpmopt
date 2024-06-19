@@ -16,7 +16,7 @@ Using this with mimalloc or so can increase memory usage with multi thread on so
 Some of the lieonn.hh operator \>\> class doesn't work as expected, might be compilers' bug.
 
 # P01, P0 hypothesis
-The P01 then P0 predictor makes the hypothesis the structure converges in some of the internal states meaning.
+The P01 then P0 predictor makes the hypothesis the structure converges in some of the internal states meaning. To get some of the hypothesis, we need large number of the input pixel contexts.
 
 In the case there's brand new observation on the states on each pixel/image context should have the next image condition, we fail with this predictor.
 This is specification of this implementation, so is intended to be so.
@@ -121,4 +121,5 @@ Even then, we can get the better results by using ongoing deep learning things f
 2024/06/17 merge p2 logic with p10 class.
 2024/06/18 code cleaning, update readme.
 2024/06/18 speed remedy.
+2024/06/19 add restriction for getting average on PprogressionOnce010n.
 
