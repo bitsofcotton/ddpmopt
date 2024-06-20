@@ -45,9 +45,8 @@ int main(int argc, const char* argv[]) {
       work = rgb2xyz<num_t>(work);
     in.emplace_back(move(work));
   }
-  in = normalize<num_t>(in);
   const int  color(in.size());
-        auto p(predMat<num_t>(in));
+        auto p(predMat<num_t>(normalize<num_t>(in)));
   for(int i = 0; i < p.first.size(); i ++) {
     if(! savep2or3<num_t>((std::string("predg-forward-") + std::to_string(i) + std::string(".ppm")).c_str(), p.first[i].size() == 3 ? normalize<num_t>(xyz2rgb<num_t>(p.first[i])) : p.first[i], color) )
       cerr << "failed to save." << endl;
