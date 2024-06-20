@@ -15,16 +15,13 @@ Using this with mimalloc or so can increase memory usage with multi thread on so
 # Tips around c++ compilers
 Some of the lieonn.hh operator \>\> class doesn't work as expected, might be compilers' bug.
 
-# P01, P0 hypothesis
-The P01 then P0 predictor makes the hypothesis the structure converges in some of the internal states meaning. To get some of the hypothesis, we need large number of the input pixel contexts.
+# PprogressionOnce hypothesis
+The PprogressionOnce predictor makes the hypothesis the structure converges in some of the internal states meaning.
 
 In the case there's brand new observation on the states on each pixel/image context should have the next image condition, we fail with this predictor.
-This is specification of this implementation, so is intended to be so.
+This is the specification of this implementation, so is intended to be so.
 
-Even then, we can get the better results by using ongoing deep learning things found somewhere on the internet. This is because they results the text-based structure valid images.
-
-# Our computer might being jammed
-However below, our computer might being jammed condition, so the test on real images can be always jammed on our computer. (Also yours if the repository and inet and some backdoor is being controlled.)
+Also, we drop some-step slip prediction they causes advantages in some conditions. They're the condition when we met some of the structure period on each input stream.
 
 # Usage:
     ./predg(32|64)?(mp)? <in0.ppm> ...
@@ -125,4 +122,5 @@ However below, our computer might being jammed condition, so the test on real im
 2024/06/18 code cleaning, update readme.
 2024/06/18 speed remedy.
 2024/06/19 add restriction for getting average on PprogressionOnce010n.
+2024/06/20 our machine is infected, take a most logically valid in our program predictions.
 
