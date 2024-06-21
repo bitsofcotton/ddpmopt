@@ -15,13 +15,13 @@ Using this with mimalloc or so can increase memory usage with multi thread on so
 # Tips around c++ compilers
 Some of the lieonn.hh operator \>\> class doesn't work as expected, might be compilers' bug.
 
-# PprogressionOnce hypothesis
-The PprogressionOnce predictor makes the hypothesis the structure converges in some of the internal states meaning.
+# P01 hypothesis
+The P01 predictor makes the hypothesis the structure is continus enough in first order.
 
 In the case there's brand new observation on the states on each pixel/image context should have the next image condition, we fail with this predictor.
 This is the specification of this implementation, so is intended to be so.
 
-Also, we drop some-step slip prediction they causes advantages in some conditions. They're the condition when we met some of the structure period on each input stream.
+Getting better result for us humans, we should use ongoing text-based trained graphics deeplearning softwares found on somewhere on the Internet. This is because they returns text structure valid graphics. So our results aims to work with ddpm noised input without any of the tags returns better next image.
 
 # Usage:
     ./predg(32|64)?(mp)? <in0.ppm> ...
@@ -124,4 +124,5 @@ Also, we drop some-step slip prediction they causes advantages in some condition
 2024/06/19 add restriction for getting average on PprogressionOnce010n.
 2024/06/20 our machine is infected, take a most logically valid in our program predictions.
 2024/06/21 fix fatal error on PprogressionOnce::next, they doesn't use predictors.
+2024/06/21 revert and brush up, add fiocursed.cc series, brush readme.
 
