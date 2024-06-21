@@ -15,6 +15,13 @@ Using this with mimalloc or so can increase memory usage with multi thread on so
 # Tips around c++ compilers
 Some of the lieonn.hh operator \>\> class doesn't work as expected, might be compilers' bug.
 
+# Tips on function entropy
+We predict output with same function without internal states the function have.
+So there's some upper bound on the output stream bit number s.t. 19638 bits.
+Around this, please refer bitsofcotton/p8.
+
+So to fit this, we should need bitsofcotton/goki_check_cc:test.py:cleanLc? command input then cleanlc? command output.
+
 # P01 hypothesis
 The P01 predictor makes the hypothesis the structure is continus enough in first order.
 
