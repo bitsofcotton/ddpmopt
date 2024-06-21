@@ -123,4 +123,5 @@ Also, we drop some-step slip prediction they causes advantages in some condition
 2024/06/18 speed remedy.
 2024/06/19 add restriction for getting average on PprogressionOnce010n.
 2024/06/20 our machine is infected, take a most logically valid in our program predictions.
+2024/06/21 fix fatal error on PprogressionOnce::next, they doesn't use predictors.
 
