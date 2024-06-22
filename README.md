@@ -15,17 +15,10 @@ Using this with mimalloc or so can increase memory usage with multi thread on so
 # Tips around c++ compilers
 Some of the lieonn.hh operator \>\> class doesn't work as expected, might be compilers' bug.
 
-# Tips on function entropy
-We predict output with same function without internal states the function have.
-So there's some upper bound on the output stream bit number s.t. 19638 bits.
-Around this, please refer bitsofcotton/p8.
-
-So to fit this, we should need bitsofcotton/goki_check_cc:test.py:cleanLc? command input then cleanlc? command output.
-
-# P01 hypothesis
-The P01 predictor makes the hypothesis the structure is continus enough in first order.
-
-In the case there's brand new observation on the states on each pixel/image context should have the next image condition, we fail with this predictor.
+# Pprogression hypothesis
+The P01 predictor makes the hypothesis the structure converges in some set of the internal states meaning.
+So there's some of the chase internal states dimension vs. progression dimension on each pixel context.
+If we lose the chase, we fail with this hypothesis.
 This is the specification of this implementation, so is intended to be so.
 
 Getting better result for us humans, we should use ongoing text-based trained graphics deeplearning softwares found on somewhere on the Internet. This is because they returns text structure valid graphics. So our results aims to work with ddpm noised input without any of the tags returns better next image.
@@ -132,4 +125,6 @@ Getting better result for us humans, we should use ongoing text-based trained gr
 2024/06/20 our machine is infected, take a most logically valid in our program predictions.
 2024/06/21 fix fatal error on PprogressionOnce::next, they doesn't use predictors.
 2024/06/21 revert and brush up, add fiocursed.cc series, brush readme.
+2024/06/22 update readme, updates around pprogression causes only 1 step after/before prediction.
+2024/06/22 p01 fatal fix.
 
