@@ -16,7 +16,7 @@ Using this with mimalloc or so can increase memory usage with multi thread on so
 Some of the lieonn.hh operator \>\> class doesn't work as expected, might be compilers' bug.
 
 # Pprogression hypothesis
-The P01 predictor makes the hypothesis the structure converges in some set of the internal states meaning.
+The Pprogression predictor makes the hypothesis the structure converges in some set of the internal states meaning.
 So there's some of the chase internal states dimension vs. progression dimension on each pixel context.
 If we lose the chase, we fail with this hypothesis.
 This is the specification of this implementation, so is intended to be so.
@@ -127,4 +127,5 @@ Getting better result for us humans, we should use ongoing text-based trained gr
 2024/06/21 revert and brush up, add fiocursed.cc series, brush readme.
 2024/06/22 update readme, updates around pprogression causes only 1 step after/before prediction.
 2024/06/22 p01 fatal fix. make/revert program invariant change friendly to predictions.
+2024/06/23 large change around class instance initializer, also have progression short range fix.
 
