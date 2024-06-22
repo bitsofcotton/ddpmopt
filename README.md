@@ -126,5 +126,5 @@ Getting better result for us humans, we should use ongoing text-based trained gr
 2024/06/21 fix fatal error on PprogressionOnce::next, they doesn't use predictors.
 2024/06/21 revert and brush up, add fiocursed.cc series, brush readme.
 2024/06/22 update readme, updates around pprogression causes only 1 step after/before prediction.
-2024/06/22 p01 fatal fix.
+2024/06/22 p01 fatal fix. make/revert program invariant change friendly to predictions.
 
