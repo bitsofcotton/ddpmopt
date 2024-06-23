@@ -128,4 +128,5 @@ Getting better result for us humans, we should use ongoing text-based trained gr
 2024/06/22 update readme, updates around pprogression causes only 1 step after/before prediction.
 2024/06/22 p01 fatal fix. make/revert program invariant change friendly to predictions.
 2024/06/23 large change around class instance initializer, also have progression short range fix.
+2024/06/23 fatal fix around last update.
 
