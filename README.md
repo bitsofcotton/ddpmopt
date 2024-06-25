@@ -21,7 +21,13 @@ So there's some of the chase internal states dimension vs. progression dimension
 If we lose the chase, we fail with this hypothesis.
 This is the specification of this implementation, so is intended to be so.
 
-Getting better result for us humans, we should use ongoing text-based trained graphics deeplearning softwares found on somewhere on the Internet. This is because they returns text structure valid graphics. So our results aims to work with ddpm noised input without any of the tags returns better next image.
+# Unknown
+The sloppy predictor worked well before we apply some norm changes or not.
+So there might be jamming from some of the computer context, also this is reduced by Pprogression persistent predictor by using half of the internal states bit we can use to the predictors, however this can jammed out from some of the reason we had get.
+
+# The things we don't extend
+We can extend Pprogression predictor to multiple of the output is given.
+We don't implement them because we don't use them now.
 
 # Usage:
     ./predg(32|64)?(mp)? <in0.ppm> ...
@@ -130,4 +136,5 @@ Getting better result for us humans, we should use ongoing text-based trained gr
 2024/06/23 large change around class instance initializer, also have progression short range fix.
 2024/06/23 fatal fix around last update.
 2024/06/24 fatal fix around last update, rotate predMat sloppy case.
+2024/06/26 some of the assertion fix, update readme.
 
