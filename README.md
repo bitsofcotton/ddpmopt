@@ -2,8 +2,6 @@
 Apply some of the filter to input stream.
 We can use this for bitsofcotton/i2g filtered images.
 
-This should behaves deterministic ones, however, these are very sensitive on accuracy, so only lowest bit has a difference condition, we get whole image different condition.
-
 # Context
 There exists Denoising Diffusion Probabilistic Models (DDPM; Ho et al. 2020). So this is another try on them but different flavoured one, we only focus to apply each pixel context to color image into monochrome one, which have the structure completely depends on filters' multiple meaning or complexity.
 
@@ -16,18 +14,16 @@ Using this with mimalloc or so can increase memory usage with multi thread on so
 Some of the lieonn.hh operator \>\> class doesn't work as expected, might be compilers' bug.
 
 # Ppersistent hypothesis
-The Ppersistent predictor makes the hypothesis the structure converges in some set of the internal states meaning.
+The Ppersistent predictor makes the hypothesis the structure converges in some set of the internal states meaning. Also sloppy one is.
 So there's some of the chase internal states dimension vs. progression dimension on each pixel context.
-However, there's some limit of the internal states dimension on Riemann measurable meaning as given input number \* 2, so we use half of them, 1/4 of each pixels can be gained if there's no counter measure to the predictors.
+However, there's some limit of the internal states dimension on Riemann measurable meaning as given input number \* 2, so we use half of them, 1/4 of each pixels can be gained if there's no counter measure to the predictors. Also, there's some of the same codition on {x,y}-axis on the graphics on normal inputs.
 
-So, if there's some counter measures to the sloppy predictor on the data stream, we fail with this hypothesis. However, we make them smooth with half of the intenral states, the given input number vs. internal states dimension on counter measure to the sloppy predictor is the matter. However, we can increase no limit the counter measure part because there's some of the balancing method to break them.
+So, if there's some counter measures to the sloppy predictor on the data stream, we fail with this hypothesis. With persistent option, we make them smooth with half of the intenral states, the given input number vs. internal states dimension on counter measure to the sloppy predictor is the matter. N.B. The upper bound for counter measure is unlimited, so artificially created streams cannot be predicted by any of the single predictors.
 
-# Unknown
-The sloppy predictor worked well before we apply some norm changes or not.
-So there might be jamming from some of the computer context, also this is reduced by Pprogression persistent predictor by using half of the internal states bit we can use to the predictors, however this can jammed out from some of the reason we had get.
-
-# Might includes bugs
-The revertProgramInvariant part needs huge accuracy when we met large enough prediction result, so they might be bugs on certain accuracy.
+# Whole image hypothesis
+There's also whole image condition hypothesis on norm of each images to input predictors.
+We align with 0\<=x in R^n condition orthogonalize meaning, however, we don't do revertProgramInvariant after predictor is done.
+This is because periodical condition on predicted image isn't aligned enough and there's only one condition to depend with, this is dangerous for result without averaging some of the meanings.
 
 # The things we don't extend
 We can extend Pprogression predictor to multiple of the output is given.
@@ -142,4 +138,5 @@ We don't implement them because we don't use them now.
 2024/06/24 fatal fix around last update, rotate predMat sloppy case.
 2024/06/26 some of the assertion fix, update readme.
 2024/06/26 update readme, fix around Ppersistent buf.full condition.
+2024/06/27 fix predv last norm condition calculations. predMat bugs might be fixed.
 
