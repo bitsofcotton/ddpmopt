@@ -14,16 +14,14 @@ Using this with mimalloc or so can increase memory usage with multi thread on so
 Some of the lieonn.hh operator \>\> class doesn't work as expected, might be compilers' bug.
 
 # Ppersistent hypothesis
-The Ppersistent predictor makes the hypothesis the structure converges in some set of the internal states meaning. Also sloppy one is.
-So there's some of the chase internal states dimension vs. progression dimension on each pixel context.
-However, there's some limit of the internal states dimension on Riemann measurable meaning as given input number \* 2, so we use half of them, 1/4 of each pixels can be gained if there's no counter measure to the predictors. Also, there's some of the same codition on {x,y}-axis on the graphics on normal inputs.
+If there's some counter measures to the sloppy predictor on the data stream, we fail with this hypothesis. With persistent option, we make them smooth with half of the intenral states, the given input number vs. internal states dimension on counter measure to the sloppy predictor is the matter.
 
-So, if there's some counter measures to the sloppy predictor on the data stream, we fail with this hypothesis. With persistent option, we make them smooth with half of the intenral states, the given input number vs. internal states dimension on counter measure to the sloppy predictor is the matter. N.B. The upper bound for counter measure is unlimited, so artificially created streams cannot be predicted by any of the single predictors.
+N.B. The upper bound for counter measure to the predictors is unlimited, so artificially created streams cannot be predicted by any of the single predictors.
 
 # Whole image hypothesis
 There's also whole image condition hypothesis on norm of each images to input predictors.
 We align with 0\<=x in R^n condition orthogonalize meaning, however, we don't do revertProgramInvariant after predictor is done.
-This is because periodical condition on predicted image isn't aligned enough and there's only one condition to depend with, this is dangerous for result without averaging some of the meanings.
+This is because periodical condition on predicted image isn't aligned enough and there's only one condition to depend with, this is dangerous for results without averaging some of the meanings.
 
 # The things we don't extend
 We can extend Pprogression predictor to multiple of the output is given.

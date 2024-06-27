@@ -47,9 +47,9 @@ int main(int argc, const char* argv[]) {
   }
   const auto p(predMat<num_t, _PERSISTENT_>(normalize<num_t>(in)));
   for(int i = 0; i < p.first.size(); i ++) {
-    if(! savep2or3<num_t>((std::string("predg-f") + std::to_string(i) + std::string(".ppm")).c_str(), p.first[i].size() == 3 ? normalize<num_t>(xyz2rgb<num_t>(p.first[i])) : p.first[i], in.size()) )
+    if(! savep2or3<num_t>((std::string("predg-f") + std::to_string(i) + std::string(".ppm")).c_str(), normalize<num_t>(p.first[i].size() == 3 ? xyz2rgb<num_t>(p.first[i]) : p.first[i]), in.size()) )
       cerr << "failed to save." << endl;
-    if(! savep2or3<num_t>((std::string("predg-b") + std::to_string(i) + std::string(".ppm")).c_str(), p.second[i].size() == 3 ? normalize<num_t>(xyz2rgb<num_t>(p.second[i])) : p.second[i], in.size()) )
+    if(! savep2or3<num_t>((std::string("predg-b") + std::to_string(i) + std::string(".ppm")).c_str(), normalize<num_t>(p.second[i].size() == 3 ? xyz2rgb<num_t>(p.second[i]) : p.second[i]), in.size()) )
       cerr << "failed to save." << endl;
   }
   cerr << " Done" << endl;
