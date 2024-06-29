@@ -14,18 +14,15 @@ Using this with mimalloc or so can increase memory usage with multi thread on so
 Some of the lieonn.hh operator \>\> class doesn't work as expected, might be compilers' bug.
 
 # Ppersistent hypothesis
-If there's some counter measures to the sloppy predictor on the data stream, we fail with this hypothesis. With persistent option, we make them smooth with half of the intenral states, the given input number vs. internal states dimension on counter measure to the sloppy predictor is the matter.
+If there's some counter measures to the sloppy predictor on the data stream, we fail with this hypothesis. With persistent option, since we make them smooth with half of the intenral states, so the given input number vs. internal states dimension on counter measure to the sloppy predictor is the matter.
 
 N.B. The upper bound for counter measure to the predictors is unlimited, so artificially created streams cannot be predicted by any of the single predictors.
 
 # Whole image hypothesis
 There's also whole image condition hypothesis on norm of each images to input predictors.
 We align with 0\<=x in R^n condition orthogonalize meaning, however, we don't do revertProgramInvariant after predictor is done.
-This is because periodical condition on predicted image isn't aligned enough and there's only one condition to depend with, this is dangerous for results without averaging some of the meanings.
 
-# The things we don't extend
-We can extend Pprogression predictor to multiple of the output is given.
-We don't implement them because we don't use them now.
+This is because periodical condition on predicted image isn't aligned enough and there's only one condition to depend with, this is dangerous for results without averaging some of the meanings.
 
 # Usage:
     ./predg(32|64)?(mp)? <in0.ppm> ...
@@ -137,4 +134,5 @@ We don't implement them because we don't use them now.
 2024/06/26 some of the assertion fix, update readme.
 2024/06/26 update readme, fix around Ppersistent buf.full condition.
 2024/06/27 fix predv last norm condition calculations. predMat bugs might be fixed.
+2024/06/29 update readme and comments.
 
