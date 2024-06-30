@@ -35,21 +35,21 @@ ddpmopt32mp:
 ddpmopt64mp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=64 -o ddpmopt64mp ddpmopt.cc
 predg:
-	${CXX} ${CXXFLAGS} -static -D_PERSISTENT_=true -o predg predg.cc
+	${CXX} ${CXXFLAGS} -static -o predg predg.cc
 predg32:
-	${CXX} ${CXXFLAGS} -static -D_PERSISTENT_=true -D_FLOAT_BITS_=32 -o predg32 predg.cc
+	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=32 -o predg32 predg.cc
 predgmp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_PERSISTENT_=true -o predgmp predg.cc
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -o predgmp predg.cc
 predg32mp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_PERSISTENT_=true -D_FLOAT_BITS_=32 -o predg32mp predg.cc
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=32 -o predg32mp predg.cc
 qredg:
-	${CXX} ${CXXFLAGS} -static -D_PERSISTENT_=true -o qredg qredg.cc
+	${CXX} ${CXXFLAGS} -static -o qredg qredg.cc
 qredg32:
-	${CXX} ${CXXFLAGS} -static -D_PERSISTENT_=true -D_FLOAT_BITS_=32 -o qredg32 qredg.cc
+	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=32 -o qredg32 qredg.cc
 qredgmp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_PERSISTENT_=true -o qredgmp qredg.cc
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -o qredgmp qredg.cc
 qredg32mp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_PERSISTENT_=true -D_FLOAT_BITS_=32 -o qredg32mp qredg.cc
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=32 -o qredg32mp qredg.cc
 tcont:
 	${CXX} ${CXXFLAGS} -static -o tcont tcont.cc
 tcont32:

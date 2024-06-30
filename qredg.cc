@@ -50,7 +50,7 @@ int main(int argc, const char* argv[]) {
       head += pwork[0][i].dot(pwork[0][i]);
       tail += pwork[pwork.size() - 1][i].dot(pwork[pwork.size() - 1][i]);
     }
-    auto p(predVec<num_t, _PERSISTENT_>(pwork));
+    auto p(predVec<num_t>(pwork));
     vector<SimpleMatrix<num_t> > wwork(work.size(),
       SimpleMatrix<num_t>(work[0].rows() + p.first.size() + p.second.size(),
         work[0].cols()).O());

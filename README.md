@@ -13,16 +13,15 @@ Using this with mimalloc or so can increase memory usage with multi thread on so
 # Tips around c++ compilers
 Some of the lieonn.hh operator \>\> class doesn't work as expected, might be compilers' bug.
 
-# Ppersistent hypothesis
-If there's some counter measures to the sloppy predictor on the data stream, we fail with this hypothesis. With persistent option, since we make them smooth with half of the intenral states, so the given input number vs. internal states dimension on counter measure to the sloppy predictor is the matter.
+# Tips on prediction
+The artificially created image stream which have counter measure to the predictions cannot be predicted by the single predictors. Also, there's similar streams we want to predict.
 
-N.B. The upper bound for counter measure to the predictors is unlimited, so artificially created streams cannot be predicted by any of the single predictors.
+There's a chase the internal states dimension the stream have vs. given input image stream number. So to predict, we should feed much of image number which wins to the internal states dimensions. This can be done by shrinking input image sizes.
 
-# Whole image hypothesis
-There's also whole image condition hypothesis on norm of each images to input predictors.
-We align with 0\<=x in R^n condition orthogonalize meaning, however, we don't do revertProgramInvariant after predictor is done.
+Also, our predictor cannot predict some of the strong habit on the number of the input index. So we make the hypothesis there's no timing-related internal states on them.
 
-This is because periodical condition on predicted image isn't aligned enough and there's only one condition to depend with, this is dangerous for results without averaging some of the meanings.
+# Tips on recursive
+We can use bitsofcotton/goki_check_cc:test.py:\[pq\]redg command to recursive predictions.
 
 # Usage:
     ./predg(32|64)?(mp)? <in0.ppm> ...
@@ -135,4 +134,5 @@ This is because periodical condition on predicted image isn't aligned enough and
 2024/06/26 update readme, fix around Ppersistent buf.full condition.
 2024/06/27 fix predv last norm condition calculations. predMat bugs might be fixed.
 2024/06/29 update readme and comments.
+2024/06/30 re-insert periods with better stable method. update readme.
 
