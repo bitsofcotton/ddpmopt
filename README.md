@@ -16,7 +16,9 @@ Some of the lieonn.hh operator \>\> class doesn't work as expected, might be com
 # Tips on prediction
 The artificially created image stream which have counter measure to the predictions cannot be predicted by any of the single predictors. Also, there's similar streams we want to predict. The problem on pqredg is the predictor's object is connected what subject.
 
-There's the internal states dimension the stream have vs. given image input number chase. Our predictor uses max rank of the input states and structures, this is because the structure of max rank has information bit amount around pixels \* (4 \* (input number) / 2)^2 and our predictor uses same order information bit amount on prediction as a majority logic. However, we can shrink input images if we fail with the chase.
+There's the internal states dimension the stream have vs. given image input number chase. Our predictor uses max rank of the input states and structures, this is because the structure on each pixel context of max rank has information bit amount around pixels \* 4 \* ((input number) / 2)^2 and our predictor uses same order information bit amount on prediction as a majority logic. However, we can shrink input images if we fail with the chase.
+
+Either, there's no each pixel context nor non orthogonal context on each image/pixels. We don't expect such contexts to predict because of the computation scale we have is middle range single laptop PC in 2023. However, some references on the optics nor from bitsofcotton/goki_check_cc:bump command either discrete inputs on some continuous pictures tells us including such context improves the output in much amount on the quality.
 
 # Tips on recursive
 We can use bitsofcotton/goki_check_cc:test.py:\[pq\]redg command to recursive predictions.
