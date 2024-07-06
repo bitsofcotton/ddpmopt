@@ -14,11 +14,9 @@ Using this with mimalloc or so can increase memory usage with multi thread on so
 Some of the lieonn.hh operator \>\> class doesn't work as expected, might be compilers' bug.
 
 # Tips on prediction
-The artificially created image stream which have counter measure to the predictions cannot be predicted by the single predictors. Also, there's similar streams we want to predict.
+The artificially created image stream which have counter measure to the predictions cannot be predicted by any of the single predictors. Also, there's similar streams we want to predict. The problem on pqredg is the predictor's object is connected what subject.
 
-There's a chase the internal states dimension the stream have vs. given input image stream number. So to predict, we should feed much of image number which wins to the internal states dimensions. This can be done by shrinking input image sizes.
-
-Also, our predictor cannot predict some of the strong habit on the number of the input index. So we make the hypothesis there's no timing-related internal states on them.
+There's the internal states dimension the stream have vs. given image input number chase. Our predictor uses max rank of the input states and structures, this is because the structure of max rank has information bit amount around pixels \* (4 \* (input number) / 2)^2 and our predictor uses same order information bit amount on prediction as a majority logic. However, we can shrink input images if we fail with the chase.
 
 # Tips on recursive
 We can use bitsofcotton/goki_check_cc:test.py:\[pq\]redg command to recursive predictions.
@@ -26,7 +24,7 @@ We can use bitsofcotton/goki_check_cc:test.py:\[pq\]redg command to recursive pr
 # Usage:
     ./predg(32|64)?(mp)? <in0.ppm> ...
     ./qredg(32|64)?(mp)? <in0out.ppm> ...
-    ./ddpmopt(32|64)?(mp)? + <in0in.ppm> <in0out.pgm> ... > cache.txt
+    ./ddpmopt(32|64)?(mp)? + <in0out.pgm> <in0in.ppm> ... > cache.txt
     ./ddpmopt(32|64)?(mp)? - <in0.ppm> ... < cache.txt
     ./tcont [xyit] <in0.ppm> ...
     cp `./tcont i <in0.ppm> ... | sort | head -n ... | tr '\n' ' '` outdir
@@ -135,4 +133,5 @@ We can use bitsofcotton/goki_check_cc:test.py:\[pq\]redg command to recursive pr
 2024/06/27 fix predv last norm condition calculations. predMat bugs might be fixed.
 2024/06/29 update readme and comments.
 2024/06/30 re-insert periods with better stable method. update readme.
+2024/07/06 Ppersistent now use maximum length for predictions. Also readme update.
 

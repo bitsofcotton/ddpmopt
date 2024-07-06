@@ -101,14 +101,15 @@ int main(int argc, const char* argv[]) {
     for(int i = 2; i < argc; i ++) {
       vector<SimpleMatrix<num_t> > work;
       if(! loadp2or3<num_t>(work, argv[i])) continue;
-      if(i & 1) {
+      if(! (i & 1)) {
+        assert(work.size() == 1);
         out[i / 2 - 1] = move(work[0]);
-        assert(out[i / 2 - 1].rows() == in[i / 2 - 1][0].rows() &&
-               out[i / 2 - 1].cols() == in[i / 2 - 1][0].cols());
         cnt += out[i / 2 - 1].rows() * out[i / 2 - 1].cols();
       } else {
         in[i / 2 - 1] = move(work);
         assert(in[i / 2 - 1].size() == 3);
+        assert(out[i / 2 - 1].rows() == in[i / 2 - 1][0].rows() &&
+               out[i / 2 - 1].cols() == in[i / 2 - 1][0].cols());
       }
     }
     assert(in.size() == out.size());
