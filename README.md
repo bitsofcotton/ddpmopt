@@ -14,7 +14,7 @@ Using this with mimalloc or so can increase memory usage with multi thread on so
 Some of the lieonn.hh operator \>\> class doesn't work as expected, might be compilers' bug.
 
 # Tips on prediction
-The artificially created image stream which have counter measure to the predictions cannot be predicted by any of the single predictors. Also, there's similar streams we want to predict. The problem on pqredg is the predictor's object is connected what subject.
+The artificially created image stream which have counter measure to the predictions cannot be predicted by any of the single predictors. Also, there's similar streams we want to predict. The problem on pqredg is what subject the predictor's object is connected.
 
 There's the internal states dimension the stream have vs. given image input number chase. Our predictor uses max rank of the input states and structures, this is because the structure on each pixel context of max rank has information bit amount around pixels \* 4 \* ((input number) / 2)^2 and our predictor uses same order information bit amount on prediction as a majority logic. However, we can shrink input images if we fail with the chase.
 

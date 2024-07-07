@@ -3675,7 +3675,7 @@ public:
         buf.next(progression(in, j, i));
       assert(buf.full);
       // N.B. only one step after.
-      res += P(1).next(buf.res);
+      res += P().next(buf.res);
       for(int j = i - 1; 0 <= j; j --)
         res += progression(in, in.size() - 1, j);
     }
