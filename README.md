@@ -136,4 +136,5 @@ We can use bitsofcotton/goki_check_cc:test.py:\[pq\]redg command to recursive pr
 2024/06/29 update readme and comments.
 2024/06/30 re-insert periods with better stable method. update readme.
 2024/07/06 Ppersistent now use maximum length for predictions. Also readme update.
+2024/07/07 code cleaning. merge Pprogression improve but no affects.
 
