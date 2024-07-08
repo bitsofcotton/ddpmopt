@@ -14,7 +14,7 @@ Using this with mimalloc or so can increase memory usage with multi thread on so
 Some of the lieonn.hh operator \>\> class doesn't work as expected, might be compilers' bug.
 
 # Tips on prediction
-We suppose the input image series as some of the functions to effect to paired images also the pixel contexts, in their meaning, our predictor uses 2nd order maximum of the input states on each pixel context. However, we can shrink input images if we fail with the internal states vs. the image states dimension chase.
+We suppose the input image series as some of the functions to effect to paired images also the pixel contexts, in their meaning, our predictor uses 2nd order maximum of the input states on each pixel context, this is beyond the complexity of each pixel context in surface copying structure. However, we can shrink input images if we fail with the internal states vs. the image states dimension chase. In the information amount estimation, around ((input number) / 2)^2 is extra from each pixel context, if whole image context is cut from each pixel context in such amount, (input number) / 2 is around the better result from any of the shallow (surface) copying input. But in deeply, we need #{x}^#{x}, so it's not enough if they referes outside the normal description space.
 
 Either, there's non each pixel context nor non orthogonal context on each image/pixels. We don't expect such contexts to predict because of the speed reason, however, some references around the optics nor from bitsofcotton/goki_check_cc:bump command either discrete inputs on some continuous pictures tells us including such context improves the output in much amount on the quality.
 
