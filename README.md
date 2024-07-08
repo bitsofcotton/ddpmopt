@@ -14,11 +14,9 @@ Using this with mimalloc or so can increase memory usage with multi thread on so
 Some of the lieonn.hh operator \>\> class doesn't work as expected, might be compilers' bug.
 
 # Tips on prediction
-The artificially created image stream which have counter measure to the predictions cannot be predicted by any of the single predictors. Also, there's similar streams we want to predict. The problem on pqredg is what subject the predictor's object is connected.
+We suppose the input image series as some of the functions to effect to paired images also the pixel contexts, in their meaning, our predictor uses 2nd order maximum of the input states on each pixel context. However, we can shrink input images if we fail with the internal states vs. the image states dimension chase.
 
-There's the internal states dimension the stream have vs. given image input number chase. Our predictor uses max rank of the input states and structures, this is because the structure on each pixel context of max rank has information bit amount around pixels \* 4 \* ((input number) / 2)^2 and our predictor uses same order information bit amount on prediction as a majority logic. However, we can shrink input images if we fail with the chase.
-
-Either, there's no each pixel context nor non orthogonal context on each image/pixels. We don't expect such contexts to predict because of the computation scale we have is middle range single laptop PC in 2023. However, some references on the optics nor from bitsofcotton/goki_check_cc:bump command either discrete inputs on some continuous pictures tells us including such context improves the output in much amount on the quality.
+Either, there's non each pixel context nor non orthogonal context on each image/pixels. We don't expect such contexts to predict because of the speed reason, however, some references around the optics nor from bitsofcotton/goki_check_cc:bump command either discrete inputs on some continuous pictures tells us including such context improves the output in much amount on the quality.
 
 # Tips on recursive
 We can use bitsofcotton/goki_check_cc:test.py:\[pq\]redg command to recursive predictions.
@@ -137,4 +135,5 @@ We can use bitsofcotton/goki_check_cc:test.py:\[pq\]redg command to recursive pr
 2024/06/30 re-insert periods with better stable method. update readme.
 2024/07/06 Ppersistent now use maximum length for predictions. Also readme update.
 2024/07/07 code cleaning. merge Pprogression improve but no affects.
+2024/07/08 internal state range strategy change, use all of the input to reduce. update readme.
 
