@@ -136,4 +136,5 @@ We can use bitsofcotton/goki_check_cc:test.py:\[pq\]redg command to recursive pr
 2024/07/06 Ppersistent now use maximum length for predictions. Also readme update.
 2024/07/07 code cleaning. merge Pprogression improve but no affects.
 2024/07/08 internal state range strategy change, use all of the input to reduce. update readme.
+2024/07/09 revert bitwise prediction causes whole image invariant works same as theoretical ones, however, each pixel context isn't enough on prediction but is enough on whole image condition information amount as better weighted.
 
