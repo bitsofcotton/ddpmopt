@@ -59,14 +59,13 @@ int main(int argc, const char* argv[]) {
           work2[ii](j, k) -= floor(work2[ii](j, k));
           work2[ii](j, k) *= num_t(int(2));
           work2[ii](j, k) -= floor(work2[ii](j, k));
+          work2[ii](j, k) += num_t(int(1));
+          work2[ii](j, k) /= num_t(int(2));
         }
     }
     in.emplace_back(move(work2));
   }
   in = normalize<num_t>(in);
-  for(int i = 0; i < in.size(); i ++)
-    for(int j = 0; j < in[i].size(); j ++)
-      in[i][j] /= num_t(int(2));
   const auto p(predMat<num_t>(in));
   pair<vector<SimpleMatrix<num_t> >, vector<SimpleMatrix<num_t> > > pw;
   pw.first.resize( p.first.size()  / IMG_BITS);

@@ -51,6 +51,8 @@ int main(int argc, const char* argv[]) {
           pwork[i][j][k] -= floor(pwork[i][j][k]);
           pwork[i][j][k] *= num_t(int(2));
           pwork[i][j][k] -= floor(pwork[i][j][k]);
+          pwork[i][j][k] += num_t(int(1));
+          pwork[i][j][k] /= num_t(int(2));
         }
       }
     auto p(predVec<num_t>(pwork));
