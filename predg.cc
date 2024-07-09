@@ -65,7 +65,6 @@ int main(int argc, const char* argv[]) {
     }
     in.emplace_back(move(work2));
   }
-  in = normalize<num_t>(in);
   const auto p(predMat<num_t>(in));
   pair<vector<SimpleMatrix<num_t> >, vector<SimpleMatrix<num_t> > > pw;
   pw.first.resize( p.first.size()  / IMG_BITS);
