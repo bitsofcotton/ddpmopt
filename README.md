@@ -14,9 +14,9 @@ Using this with mimalloc or so can increase memory usage with multi thread on so
 Some of the lieonn.hh operator \>\> class doesn't work as expected, might be compilers' bug.
 
 # Tips on prediction
-We suppose the input image series as some of the functions to effect to paired images also the pixel contexts, in their meaning, our predictor uses 2nd order maximum of the input states on each pixel context with the enough information amount of whole image context, this is beyond the complexity of these context in optimized copying structure. But not in deep structure they excluded by optimization.
+We suppose the input image series as some of the functions to effect to or data to be effected by paired images also the pixel contexts, in their meaning, our predictor uses 2nd order maximum of the input states on each pixel context with the enough information amount of whole image context, this is beyond the complexity of these context in optimized copying structure. But not in deep structure they excluded by optimization.
 
-However, we can shrink input images if we fail with the internal states vs. the image states dimension chase. Shrinking image after the prediction also works well if non each pixel context nor non orthogonal context worse affected series, with goki_check_cc:test.py:integ command or only blurring image, they can be improved.
+However, we can shrink input images if we fail with the internal states vs. the image states dimension chase however we use maximum of given inputs in the context. Shrinking image after the prediction also works well if non each pixel context nor non orthogonal context worse affected series, with goki_check_cc:test.py:integ command or only blurring image, they can be improved.
 
 # Tips on recursive
 We can use bitsofcotton/goki_check_cc:test.py:\[pq\]redg command to recursive predictions.
