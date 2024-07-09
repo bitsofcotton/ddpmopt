@@ -75,13 +75,18 @@ int main(int argc, const char* argv[]) {
     for(int j = 0; j < wwork.size(); j ++)
       for(int k = 1; k < wwork[j].rows() - 1; k ++)
         norm2 += wwork[j].row(k).dot(wwork[j].row(k));
-    norm2 = norm2 / num_t(wwork.size() * (wwork[0].rows() - 2));
+    norm2 = norm2 / num_t(wwork[0].rows() - 2);
+    num_t norm2_0(int(0));
+    num_t norm2_m1(int(0));
     for(int j = 0; j < wwork.size(); j ++) {
-      wwork[j].row(0) *= sqrt(norm2 / wwork[j].row(0).dot(wwork[j].row(0))) *
-        num_t(int(3)) / num_t(int(2));
+      norm2_0  += wwork[j].row(0).dot(wwork[j].row(0));
+      norm2_m1 += wwork[j].row(wwork[j].rows() - 1).dot(
+        wwork[j].row(wwork[j].rows() - 1) );
+    }
+    for(int j = 0; j < wwork.size(); j ++) {
+      wwork[j].row(0) *= sqrt(norm2 / norm2_0) * num_t(int(3)) / num_t(int(2));
       wwork[j].row(wwork[j].rows() - 1) *=
-        sqrt(norm2 / wwork[j].row(wwork[j].rows() - 1).dot(
-          wwork[j].row(wwork[j].rows() - 1) ) ) * num_t(int(3)) / num_t(int(2));
+        sqrt(norm2 / norm2_m1) * num_t(int(3)) / num_t(int(2));
     }
     if(! savep2or3<num_t>(argv[i0], normalize<num_t>(wwork.size() == 3 ?
       xyz2rgb<num_t>(wwork) : wwork), work[0].rows() * IMG_BITS) )
