@@ -50,9 +50,9 @@ int main(int argc, const char* argv[]) {
           pwork[i][j][k] *= num_t(j % IMG_BITS ? int(1) << (j % IMG_BITS) : int(1));
           pwork[i][j][k] -= floor(pwork[i][j][k]);
           pwork[i][j][k] *= num_t(int(2));
-          pwork[i][j][k] -= floor(pwork[i][j][k]);
           pwork[i][j][k] += num_t(int(1));
-          pwork[i][j][k] /= num_t(int(2));
+          // N.B. CPU float glitch, instead of 2, we use 3.
+          pwork[i][j][k] /= num_t(int(3));
         }
       }
     auto p(predVec<num_t>(pwork));
@@ -77,10 +77,11 @@ int main(int argc, const char* argv[]) {
         norm2 += wwork[j].row(k).dot(wwork[j].row(k));
     norm2 = norm2 / num_t(wwork.size() * (wwork[0].rows() - 2));
     for(int j = 0; j < wwork.size(); j ++) {
-      wwork[j].row(0) *= sqrt(norm2 / wwork[j].row(0).dot(wwork[j].row(0)));
+      wwork[j].row(0) *= sqrt(norm2 / wwork[j].row(0).dot(wwork[j].row(0))) *
+        num_t(int(3)) / num_t(int(2));
       wwork[j].row(wwork[j].rows() - 1) *=
         sqrt(norm2 / wwork[j].row(wwork[j].rows() - 1).dot(
-          wwork[j].row(wwork[j].rows() - 1) ) );
+          wwork[j].row(wwork[j].rows() - 1) ) ) * num_t(int(3)) / num_t(int(2));
     }
     if(! savep2or3<num_t>(argv[i0], normalize<num_t>(wwork.size() == 3 ?
       xyz2rgb<num_t>(wwork) : wwork), work[0].rows() * IMG_BITS) )

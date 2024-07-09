@@ -58,9 +58,9 @@ int main(int argc, const char* argv[]) {
           work2[ii](j, k) = work[ii / IMG_BITS](j, k) * num_t(ii % IMG_BITS ? int(1) << (ii % IMG_BITS) : int(1));
           work2[ii](j, k) -= floor(work2[ii](j, k));
           work2[ii](j, k) *= num_t(int(2));
-          work2[ii](j, k) -= floor(work2[ii](j, k));
           work2[ii](j, k) += num_t(int(1));
-          work2[ii](j, k) /= num_t(int(2));
+          // N.B. CPU float glitch, instead of 2, we use 3.
+          work2[ii](j, k) /= num_t(int(3));
         }
     }
     in.emplace_back(move(work2));
