@@ -28,8 +28,6 @@ using std::binary_search;
 using std::make_pair;
 using std::istringstream;
 
-#define IMG_BITS 8
-
 #undef int
 int main(int argc, const char* argv[]) {
 #define int int64_t
@@ -39,38 +37,23 @@ int main(int argc, const char* argv[]) {
   for(int i0 = 1; i0 < argc; i0 ++) {
     vector<SimpleMatrix<num_t> > work;
     if(! loadp2or3<num_t>(work, argv[i0])) continue;
-    if(work.size() == 3)
-      work = normalize<num_t>(rgb2xyz<num_t>(work));
+    work = normalize<num_t>(work.size() == 3 ? rgb2xyz<num_t>(work) : work);
     vector<vector<SimpleVector<num_t> > > pwork;
     pwork.resize(work[0].rows());
-    for(int i = 0; i < pwork.size(); i ++)
-      for(int j = 0; j < work.size() * IMG_BITS; j ++) {
-        pwork[i].emplace_back(work[j / IMG_BITS].row(i));
-        for(int k = 0; k < pwork[i][j].size(); k ++) {
-          pwork[i][j][k] *= num_t(j % IMG_BITS ? int(1) << (j % IMG_BITS) : int(1));
-          pwork[i][j][k] -= floor(pwork[i][j][k]);
-          pwork[i][j][k] *= num_t(int(2));
-          pwork[i][j][k] += num_t(int(1));
-          // N.B. CPU float glitch, instead of 2, we use 3.
-          pwork[i][j][k] /= num_t(int(3));
-        }
-      }
+    for(int i = 0; i < pwork.size(); i ++) {
+      pwork[i].reserve(work.size());
+      for(int j = 0; j < work.size(); j ++)
+        pwork[i].emplace_back(work[j].row(i));
+    }
     auto p(predVec<num_t>(pwork));
     vector<SimpleMatrix<num_t> > wwork(work.size(),
       SimpleMatrix<num_t>(work[0].rows() + 2, work[0].cols()).O());
     for(int j = 0; j < work.size(); j ++)
       wwork[j].setMatrix(1, 0, work[j]);
-    for(int j = 0; j < p.first.size(); j ++)
-      if(! (j % IMG_BITS)) {
-        wwork[j / IMG_BITS].row(0) = move(p.second[j]);
-        wwork[j / IMG_BITS].row(wwork[j / IMG_BITS].rows() - 1) =
-          move(p.first[j]);
-      } else {
-        wwork[j / IMG_BITS].row(0) +=
-          p.second[j] / num_t(int(1) << (j % IMG_BITS));
-        wwork[j / IMG_BITS].row(wwork[j / IMG_BITS].rows() - 1) +=
-          p.first[ j] / num_t(int(1) << (j % IMG_BITS));
-      }
+    for(int j = 0; j < p.first.size(); j ++) {
+      wwork[j].row(0) = move(p.second[j]);
+      wwork[j].row(wwork[j].rows() - 1) = move(p.first[j]);
+    }
     num_t norm2(int(0));
     for(int j = 0; j < wwork.size(); j ++)
       for(int k = 1; k < wwork[j].rows() - 1; k ++)
@@ -89,7 +72,7 @@ int main(int argc, const char* argv[]) {
         sqrt(norm2 / norm2_m1) * num_t(int(3)) / num_t(int(2));
     }
     if(! savep2or3<num_t>(argv[i0], normalize<num_t>(wwork.size() == 3 ?
-      xyz2rgb<num_t>(wwork) : wwork), work[0].rows() * IMG_BITS) )
+      xyz2rgb<num_t>(wwork) : wwork), work[0].rows()) )
       cerr << "failed to save." << endl;
   }
   cerr << " Done" << endl;
