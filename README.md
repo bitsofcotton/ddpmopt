@@ -18,6 +18,8 @@ If we use pqredg with goki_check_cc:test.py:bit command, we suppose the input im
 
 However, we can shrink input images if we fail with the internal states vs. the image states dimension chase however we use maximum of given inputs in the context. Shrinking image after the prediction also works well if non each pixel context nor non orthogonal context worse affected series, with goki_check_cc:test.py:integ command or only blurring image, they can be improved.
 
+Sometimes predg results red out image and it's completely binary scaled even with goki check 's bit operated images. This might be from some of the infection because we cannot get completely binary scaled image in even such cases. However, my machine's base binaries are shown to be integrated with base binaries' check tools even we pursue latest releases on time with signature with first CD-set public key. So we should implement pqredg on some another VMs to double check this if we cannot run away from this base binary.
+
 # Tips on recursive
 We can use bitsofcotton/goki_check_cc:test.py:\[pq\]redg command to recursive predictions.
 
@@ -141,4 +143,5 @@ We might leave this repository with this update, however, if there's some sort o
 2024/07/08 internal state range strategy change, use all of the input to reduce. update readme.
 2024/07/09 revert bitwise prediction causes whole image invariant works same as theoretical ones, however, each pixel context isn't enough on prediction but is enough on whole image condition information amount as better weighted. update readme.
 2024/07/10 revert [pq]redg.cc as no each bit condition, instead of this, use goki_check_cc:test.py:bit command.
+2024/07/20 update readme, might our system is infected.
 
