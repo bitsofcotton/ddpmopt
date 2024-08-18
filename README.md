@@ -16,9 +16,11 @@ Some of the lieonn.hh operator \>\> class doesn't work as expected, might be com
 # Tips on prediction
 If we use pqredg with goki_check_cc:test.py:bit command, we suppose the input image series as some of the functions to effect to or data to be effected by paired images also the pixel contexts.
 
-The plain \[pq\]redg predictor uses first order shallow copying structures but it's saturated by in/output, 3 predictor uses 2nd order enough bits for predictions, 6 predictor is enough for multiple layer algebraic copying structure, 9 predictor is enough for algorithm decomposition including inverse of them, so in the worst case, 9 predictor handles the prediction with simple enough P01 predictor copying structure with the decomposition, however, in the flat algorithm meaning, it's equivalent to plain or 3 predictors.
+The plain \[pq\]redg predictor uses first order shallow copying structures but it's saturated by in/output, 3 predictor uses 2nd order enough bits for predictions, 6 predictor is enough for multiple layer algebraic copying structure, 9 predictor is enough for algorithm decomposition including inverse of them, so in the worst case, 9 predictor handles the prediction with simple but shall not be enough complexity on information amount P01 predictor copying structure with the decomposition, however, in the flat algorithm meaning, it's equivalent to plain or 3 predictors.
 
-However, we can shrink input images if we fail with the internal states vs. the image states dimension chase however we use maximum of given inputs in the context. Shrinking image after the prediction also works well if non each pixel context nor non orthogonal context worse affected series, with goki_check_cc:test.py:collect command or only blurring image, they can be improved.
+However, we can shrink input images if we fail with the internal states vs. the image states dimension chase however we use maximum of given inputs in the context.
+
+Around monochrome vector images, we can use goki_check_cc:collect command for them to make some of the continuity on image set however this method isn't effective if the original monochrome image has some of the graduation on the each vector graphics.
 
 # Tips on recursive
 We can use bitsofcotton/goki_check_cc:test.py:\[pq\]redg command to recursive predictions.

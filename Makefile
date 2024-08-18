@@ -15,12 +15,12 @@ CXXFLAGS+=	-std=c++11
 LDFLAGS+=	-lc++ -L/usr/local/lib
 #LDFLAGS+=	-lestdc++ -L/usr/local/lib
 
-CLEANFILES= *.o ddpmopt ddpmopt32 predg predg32 predg3 predg3-32 predg6 predg6-32 predg9 predg9-32 qredg qredg32 qredg3 qredg3-32 qredg6 qredg6-32 qredg9 qredg9-32 ddpmoptmp ddpmopt32mp predgmp predg32mp predg3mp predg3-32mp predg6mp predg6-32mp predg9mp predg9-32mp qredgmp qredg32mp qredg3mp qredg3-32mp qredg6mp qredg6-32mp qredg9mp qredg9-32mp tcont tcont32
+CLEANFILES= *.o ddpmopt ddpmopt32 predg predg32 predg3 predg3-32 qredg qredg32 qredg3 qredg3-32 ddpmoptmp ddpmopt32mp predgmp predg32mp predg3mp predg3-32mp qredgmp qredg32mp qredg3mp qredg3-32mp tcont tcont32
 
 clean:
 	@rm -rf ${CLEANFILES}
 
-all:	ddpmopt ddpmopt32 predg predg32 predg3 predg3-32 predg6 predg6-32 predg9 predg9-32 qredg qredg32 qredg3 qredg3-32 qredg6 qredg6-32 qredg9 qredg9-32 ddpmoptmp ddpmopt32mp predgmp predg32mp predg3mp predg3-32mp predg6mp predg6-32mp predg9mp predg9-32mp qredgmp qredg32mp qredg3mp qredg3-32mp qredg6mp qredg6-32mp qredg9mp qredg9-32mp tcont tcont32
+all:	ddpmopt ddpmopt32 predg predg32 predg3 predg3-32 qredg qredg32 qredg3 qredg3-32 ddpmoptmp ddpmopt32mp predgmp predg32mp predg3mp predg3-32mp qredgmp qredg32mp qredg3mp qredg3-32mp tcont tcont32
 
 ddpmopt:
 	${CXX} ${CXXFLAGS} -static -o ddpmopt ddpmopt.cc
