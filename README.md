@@ -14,18 +14,18 @@ Using this with mimalloc or so can increase memory usage with multi thread on so
 Some of the lieonn.hh operator \>\> class doesn't work as expected, might be compilers' bug.
 
 # Tips on prediction
-If we use pqredg with goki_check_cc:test.py:bit command, we suppose the input image series as some of the functions to effect to or data to be effected by paired images also the pixel contexts, in their meaning, our predictor uses 2nd order maximum of the input states on each pixel context with the enough information amount of whole image context, this is beyond the complexity of these context in optimized copying structure. But not in deep structure they excluded by optimization.
+If we use pqredg with goki_check_cc:test.py:bit command, we suppose the input image series as some of the functions to effect to or data to be effected by paired images also the pixel contexts.
 
-However, we can shrink input images if we fail with the internal states vs. the image states dimension chase however we use maximum of given inputs in the context. Shrinking image after the prediction also works well if non each pixel context nor non orthogonal context worse affected series, with goki_check_cc:test.py:integ command or only blurring image, they can be improved.
+The plain \[pq\]redg predictor uses first order shallow copying structures but it's saturated by in/output, 3 predictor uses 2nd order enough bits for predictions, 6 predictor is enough for multiple layer algebraic copying structure, 9 predictor is enough for algorithm decomposition including inverse of them, so in the worst case, 9 predictor handles the prediction with simple enough P01 predictor copying structure with the decomposition, however, in the flat algorithm meaning, it's equivalent to plain or 3 predictors.
 
-Sometimes predg results red out image and it's completely binary scaled even with goki check 's bit operated images. This might be from some of the infection because we cannot get completely binary scaled image in even such cases. However, my machine's base binaries are shown to be integrated with base binaries' check tools even we pursue latest releases on time with signature with first CD-set public key. So we should implement pqredg on some another VMs to double check this if we cannot run away from this base binary.
+However, we can shrink input images if we fail with the internal states vs. the image states dimension chase however we use maximum of given inputs in the context. Shrinking image after the prediction also works well if non each pixel context nor non orthogonal context worse affected series, with goki_check_cc:test.py:collect command or only blurring image, they can be improved.
 
 # Tips on recursive
 We can use bitsofcotton/goki_check_cc:test.py:\[pq\]redg command to recursive predictions.
 
 # Usage:
-    ./predg(32|64)?(mp)? <in0.ppm> ...
-    ./qredg(32|64)?(mp)? <in0out.ppm> ...
+    ./predg([369]-?)?(32|64)?(mp)? <in0.ppm> ...
+    ./qredg([369]-?)?(32|64)?(mp)? <in0out.ppm> ...
     ./ddpmopt(32|64)?(mp)? + <in0out.pgm> <in0in.ppm> ... > cache.txt
     ./ddpmopt(32|64)?(mp)? - <in0.ppm> ... < cache.txt
     ./tcont [xyit] <in0.ppm> ...
@@ -144,4 +144,5 @@ We might leave this repository with this update, however, if there's some sort o
 2024/07/09 revert bitwise prediction causes whole image invariant works same as theoretical ones, however, each pixel context isn't enough on prediction but is enough on whole image condition information amount as better weighted. update readme.
 2024/07/10 revert [pq]redg.cc as no each bit condition, instead of this, use goki_check_cc:test.py:bit command.
 2024/07/20 update readme, might our system is infected.
+2024/08/18 update -\[369\] predictors for recursive but equivalent.
 
