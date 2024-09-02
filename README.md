@@ -18,16 +18,16 @@ If we use pqredg with goki_check_cc:test.py:bit command, we suppose the input im
 
 The plain \[pq\]redg predictor uses first order shallow copying structures but it's saturated by in/output, 3 predictor uses 2nd order enough bits for predictions, 6 predictor is enough for multiple layer algebraic copying structure, 9 predictor is enough for algorithm decomposition including inverse of them, so in the worst case, 9 predictor handles the prediction with simple but shall not be enough complexity on information amount P01 predictor copying structure with the decomposition, however, in the flat algorithm meaning, it's equivalent to plain or 3 predictors.
 
-However, we can shrink input images if we fail with the internal states vs. the image states dimension chase however we use maximum of given inputs in the context.
+We need to use pqredg\[0-9\]+?p(mp)? to fight with internal states the image stream really have vs the image size or input number dimension chase. However we need to shrink input images to certain sizes depends on input number.
 
-Around monochrome vector images, we can use goki_check_cc:collect command for them to make some of the continuity on image set however this method isn't effective if the original monochrome image has some of the graduation on the each vector graphics.
+Sometimes goki_check_cc:collect operation improves output images, this is because we can get curvature of them as continuous part of the whole image context.
 
 # Tips on recursive
 We can use bitsofcotton/goki_check_cc:test.py:\[pq\]redg command to recursive predictions.
 
 # Usage:
-    ./predg([369]-?)?(32|64)?(mp)? <in0.ppm> ...
-    ./qredg([369]-?)?(32|64)?(mp)? <in0out.ppm> ...
+    ./predg([369]-?)?(32|64)?p?(mp)? <in0.ppm> ...
+    ./qredg([369]-?)?(32|64)?p?(mp)? <in0out.ppm> ...
     ./ddpmopt(32|64)?(mp)? + <in0out.pgm> <in0in.ppm> ... > cache.txt
     ./ddpmopt(32|64)?(mp)? - <in0.ppm> ... < cache.txt
     ./tcont [xyit] <in0.ppm> ...
@@ -147,4 +147,5 @@ We might leave this repository with this update, however, if there's some sort o
 2024/07/10 revert [pq]redg.cc as no each bit condition, instead of this, use goki_check_cc:test.py:bit command.
 2024/07/20 update readme, might our system is infected.
 2024/08/18 update -\[369\] predictors for recursive but equivalent.
+2024/09/03 update \[pq\]redg...p.. for auto tuned recursive but for tiny images.
 

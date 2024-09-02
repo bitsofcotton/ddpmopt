@@ -4425,6 +4425,13 @@ template <typename T> pair<SimpleVector<T>, SimpleVector<T> > predv(const vector
   const int unit(in.size() / 12);
 #elif _PREDV_ == 9
   const int unit(in.size() / 18);
+#elif _PREDV_ == -1
+  const int recursive0(max(int(0), int((in.size() - 3) / 10 / 2 - 1)) );
+  const int unit0(recursive0 ? in.size() / (recursive0 * 2) : in.size() / 2);
+  const int recursive(unit0 < 14 ? recursive0 - 1 : recursive0);
+  const int unit(recursive ? in.size() / (recursive * 2) : in.size() / 2);
+  if((int64_t(1) << (2 * (recursive + 1))) < in[0].size())
+    cerr << "predv: exceeds internal status assumption : " << (int64_t(1) << (2 * (recursive + 1))) << " total pixels." << endl;
 #else
 # error _PREDV_ has a invalid value
 #endif
@@ -4453,33 +4460,112 @@ template <typename T> pair<SimpleVector<T>, SimpleVector<T> > predv(const vector
 #elif _PREDV_ == 9
     p[j] = PP9<T>().next(buf.res, unit);
     q[j] = PP9<T>().next(buf.res.reverse(), unit);
+#elif _PREDV_ == -1
+    switch(recursive) {
+    case 0:
+      p[j] = PP0<T>().next(buf.res, unit);
+      q[j] = PP0<T>().next(buf.res.reverse(), unit);
+      break;
+    case 1:
+      p[j] = PdeltaOnce<T, P01<T, PP0<T>, true> >().next(buf.res, unit);
+      q[j] = PdeltaOnce<T, P01<T, PP0<T>, true> >().next(buf.res.reverse(), unit);
+      break;
+    case 2:
+      p[j] = PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP0<T>, true> >, true> >().next(buf.res, unit);
+      q[j] = PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP0<T>, true> >, true> >().next(buf.res.reverse(), unit);
+      break;
+    case 3:
+      p[j] = PP3<T>().next(buf.res, unit);
+      q[j] = PP3<T>().next(buf.res.reverse(), unit);
+      break;
+    case 4:
+      p[j] = PdeltaOnce<T, P01<T, PP3<T>, true> >().next(buf.res, unit);
+      q[j] = PdeltaOnce<T, P01<T, PP3<T>, true> >().next(buf.res.reverse(), unit);
+      break;
+    case 5:
+      p[j] = PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP3<T>, true> >, true> >().next(buf.res, unit);
+      q[j] = PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP3<T>, true> >, true> >().next(buf.res.reverse(), unit);
+      break;
+    case 6:
+      p[j] = PP6<T>().next(buf.res, unit);
+      q[j] = PP6<T>().next(buf.res.reverse(), unit);
+      break;
+    case 7:
+      p[j] = PdeltaOnce<T, P01<T, PP6<T>, true> >().next(buf.res, unit);
+      q[j] = PdeltaOnce<T, P01<T, PP6<T>, true> >().next(buf.res.reverse(), unit);
+      break;
+    case 8:
+      p[j] = PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP6<T>, true> >, true> >().next(buf.res, unit);
+      q[j] = PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP6<T>, true> >, true> >().next(buf.res.reverse(), unit);
+      break;
+    case 9:
+      p[j] = PP9<T>().next(buf.res, unit);
+      q[j] = PP9<T>().next(buf.res.reverse(), unit);
+      break;
+    case 10:
+      p[j] = PdeltaOnce<T, P01<T, PP9<T>, true> >().next(buf.res, unit);
+      q[j] = PdeltaOnce<T, P01<T, PP9<T>, true> >().next(buf.res.reverse(), unit);
+      break;
+    case 11:
+      p[j] = PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP9<T>, true> >, true> >().next(buf.res, unit);
+      q[j] = PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP9<T>, true> >, true> >().next(buf.res.reverse(), unit);
+      break;
+    default:
+      assert(0 && "We assume this is too large input number to calculate in moderate PC.");
+    }
 #endif
   }
   const auto nseconds(sqrt(seconds.dot(seconds)));
   return make_pair(revertProgramInvariant<T>(make_pair(
     makeProgramInvariant<T>(normalize<T>(p), - T(int(1)), true).first,
 #if !defined(_PREDV_)
-      PP0<T>().next(
+      PP0<T>().next(seconds / nseconds, unit) * nseconds), true),
 #elif _PREDV_ == 3
-      PP3<T>().next(
+      PP3<T>().next(seconds / nseconds, unit) * nseconds), true),
 #elif _PREDV_ == 6
-      PP6<T>().next(
+      PP6<T>().next(seconds / nseconds, unit) * nseconds), true),
 #elif _PREDV_ == 9
-      PP9<T>().next(
+      PP9<T>().next(seconds / nseconds, unit) * nseconds), true),
+#else
+      (recursive == 0 ? PP0<T>().next(seconds / nseconds, unit) :
+      (recursive == 1 ? PdeltaOnce<T, P01<T, PP0<T>, true> >().next(seconds / nseconds, unit) :
+      (recursive == 2 ? PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP0<T>, true> >, true> >().next(seconds / nseconds, unit) :
+      (recursive == 3 ? PP3<T>().next(seconds / nseconds, unit) :
+      (recursive == 4 ? PdeltaOnce<T, P01<T, PP3<T>, true> >().next(seconds / nseconds, unit) :
+      (recursive == 5 ? PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP3<T>, true> >, true> >().next(seconds / nseconds, unit) :
+      (recursive == 6 ? PP6<T>().next(seconds / nseconds, unit) :
+      (recursive == 7 ? PdeltaOnce<T, P01<T, PP6<T>, true> >().next(seconds / nseconds, unit) :
+      (recursive == 8 ? PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP6<T>, true> >, true> >().next(seconds / nseconds, unit) :
+      (recursive == 9 ? PP9<T>().next(seconds / nseconds, unit) :
+      (recursive == 10 ? PdeltaOnce<T, P01<T, PP9<T>, true> >().next(seconds / nseconds, unit) :
+        PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP9<T>, true> >, true> >().next(seconds / nseconds, unit)
+      ) ) ) ) ) ) ) ) ) ) ) * nseconds), true),
 #endif
-        seconds / nseconds, unit) * nseconds), true),
     revertProgramInvariant<T>(make_pair(
     makeProgramInvariant<T>(normalize<T>(q), - T(int(1)), true).first,
 #if !defined(_PREDV_)
-      PP0<T>().next(
+      PP0<T>().next(seconds.reverse() / nseconds, unit) * nseconds), true) );
 #elif _PREDV_ == 3
-      PP3<T>().next(
+      PP3<T>().next(seconds.reverse() / nseconds, unit) * nseconds), true) );
 #elif _PREDV_ == 6
-      PP6<T>().next(
+      PP6<T>().next(seconds.reverse() / nseconds, unit) * nseconds), true) );
 #elif _PREDV_ == 9
-      PP9<T>().next(
+      PP9<T>().next(seconds.reverse() / nseconds, unit) * nseconds), true) );
+#else
+      (recursive == 0 ? PP0<T>().next(seconds.reverse() / nseconds, unit) :
+      (recursive == 1 ? PdeltaOnce<T, P01<T, PP0<T>, true> >().next(seconds.reverse() / nseconds, unit) :
+      (recursive == 2 ? PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP0<T>, true> >, true> >().next(seconds.reverse() / nseconds, unit) :
+      (recursive == 3 ? PP3<T>().next(seconds.reverse() / nseconds, unit) :
+      (recursive == 4 ? PdeltaOnce<T, P01<T, PP3<T>, true> >().next(seconds.reverse() / nseconds, unit) :
+      (recursive == 5 ? PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP3<T>, true> >, true> >().next(seconds.reverse() / nseconds, unit) :
+      (recursive == 6 ? PP6<T>().next(seconds.reverse() / nseconds, unit) :
+      (recursive == 7 ? PdeltaOnce<T, P01<T, PP6<T>, true> >().next(seconds.reverse() / nseconds, unit) :
+      (recursive == 8 ? PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP6<T>, true> >, true> >().next(seconds.reverse() / nseconds, unit) :
+      (recursive == 9 ? PP9<T>().next(seconds.reverse() / nseconds, unit) :
+      (recursive == 10 ? PdeltaOnce<T, P01<T, PP9<T>, true> >().next(seconds.reverse() / nseconds, unit) :
+        PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP9<T>, true> >, true> >().next(seconds.reverse() / nseconds, unit)
+      ) ) ) ) ) ) ) ) ) ) ) * nseconds), true) );
 #endif
-        seconds.reverse() / nseconds, unit) * nseconds), true) );
 }
 
 template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > predVec(const vector<vector<SimpleVector<T> > >& in0) {
