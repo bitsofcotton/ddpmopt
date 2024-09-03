@@ -4426,12 +4426,18 @@ template <typename T> pair<SimpleVector<T>, SimpleVector<T> > predv(const vector
 #elif _PREDV_ == 9
   const int unit(in.size() / 18);
 #elif _PREDV_ == -1
-  int recursive0(max(int(0), int((in.size() - 3) / 8 / 2)) );
-  int unit0(in.size() / ((recursive0 + 1) * 2));
-  while(recursive0 && (unit0 = (in.size() - 3) / ((recursive0 + 1) * 2)) < 8)
-    recursive0 --;
+  int recursive0(0);
+  int unit0(in.size() / 2);
+  while((! recursive0 ||
+          ((unit0 = (in.size() - 3) / ((recursive0 + 1) * 2)) >= 8) ) &&
+        (int64_t(1) << (2 * (recursive0 + 1))) < in[0].size() )
+    recursive0 ++;
+  if(unit0 < 8) recursive0 --;
+  recursive0 = max(int(0), recursive0);
   const auto& recursive(recursive0);
-  const auto& unit(unit0);
+  const auto& unit(unit0 =
+    (recursive ? (in.size() - 3) / ((recursive + 1) * 2) :
+      (in.size() - 3) / 2) );
   cerr << "predv(_PREDV_==-1): up to " << (int64_t(1) << (2 * (recursive + 1))) << " pixels, " << unit << " units." << endl;
   assert(in[0].size() <= (int64_t(1) << (2 * (recursive + 1))) );
 #else
