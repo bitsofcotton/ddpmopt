@@ -148,4 +148,5 @@ We might leave this repository with this update, however, if there's some sort o
 2024/07/20 update readme, might our system is infected.
 2024/08/18 update -\[369\] predictors for recursive but equivalent.
 2024/09/03 update \[pq\]redg...p.. for auto tuned recursive but for tiny images.
+2024/09/04 update last up with proper recursive value.
 

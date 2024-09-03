@@ -4426,12 +4426,14 @@ template <typename T> pair<SimpleVector<T>, SimpleVector<T> > predv(const vector
 #elif _PREDV_ == 9
   const int unit(in.size() / 18);
 #elif _PREDV_ == -1
-  const int recursive0(max(int(0), int((in.size() - 3) / 10 / 2 - 1)) );
-  const int unit0(recursive0 ? in.size() / (recursive0 * 2) : in.size() / 2);
-  const int recursive(unit0 < 14 ? recursive0 - 1 : recursive0);
-  const int unit(recursive ? in.size() / (recursive * 2) : in.size() / 2);
-  if((int64_t(1) << (2 * (recursive + 1))) < in[0].size())
-    cerr << "predv: exceeds internal status assumption : " << (int64_t(1) << (2 * (recursive + 1))) << " total pixels." << endl;
+  int recursive0(max(int(0), int((in.size() - 3) / 8 / 2)) );
+  int unit0(in.size() / ((recursive0 + 1) * 2));
+  while(recursive0 && (unit0 = (in.size() - 3) / ((recursive0 + 1) * 2)) < 8)
+    recursive0 --;
+  const auto& recursive(recursive0);
+  const auto& unit(unit0);
+  cerr << "predv(_PREDV_==-1): up to " << (int64_t(1) << (2 * (recursive + 1))) << " pixels, " << unit << " units." << endl;
+  assert(in[0].size() <= (int64_t(1) << (2 * (recursive + 1))) );
 #else
 # error _PREDV_ has a invalid value
 #endif
