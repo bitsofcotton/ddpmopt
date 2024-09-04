@@ -2291,7 +2291,12 @@ template <typename T> inline SimpleVector<T> SimpleMatrix<T>::zeroFix(const Simp
       continue;
     if(T(int(0)) < fidx[idx].first &&
        fidx[idx].first < sqrt(one.dot(one)) * epsilon()) {
-      cerr << "linearInvariant: P matrix is orthogonal to 1 vector." << endl;
+      static bool shown(false);
+      if(! shown) {
+        shown = true;
+        cerr << "zeroFix: invariant should be 0 but there's no information." <<
+          endl << "         so we choice the invariant one loop before." << endl;
+      }
       *this = Pb;
       break;
     }
@@ -3601,7 +3606,10 @@ public:
     invariant.O();
     for(int i = 0; i < invariants.cols(); i ++)
       invariant[i] = P().next(invariants.col(i), unit);
-    if(invariant[varlen - 1] == zero) return zero;
+    if(invariant[varlen - 1] == zero) {
+      cerr << "!" << flush;
+      return zero;
+    }
     SimpleVector<T> work(varlen);
     for(int i = 1; i < work.size(); i ++)
       work[i - 1] = in[i - work.size() + in.size()];
