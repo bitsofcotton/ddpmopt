@@ -18,7 +18,7 @@ If we use pqredg with goki_check_cc:test.py:bit command, we suppose the input im
 
 The plain \[pq\]redg predictor uses first order shallow copying structures but it's saturated by in/output, 3 predictor uses 2nd order enough bits for predictions, 6 predictor is enough for multiple layer algebraic copying structure, 9 predictor is enough for algorithm decomposition including inverse of them, so in the worst case, 9 predictor handles the prediction with simple but shall not be enough complexity on information amount P01 predictor copying structure with the decomposition, however, in the flat algorithm meaning, it's equivalent to plain or 3 predictors.
 
-We need to use pqredg\[0-9\]+?p(mp)? to fight with internal states the image stream really have vs the image size or input number dimension chase. However we need to shrink input images to certain sizes depends on input number.
+We need to use \[pq\]redgp\[0-9\]\*(mp)? to fight with internal states the image stream really have vs the image size or input number dimension chase. However we need to shrink input images to certain sizes depends on input number. Either, if we suppose the prediction is done by only one function and the function does not have initialized numbers for resource, 3 predictor is enough for them.
 
 Sometimes goki_check_cc:collect operation improves output images, this is because we can get curvature of them as continuous part of the whole image context.
 
@@ -26,15 +26,15 @@ Sometimes goki_check_cc:collect operation improves output images, this is becaus
 We can use bitsofcotton/goki_check_cc:test.py:\[pq\]redg command to recursive predictions.
 
 # Usage:
-    ./predg([369]-?)?(32|64)?p?(mp)? <in0.ppm> ...
-    ./qredg([369]-?)?(32|64)?p?(mp)? <in0out.ppm> ...
+    ./predg([369p]-?)?(32|64)?(mp)? <in0.ppm> ...
+    ./qredg([369p]-?)?(32|64)?(mp)? <in0out.ppm> ...
     ./ddpmopt(32|64)?(mp)? + <in0out.pgm> <in0in.ppm> ... > cache.txt
     ./ddpmopt(32|64)?(mp)? - <in0.ppm> ... < cache.txt
     ./tcont [xyit] <in0.ppm> ...
     cp `./tcont i <in0.ppm> ... | sort | head -n ... | tr '\n' ' '` outdir
 
-# Leave
-We might leave this repository with this update, however, if there's some sort of the reason to improve, we re-open here, also, lieonn.hh change might be updated even we leave here.
+# Re-Leave
+We might re-leave this repository with this update, however, if there's some sort of the reason to improve, we re-open here, also, lieonn.hh change might be updated even we leave here.
 
 # Real close
 2023/03/01
@@ -150,4 +150,5 @@ We might leave this repository with this update, however, if there's some sort o
 2024/09/03 update \[pq\]redg...p.. for auto tuned recursive but for tiny images.
 2024/09/04 update last up with proper recursive value.
 2024/09/05 omit error output in zeroFix.
+2024/09/06 update and fix readme.
 
