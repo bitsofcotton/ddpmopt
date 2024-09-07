@@ -4414,7 +4414,7 @@ template <typename T> using PP6 = PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, Pdel
 template <typename T> using PP9 = PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, P0maxRank<T>, true> >, true> >, true> >, true> >, true> >, true> >, true> >, true> >, true> >;
 
 // N.B. the raw P01 predictor is useless because of their sloppiness.
-template <typename T> pair<SimpleVector<T>, SimpleVector<T> > predv0(const vector<SimpleVector<T> >& in) {
+template <typename T> pair<SimpleVector<T>, SimpleVector<T> > predv(const vector<SimpleVector<T> >& in) {
   // N.B. we need to initialize p0 vector.
   SimpleVector<T> init(3);
   for(int i = 0; i < init.size(); i ++)
@@ -4585,41 +4585,6 @@ template <typename T> pair<SimpleVector<T>, SimpleVector<T> > predv0(const vecto
         PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP9<T>, true> >, true> >().next(seconds.reverse() / nseconds, unit)
       ) ) ) ) ) ) ) ) ) ) ) * nseconds), true) );
 #endif
-}
-
-// N.B. Do twice prediction causes aleph_0^aleph_0 to const.
-//      Don't know why this one step only margin works well but some practices.
-template <typename T> pair<SimpleVector<T>, SimpleVector<T> > predv(const vector<SimpleVector<T> >& in0) {
-  vector<SimpleVector<T> > in(in0.size() - 1);
-  for(int i = 0; i < in.size(); i ++)
-    in[i] = in0[i];
-  const auto Mb(predv0<T>(in));
-  for(int i = 0; i < in.size(); i ++)
-    in[i] = in0[i + 1];
-  const auto Mf(predv0<T>(in));
-  for(int i = 0; i < in.size() - 1; i ++)
-    in[i + 1].O();
-  for(int i = 0; i < in[0].size(); i ++)
-    in[0][i] = (in0[0][i] * T(int(2)) - T(int(1)) ) *
-      (Mf.first[i] * T(int(2)) - T(int(1)) ) / T(int(4)) +
-        T(int(1)) / T(int(2));
-  auto resb(predv0<T>(in).second);
-  for(int i = 0; i < in.size() - 1; i ++)
-    in[i].O();
-  for(int i = 0; i < in[0].size(); i ++)
-    in[in.size() - 1][i] = (in0[in0.size() - 1][i] * T(int(2)) - T(int(1)) ) *
-      (Mb.second[i] * T(int(2)) - T(int(1)) ) / T(int(4)) +
-        T(int(1)) / T(int(2));
-  auto resf(predv0<T>(in).second);
-  for(int i = 0; i < in0[0].size(); i ++) {
-    resb[i] = (Mb.first[i] * T(int(2)) - T(int(1)) ) *
-      (in0[0][i] * T(int(2)) - T(int(1)) ) *
-      (resb[i] * T(int(2)) - T(int(1))) / T(int(8)) - T(int(1)) / T(int(2));
-    resf[i] = (Mf.second[i] * T(int(2)) - T(int(1)) ) *
-      (in0[in0.size() - 1][i] * T(int(2)) - T(int(1)) ) *
-      (resf[i] * T(int(2)) - T(int(1))) / T(int(8)) - T(int(1)) / T(int(2));
-  }
-  return make_pair(move(resb), move(resf));
 }
 
 template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > predVec(const vector<vector<SimpleVector<T> > >& in0) {
