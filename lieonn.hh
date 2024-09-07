@@ -3400,31 +3400,34 @@ public:
   P p;
 };
 
-template <typename T, typename P, typename feeder> class P0DFT {
+template <typename T, typename P> class P0DFT {
 public:
   inline P0DFT() { ; }
-  inline P0DFT(P&& p, const int& size) {
-    f = feeder(size);
-    (this->p).resize(size, p);
-    q = this->p;
-  }
   inline ~P0DFT() { ; };
-  inline T next(const T& in) {
-    const auto& fn(f.next(in));
-    if(! f.full) return T(int(0));
-    auto ff(dftcache<T>(fn.size()) * fn.template cast<complex<T> >());
-    assert(ff.size() == p.size() && p.size() == q.size());
-    for(int i = 0; i < ff.size(); i ++)
-      ff[i] = complex<T>(p[i].next(ff[i].real()), q[i].next(ff[i].imag()));
-/*
-      if(! (ff[i].real() == T(int(0)) && ff[i].imag() == T(int(0)) ) )
-        ff[i] = abs(p[i].next(abs(ff[i]))) * exp(complex<T>(T(int(0)), q[i].next(arg(ff[i]))));
-*/
-    return dftcache<T>(- fn.size()).row(fn.size() - 1).dot(ff).real();
+  inline T next(const SimpleVector<T>& in, const int& unit) {
+    const auto& cdft( dftcache<T>(  unit));
+    idFeeder<SimpleVector<T> > real(in.size() - unit + 1);
+    idFeeder<SimpleVector<T> > imag(in.size() - unit + 1);
+    for(int j = unit; j <= in.size(); j ++) {
+      const auto work(cdft * in.subVector(j - unit, unit).template cast<complex<T> >());
+      real.next(work.template real<T>());
+      imag.next(work.template imag<T>());
+    }
+    assert(real.full && imag.full);
+    SimpleVector<complex<T> > res(unit);
+    for(int i = 0; i < unit; i ++) {
+      idFeeder<T> wreal(real.res.size());
+      idFeeder<T> wimag(imag.res.size());
+      for(int j = 0; j < wreal.res.size(); j ++) {
+        wreal.next(real.res[j][i]);
+        wimag.next(imag.res[j][i]);
+      }
+      assert(wreal.full && wimag.full);
+      res[i] = complex<T>(P().next(wreal.res, unit), P().next(wimag.res, unit));
+    }
+    return dftcache<T>(- unit).row(unit - 1).dot(res).real();
   }
-  vector<P> p;
-  vector<P> q;
-  feeder f;
+  P p;
 };
 
 template <typename T, typename P> class northPole {
@@ -3535,7 +3538,7 @@ public:
   //      2 dimension semi-order causes (x, status) from input as sedenion.
   // N.B. we need only once P0DFT in general because associative condition
   //      is necessary for input ordering.
-  typedef P0DFT<T, p0_1t, idFeeder<T> > p0_2t;
+  typedef P0DFT<T, p0_1t> p0_2t;
   // N.B. on any R to R into reasonable taylor.
   typedef northPole<T, p0_2t> p0_6t;
   typedef northPole<T, p0_6t> p0_7t;
@@ -4411,7 +4414,7 @@ template <typename T> using PP6 = PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, Pdel
 template <typename T> using PP9 = PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, P0maxRank<T>, true> >, true> >, true> >, true> >, true> >, true> >, true> >, true> >, true> >;
 
 // N.B. the raw P01 predictor is useless because of their sloppiness.
-template <typename T> pair<SimpleVector<T>, SimpleVector<T> > predv(const vector<SimpleVector<T> >& in) {
+template <typename T> pair<SimpleVector<T>, SimpleVector<T> > predv0(const vector<SimpleVector<T> >& in) {
   // N.B. we need to initialize p0 vector.
   SimpleVector<T> init(3);
   for(int i = 0; i < init.size(); i ++)
@@ -4435,17 +4438,17 @@ template <typename T> pair<SimpleVector<T>, SimpleVector<T> > predv(const vector
   const int unit(in.size() / 18);
 #elif _PREDV_ == -1
   int recursive0(0);
-  int unit0(in.size() / 2);
+  int unit0(in.size() / 3);
   while((! recursive0 ||
-          ((unit0 = (in.size() - 3) / ((recursive0 + 1) * 2)) >= 8) ) &&
+          ((unit0 = (in.size() - 3) / ((recursive0 + 1) * 2 + 1)) >= 8) ) &&
         (int64_t(1) << (2 * (recursive0 + 1))) < in[0].size() )
     recursive0 ++;
   if(unit0 < 8) recursive0 --;
   recursive0 = max(int(0), recursive0);
   const auto& recursive(recursive0);
   const auto& unit(unit0 =
-    (recursive ? (in.size() - 3) / ((recursive + 1) * 2) :
-      (in.size() - 3) / 2) );
+    (recursive ? (in.size() - 3) / ((recursive + 1) * 2 + 1) :
+      (in.size() - 3) / 3) );
   cerr << "predv(_PREDV_==-1): up to " << (int64_t(1) << (2 * (recursive + 1))) << " pixels, " << unit << " units." << endl;
   assert(in[0].size() <= (int64_t(1) << (2 * (recursive + 1))) );
 #else
@@ -4466,16 +4469,16 @@ template <typename T> pair<SimpleVector<T>, SimpleVector<T> > predv(const vector
     assert(buf.full);
 #if !defined(_PREDV_)
     p[j] = PP0<T>().next(buf.res, unit);
-    q[j] = PP0<T>().next(buf.res.reverse(), unit);
+    p[j] = PP0<T>().next(buf.res.reverse(), unit);
 #elif _PREDV_ == 3
     p[j] = PP3<T>().next(buf.res, unit);
-    q[j] = PP3<T>().next(buf.res.reverse(), unit);
+    p[j] = PP3<T>().next(buf.res.reverse(), unit);
 #elif _PREDV_ == 6
     p[j] = PP6<T>().next(buf.res, unit);
-    q[j] = PP6<T>().next(buf.res.reverse(), unit);
+    p[j] = PP6<T>().next(buf.res.reverse(), unit);
 #elif _PREDV_ == 9
     p[j] = PP9<T>().next(buf.res, unit);
-    q[j] = PP9<T>().next(buf.res.reverse(), unit);
+    p[j] = PP9<T>().next(buf.res.reverse(), unit);
 #elif _PREDV_ == -1
     switch(recursive) {
     case 0:
@@ -4582,6 +4585,41 @@ template <typename T> pair<SimpleVector<T>, SimpleVector<T> > predv(const vector
         PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP9<T>, true> >, true> >().next(seconds.reverse() / nseconds, unit)
       ) ) ) ) ) ) ) ) ) ) ) * nseconds), true) );
 #endif
+}
+
+// N.B. Do twice prediction causes aleph_0^aleph_0 to const.
+//      Don't know why this one step only margin works well but some practices.
+template <typename T> pair<SimpleVector<T>, SimpleVector<T> > predv(const vector<SimpleVector<T> >& in0) {
+  vector<SimpleVector<T> > in(in0.size() - 1);
+  for(int i = 0; i < in.size(); i ++)
+    in[i] = in0[i];
+  const auto Mb(predv0<T>(in));
+  for(int i = 0; i < in.size(); i ++)
+    in[i] = in0[i + 1];
+  const auto Mf(predv0<T>(in));
+  for(int i = 0; i < in.size() - 1; i ++)
+    in[i + 1].O();
+  for(int i = 0; i < in[0].size(); i ++)
+    in[0][i] = (in0[0][i] * T(int(2)) - T(int(1)) ) *
+      (Mf.first[i] * T(int(2)) - T(int(1)) ) / T(int(4)) +
+        T(int(1)) / T(int(2));
+  auto resb(predv0<T>(in).second);
+  for(int i = 0; i < in.size() - 1; i ++)
+    in[i].O();
+  for(int i = 0; i < in[0].size(); i ++)
+    in[in.size() - 1][i] = (in0[in0.size() - 1][i] * T(int(2)) - T(int(1)) ) *
+      (Mb.second[i] * T(int(2)) - T(int(1)) ) / T(int(4)) +
+        T(int(1)) / T(int(2));
+  auto resf(predv0<T>(in).second);
+  for(int i = 0; i < in0[0].size(); i ++) {
+    resb[i] = (Mb.first[i] * T(int(2)) - T(int(1)) ) *
+      (in0[0][i] * T(int(2)) - T(int(1)) ) *
+      (resb[i] * T(int(2)) - T(int(1))) / T(int(8)) - T(int(1)) / T(int(2));
+    resf[i] = (Mf.second[i] * T(int(2)) - T(int(1)) ) *
+      (in0[in0.size() - 1][i] * T(int(2)) - T(int(1)) ) *
+      (resf[i] * T(int(2)) - T(int(1))) / T(int(8)) - T(int(1)) / T(int(2));
+  }
+  return make_pair(move(resb), move(resf));
 }
 
 template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > predVec(const vector<vector<SimpleVector<T> > >& in0) {
