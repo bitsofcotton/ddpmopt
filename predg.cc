@@ -23,13 +23,6 @@ using std::endl;
 using std::atoi;
 using std::string;
 using std::to_string;
-using std::vector;
-using std::sort;
-using std::binary_search;
-using std::make_pair;
-using std::istringstream;
-using std::move;
-using std::pair;
 
 #undef int
 int main(int argc, const char* argv[]) {
@@ -45,13 +38,8 @@ int main(int argc, const char* argv[]) {
     in.emplace_back(work.size() == 3 ? rgb2xyz<num_t>(work) : move(work));
   }
   const auto p(predMat<num_t>(normalize<num_t>(in)));
-  if(! savep2or3<num_t>("predg-f.ppm",
-    normalize<num_t>(p.first.size() == 3 ? xyz2rgb<num_t>(p.first)
-      : p.first), in.size()) )
-    cerr << "failed to save." << endl;
-  if(! savep2or3<num_t>("predg-b.ppm",
-    normalize<num_t>(p.second.size() == 3 ? xyz2rgb<num_t>(p.second)
-      : p.second), in.size()) )
+  if(! savep2or3<num_t>("predg.ppm",
+    normalize<num_t>(p.size() == 3 ? xyz2rgb<num_t>(p) : p), in.size()) )
     cerr << "failed to save." << endl;
   cerr << " Done" << endl;
   return 0;

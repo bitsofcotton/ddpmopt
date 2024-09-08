@@ -4413,8 +4413,13 @@ template <typename T> using PP3 = PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, Pdel
 template <typename T> using PP6 = PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, P0maxRank<T>, true> >, true> >, true> >, true> >, true> >, true> >;
 template <typename T> using PP9 = PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, P0maxRank<T>, true> >, true> >, true> >, true> >, true> >, true> >, true> >, true> >, true> >;
 
-// N.B. the raw P01 predictor is useless because of their sloppiness.
-template <typename T> pair<SimpleVector<T>, SimpleVector<T> > predv(const vector<SimpleVector<T> >& in) {
+// N.B. as ddpmopt:README.md, PP3 is least and enough normally.
+// N.B. as p8:README.md, predv once is enough for finite combinations
+//      except for upper cardinals. If we're lucky enough, the original stream
+//      is made from Lie algebra with tangent, we reduce combination on them,
+//      the residue could be continuous one variable tangent series and
+//      we bet them.
+template <typename T> SimpleVector<T> predv0(const vector<SimpleVector<T> >& in, const string& strloop = string("")) {
   // N.B. we need to initialize p0 vector.
   SimpleVector<T> init(3);
   for(int i = 0; i < init.size(); i ++)
@@ -4429,165 +4434,66 @@ template <typename T> pair<SimpleVector<T>, SimpleVector<T> > predv(const vector
     seconds[i] = makeProgramInvariant<T>(in[i], - T(int(1)), true).second;
   }
 #if !defined(_PREDV_)
-  const int unit(in.size() / 2);
+  const int unit(in.size() / 3);
+  #define PPP PP0<T>
 #elif _PREDV_ == 3
-  const int unit(in.size() / 6);
+  const int unit(in.size() / 7);
+  #define PPP PP3<T>
 #elif _PREDV_ == 6
-  const int unit(in.size() / 12);
+  const int unit(in.size() / 13);
+  #define PPP PP6<T>
 #elif _PREDV_ == 9
-  const int unit(in.size() / 18);
-#elif _PREDV_ == -1
-  int recursive0(0);
-  int unit0(in.size() / 3);
-  while((! recursive0 ||
-          ((unit0 = (in.size() - 3) / ((recursive0 + 1) * 2 + 1)) >= 8) ) &&
-        (int64_t(1) << (2 * (recursive0 + 1))) < in[0].size() )
-    recursive0 ++;
-  if(unit0 < 8) recursive0 --;
-  recursive0 = max(int(0), recursive0);
-  const auto& recursive(recursive0);
-  const auto& unit(unit0 =
-    (recursive ? (in.size() - 3) / ((recursive + 1) * 2 + 1) :
-      (in.size() - 3) / 3) );
-  cerr << "predv(_PREDV_==-1): up to " << (int64_t(1) << (2 * (recursive + 1))) << " pixels, " << unit << " units." << endl;
-  assert(in[0].size() <= (int64_t(1) << (2 * (recursive + 1))) );
+  const int unit(in.size() / 19);
+  #define PPP PP9<T>
 #else
 # error _PREDV_ has a invalid value
 #endif
+  cerr << "Coherent: DFT " << dftcache<T>(  unit);
+  cerr << "Coherent: IDFT" << dftcache<T>(- unit);
   SimpleVector<T> p(in[0].size());
-  SimpleVector<T> q(in[0].size());
   p.O();
-  q.O();
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
   for(int j = 0; j < in[0].size(); j ++) {
-    cerr << j << " / " << in[0].size() << endl;
+    cerr << j << " / " << in[0].size() << ", " << strloop << endl;
     idFeeder<T> buf(in.size());
     for(int i = 0; i < in.size(); i ++)
       buf.next(makeProgramInvariantPartial<T>(in[i][j], seconds[i], true));
     assert(buf.full);
-#if !defined(_PREDV_)
-    p[j] = PP0<T>().next(buf.res, unit);
-    p[j] = PP0<T>().next(buf.res.reverse(), unit);
-#elif _PREDV_ == 3
-    p[j] = PP3<T>().next(buf.res, unit);
-    p[j] = PP3<T>().next(buf.res.reverse(), unit);
-#elif _PREDV_ == 6
-    p[j] = PP6<T>().next(buf.res, unit);
-    p[j] = PP6<T>().next(buf.res.reverse(), unit);
-#elif _PREDV_ == 9
-    p[j] = PP9<T>().next(buf.res, unit);
-    p[j] = PP9<T>().next(buf.res.reverse(), unit);
-#elif _PREDV_ == -1
-    switch(recursive) {
-    case 0:
-      p[j] = PP0<T>().next(buf.res, unit);
-      q[j] = PP0<T>().next(buf.res.reverse(), unit);
-      break;
-    case 1:
-      p[j] = PdeltaOnce<T, P01<T, PP0<T>, true> >().next(buf.res, unit);
-      q[j] = PdeltaOnce<T, P01<T, PP0<T>, true> >().next(buf.res.reverse(), unit);
-      break;
-    case 2:
-      p[j] = PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP0<T>, true> >, true> >().next(buf.res, unit);
-      q[j] = PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP0<T>, true> >, true> >().next(buf.res.reverse(), unit);
-      break;
-    case 3:
-      p[j] = PP3<T>().next(buf.res, unit);
-      q[j] = PP3<T>().next(buf.res.reverse(), unit);
-      break;
-    case 4:
-      p[j] = PdeltaOnce<T, P01<T, PP3<T>, true> >().next(buf.res, unit);
-      q[j] = PdeltaOnce<T, P01<T, PP3<T>, true> >().next(buf.res.reverse(), unit);
-      break;
-    case 5:
-      p[j] = PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP3<T>, true> >, true> >().next(buf.res, unit);
-      q[j] = PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP3<T>, true> >, true> >().next(buf.res.reverse(), unit);
-      break;
-    case 6:
-      p[j] = PP6<T>().next(buf.res, unit);
-      q[j] = PP6<T>().next(buf.res.reverse(), unit);
-      break;
-    case 7:
-      p[j] = PdeltaOnce<T, P01<T, PP6<T>, true> >().next(buf.res, unit);
-      q[j] = PdeltaOnce<T, P01<T, PP6<T>, true> >().next(buf.res.reverse(), unit);
-      break;
-    case 8:
-      p[j] = PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP6<T>, true> >, true> >().next(buf.res, unit);
-      q[j] = PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP6<T>, true> >, true> >().next(buf.res.reverse(), unit);
-      break;
-    case 9:
-      p[j] = PP9<T>().next(buf.res, unit);
-      q[j] = PP9<T>().next(buf.res.reverse(), unit);
-      break;
-    case 10:
-      p[j] = PdeltaOnce<T, P01<T, PP9<T>, true> >().next(buf.res, unit);
-      q[j] = PdeltaOnce<T, P01<T, PP9<T>, true> >().next(buf.res.reverse(), unit);
-      break;
-    case 11:
-      p[j] = PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP9<T>, true> >, true> >().next(buf.res, unit);
-      q[j] = PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP9<T>, true> >, true> >().next(buf.res.reverse(), unit);
-      break;
-    default:
-      assert(0 && "We assume this is too large input number to calculate in moderate PC.");
-    }
-#endif
+    p[j] = P0DFT<T, PPP >().next(buf.res, unit);
   }
   const auto nseconds(sqrt(seconds.dot(seconds)));
-  return make_pair(revertProgramInvariant<T>(make_pair(
+  return revertProgramInvariant<T>(make_pair(
     makeProgramInvariant<T>(normalize<T>(p), - T(int(1)), true).first,
-#if !defined(_PREDV_)
-      PP0<T>().next(seconds / nseconds, unit) * nseconds), true),
-#elif _PREDV_ == 3
-      PP3<T>().next(seconds / nseconds, unit) * nseconds), true),
-#elif _PREDV_ == 6
-      PP6<T>().next(seconds / nseconds, unit) * nseconds), true),
-#elif _PREDV_ == 9
-      PP9<T>().next(seconds / nseconds, unit) * nseconds), true),
-#else
-      (recursive == 0 ? PP0<T>().next(seconds / nseconds, unit) :
-      (recursive == 1 ? PdeltaOnce<T, P01<T, PP0<T>, true> >().next(seconds / nseconds, unit) :
-      (recursive == 2 ? PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP0<T>, true> >, true> >().next(seconds / nseconds, unit) :
-      (recursive == 3 ? PP3<T>().next(seconds / nseconds, unit) :
-      (recursive == 4 ? PdeltaOnce<T, P01<T, PP3<T>, true> >().next(seconds / nseconds, unit) :
-      (recursive == 5 ? PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP3<T>, true> >, true> >().next(seconds / nseconds, unit) :
-      (recursive == 6 ? PP6<T>().next(seconds / nseconds, unit) :
-      (recursive == 7 ? PdeltaOnce<T, P01<T, PP6<T>, true> >().next(seconds / nseconds, unit) :
-      (recursive == 8 ? PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP6<T>, true> >, true> >().next(seconds / nseconds, unit) :
-      (recursive == 9 ? PP9<T>().next(seconds / nseconds, unit) :
-      (recursive == 10 ? PdeltaOnce<T, P01<T, PP9<T>, true> >().next(seconds / nseconds, unit) :
-        PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP9<T>, true> >, true> >().next(seconds / nseconds, unit)
-      ) ) ) ) ) ) ) ) ) ) ) * nseconds), true),
-#endif
-    revertProgramInvariant<T>(make_pair(
-    makeProgramInvariant<T>(normalize<T>(q), - T(int(1)), true).first,
-#if !defined(_PREDV_)
-      PP0<T>().next(seconds.reverse() / nseconds, unit) * nseconds), true) );
-#elif _PREDV_ == 3
-      PP3<T>().next(seconds.reverse() / nseconds, unit) * nseconds), true) );
-#elif _PREDV_ == 6
-      PP6<T>().next(seconds.reverse() / nseconds, unit) * nseconds), true) );
-#elif _PREDV_ == 9
-      PP9<T>().next(seconds.reverse() / nseconds, unit) * nseconds), true) );
-#else
-      (recursive == 0 ? PP0<T>().next(seconds.reverse() / nseconds, unit) :
-      (recursive == 1 ? PdeltaOnce<T, P01<T, PP0<T>, true> >().next(seconds.reverse() / nseconds, unit) :
-      (recursive == 2 ? PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP0<T>, true> >, true> >().next(seconds.reverse() / nseconds, unit) :
-      (recursive == 3 ? PP3<T>().next(seconds.reverse() / nseconds, unit) :
-      (recursive == 4 ? PdeltaOnce<T, P01<T, PP3<T>, true> >().next(seconds.reverse() / nseconds, unit) :
-      (recursive == 5 ? PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP3<T>, true> >, true> >().next(seconds.reverse() / nseconds, unit) :
-      (recursive == 6 ? PP6<T>().next(seconds.reverse() / nseconds, unit) :
-      (recursive == 7 ? PdeltaOnce<T, P01<T, PP6<T>, true> >().next(seconds.reverse() / nseconds, unit) :
-      (recursive == 8 ? PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP6<T>, true> >, true> >().next(seconds.reverse() / nseconds, unit) :
-      (recursive == 9 ? PP9<T>().next(seconds.reverse() / nseconds, unit) :
-      (recursive == 10 ? PdeltaOnce<T, P01<T, PP9<T>, true> >().next(seconds.reverse() / nseconds, unit) :
-        PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PP9<T>, true> >, true> >().next(seconds.reverse() / nseconds, unit)
-      ) ) ) ) ) ) ) ) ) ) ) * nseconds), true) );
-#endif
+      P0DFT<T, PPP >().next(seconds / nseconds, unit) * nseconds), true);
+#undef PPP
 }
 
-template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > predVec(const vector<vector<SimpleVector<T> > >& in0) {
+template <typename T> SimpleVector<T> predv(const vector<SimpleVector<T> >& in0) {
+  SimpleMatrix<T> p(4, in0[0].size());
+  for(int i = 0; i < p.rows(); i ++) {
+    vector<SimpleVector<T> > in;
+    in.reserve(in0.size() - 2);
+    for(int j = i; j < in0.size() - 3 + i; j ++)
+      in.emplace_back(in0[j]);
+    auto pp(predv0<T>(in, to_string(i) + string(" / ") + to_string(p.rows()) ));
+    for(int j = 0; j < p.cols(); j ++)
+      p(i, j) = atan(i == p.rows() - 1 ? pp[j] * T(int(2)) - T(int(1)) :
+        (pp[j] * T(int(2)) - T(int(1)) ) *
+          (in[in.size() - 3 + i][j] * T(int(2)) - T(int(1)) ) );
+  }
+  SimpleVector<T> res(p.cols());
+#if defined(_OPENMP)
+#pragma omp parallel for schedule(static, 1)
+#endif
+  for(int i = 0; i < p.cols(); i ++) {
+    res[i] = tan(P0maxRank<T>().next(p.col(i).subVector(0, 3))) * p(3, i) / T(int(8)) + T(int(1)) / T(int(2));
+  }
+  return move(res);
+}
+
+template <typename T> vector<SimpleVector<T> > predVec(const vector<vector<SimpleVector<T> > >& in0) {
   assert(in0.size() && in0[0].size() && in0[0][0].size());
   vector<SimpleVector<T> > in;
   in.resize(in0.size());
@@ -4601,19 +4507,14 @@ template <typename T> pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > 
     }
   }
   const auto p(predv<T>(in));
-  pair<vector<SimpleVector<T> >, vector<SimpleVector<T> > > res;
-  res.first.resize(in0[0].size());
-  res.second.resize(in0[0].size());
-  for(int j = 0; j < in0[0].size(); j ++) {
-    res.first[j] =
-      p.first.subVector(in0[0][0].size() * j, in0[0][0].size());
-    res.second[j] =
-      p.second.subVector(in0[0][0].size() * j, in0[0][0].size());
-  }
+  vector<SimpleVector<T> > res;
+  res.resize(in0[0].size());
+  for(int j = 0; j < in0[0].size(); j ++)
+    res[j] = p.subVector(in0[0][0].size() * j, in0[0][0].size());
   return res;
 }
 
-template <typename T> pair<vector<SimpleMatrix<T> >, vector<SimpleMatrix<T> > > predMat(const vector<vector<SimpleMatrix<T> > >& in0) {
+template <typename T> vector<SimpleMatrix<T> > predMat(const vector<vector<SimpleMatrix<T> > >& in0) {
   assert(in0.size() && in0[0].size() && in0[0][0].rows() && in0[0][0].cols());
   vector<SimpleVector<T> > in;
   in.resize(in0.size());
@@ -4629,27 +4530,19 @@ template <typename T> pair<vector<SimpleMatrix<T> >, vector<SimpleMatrix<T> > > 
     }
   }
   const auto p(predv<T>(in));
-  pair<vector<SimpleMatrix<T> >, vector<SimpleMatrix<T> > > res;
-  res.first.resize(in0[0].size());
-  res.second.resize(in0[0].size());
-  for(int j = 0; j < res.first.size(); j ++) {
-    res.first[j].resize(in0[0][0].rows(), in0[0][0].cols());
-    res.second[j].resize(in0[0][0].rows(), in0[0][0].cols());
-    for(int k = 0; k < in0[0][0].rows(); k ++) {
-      res.first[j].row(k) =
-        p.first.subVector(
-          j * in0[0][0].rows() * in0[0][0].cols() + k * in0[0][0].cols(),
-          in0[0][0].cols());
-      res.second[j].row(k) =
-        p.second.subVector(
-          j * in0[0][0].rows() * in0[0][0].cols() + k * in0[0][0].cols(),
-          in0[0][0].cols());
-    }
+  vector<SimpleMatrix<T> > res;
+  res.resize(in0[0].size());
+  for(int j = 0; j < res.size(); j ++) {
+    res[j].resize(in0[0][0].rows(), in0[0][0].cols());
+    for(int k = 0; k < in0[0][0].rows(); k ++)
+      res[j].row(k) = p.subVector(
+        j * in0[0][0].rows() * in0[0][0].cols() + k * in0[0][0].cols(),
+        in0[0][0].cols());
   }
   return res;
 }
 
-template <typename T> pair<SimpleSparseTensor<T>, SimpleSparseTensor<T> > predSTen(const vector<SimpleSparseTensor<T> >& in0, const vector<int>& idx) {
+template <typename T> SimpleSparseTensor<T> predSTen(const vector<SimpleSparseTensor<T> >& in0, const vector<int>& idx) {
   assert(idx.size() && in0.size());
   // N.B. we don't do input scaling.
   // N.B. the data we target is especially string stream corpus.
@@ -4682,15 +4575,13 @@ template <typename T> pair<SimpleSparseTensor<T>, SimpleSparseTensor<T> > predST
   }
   const auto p(predv<T>(in));
   in.resize(0);
-  pair<SimpleSparseTensor<T>, SimpleSparseTensor<T> > res;
+  SimpleSparseTensor<T> res;
   for(int j = 0, cnt = 0; j < idx.size(); j ++)
     for(int k = 0; k < idx.size(); k ++)
       for(int m = 0; m < idx.size(); m ++)
         if(binary_search(attend.begin(), attend.end(),
-             make_pair(j, make_pair(k, m)))) {
-          res.first[idx[j]][idx[k]][idx[m]] = p.first[cnt] * T(int(2)) - T(int(1));
-          res.second[idx[j]][idx[k]][idx[m]] = p.second[cnt ++] * T(int(2)) - T(int(1));
-        }
+             make_pair(j, make_pair(k, m))))
+          res[idx[j]][idx[k]][idx[m]] = p[cnt] * T(int(2)) - T(int(1));
   return res;
 }
 

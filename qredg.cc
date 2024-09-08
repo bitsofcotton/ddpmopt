@@ -22,11 +22,6 @@ using std::endl;
 using std::atoi;
 using std::string;
 using std::to_string;
-using std::vector;
-using std::sort;
-using std::binary_search;
-using std::make_pair;
-using std::istringstream;
 
 #undef int
 int main(int argc, const char* argv[]) {
@@ -47,30 +42,23 @@ int main(int argc, const char* argv[]) {
     }
     auto p(predVec<num_t>(pwork));
     vector<SimpleMatrix<num_t> > wwork(work.size(),
-      SimpleMatrix<num_t>(work[0].rows() + 2, work[0].cols()).O());
+      SimpleMatrix<num_t>(work[0].rows() + 1, work[0].cols()).O());
     for(int j = 0; j < work.size(); j ++)
-      wwork[j].setMatrix(1, 0, work[j]);
-    for(int j = 0; j < p.first.size(); j ++) {
-      wwork[j].row(0) = move(p.second[j]);
-      wwork[j].row(wwork[j].rows() - 1) = move(p.first[j]);
-    }
+      wwork[j].setMatrix(0, 0, work[j]);
+    for(int j = 0; j < p.size(); j ++)
+      wwork[j].row(wwork[j].rows() - 1) = move(p[j]);
     num_t norm2(int(0));
     for(int j = 0; j < wwork.size(); j ++)
-      for(int k = 1; k < wwork[j].rows() - 1; k ++)
+      for(int k = 0; k < wwork[j].rows() - 1; k ++)
         norm2 += wwork[j].row(k).dot(wwork[j].row(k));
-    norm2 = norm2 / num_t(wwork[0].rows() - 2);
-    num_t norm2_0(int(0));
+    norm2 = norm2 / num_t(wwork[0].rows() - 1);
     num_t norm2_m1(int(0));
-    for(int j = 0; j < wwork.size(); j ++) {
-      norm2_0  += wwork[j].row(0).dot(wwork[j].row(0));
+    for(int j = 0; j < wwork.size(); j ++)
       norm2_m1 += wwork[j].row(wwork[j].rows() - 1).dot(
         wwork[j].row(wwork[j].rows() - 1) );
-    }
-    for(int j = 0; j < wwork.size(); j ++) {
-      wwork[j].row(0) *= sqrt(norm2 / norm2_0) * num_t(int(3)) / num_t(int(2));
+    for(int j = 0; j < wwork.size(); j ++)
       wwork[j].row(wwork[j].rows() - 1) *=
         sqrt(norm2 / norm2_m1) * num_t(int(3)) / num_t(int(2));
-    }
     if(! savep2or3<num_t>(argv[i0], normalize<num_t>(wwork.size() == 3 ?
       xyz2rgb<num_t>(wwork) : wwork), work[0].rows()) )
       cerr << "failed to save." << endl;
