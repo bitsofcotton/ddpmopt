@@ -4414,17 +4414,12 @@ template <typename T> using PP6 = PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, Pdel
 template <typename T> using PP9 = PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, PdeltaOnce<T, P01<T, P0maxRank<T>, true> >, true> >, true> >, true> >, true> >, true> >, true> >, true> >, true> >;
 
 // N.B. as ddpmopt:README.md, PP3 is least and enough normally.
-// N.B. as p8:README.md, predv once is enough for finite combinations
-//      except for upper cardinals. If we're lucky enough, the original stream
-//      is made from Lie algebra with tangent, we reduce combination on them,
-//      the residue could be continuous one variable tangent series and
-//      we bet them.
-template <typename T> SimpleVector<T> predv0(const vector<SimpleVector<T> >& in, const string& strloop = string("")) {
+template <typename T, bool progress = true> SimpleVector<T> predv(const vector<SimpleVector<T> >& in, const string& strloop = string("")) {
   // N.B. we need to initialize p0 vector.
   SimpleVector<T> init(3);
   for(int i = 0; i < init.size(); i ++)
     init[i] = T(int(i));
-  cerr << "Coherent: P0: " << P0maxRank0<T>().next(init) << endl;
+  P0maxRank0<T>().next(init);
   SimpleVector<T> seconds(in.size());
   seconds.O();
 #if defined(_OPENMP)
@@ -4448,52 +4443,91 @@ template <typename T> SimpleVector<T> predv0(const vector<SimpleVector<T> >& in,
 #else
 # error _PREDV_ has a invalid value
 #endif
-  cerr << "Coherent: DFT " << dftcache<T>(  unit);
-  cerr << "Coherent: IDFT" << dftcache<T>(- unit);
+  dftcache<T>(  unit);
+  dftcache<T>(- unit);
   SimpleVector<T> p(in[0].size());
   p.O();
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
   for(int j = 0; j < in[0].size(); j ++) {
-    cerr << j << " / " << in[0].size() << ", " << strloop << endl;
+    if(progress) cerr << j << " / " << in[0].size() << ", " << strloop << endl;
     idFeeder<T> buf(in.size());
     for(int i = 0; i < in.size(); i ++)
       buf.next(makeProgramInvariantPartial<T>(in[i][j], seconds[i], true));
     assert(buf.full);
-    p[j] = P0DFT<T, PPP >().next(buf.res, unit);
+    p[j] = PPP ().next(buf.res, unit);
   }
   const auto nseconds(sqrt(seconds.dot(seconds)));
   return revertProgramInvariant<T>(make_pair(
     makeProgramInvariant<T>(normalize<T>(p), - T(int(1)), true).first,
-      P0DFT<T, PPP >().next(seconds / nseconds, unit) * nseconds), true);
+      PPP ().next(seconds / nseconds, unit) * nseconds), true);
 #undef PPP
 }
 
-template <typename T> SimpleVector<T> predv(const vector<SimpleVector<T> >& in0) {
-  SimpleMatrix<T> p(4, in0[0].size());
-  for(int i = 0; i < p.rows(); i ++) {
-    vector<SimpleVector<T> > in;
-    in.reserve(in0.size() - 2);
-    for(int j = i; j < in0.size() - 3 + i; j ++)
-      in.emplace_back(in0[j]);
-    auto pp(predv0<T>(in, to_string(i) + string(" / ") + to_string(p.rows()) ));
-    for(int j = 0; j < p.cols(); j ++)
-      p(i, j) = atan(i == p.rows() - 1 ? pp[j] * T(int(2)) - T(int(1)) :
-        (pp[j] * T(int(2)) - T(int(1)) ) *
-          (in[in.size() - 3 + i][j] * T(int(2)) - T(int(1)) ) );
+// N.B. as p8:README.md, predv once is enough for finite combinations
+//      except for upper cardinals. If we're lucky enough, the original stream
+//      is made from Lie algebra with tangent, we reduce combination on them,
+//      the residue could be continuous one variable tangent series and
+//      we bet them.
+//      However, the residue is normally only the noise, so we do once more,
+//      also we bet the result to be return to the average or having some
+//      of a continuity.
+//      We return low prediction we can't bet them raw but is enough to
+//      image prediction.
+// N.B. predv *quint*
+// N.B. over all, we should need around 5 * 60 step input for normal use.
+//      this is huge problem for us nor our computer resource.
+
+template <typename T, bool progress> static inline SimpleVector<T> predvqSub(SimpleVector<SimpleVector<T> >& res, const SimpleVector<SimpleVector<T> >& in, const SimpleVector<SimpleVector<T> >& p, const int& quint, const string& strloop = string("")) {
+  assert(in.size() == p.size() && 0 < quint && quint <= in.size());
+  auto inb(in);
+  for(int i = 0; i < in.size(); i ++) {
+    inb[i].resize(in[i].size() * 2);
+    for(int j = 0; j < in[i].size(); j ++) {
+      inb[i][j] = ((p[i][j]  * T(int(2)) - T(int(1))) *
+                   (in[i][j] * T(int(2)) - T(int(1))) + T(int(2)) ) /
+                  T(int(4));
+      inb[i][j + in[i].size()] = p[i][j];
+    }
   }
-  SimpleVector<T> res(p.cols());
-#if defined(_OPENMP)
-#pragma omp parallel for schedule(static, 1)
-#endif
-  for(int i = 0; i < p.cols(); i ++) {
-    res[i] = tan(P0maxRank<T>().next(p.col(i).subVector(0, 3))) * p(3, i) / T(int(8)) + T(int(1)) / T(int(2));
-  }
-  return move(res);
+  res.entity.resize(0);
+  res.entity.reserve(in.size() - quint);
+  for(int i = 0; i < in.size() - quint; i ++)
+    res.entity.emplace_back(predv<T, progress>(inb.subVector(i, quint).entity, to_string(i) + string(" / ") + to_string(in.size() - quint + 1) + string(", ") + strloop).subVector(0, inb[0].size()));
+  return predv<T, progress>(inb.subVector(in.size() - quint, quint).entity, string("last, ") + strloop).subVector(0, inb[0].size());
 }
 
-template <typename T> vector<SimpleVector<T> > predVec(const vector<vector<SimpleVector<T> > >& in0) {
+template <typename T, bool progress = true> static inline SimpleVector<T> predvq(const SimpleVector<SimpleVector<T> >& in) {
+  const int quint(in.size() / 5);
+  SimpleVector<SimpleVector<T> > in1;
+  in1.entity.reserve(in.size() - quint);
+  for(int i = 0; i < in.size() - quint; i ++)
+    in1.entity.emplace_back(predv<T, progress>(in.subVector(i, quint).entity, to_string(i) + string(" / ") + to_string(in.size() - quint + 1) + string(", 0 / 5")).subVector(0, in[0].size()));
+  auto r0(predv<T, progress>(in.subVector(in.size() - quint, quint).entity, string("0 / 5")).subVector(0, in[0].size()));
+  SimpleVector<SimpleVector<T> > in2;
+  auto r1(predvqSub<T, progress>(in2, in.subVector(quint, in.size() - quint), in1, quint, string("1 / 5") ) );
+  SimpleVector<SimpleVector<T> > in3;
+  auto r2(predvqSub<T, progress>(in3, in1.subVector(quint, in1.size() - quint), in2, quint, string("2 / 5") ) );
+  SimpleVector<SimpleVector<T> > in4;
+  auto r3(predvqSub<T, progress>(in4, in2.subVector(quint, in2.size() - quint), in3, quint, string("3 / 5") ) );
+  SimpleVector<SimpleVector<T> > in5;
+  auto r4(predvqSub<T, progress>(in5, in3.subVector(quint, in3.size() - quint), in4, quint, string("4 / 5") ) );
+  SimpleVector<T> res;
+  res.resize(in[0].size());
+  res.O();
+  for(int i = 0; i < res.size(); i ++)
+    // N.B. r(k+1) (estimates~) i(k)*r(k)
+    //      r4=r3*r2*r1*r0*i0=(r2*r1)^2(i0)^2=r1^4*i0^4=i0^8
+    //      ... r3=i0^4, r2=i0^2, r1=i0, so the estimation them only has a
+    //      differences on gamma complement.
+    res[i] = ((r0[i] * T(int(2)) - T(int(1))) * (r1[i] * T(int(2)) - T(int(1)))
+      * (r2[i] * T(int(2)) - T(int(1))) * (r3[i] * T(int(2)) - T(int(1)))
+      * (r4[i] * T(int(2)) - T(int(1))) + T(int(5))) / T(int(32));
+  return res;
+}
+
+template <typename T, bool pnoise = false> vector<SimpleVector<T> > predVec(const vector<vector<SimpleVector<T> > >& in0) {
   assert(in0.size() && in0[0].size() && in0[0][0].size());
   vector<SimpleVector<T> > in;
   in.resize(in0.size());
@@ -4506,7 +4540,7 @@ template <typename T> vector<SimpleVector<T> > predVec(const vector<vector<Simpl
       in[i].setVector(j * in0[i][0].size(), in0[i][j]);
     }
   }
-  const auto p(predv<T>(in));
+  const auto p(predv<T, pnoise>(in));
   vector<SimpleVector<T> > res;
   res.resize(in0[0].size());
   for(int j = 0; j < in0[0].size(); j ++)
@@ -4514,7 +4548,7 @@ template <typename T> vector<SimpleVector<T> > predVec(const vector<vector<Simpl
   return res;
 }
 
-template <typename T> vector<SimpleMatrix<T> > predMat(const vector<vector<SimpleMatrix<T> > >& in0) {
+template <typename T, bool pnoise = false> vector<SimpleMatrix<T> > predMat(const vector<vector<SimpleMatrix<T> > >& in0) {
   assert(in0.size() && in0[0].size() && in0[0][0].rows() && in0[0][0].cols());
   vector<SimpleVector<T> > in;
   in.resize(in0.size());
@@ -4529,7 +4563,7 @@ template <typename T> vector<SimpleMatrix<T> > predMat(const vector<vector<Simpl
                         k * in0[i][0].cols(), in0[i][j].row(k));
     }
   }
-  const auto p(predv<T>(in));
+  const auto p(predv<T, pnoise>(in));
   vector<SimpleMatrix<T> > res;
   res.resize(in0[0].size());
   for(int j = 0; j < res.size(); j ++) {
@@ -4542,7 +4576,7 @@ template <typename T> vector<SimpleMatrix<T> > predMat(const vector<vector<Simpl
   return res;
 }
 
-template <typename T> SimpleSparseTensor<T> predSTen(const vector<SimpleSparseTensor<T> >& in0, const vector<int>& idx) {
+template <typename T, bool pnoise = false> SimpleSparseTensor<T> predSTen(const vector<SimpleSparseTensor<T> >& in0, const vector<int>& idx) {
   assert(idx.size() && in0.size());
   // N.B. we don't do input scaling.
   // N.B. the data we target is especially string stream corpus.
@@ -4573,7 +4607,7 @@ template <typename T> SimpleSparseTensor<T> predSTen(const vector<SimpleSparseTe
             in[i][cnt ++] =
               (in0[i][idx[j]][idx[k]][idx[m]] + T(int(1))) / T(int(2));
   }
-  const auto p(predv<T>(in));
+  const auto p(predv<T, pnoise>(in));
   in.resize(0);
   SimpleSparseTensor<T> res;
   for(int j = 0, cnt = 0; j < idx.size(); j ++)

@@ -18,7 +18,9 @@ If we use pqredg with goki_check_cc:test.py:bit command, we suppose the input im
 
 The plain \[pq\]redg predictor uses first order shallow copying structures but it's saturated by in/output, 3 predictor uses 2nd order enough bits for predictions, 6 predictor is enough for multiple layer algebraic copying structure, 9 predictor is enough for algorithm decomposition including inverse of them, so in the worst case, 9 predictor handles the prediction with simple but shall not be enough complexity on information amount P01 predictor copying structure with the decomposition, however, in the flat algorithm meaning, it's equivalent to plain or 3 predictors.
 
-We need to use \[pq\]redgp\[0-9\]\*(mp)? to fight with internal states the image stream really have vs the image size or input number dimension chase. However we need to shrink input images to certain sizes depends on input number. Either, if we suppose the prediction is done by only one function and the function does not have initialized numbers for resource, 3 predictor is enough for them.
+Also, we need to adjust the prediction depth to fight with internal states the image stream really have vs the image size or input number dimension chase. However we need to shrink input images to certain sizes depends on input number. Either, if we suppose the prediction is done by only one function and they're pure function with small number of initialized internal states, 3 predictor is enough for them.
+
+We try to do raw prediction quint with \[pq\]redgn.\*, this is because of our p1/pp3.cc experiments also p8/README.md. A rough sketch of their validity is: doing quad cause valishes variables on given stream as a prediction, so they remains noise for structure subtracted form we suppose, so once more prediction causes noise also predicted so the result is something continuous without gamma condition. So after the prediction 'p0 0' causes our test on some of the PRNGs got better ones, since we don't need the continuous condition on predicting only one line / one image, we conclude with this form. Either, pp3n \| p0 0 test causes almost linear on surface but there's much of the gulfs appeares, so the gulf itself is the appearence of unobserved internal states in this condition, so we can feed some of the additional internal states on surface as p2/cr.py:z command however, if they suddenly appears with hidden algorithm dimension part, we cannot predict at all, this condition includes some of the hand made manipulation on the stream.
 
 Sometimes goki_check_cc:collect operation improves output images, this is because we can get curvature of them as continuous part of the whole image context.
 
@@ -26,15 +28,15 @@ Sometimes goki_check_cc:collect operation improves output images, this is becaus
 We can use bitsofcotton/goki_check_cc:test.py:\[pq\]redg command to recursive predictions.
 
 # Usage:
-    ./predg([369p]-?)?(32|64)?(mp)? <in0.ppm> ...
-    ./qredg([369p]-?)?(32|64)?(mp)? <in0out.ppm> ...
+    ./predgn?([369]-?)?(32|64)?(mp)? <in0.ppm> ...
+    ./qredgn?([369]-?)?(32|64)?(mp)? <in0out.ppm> ...
     ./ddpmopt(32|64)?(mp)? + <in0out.pgm> <in0in.ppm> ... > cache.txt
     ./ddpmopt(32|64)?(mp)? - <in0.ppm> ... < cache.txt
     ./tcont [xyit] <in0.ppm> ...
     cp `./tcont i <in0.ppm> ... | sort | head -n ... | tr '\n' ' '` outdir
 
-# Re-Leave
-We might re-leave this repository with this update, however, if there's some sort of the reason to improve, we re-open here, also, lieonn.hh change might be updated even we leave here.
+# Re-Re-Leave
+We might re-re-leave this repository with this update, however, if there's some sort of the reason to improve, we re-re-open here, also, lieonn.hh change might be updated even we leave here.
 
 # Real close
 2023/03/01
@@ -152,4 +154,5 @@ We might re-leave this repository with this update, however, if there's some sor
 2024/09/05 omit error output in zeroFix.
 2024/09/06 update and fix readme.
 2024/09/09 merge p1/pp3.cc result, change only output forward pred ones.
+2024/09/10 merge p1/pp3.cc result, re-re-leave.
 
