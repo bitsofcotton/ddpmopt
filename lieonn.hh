@@ -4498,7 +4498,7 @@ template <typename T, bool progress> static inline SimpleVector<T> predvqSub(Sim
   return predv<T, progress>(inb.subVector(in.size() - quint, quint).entity, string("last, ") + strloop).subVector(0, inb[0].size());
 }
 
-template <typename T, bool progress = true> static inline SimpleVector<T> predvq(const SimpleVector<SimpleVector<T> >& in) {
+template <typename T, bool progress = true> static inline SimpleVector<T> predvq0(const SimpleVector<SimpleVector<T> >& in) {
   const int quint(in.size() / 5);
   SimpleVector<SimpleVector<T> > in1;
   in1.entity.reserve(in.size() - quint);
@@ -4527,6 +4527,14 @@ template <typename T, bool progress = true> static inline SimpleVector<T> predvq
   return res;
 }
 
+template <typename T, bool progress = true> static inline SimpleVector<T> predvq(vector<SimpleVector<T> >& in) {
+  SimpleVector<SimpleVector<T> > work;
+  work.entity = move(in);
+  auto res(predvq0<T, progress>(work));
+  in = move(work.entity);
+  return res;
+}
+
 template <typename T, bool pnoise = false> vector<SimpleVector<T> > predVec(const vector<vector<SimpleVector<T> > >& in0) {
   assert(in0.size() && in0[0].size() && in0[0][0].size());
   vector<SimpleVector<T> > in;
@@ -4540,7 +4548,7 @@ template <typename T, bool pnoise = false> vector<SimpleVector<T> > predVec(cons
       in[i].setVector(j * in0[i][0].size(), in0[i][j]);
     }
   }
-  const auto p(predv<T, pnoise>(in));
+  const auto p(pnoise ? predvq<T>(in) : predv<T>(in));
   vector<SimpleVector<T> > res;
   res.resize(in0[0].size());
   for(int j = 0; j < in0[0].size(); j ++)
@@ -4563,7 +4571,7 @@ template <typename T, bool pnoise = false> vector<SimpleMatrix<T> > predMat(cons
                         k * in0[i][0].cols(), in0[i][j].row(k));
     }
   }
-  const auto p(predv<T, pnoise>(in));
+  const auto p(pnoise ? predvq<T>(in) : predv<T>(in));
   vector<SimpleMatrix<T> > res;
   res.resize(in0[0].size());
   for(int j = 0; j < res.size(); j ++) {
@@ -4607,7 +4615,7 @@ template <typename T, bool pnoise = false> SimpleSparseTensor<T> predSTen(const 
             in[i][cnt ++] =
               (in0[i][idx[j]][idx[k]][idx[m]] + T(int(1))) / T(int(2));
   }
-  const auto p(predv<T, pnoise>(in));
+  const auto p(pnoise ? predvq<T>(in) : predv<T>(in));
   in.resize(0);
   SimpleSparseTensor<T> res;
   for(int j = 0, cnt = 0; j < idx.size(); j ++)
