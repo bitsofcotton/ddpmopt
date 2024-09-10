@@ -24,6 +24,9 @@ We can try to do raw prediction quint with \[pq\]redgn.\*, this is because of ou
 
 Sometimes goki_check_cc:collect operation improves output images, this is because we can get curvature of them as continuous part of the whole image context.
 
+
+So we conclude: raw predg... is enough for data prediction meaning, predg...3... is enough for selecting function on each pixel with whole image context meaning, predgn... is same and extension by where we expect s.t. the stream algebra is abstract algebra as starting finite combination elements, then, the stream itself is made from the combination of their algebra. However, the prediction condition is something continuous condition in each pixel context as multiplying real next images.
+
 # Tips on recursive
 We can use bitsofcotton/goki_check_cc:test.py:\[pq\]redg command to recursive predictions.
 
@@ -155,5 +158,5 @@ We might re-re-leave this repository with this update, however, if there's some 
 2024/09/06 update and fix readme.
 2024/09/09 merge p1/pp3.cc result, change only output forward pred ones.
 2024/09/10 merge p1/pp3.cc result, re-re-leave.
-2024/09/10 fix pnoise meaning.
+2024/09/10 fix pnoise meaning. update readme, re-re-re-leave.
 
