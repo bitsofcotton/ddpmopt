@@ -15,12 +15,12 @@ CXXFLAGS+=	-std=c++11
 LDFLAGS+=	-lc++ -L/usr/local/lib
 #LDFLAGS+=	-lestdc++ -L/usr/local/lib
 
-CLEANFILES= *.o ddpmopt ddpmopt32 predg predg32 predg predg32 predg3 predg3-32 predg3 predg3-32 qredg qredg32 qredg qredg32 qredg3 qredg3-32 qredg3 qredg3-32 ddpmoptmp ddpmopt32mp predgmp predg32mp predgmp predg32mp predg3mp predg3-32mp predg3mp predg3-32mp qredgmp qredg32mp qredgmp qredg32mp qredg3mp qredg3-32mp qredg3mp qredg3-32mp tcont tcont32
+CLEANFILES= *.o ddpmopt ddpmopt32 predg predg32 qredg qredg32 ddpmoptmp ddpmopt32mp predgmp predg32mp qredgmp qredg32mp tcont tcont32
 
 clean:
 	@rm -rf ${CLEANFILES}
 
-all:	ddpmopt ddpmopt32 predg predg32 predg3 predg3-32 qredg qredg32 qredg3 qredg3-32 ddpmoptmp ddpmopt32mp predgmp predg32mp predg3mp predg3-32mp qredgmp qredg32mp qredg3mp qredg3-32mp tcont tcont32
+all:	ddpmopt ddpmopt32 predg predg32 qredg qredg32 ddpmoptmp ddpmopt32mp predgmp predg32mp qredgmp qredg32mp tcont tcont32
 
 ddpmopt:
 	${CXX} ${CXXFLAGS} -static -o ddpmopt ddpmopt.cc
