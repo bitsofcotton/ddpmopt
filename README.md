@@ -22,17 +22,20 @@ Also, we need to adjust the prediction depth to fight with internal states the i
 
 We can try to do raw prediction quint with \[pq\]redgn.\*, this is because of our p1/pp3.cc experiments also p8/README.md. A rough sketch of their validity is: doing quad cause valishes variables on given stream as a prediction, so they remains noise for structure subtracted form we suppose, so once more prediction causes noise also predicted so the result is something continuous without gamma condition. So after the prediction 'p0 0' causes our test on some of the PRNGs got better ones, since we don't need the continuous condition on predicting only one line / one image, we conclude with this form. Either, pp3n \| p0 0 test causes almost linear on surface but there's much of the gulfs appeares, so the gulf itself is the appearence of unobserved internal states in this condition, so we can feed some of the additional internal states on surface as p2/cr.py:z command however, if they suddenly appears with hidden algorithm dimension part, we cannot predict at all, this condition includes some of the hand made manipulation on the stream.
 
+Also we try to reduce gulf glitch as applying P0DFT first to eliminate self-similarity period based structure. This works well in practical.
+
 Sometimes goki_check_cc:collect operation improves output images, this is because we can get curvature of them as continuous part of the whole image context.
 
-
 So we conclude: raw predg... is enough for data prediction meaning, predg...3... is enough for selecting function on each pixel with whole image context meaning, predgn... is same and extension by where we expect s.t. the stream algebra is abstract algebra as starting finite combination elements, then, the stream itself is made from the combination of their algebra. However, the prediction result condition is something continuous condition in each pixel context as multiplying real next images. Also, all each of them needs input length enough for the states the stream have, otherwise, the gulf causes the prediction failure. Also, if raw predg... has 2-way idempotence, we only need raw predg... only however only depends on input length, also this might depends on attack to raw invariants.
+
+However, only to predict with finite input, our test best works with preddg(32\|64)?(mp)? and qreddg(32\|64)?(mp)? .
 
 # Tips on recursive
 We can use bitsofcotton/goki_check_cc:test.py:\[pq\]redg command to recursive predictions.
 
 # Usage:
-    ./predgn?([369]-?)?(32|64)?(mp)? <in0.ppm> ...
-    ./qredgn?([369]-?)?(32|64)?(mp)? <in0out.ppm> ...
+    ./predd?gn?([369]-?)?(32|64)?(mp)? <in0.ppm> ...
+    ./qredd?gn?([369]-?)?(32|64)?(mp)? <in0out.ppm> ...
     ./ddpmopt(32|64)?(mp)? + <in0out.pgm> <in0in.ppm> ... > cache.txt
     ./ddpmopt(32|64)?(mp)? - <in0.ppm> ... < cache.txt
     ./tcont [xyit] <in0.ppm> ...
@@ -160,4 +163,5 @@ We might re-re-leave this repository with this update, however, if there's some 
 2024/09/10 merge p1/pp3.cc result, re-re-leave.
 2024/09/10 fix pnoise meaning. update readme, re-re-re-leave.
 2024/09/12 update readme. leave.
+2024/09/22 append dft hack, add readme, releave.
 

@@ -15,12 +15,12 @@ CXXFLAGS+=	-std=c++11
 LDFLAGS+=	-lc++ -L/usr/local/lib
 #LDFLAGS+=	-lestdc++ -L/usr/local/lib
 
-CLEANFILES= *.o ddpmopt ddpmopt32 predg predg32 qredg qredg32 ddpmoptmp ddpmopt32mp predgmp predg32mp qredgmp qredg32mp tcont tcont32
+CLEANFILES= *.o ddpmopt ddpmopt32 predg predg32 qredg qredg32 ddpmoptmp ddpmopt32mp predgmp predg32mp qredgmp qredg32mp tcont tcont32 preddgmp qreddgmp preddg32mp qreddg32mp
 
 clean:
 	@rm -rf ${CLEANFILES}
 
-all:	ddpmopt ddpmopt32 predg predg32 qredg qredg32 ddpmoptmp ddpmopt32mp predgmp predg32mp qredgmp qredg32mp tcont tcont32
+all:	ddpmopt ddpmopt32 predg predg32 qredg qredg32 ddpmoptmp ddpmopt32mp predgmp predg32mp qredgmp qredg32mp tcont tcont32 preddgmp preddg32mp qreddgmp qreddg32mp
 
 ddpmopt:
 	${CXX} ${CXXFLAGS} -static -o ddpmopt ddpmopt.cc
@@ -36,8 +36,12 @@ ddpmopt64mp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=64 -o ddpmopt64mp ddpmopt.cc
 predg:
 	${CXX} ${CXXFLAGS} -static -D_PNOISE_=false -o predg predg.cc
+preddg:
+	${CXX} ${CXXFLAGS} -static -D_PNOISE_=false -D_PREDV_DFT_ -o preddg predg.cc
 predg32:
 	${CXX} ${CXXFLAGS} -static -D_PNOISE_=false -D_FLOAT_BITS_=32 -o predg32 predg.cc
+preddg32:
+	${CXX} ${CXXFLAGS} -static -D_PNOISE_=false -D_PREDV_DFT_ -D_FLOAT_BITS_=32 -o preddg32 predg.cc
 predgn:
 	${CXX} ${CXXFLAGS} -static -D_PNOISE_=true -o predgn predg.cc
 predgn32:
@@ -68,8 +72,12 @@ predgn9-32:
 	${CXX} ${CXXFLAGS} -static -D_PNOISE=true -D_PREDV_=9 -D_FLOAT_BITS_=32 -o predgn9-32 predg.cc
 predgmp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_PNOISE_=false -o predgmp predg.cc
+preddgmp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_PNOISE_=false -D_PREDV_DFT_ -o preddgmp predg.cc
 predg32mp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_PNOISE_=false -D_FLOAT_BITS_=32 -o predg32mp predg.cc
+preddg32mp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_PNOISE_=false -D_PREDV_DFT_ -D_FLOAT_BITS_=32 -o preddg32mp predg.cc
 predgnmp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_PNOISE_=true -o predgnmp predg.cc
 predgn32mp:
@@ -100,8 +108,12 @@ predgn9-32mp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_PNOISE_=true -D_PREDV_=9 -D_FLOAT_BITS_=32 -o predgn9-32mp predg.cc
 qredg:
 	${CXX} ${CXXFLAGS} -static -D_PNOISE_=false -o qredg qredg.cc
+qreddg:
+	${CXX} ${CXXFLAGS} -static -D_PNOISE_=false -D_PREDV_DFT_ -o qreddg qredg.cc
 qredg32:
 	${CXX} ${CXXFLAGS} -static -D_PNOISE_=false -D_FLOAT_BITS_=32 -o qredg32 qredg.cc
+qreddg32:
+	${CXX} ${CXXFLAGS} -static -D_PNOISE_=false -D_PREDV_DFT_ -D_FLOAT_BITS_=32 -o qreddg32 qredg.cc
 qredgn:
 	${CXX} ${CXXFLAGS} -static -D_PNOISE_=true -o qredgn qredg.cc
 qredgn32:
@@ -132,8 +144,12 @@ qredgn9-32:
 	${CXX} ${CXXFLAGS} -static -D_PNOISE_=true -D_PREDV_=9 -D_FLOAT_BITS_=32 -o qredgn9-32 qredg.cc
 qredgmp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_PNOISE_=false -o qredgmp qredg.cc
+qreddgmp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_PNOISE_=false -D_PREDV_DFT_ -o qreddgmp qredg.cc
 qredg32mp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_PNOISE_=false -D_FLOAT_BITS_=32 -o qredg32mp qredg.cc
+qreddg32mp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_PNOISE_=false -D_PREDV_DFT_ -D_FLOAT_BITS_=32 -o qreddg32mp qredg.cc
 qredgmp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_PNOISE_=true -o qredgnmp qredg.cc
 qredg32mp:
