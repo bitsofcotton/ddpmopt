@@ -28,14 +28,18 @@ Sometimes goki_check_cc:collect operation improves output images, this is becaus
 
 So we conclude: raw predg... is enough for data prediction meaning, predg...3... is enough for selecting function on each pixel with whole image context meaning, predgn... is same and extension by where we expect s.t. the stream algebra is abstract algebra as starting finite combination elements, then, the stream itself is made from the combination of their algebra. However, the prediction result condition is something continuous condition in each pixel context as multiplying real next images. Also, all each of them needs input length enough for the states the stream have, otherwise, the gulf causes the prediction failure. Also, if raw predg... has 2-way idempotence, we only need raw predg... only however only depends on input length, also this might depends on attack to raw invariants.
 
-However, only to predict with finite input, our test best works with preddg(32\|64)?(mp)? and qreddg(32\|64)?(mp)? .
+However, only to predict with finite input, our test best works with \[pq\]redfg(32\|64)?(mp)? . This might because of linear increase of parameters we predict and 1-layered in-output saturation copying structure with 4 dimension but never get whole input saturation. So \[pq\]redfg3-... might be the correct one but very heavy to run.
+
+Also, if such self similarity hack is included in PP0 and so on, either recursive also included, we only need raw predg only to predict and p1/pp3.cc results such output with p0/p0.cc after apply.
+This might because avoiding jammer by PdeltaOnce then, predict invariant continuity can get return something continue result on datastream-prediction inner product.
+So we might need to apply weighted average on continued datastream-prediction product back stream but long enough, also this might be only some backstream weighted one part to part production.
 
 # Tips on recursive
 We can use bitsofcotton/goki_check_cc:test.py:\[pq\]redg command to recursive predictions.
 
 # Usage:
-    ./predd?gn?([369]-?)?(32|64)?(mp)? <in0.ppm> ...
-    ./qredd?gn?([369]-?)?(32|64)?(mp)? <in0out.ppm> ...
+    ./predf?gn?([369]-?)?(32|64)?(mp)? <in0.ppm> ...
+    ./qredf?gn?([369]-?)?(32|64)?(mp)? <in0out.ppm> ...
     ./ddpmopt(32|64)?(mp)? + <in0out.pgm> <in0in.ppm> ... > cache.txt
     ./ddpmopt(32|64)?(mp)? - <in0.ppm> ... < cache.txt
     ./tcont [xyit] <in0.ppm> ...
@@ -164,4 +168,5 @@ We might re-re-leave this repository with this update, however, if there's some 
 2024/09/10 fix pnoise meaning. update readme, re-re-re-leave.
 2024/09/12 update readme. leave.
 2024/09/22 append dft hack, add readme, releave.
+2024/09/23 fix _PREDV_==3 _PREDV_DFT_ case unit value. Changed preddg... to predfg... to make some readability. Fix around comments and readme.md.
 

@@ -3375,7 +3375,7 @@ public:
     this->step = step;
   }
   inline ~P0() { ; };
-  inline T next(const SimpleVector<T>& in) {
+  inline T next(const SimpleVector<T>& in, const int& sute = 0) {
     return pnextcacher<T>(in.size(), ((step - 1) % in.size()) + 1, r).dot(in);
   }
   int step;
@@ -3434,7 +3434,7 @@ public:
   inline northPole() { ; }
   inline northPole(P&& p) { this->p = p; }
   inline ~northPole() { ; }
-  inline T next(const SimpleVector<T>& in) {
+  inline T next(const SimpleVector<T>& in, const int& unit = 3) {
     static const T zero(int(0));
     static const T one(int(1));
     static const T M(atan(one / sqrt(SimpleMatrix<T>().epsilon())));
@@ -3448,7 +3448,7 @@ public:
         // ff[i] = atan(one / ff[i]);
         // assert(- M < ff[i] && ff[i] < M);
       }
-    auto work(p.next(ff));
+    auto work(p.next(ff, unit));
     // if(! isfinite(work) || work == zero) return in[in.size() - 1];
     if(! isfinite(work)) return in[in.size() - 1];
     // work = tan(max(- M, min(M, one / tan(max(- M, min(M, work))))));
@@ -3464,15 +3464,15 @@ public:
   inline sumChain() { ; }
   inline sumChain(P&& p) { this->p = p; }
   inline ~sumChain() { ; }
-  inline T next(const SimpleVector<T>& in) {
+  inline T next(const SimpleVector<T>& in, const int& unit = 3) {
     auto ff(in);
     for(int i = 1; i < ff.size(); i ++)
       ff[i] += ff[i - 1];
-    if(! avg) return p.next(ff) - ff[ff.size() - 1];
+    if(! avg) return p.next(ff, unit) - ff[ff.size() - 1];
     const auto A(ff[ff.size() - 1] / T(ff.size()));
     for(int i = 0; i < ff.size(); i ++)
       ff[i] = in[i] - A;
-    return p.next(ff) + A;
+    return p.next(ff, unit) + A;
   }
   P p;
 };
@@ -3482,7 +3482,7 @@ public:
   inline logChain() { ; }
   inline logChain(P&& p) { this->p = p; }
   inline ~logChain() { ; }
-  inline T next(const SimpleVector<T>& in) {
+  inline T next(const SimpleVector<T>& in, const int& unit = 3) {
     static const T zero(int(0));
     static const T one(int(1));
     auto ff(in);
@@ -3493,7 +3493,7 @@ public:
     gg.O();
     for(int i = 1; i < ff.size(); i ++)
       if(! isfinite(gg[i - 1] = ff[i] / ff[i - 1] - one)) return in[in.size() - 1];
-    return p.next(gg) * ff[ff.size() - 1];
+    return p.next(gg, unit) * ff[ff.size() - 1];
   }
   P p;
 };
@@ -3505,7 +3505,7 @@ public:
     q = p0_i0t(p0_0t(P0<T>(step)));
   }
   inline ~P0maxRank0() { ; }
-  inline T next(const SimpleVector<T>& in) {
+  inline T next(const SimpleVector<T>& in, const int& sute = 0) {
     return (p.next(in) + q.next(in)) / T(int(2));
   }
   // N.B. on existing taylor series.
@@ -3530,7 +3530,7 @@ public:
   }
   inline ~P0maxRank() { ; }
   inline T next(const SimpleVector<T>& in, const int& sute = 0) {
-    return p.next(in);
+    return p.next(in, sute);
   }
 /*
   // N.B. make information-rich not to associative/commutative.
@@ -4427,41 +4427,44 @@ template <typename T, bool progress = true> SimpleVector<T> predv(const vector<S
   for(int i = 0; i < in.size(); i ++)  {
     seconds[i] = makeProgramInvariant<T>(in[i], - T(int(1)), true).second;
   }
+// N.B. we need this to reduce gulf glitch around unobserved condition
+//      with large input length around self-similarity hack.
 #if !defined(_PREDV_DFT_)
-#if !defined(_PREDV_)
+#  if !defined(_PREDV_)
   const int unit(in.size() / 2);
   #define PPP PP0<T>
-#elif _PREDV_ == 3
+// N.B. we need this with shorter range but not in practical.
+#  elif _PREDV_ == 3
   const int unit(in.size() / 6);
   #define PPP PP3<T>
-#elif _PREDV_ == 6
+#  elif _PREDV_ == 6
   const int unit(in.size() / 12);
   #define PPP PP6<T>
-#elif _PREDV_ == 9
+#  elif _PREDV_ == 9
   const int unit(in.size() / 18);
   #define PPP PP9<T>
+#  else
+#    error _PREDV_ has a invalid value
+#  endif
 #else
-# error _PREDV_ has a invalid value
-#endif
-#else
-#if !defined(_PREDV_)
+#  if !defined(_PREDV_)
   const int unit(in.size() / 3);
   #define PPP P0DFT<T, PP0<T> >
-#elif _PREDV_ == 3
-  const int unit(in.size() / 5);
+#  elif _PREDV_ == 3
+  const int unit(in.size() / 7);
   #define PPP P0DFT<T, PP3<T> >
-#elif _PREDV_ == 6
+#  elif _PREDV_ == 6
   const int unit(in.size() / 13);
   #define PPP P0DFT<T, PP6<T> >
-#elif _PREDV_ == 9
+#  elif _PREDV_ == 9
   const int unit(in.size() / 19);
   #define PPP P0DFT<T, PP9<T> >
-#else
-# error _PREDV_ has a invalid value
-#endif
-#endif
+#  else
+#    error _PREDV_ has a invalid value
+#  endif
   dftcache<T>(  unit);
   dftcache<T>(- unit);
+#endif
   SimpleVector<T> p(in[0].size());
   p.O();
 #if defined(_OPENMP)
