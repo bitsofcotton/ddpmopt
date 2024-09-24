@@ -22,17 +22,12 @@ Also, we need to adjust the prediction depth to fight with internal states the i
 
 We can try to do raw prediction quint with \[pq\]redgn.\*, this is because of our p1/pp3.cc experiments also p8/README.md. A rough sketch of their validity is: doing quad cause valishes variables on given stream as a prediction, so they remains noise for structure subtracted form we suppose, so once more prediction causes noise also predicted so the result is something continuous without gamma condition. So after the prediction 'p0 0' causes our test on some of the PRNGs got better ones, since we don't need the continuous condition on predicting only one line / one image, we conclude with this form. Either, pp3n \| p0 0 test causes almost linear on surface but there's much of the gulfs appeares, so the gulf itself is the appearence of unobserved internal states in this condition, so we can feed some of the additional internal states on surface as p2/cr.py:z command however, if they suddenly appears with hidden algorithm dimension part, we cannot predict at all, this condition includes some of the hand made manipulation on the stream.
 
-Also we try to reduce gulf glitch as applying P0DFT first to eliminate self-similarity period based structure. This works well in practical.
-
 Sometimes goki_check_cc:collect operation improves output images, this is because we can get curvature of them as continuous part of the whole image context.
 
-So we conclude: raw predg... is enough for data prediction meaning, predg...3... is enough for selecting function on each pixel with whole image context meaning, predgn... is same and extension by where we expect s.t. the stream algebra is abstract algebra as starting finite combination elements, then, the stream itself is made from the combination of their algebra. However, the prediction result condition is something continuous condition in each pixel context as multiplying real next images. Also, all each of them needs input length enough for the states the stream have, otherwise, the gulf causes the prediction failure. Also, if raw predg... has 2-way idempotence, we only need raw predg... only however only depends on input length, also this might depends on attack to raw invariants.
-
-However, only to predict with finite input, our test best works with \[pq\]redfg(32\|64)?(mp)? . This might because of linear increase of parameters we predict and 1-layered in-output saturation copying structure with 4 dimension but never get whole input saturation. So \[pq\]redfg3-... might be the correct one but very heavy to run.
-
-Also, if such self similarity hack is included in PP0 and so on, either recursive also included, we only need raw predg only to predict and p1/pp3.cc results such output with p0/p0.cc after apply.
-This might because avoiding jammer by PdeltaOnce then, predict invariant continuity can get return something continue result on datastream-prediction inner product.
-So we might need to apply weighted average on continued datastream-prediction product back stream but long enough, also this might be only some backstream weighted one part to part production.
+We are avoiding jammer by PdeltaOnce then, predict invariant can get return something continue result on datastream-prediction inner product.
+However, the integrated predvp0 predictor prediction often fails in some tests, even the p1/pp3n \| p0/p0 predictor works well on the meaning of us.
+So this might be came from our systems' infection from deep inside the box.
+Otherwise, this might work well so \[pq\]redg using them.
 
 # Tips on recursive
 We can use bitsofcotton/goki_check_cc:test.py:\[pq\]redg command to recursive predictions.
@@ -169,4 +164,5 @@ We might re-re-leave this repository with this update, however, if there's some 
 2024/09/12 update readme. leave.
 2024/09/22 append dft hack, add readme, releave.
 2024/09/23 fix _PREDV_==3 _PREDV_DFT_ case unit value. Changed preddg... to predfg... to make some readability. Fix around comments and readme.md.
+2024/09/24 brush up, eliminate exhaust of the resource to get tiny output improve in finite and up to aleph_0 condition.
 

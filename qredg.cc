@@ -40,7 +40,7 @@ int main(int argc, const char* argv[]) {
       for(int j = 0; j < work.size(); j ++)
         pwork[i].emplace_back(work[j].row(i));
     }
-    auto p(predVec<num_t, _PNOISE_>(pwork));
+    auto p(predVec<num_t>(pwork));
     vector<SimpleMatrix<num_t> > wwork(work.size(),
       SimpleMatrix<num_t>(work[0].rows() + 1, work[0].cols()).O());
     for(int j = 0; j < work.size(); j ++)
