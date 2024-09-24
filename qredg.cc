@@ -60,7 +60,8 @@ int main(int argc, const char* argv[]) {
       wwork[j].row(wwork[j].rows() - 1) *=
         sqrt(norm2 / norm2_m1) * num_t(int(3)) / num_t(int(2));
     if(! savep2or3<num_t>(argv[i0], normalize<num_t>(wwork.size() == 3 ?
-      xyz2rgb<num_t>(wwork) : wwork), work[0].rows()) )
+      // xyz2rgb<num_t>(wwork) : wwork), work[0].rows()) )
+      xyz2rgb<num_t>(wwork) : wwork) ) )
       cerr << "failed to save." << endl;
   }
   cerr << " Done" << endl;
