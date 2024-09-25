@@ -39,7 +39,6 @@ int main(int argc, const char* argv[]) {
   }
   const auto p(predMat<num_t>(normalize<num_t>(in)));
   if(! savep2or3<num_t>("predg.ppm",
-    // normalize<num_t>(p.size() == 3 ? xyz2rgb<num_t>(p) : p), in.size()) )
     normalize<num_t>(p.size() == 3 ? xyz2rgb<num_t>(p) : p)) )
     cerr << "failed to save." << endl;
   cerr << " Done" << endl;

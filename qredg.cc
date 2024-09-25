@@ -51,16 +51,14 @@ int main(int argc, const char* argv[]) {
     for(int j = 0; j < wwork.size(); j ++)
       for(int k = 0; k < wwork[j].rows() - 1; k ++)
         norm2 += wwork[j].row(k).dot(wwork[j].row(k));
-    norm2 = norm2 / num_t(wwork[0].rows() - 1);
+    norm2 /= num_t(wwork[0].rows() - 1);
     num_t norm2_m1(int(0));
     for(int j = 0; j < wwork.size(); j ++)
       norm2_m1 += wwork[j].row(wwork[j].rows() - 1).dot(
         wwork[j].row(wwork[j].rows() - 1) );
     for(int j = 0; j < wwork.size(); j ++)
-      wwork[j].row(wwork[j].rows() - 1) *=
-        sqrt(norm2 / norm2_m1) * num_t(int(3)) / num_t(int(2));
+      wwork[j].row(wwork[j].rows() - 1) *= sqrt(norm2 / norm2_m1);
     if(! savep2or3<num_t>(argv[i0], normalize<num_t>(wwork.size() == 3 ?
-      // xyz2rgb<num_t>(wwork) : wwork), work[0].rows()) )
       xyz2rgb<num_t>(wwork) : wwork) ) )
       cerr << "failed to save." << endl;
   }

@@ -24,17 +24,20 @@ We can try to do raw prediction quint with \[pq\]redgn.\*, this is because of ou
 
 Sometimes goki_check_cc:collect operation improves output images, this is because we can get curvature of them as continuous part of the whole image context.
 
-We are avoiding jammer by PdeltaOnce then, predict invariant can get return something continue result on datastream-prediction inner product.
-However, the integrated predvp0 predictor prediction often fails in some tests, even the p1/pp3n \| p0/p0 predictor works well on the meaning of us.
-So this might be came from our systems' infection from deep inside the box.
-Otherwise, this might work well so \[pq\]redg using them.
+We can do P0DFT before to predict, this can increase some self-similarity based jammers but many of the cost increases, we eliminated this code.
+
+We are avoiding jammer by PdeltaOnce then predict by invariant can get return something continue result on datastream-prediction inner product. \[pq\]redg using this. This improves finite combinations up to aleph_0 but works very well on some of the soft PRNG tests.
 
 # Tips on recursive
 We can use bitsofcotton/goki_check_cc:test.py:\[pq\]redg command to recursive predictions.
 
+# XXX around predictions
+If input number is smaller than expected and input continuity is almost discontinued, result can be seen as only last small number weighted sum result.
+This is bug and we can correct this by enlarging predv0 unit however this costs huge. We're using moderate spec PC around early 2020 laptop, so we cannot endure the result on them so the implementation is excluded but can be specified in the parameters in \[pq\]redg.cc pred... call.
+
 # Usage:
-    ./predf?gn?([369]-?)?(32|64)?(mp)? <in0.ppm> ...
-    ./qredf?gn?([369]-?)?(32|64)?(mp)? <in0out.ppm> ...
+    ./predg(32|64)?(mp)? <in0.ppm> ...
+    ./qredg(32|64)?(mp)? <in0out.ppm> ...
     ./ddpmopt(32|64)?(mp)? + <in0out.pgm> <in0in.ppm> ... > cache.txt
     ./ddpmopt(32|64)?(mp)? - <in0.ppm> ... < cache.txt
     ./tcont [xyit] <in0.ppm> ...
@@ -165,4 +168,5 @@ We might re-re-leave this repository with this update, however, if there's some 
 2024/09/22 append dft hack, add readme, releave.
 2024/09/23 fix _PREDV_==3 _PREDV_DFT_ case unit value. Changed preddg... to predfg... to make some readability. Fix around comments and readme.md.
 2024/09/24 brush up, eliminate exhaust of the resource to get tiny output improve in finite and up to aleph_0 condition.
+2024/09/25 elim dead code, update readme. leave.
 

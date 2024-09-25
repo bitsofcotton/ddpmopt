@@ -4397,10 +4397,6 @@ template <typename T, bool progress = true> SimpleVector<T> predv(const vector<S
     seconds[i] = makeProgramInvariant<T>(in[i], - T(int(1)), true).second;
   }
   const int unit(in.size() / 2);
-  SimpleVector<T> init(in.size() - unit);
-  for(int i = 0; i < init.size(); i ++)
-    init[i] = T(int(i));
-  P0maxRank0<T>().next(init);
   SimpleVector<T> p(in[0].size());
   p.O();
 #if defined(_OPENMP)
@@ -4438,7 +4434,7 @@ template <typename T, bool progress = true> SimpleVector<T> predv(const vector<S
 // N.B. instead of them, we apply P0maxRank0 after predv,
 //      this improves well in practical and up to raw aleph_0.
 template <typename T, bool progress = true> static inline SimpleVector<T> predvp0(const SimpleVector<SimpleVector<T> >& in, const int& unit = 3) {
-  assert(0 <= unit);
+  assert(0 <= unit && unit <= in.size() / 3);
   if(unit <= 1)
     return predv<T, progress>(in.entity, string("0 / 1")).subVector(0, in[0].size());
   // N.B. we specify what width in ordinary we get better result in average.
