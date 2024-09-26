@@ -4478,7 +4478,7 @@ template <typename T, bool progress = true> static inline SimpleVector<T> predvp
   return res;
 }
 
-template <typename T> vector<SimpleVector<T> > predVec(const vector<vector<SimpleVector<T> > >& in0, const int& unit = 3) {
+template <typename T> vector<SimpleVector<T> > predVec(vector<vector<SimpleVector<T> > >& in0, const int& unit = 3) {
   assert(in0.size() && in0[0].size() && in0[0][0].size());
   vector<SimpleVector<T> > in;
   in.resize(in0.size());
@@ -4491,15 +4491,19 @@ template <typename T> vector<SimpleVector<T> > predVec(const vector<vector<Simpl
       in[i].setVector(j * in0[i][0].size(), in0[i][j]);
     }
   }
+  const auto size0(in0[0].size());
+  const auto size1(in0[0][0].size());
+  in0.resize(0);
   const auto p(predvp0<T>(in, unit));
+  in.resize(0);
   vector<SimpleVector<T> > res;
-  res.resize(in0[0].size());
-  for(int j = 0; j < in0[0].size(); j ++)
-    res[j] = p.subVector(in0[0][0].size() * j, in0[0][0].size());
+  res.resize(size0);
+  for(int j = 0; j < res.size(); j ++)
+    res[j] = p.subVector(size1 * j, size1);
   return res;
 }
 
-template <typename T> vector<SimpleMatrix<T> > predMat(const vector<vector<SimpleMatrix<T> > >& in0, const int& unit = 3) {
+template <typename T> vector<SimpleMatrix<T> > predMat(vector<vector<SimpleMatrix<T> > >& in0, const int& unit = 3) {
   assert(in0.size() && in0[0].size() && in0[0][0].rows() && in0[0][0].cols());
   vector<SimpleVector<T> > in;
   in.resize(in0.size());
@@ -4514,20 +4518,23 @@ template <typename T> vector<SimpleMatrix<T> > predMat(const vector<vector<Simpl
                         k * in0[i][0].cols(), in0[i][j].row(k));
     }
   }
+  const auto size(in0[0].size());
+  const auto rows(in0[0][0].rows());
+  const auto cols(in0[0][0].cols());
+  in0.resize(0);
   const auto p(predvp0<T>(in, unit));
+  in.resize(0);
   vector<SimpleMatrix<T> > res;
-  res.resize(in0[0].size());
+  res.resize(size);
   for(int j = 0; j < res.size(); j ++) {
-    res[j].resize(in0[0][0].rows(), in0[0][0].cols());
-    for(int k = 0; k < in0[0][0].rows(); k ++)
-      res[j].row(k) = p.subVector(
-        j * in0[0][0].rows() * in0[0][0].cols() + k * in0[0][0].cols(),
-        in0[0][0].cols());
+    res[j].resize(rows, cols);
+    for(int k = 0; k < rows; k ++)
+      res[j].row(k) = p.subVector(j * rows * cols + k * cols, cols);
   }
   return res;
 }
 
-template <typename T> SimpleSparseTensor<T> predSTen(const vector<SimpleSparseTensor<T> >& in0, const vector<int>& idx, const int& unit = 3) {
+template <typename T> SimpleSparseTensor<T> predSTen(vector<SimpleSparseTensor<T> >& in0, const vector<int>& idx, const int& unit = 3) {
   assert(idx.size() && in0.size());
   // N.B. we don't do input scaling.
   // N.B. the data we target is especially string stream corpus.
@@ -4558,6 +4565,7 @@ template <typename T> SimpleSparseTensor<T> predSTen(const vector<SimpleSparseTe
             in[i][cnt ++] =
               (in0[i][idx[j]][idx[k]][idx[m]] + T(int(1))) / T(int(2));
   }
+  in0.resize(0);
   const auto p(predvp0<T>(in, unit));
   in.resize(0);
   SimpleSparseTensor<T> res;
@@ -4997,10 +5005,12 @@ template <typename T> static inline SimpleMatrix<T> flop(const SimpleMatrix<T>& 
   return res;
 }
 
-template <typename T> static inline SimpleMatrix<T> normalize(const SimpleMatrix<T>& data, const T& upper = T(1)) {
+template <typename T> static inline SimpleMatrix<T> normalize(SimpleMatrix<T>& data, const T& upper = T(1)) {
   vector<SimpleMatrix<T> > work;
-  work.emplace_back(data);
-  return normalize<T>(work, upper)[0];
+  work.emplace_back(move(data));
+  auto res(normalize<T>(work, upper)[0]);
+  data = move(work[0]);
+  return res;
 }
 
 template <typename T> static inline SimpleMatrix<T> autoLevel(const SimpleMatrix<T>& data, const int& count = 0) {

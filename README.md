@@ -10,6 +10,8 @@ We need to do ulimit or edit /etc/login.conf for large malloc use cases required
 
 Using this with mimalloc or so can increase memory usage with multi thread on some systems.
 
+We use at least 2\*((whole input size))\*sizeof(num_t) in heap resource, with better resource efficiency allocator, it's up to (2+\epsilon)\*... NOT for any allocators.
+
 # Tips around c++ compilers
 Some of the lieonn.hh operator \>\> class doesn't work as expected, might be compilers' bug.
 
@@ -169,4 +171,5 @@ We might re-re-leave this repository with this update, however, if there's some 
 2024/09/23 fix _PREDV_==3 _PREDV_DFT_ case unit value. Changed preddg... to predfg... to make some readability. Fix around comments and readme.md.
 2024/09/24 brush up, eliminate exhaust of the resource to get tiny output improve in finite and up to aleph_0 condition.
 2024/09/25 elim dead code, update readme. leave.
+2024/09/26 improve heap resource efficiency.
 
