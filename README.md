@@ -28,14 +28,10 @@ Sometimes goki_check_cc:collect operation improves output images, this is becaus
 
 We can do P0DFT before to predict, this can increase some self-similarity based jammers but many of the cost increases, we eliminated this code.
 
-We are avoiding jammer by PdeltaOnce then predict by invariant can get return something continue result on datastream-prediction inner product. \[pq\]redg using this. This improves finite combinations up to aleph_0 but works very well on some of the soft PRNG tests.
+We are predicting by invariant can get return something continue result on datastream-prediction inner product. \[pq\]redg using this. This improves finite combinations up to aleph_0 but works very well on some of the soft PRNG tests.
 
 # Tips on recursive
 We can use bitsofcotton/goki_check_cc:test.py:\[pq\]redg command to recursive predictions.
-
-# XXX around predictions
-If input number is smaller than expected and input continuity is almost discontinued, result can be seen as only last small number weighted sum result.
-This is bug and we can correct this by enlarging predv0 unit however this costs huge. We're using moderate spec PC around early 2020 laptop, so we cannot endure the result on them so the implementation is excluded but can be specified in the parameters in \[pq\]redg.cc pred... call.
 
 # Usage:
     ./predg(32|64)?(mp)? <in0.ppm> ...
