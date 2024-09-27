@@ -4383,10 +4383,18 @@ template <typename T> static inline SimpleMatrix<T> center(const SimpleMatrix<T>
 //      the result we get isn't depends on simplicity on loop, so we elim it.
 // template <typename T> using PP0 = PdeltaOnce<T, P01<T, P0maxRank<T>, true> >;
 // N.B. we use maximum of them as invariant compatible, no continuous condition.
-template <typename T> using PP0 = PdeltaOnce<T, P01<T, P01delim<T>, true> >;
+// N.B. we make insurance as PdeltaOnce, this causes tan(Ax-x)==tan(Bx),
+//      diag(eigen(B)) ~~ diag(1) hypothesis but usually the original stream
+//      matrix is larger than this. we might need P0DFT after doing this but
+//      they should be included in P01 also friendly to orthogonal matrices.
+// N.B. some of the soft PRNG tests doesn't need PdeltaOnce.
+// template <typename T> using PP0 = PdeltaOnce<T, P01<T, P01delim<T>, true> >;
+// N.B. we are targetting the structure they appears additional states after
+//      additional states on given input range. so we don't use PdeltaOnce.
+template <typename T> using PP0 = P01<T, P01delim<T>, true>;
 
 // N.B. as ddpmopt:README.md, PP3 is least and enough normally.
-template <typename T, bool progress = true> SimpleVector<T> predv(const vector<SimpleVector<T> >& in, const string& strloop = string("")) {
+template <typename T, bool progress = true> SimpleVector<T> predv0(const vector<SimpleVector<T> >& in, const string& strloop = string("")) {
   // N.B. we need to initialize p0 vector.
   SimpleVector<T> seconds(in.size());
   seconds.O();
@@ -4433,17 +4441,19 @@ template <typename T, bool progress = true> SimpleVector<T> predv(const vector<S
 // Important N.B. However, belows doesn't improve output enough, so we elim it.
 // N.B. instead of them, we apply P0maxRank0 after predv,
 //      this improves well in practical and up to raw aleph_0.
-template <typename T, bool progress = true> static inline SimpleVector<T> predvp0(const SimpleVector<SimpleVector<T> >& in, const int& unit = 3) {
+template <typename T, bool progress = true> static inline SimpleVector<T> predv(const SimpleVector<SimpleVector<T> >& in, const int& unit = 3) {
+  // N.B. we specify what width in ordinary we get better result in average.
+  //      we use minimum as a default, however we should use another length
+  //      avoiding some of the jammers.
+  // N.B. it's up to size / 3, because we need P01 double states than P0.
+  //      P0 looks 4 times upper by complement, so we average double upper.
   assert(0 <= unit && unit <= in.size() / 3);
   if(unit <= 1)
-    return predv<T, progress>(in.entity, string("0 / 1")).subVector(0, in[0].size());
-  // N.B. we specify what width in ordinary we get better result in average.
-  //      we use minimum as default, however we should use another length
-  //      avoiding some of the jammers.
+    return predv0<T, progress>(in.entity, string("0 / 1")).subVector(0, in[0].size());
   SimpleVector<SimpleVector<T> > p;
   p.entity.reserve(unit);
   for(int i = 0; i < unit; i ++)
-    p.entity.emplace_back(predv<T, progress>(in.subVector(i, in.size() - unit + 1).entity, to_string(i) + string(" / ") + to_string(unit)));
+    p.entity.emplace_back(predv0<T, progress>(in.subVector(i, in.size() - unit + 1).entity, to_string(i) + string(" / ") + to_string(unit)));
   SimpleVector<T> res(in[0].size());
   res.O();
   SimpleMatrix<T> ip(p.size() - 1, res.size());
@@ -4470,10 +4480,10 @@ template <typename T, bool progress = true> static inline SimpleVector<T> predvp
   return res;
 }
 
-template <typename T, bool progress = true> static inline SimpleVector<T> predvp0(vector<SimpleVector<T> >& in, const int& unit = 3) {
+template <typename T, bool progress = true> static inline SimpleVector<T> predv(vector<SimpleVector<T> >& in, const int& unit = 3) {
   SimpleVector<SimpleVector<T> > work;
   work.entity = move(in);
-  auto res(predvp0<T, progress>(work, unit));
+  auto res(predv<T, progress>(work, unit));
   in = move(work.entity);
   return res;
 }
@@ -4494,7 +4504,7 @@ template <typename T> vector<SimpleVector<T> > predVec(vector<vector<SimpleVecto
   const auto size0(in0[0].size());
   const auto size1(in0[0][0].size());
   in0.resize(0);
-  const auto p(predvp0<T>(in, unit));
+  const auto p(predv<T>(in, unit));
   in.resize(0);
   vector<SimpleVector<T> > res;
   res.resize(size0);
@@ -4522,7 +4532,7 @@ template <typename T> vector<SimpleMatrix<T> > predMat(vector<vector<SimpleMatri
   const auto rows(in0[0][0].rows());
   const auto cols(in0[0][0].cols());
   in0.resize(0);
-  const auto p(predvp0<T>(in, unit));
+  const auto p(predv<T>(in, unit));
   in.resize(0);
   vector<SimpleMatrix<T> > res;
   res.resize(size);
@@ -4566,7 +4576,7 @@ template <typename T> SimpleSparseTensor<T> predSTen(vector<SimpleSparseTensor<T
               (in0[i][idx[j]][idx[k]][idx[m]] + T(int(1))) / T(int(2));
   }
   in0.resize(0);
-  const auto p(predvp0<T>(in, unit));
+  const auto p(predv<T>(in, unit));
   in.resize(0);
   SimpleSparseTensor<T> res;
   for(int j = 0, cnt = 0; j < idx.size(); j ++)

@@ -172,4 +172,5 @@ We might re-re-leave this repository with this update, however, if there's some 
 2024/09/24 brush up, eliminate exhaust of the resource to get tiny output improve in finite and up to aleph_0 condition.
 2024/09/25 elim dead code, update readme. leave.
 2024/09/26 improve heap resource efficiency.
+2024/09/27 refactoring predv, predvp0. the target stream we predict is now concrete, so PP0 type changed.
 
