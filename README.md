@@ -20,18 +20,21 @@ If we use pqredg with goki_check_cc:test.py:bit command, we suppose the input im
 
 The plain \[pq\]redg predictor uses first order shallow copying structures but it's saturated by in/output, 3 predictor uses 2nd order enough bits for predictions, 6 predictor is enough for multiple layer algebraic copying structure, 9 predictor is enough for algorithm decomposition including inverse of them, so in the worst case, 9 predictor handles the prediction with simple but shall not be enough complexity on information amount P01 predictor copying structure with the decomposition, however, in the flat algorithm meaning, it's equivalent to plain or 3 predictors.
 
-Also, we need to adjust the prediction depth to fight with internal states the image stream really have vs the image size or input number dimension chase. However we need to shrink input images to certain sizes depends on input number. Either, if we suppose the prediction is done by only one function and they're pure function with small number of initialized internal states, 3 predictor is enough for them.
+Also, we need to adjust the prediction depth to fight with internal states the image stream really have vs the image size or input number dimension chase. However we need to shrink input images to certain sizes depends on input number. Either, if we suppose the prediction is done by only one function and they're pure function with small number of initialized internal states, 3 predictor is enough for them, if we don't have an interest on second order, plain predictor is enough.
 
 We can try to do raw prediction quint with \[pq\]redgn.\*, this is because of our p1/pp3.cc experiments also p8/README.md. A rough sketch of their validity is: doing quad cause valishes variables on given stream as a prediction, so they remains noise for structure subtracted form we suppose, so once more prediction causes noise also predicted so the result is something continuous without gamma condition. So after the prediction 'p0 0' causes our test on some of the PRNGs got better ones, since we don't need the continuous condition on predicting only one line / one image, we conclude with this form. Either, pp3n \| p0 0 test causes almost linear on surface but there's much of the gulfs appeares, so the gulf itself is the appearence of unobserved internal states in this condition, so we can feed some of the additional internal states on surface as p2/cr.py:z command however, if they suddenly appears with hidden algorithm dimension part, we cannot predict at all, this condition includes some of the hand made manipulation on the stream.
 
 Sometimes goki_check_cc:collect operation improves output images, this is because we can get curvature of them as continuous part of the whole image context.
 
-We can do P0DFT before to predict, this can increase some self-similarity based jammers but many of the cost increases, we eliminated this code.
+\[PQ\]redg are predicting by invariant can get return something continue result on datastream-prediction inner product. This improves finite combinations up to aleph_0 but works very well on some of the soft PRNG tests.
 
-We are predicting by invariant can get return something continue result on datastream-prediction inner product. \[pq\]redg using this. This improves finite combinations up to aleph_0 but works very well on some of the soft PRNG tests.
+We can average each (unit, step) average on only one step after case, however, since this needs huge computation power, we don't implement them.
 
 # Tips on recursive
 We can use bitsofcotton/goki_check_cc:test.py:\[pq\]redg command to recursive predictions.
+
+# Tips on qredg
+A qredg often have white out result, this is a lack of the accuracy on pnext cached taylor series. So if make the taylor series with upper accuracy, this is improved otherwise we need to do qredg on extra-small images.
 
 # Usage:
     ./predg(32|64)?(mp)? <in0.ppm> ...
@@ -169,4 +172,5 @@ We might re-re-leave this repository with this update, however, if there's some 
 2024/09/25 elim dead code, update readme. leave.
 2024/09/26 improve heap resource efficiency.
 2024/09/27 refactoring predv, predvp0. the target stream we predict is now concrete, so PP0 type changed.
+2024/09/28 add step after predictions.
 

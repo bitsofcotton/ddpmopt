@@ -37,10 +37,12 @@ int main(int argc, const char* argv[]) {
     if(! loadp2or3<num_t>(work, argv[i])) continue;
     in.emplace_back(work.size() == 3 ? rgb2xyz<num_t>(work) : move(work));
   }
-  const auto p(predMat<num_t>(in = normalize<num_t>(in), in.size() / 3));
-  if(! savep2or3<num_t>("predg.ppm",
-    normalize<num_t>(p.size() == 3 ? xyz2rgb<num_t>(p) : p)) )
-    cerr << "failed to save." << endl;
+  const auto p(predMat<num_t>(in = normalize<num_t>(in)));
+  for(int i = 0; i < p.size(); i ++)
+    if(! savep2or3<num_t>((string("predg-") + to_string(i) +
+      string(".ppm")).c_str(),
+        normalize<num_t>(p[i].size() == 3 ? xyz2rgb<num_t>(p[i]) : p[i])) )
+          cerr << "failed to save." << endl;
   cerr << " Done" << endl;
   return 0;
 }
