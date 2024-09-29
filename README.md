@@ -22,16 +22,19 @@ The plain \[pq\]redg predictor uses first order shallow copying structures but i
 
 Also, we need to adjust the prediction depth to fight with internal states the image stream really have vs the image size or input number dimension chase. However we need to shrink input images to certain sizes depends on input number. Either, if we suppose the prediction is done by only one function and they're pure function with small number of initialized internal states, 3 predictor is enough for them, if we don't have an interest on second order, plain predictor is enough.
 
-We can try to do raw prediction quint with \[pq\]redgn.\*, this is because of our p1/pp3.cc experiments also p8/README.md. A rough sketch of their validity is: doing quad cause valishes variables on given stream as a prediction, so they remains noise for structure subtracted form we suppose, so once more prediction causes noise also predicted so the result is something continuous without gamma condition. So after the prediction 'p0 0' causes our test on some of the PRNGs got better ones, since we don't need the continuous condition on predicting only one line / one image, we conclude with this form. Either, pp3n \| p0 0 test causes almost linear on surface but there's much of the gulfs appeares, so the gulf itself is the appearence of unobserved internal states in this condition, so we can feed some of the additional internal states on surface as p2/cr.py:z command however, if they suddenly appears with hidden algorithm dimension part, we cannot predict at all, this condition includes some of the hand made manipulation on the stream.
+We can try to do raw prediction quint with \[pq\]redgn.\*, this is because of our p1/pp3.cc experiments also p8/README.md. A rough sketch of their validity is: doing quad cause valishes variables on given stream as a prediction, so they remains noise for structure subtracted form we suppose, so once more prediction causes noise also predicted so the result is something continuous without gamma condition. A pp3n \| p0 test causes almost linear on surface but there's much of the gulfs appeares, so the gulf itself is the appearence of unobserved internal states in this condition, so we can feed some of the additional internal states on surface as p2/cr.py:z command however, if they suddenly appears with hidden algorithm dimension part, we cannot predict at all, this condition includes some of the hand made manipulation on the stream.
 
 Sometimes goki_check_cc:collect operation improves output images, this is because we can get curvature of them as continuous part of the whole image context.
 
-\[PQ\]redg are predicting by invariant can get return something continue result on datastream-prediction inner product. This improves finite combinations up to aleph_0 but works very well on some of the soft PRNG tests.
+\[PQ\]redg are predicting by invariant they can get return something continue result on datastream-prediction inner product. This improves finite combinations up to aleph_0 but works very well on some of the soft PRNG tests.
 
-We can average each (unit, step) average on only one step after case, however, since this needs huge computation power, we don't implement them.
+# Tips on prediction range and unit param.
+From some test around soft PRNGs, we can adjust input stream range with last n-set used also the continuous part unit argument on predv1.
+Ideally, we should test the sliding same (range, unit) with prediction-stream - fixed-input-stream inner product stream : in which last range fibonatti range heuristics can detect the failure or continuity of such range prediction, so we should \*cherry pick\* a best parameter on them.
+Otherwise even when average them, we often fail the prediction at the place.
 
-# Tips on recursive
-We can use bitsofcotton/goki_check_cc:test.py:\[pq\]redg command to recursive predictions.
+However, we don't have such better amount possible computation systems, we don't implement the heuristic.
+Instead of them, we implement the best internal-states awared prediction but they can fail there often.
 
 # Tips on qredg
 A qredg often have white out result, this is a lack of the accuracy on pnext cached taylor series. So if make the taylor series with upper accuracy, this is improved otherwise we need to do qredg on extra-small images.
@@ -173,4 +176,5 @@ We might re-re-leave this repository with this update, however, if there's some 
 2024/09/26 improve heap resource efficiency.
 2024/09/27 refactoring predv, predvp0. the target stream we predict is now concrete, so PP0 type changed.
 2024/09/28 add step after predictions.
+2024/09/29 update readme. leave the repository really.
 
