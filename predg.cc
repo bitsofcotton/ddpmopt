@@ -38,7 +38,7 @@ int main(int argc, const char* argv[]) {
     in.emplace_back(work.size() == 3 ? rgb2xyz<num_t>(work) : move(work));
   }
   {
-    const auto p(predMat<num_t>(in = normalize<num_t>(in)));
+    const auto p(predMat<num_t>(in = normalize<num_t>(in), - 1, 1));
     assert(p.size() == 1);
     if(! savep2or3<num_t>("predg.ppm",
         normalize<num_t>(p[0].size() == 3 ? xyz2rgb<num_t>(p[0]) : p[0])) )
