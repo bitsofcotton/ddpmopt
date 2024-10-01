@@ -20,6 +20,8 @@ If we use pqredg with goki_check_cc:test.py:bit command, we suppose the input im
 
 The plain \[pq\]redg predictor uses first order shallow copying structures but it's saturated by in/output, 3 predictor uses 2nd order enough bits for predictions, 6 predictor is enough for multiple layer algebraic copying structure, 9 predictor is enough for algorithm decomposition including inverse of them, so in the worst case, 9 predictor handles the prediction with simple but shall not be enough complexity on information amount P01 predictor copying structure with the decomposition, however, in the flat algorithm meaning, it's equivalent to plain or 3 predictors.
 
+So n-predictor is useful when the problem needs some of the internal bit-wise structure is worse complex case they needs very large accuracy depends on input dimension number, stacking predictor reduces them.
+
 Also, we need to adjust the prediction depth to fight with internal states the image stream really have vs the image size or input number dimension chase. However we need to shrink input images to certain sizes depends on input number. Either, if we suppose the prediction is done by only one function and they're pure function with small number of initialized internal states, 3 predictor is enough for them, if we don't have an interest on second order, plain predictor is enough.
 
 We can try to do raw prediction quint with \[pq\]redgn.\*, this is because of our p1/pp3.cc experiments also p8/README.md. A rough sketch of their validity is: doing quad cause valishes variables on given stream as a prediction, so they remains noise for structure subtracted form we suppose, so once more prediction causes noise also predicted so the result is something continuous without gamma condition. A pp3n \| p0 test causes almost linear on surface but there's much of the gulfs appeares, so the gulf itself is the appearence of unobserved internal states in this condition, so we can feed some of the additional internal states on surface as p2/cr.py:z command however, if they suddenly appears with hidden algorithm dimension part, we cannot predict at all, this condition includes some of the hand made manipulation on the stream.
@@ -30,8 +32,9 @@ Sometimes goki_check_cc:collect operation improves output images, this is becaus
 
 # Tips on prediction range and unit param.
 From some test around soft PRNGs, we can adjust input stream range with last n-set used also the continuous part unit argument on predv1.
-Ideally, we should test the sliding same (range, unit) with prediction-stream - fixed-input-stream inner product stream : in which last range fibonatti range heuristics can detect the failure or continuity of such range prediction, so we should \*cherry pick\* a best parameter on them.
-Otherwise even when average them, we often fail the prediction at the place.
+Ideally, we should test the sliding same (range, unit) with prediction-stream - fixed-input-stream inner product stream : in which last range fibonacci range heuristics can detect the failure or continuity of such range prediction, so we should \*cherry pick\* a best parameter on them.
+
+Otherwise even when average them, we often fail the prediction at the place. Even with majority logis is so.
 
 However, we don't have such better amount possible computation systems, we don't implement the heuristic.
 Instead of them, we implement the best internal-states awared prediction but they can fail there often.
