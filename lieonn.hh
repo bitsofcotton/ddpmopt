@@ -4447,6 +4447,52 @@ template <typename T, int nprogress = 100> static inline vector<SimpleVector<T> 
   return res;
 }
 
+template <typename T, int nprogress = 3> static inline vector<SimpleVector<T> > predvall(vector<SimpleVector<T> >& in0) {
+  SimpleVector<SimpleVector<T> > in;
+  in.entity = move(in0);
+  vector<SimpleVector<T> > res;
+  for(int step = 1; step < in.size() / 2; step ++)
+    for(int unit = step; unit < in.size() / 2 - step; unit ++) {
+      cerr << " *** " << step << " / " << in.size() / 2 << ", " << unit << " / " << in.size() / 2 - step * 2 + 1 << " ***" << endl;
+      SimpleVector<SimpleVector<T> > p;
+      p.entity.reserve(unit);
+      for(int i = 0; i < unit; i ++)
+        p.entity.emplace_back(predv0<T, nprogress>(in.subVector(i, in.size() - unit + 1).entity, to_string(i) + string(" / ") + to_string(unit), step));
+      SimpleMatrix<T> ip(p.size() - step, in[0].size());
+#if defined(_OPENMP)
+#pragma omp parallel 
+#pragma for schedule(static, 1)
+#endif
+      for(int i = 0; i < ip.rows(); i ++) {
+        for(int j = 0; j < ip.cols(); j ++)
+          ip(i, j) = (p[i - ip.rows() + p.size() - step][j] *
+            T(int(2)) - T(int(1)) ) *
+              (in[i - ip.rows() + in.size()][j] * T(int(2)) - T(int(1)) );
+      }
+      for(int j = 0; j < ip.rows() - step; j ++)
+        for(int k = 0; k < step; k ++) {
+          SimpleVector<T> work(in[0].size());
+          work.O();
+          // N.B. we need gamma complement after this.
+          //      dftcache need to be single thread on first call.
+          work[0] = (P0maxRank0<T>(step - k).next(ip.col(0).subVector(j, ip.rows() - j)) *
+            (p[p.size() - 1 - k][0] * T(int(2)) - T(int(1)) ) + T(int(1)) ) / T(int(2));
+#if defined(_OPENMP)
+#pragma for schedule(static, 1)
+#endif
+          for(int i = 1; i < work.size(); i ++) {
+            if(nprogress && ! (i % (work.size() / nprogress)) )
+              cerr << i << " / " << work.size() << endl;
+            work[i] = (P0maxRank0<T>(step - k).next(ip.col(i).subVector(j, ip.rows() - j)) *
+              (p[p.size() - 1 - k][i] * T(int(2)) - T(int(1)) ) + T(int(1)) ) / T(int(2));
+          }
+          res.emplace_back(move(work));
+        }
+    }
+  in0 = move(in.entity);
+  return res;
+}
+
 template <typename T> vector<vector<SimpleVector<T> > > predVec(vector<vector<SimpleVector<T> > >& in0, const int& unit = - 1, const int& step = - 1) {
   assert(in0.size() && in0[0].size() && in0[0][0].size());
   vector<SimpleVector<T> > in;
@@ -4463,7 +4509,7 @@ template <typename T> vector<vector<SimpleVector<T> > > predVec(vector<vector<Si
   const auto size0(in0[0].size());
   const auto size1(in0[0][0].size());
   in0.resize(0);
-  const auto p(predv<T>(in, unit, step));
+  const auto p(! unit && ! step ? predvall<T>(in) : predv<T>(in, unit, step));
   in.resize(0);
   vector<vector<SimpleVector<T> > > res;
   res.resize(p.size());
@@ -4494,7 +4540,7 @@ template <typename T> vector<vector<SimpleMatrix<T> > > predMat(vector<vector<Si
   const auto rows(in0[0][0].rows());
   const auto cols(in0[0][0].cols());
   in0.resize(0);
-  const auto p(predv<T>(in, unit, step));
+  const auto p(! unit && ! step ? predvall<T>(in) : predv<T>(in, unit, step));
   in.resize(0);
   vector<vector<SimpleMatrix<T> > > res;
   res.resize(p.size());
@@ -4541,7 +4587,7 @@ template <typename T> vector<SimpleSparseTensor<T> > predSTen(vector<SimpleSpars
               (in0[i][idx[j]][idx[k]][idx[m]] + T(int(1))) / T(int(2));
   }
   in0.resize(0);
-  const auto p(predv<T>(in, unit, step));
+  const auto p(! unit && ! step ? predvall<T>(in) : predv<T>(in, unit, step));
   in.resize(0);
   vector<SimpleSparseTensor<T> > res;
   res.resize(p.size());

@@ -30,20 +30,14 @@ Sometimes goki_check_cc:collect operation improves output images, this is becaus
 
 \[PQ\]redg are predicting by invariant they can get return something continue result on datastream-prediction inner product. This improves finite combinations up to aleph_0 but works very well on some of the soft PRNG tests.
 
-# Tips on prediction range and unit param.
-From some test around soft PRNGs, we can adjust input stream range with last n-set used also the continuous part unit argument on predv1.
-Ideally, we should test the sliding same (range, unit) with prediction-stream - fixed-input-stream inner product stream : in which last range fibonacci range heuristics can detect the failure or continuity of such range prediction, so we should \*cherry pick\* a best parameter on them.
-
-Otherwise even when average them, we often fail the prediction at the place. Even with majority logis is so.
-
-However, we don't have such better amount possible computation systems, we don't implement the heuristic.
-Instead of them, we implement the best internal-states awared prediction but they can fail there often.
+# Tips on cherry picking
+We should \*cherry pick\* a best parameter on predv1, instead of them, we have predga.cc for pseudo predict all of the params and cherry pick after them.
 
 # Tips on qredg
 A qredg often have white out result, this is a lack of the accuracy on pnext cached taylor series. So if make the taylor series with upper accuracy, this is improved otherwise we need to do qredg on extra-small images.
 
 # Usage:
-    ./predg(32|64)?(mp)? <in0.ppm> ...
+    ./predga?(32|64)?(mp)? <in0.ppm> ...
     ./qredg(32|64)?(mp)? <in0out.ppm> ...
     ./ddpmopt(32|64)?(mp)? + <in0out.pgm> <in0in.ppm> ... > cache.txt
     ./ddpmopt(32|64)?(mp)? - <in0.ppm> ... < cache.txt
@@ -180,4 +174,5 @@ We might re-re-leave this repository with this update, however, if there's some 
 2024/09/27 refactoring predv, predvp0. the target stream we predict is now concrete, so PP0 type changed.
 2024/09/28 add step after predictions.
 2024/09/29 update readme. leave the repository really.
+2024/10/05 add predga.cc and compile option.
 
