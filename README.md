@@ -175,4 +175,5 @@ We might re-re-leave this repository with this update, however, if there's some 
 2024/09/28 add step after predictions.
 2024/09/29 update readme. leave the repository really.
 2024/10/05 add predga.cc and compile option.
+2024/10/26 fix predvall meaning after p2/README.md:Tips on reseed.
 

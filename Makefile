@@ -42,6 +42,8 @@ predgmp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -o predgmp predg.cc
 predg32mp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=32 -o predg32mp predg.cc
+predg64mp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=64 -o predg64mp predg.cc
 predga:
 	${CXX} ${CXXFLAGS} -static -o predga predga.cc
 predga32:
@@ -50,6 +52,8 @@ predgamp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -o predgamp predga.cc
 predga32mp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=32 -o predga32mp predga.cc
+predga64mp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=64 -o predga64mp predga.cc
 qredg:
 	${CXX} ${CXXFLAGS} -static -o qredg qredg.cc
 qredg32:
