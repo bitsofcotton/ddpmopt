@@ -62,6 +62,8 @@ predgsmp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -o predgsmp predgs.cc
 predgs32mp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=32 -o predgs32mp predgs.cc
+predgs64mp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=64 -o predgs64mp predgs.cc
 qredg:
 	${CXX} ${CXXFLAGS} -static -o qredg qredg.cc
 qredg32:
