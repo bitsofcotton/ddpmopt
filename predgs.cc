@@ -107,23 +107,23 @@ template <typename T> vector<SimpleMatrix<T> > revert(const vector<SimpleMatrix<
     auto R(in[i * ACCURACY * 3 + ACCURACY * 2]);
     for(int ii = 0; ii < L.rows(); ii ++)
       for(int jj = 0; jj < L.cols(); jj ++)
-          L(ii, jj) -= num_t(int(1)) / num_t(int(2));
+        L(ii, jj) -= num_t(int(1)) / num_t(int(2));
     for(int ii = 0; ii < D.rows(); ii ++)
       for(int jj = 0; jj < D.cols(); jj ++)
-          D(ii, jj) -= num_t(int(1)) / num_t(int(2));
+        D(ii, jj) -= num_t(int(1)) / num_t(int(2));
     for(int ii = 0; ii < R.rows(); ii ++)
       for(int jj = 0; jj < R.cols(); jj ++)
-          R(ii, jj) -= num_t(int(1)) / num_t(int(2));
+        R(ii, jj) -= num_t(int(1)) / num_t(int(2));
     for(int j = 1; j < ACCURACY; j ++) {
       for(int ii = 0; ii < L.rows(); ii ++)
         for(int jj = 0; jj < L.cols(); jj ++)
-          L(ii, jj) += (in[i * ACCURACY * 3 + j](ii, jj) - num_t(int(1)) / num_t(int(2)) ) / pow(num_t(int(2)), - num_t(int(j)) );
+          L(ii, jj) += (in[i * ACCURACY * 3 + j](ii, jj) - num_t(int(1)) / num_t(int(2)) ) * pow(num_t(int(2)), - num_t(int(j)) );
       for(int ii = 0; ii < D.rows(); ii ++)
         for(int jj = 0; jj < D.cols(); jj ++)
-          D(ii, jj) += (in[i * ACCURACY * 3 + ACCURACY + j](ii, jj) - num_t(int(1)) / num_t(int(2)) ) / pow(num_t(int(2)), - num_t(int(j)) );
+          D(ii, jj) += (in[i * ACCURACY * 3 + ACCURACY + j](ii, jj) - num_t(int(1)) / num_t(int(2)) ) * pow(num_t(int(2)), - num_t(int(j)) );
       for(int ii = 0; ii < R.rows(); ii ++)
         for(int jj = 0; jj < R.cols(); jj ++)
-          R(ii, jj) += (in[i * ACCURACY * 3 + ACCURACY * 2 + j](ii, jj) - num_t(int(1)) / num_t(int(2)) ) / pow(num_t(int(2)), - num_t(int(j)) );
+          R(ii, jj) += (in[i * ACCURACY * 3 + ACCURACY * 2 + j](ii, jj) - num_t(int(1)) / num_t(int(2)) ) * pow(num_t(int(2)), - num_t(int(j)) );
     }
     res[i] = L * D * R;
   }
