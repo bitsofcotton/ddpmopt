@@ -2193,7 +2193,7 @@ template <typename T> inline SimpleMatrix<T> SimpleMatrix<T>::SVDleft1d() const 
     Left  *= Left;
     Right *= Right;
   }
-  return (Left * Right).QR() * Qt;
+  return (Left * Qt * /* U * */ Right).QR() * Qt;
 }
 
 template <typename T> inline pair<SimpleMatrix<T>, SimpleMatrix<T> > SimpleMatrix<T>::SVD1d() const {

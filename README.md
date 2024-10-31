@@ -36,8 +36,13 @@ We should \*cherry pick\* a best parameter on predv1, instead of them, we have p
 # Tips on qredg
 A qredg often have white out result, this is a lack of the accuracy on pnext cached taylor series. So if make the taylor series with upper accuracy, this is improved otherwise we need to do qredg on extra-small images.
 
+# Tips on improving numerical stability
+A predgs.cc do pseudo-SVD before and after to predict which now needs square images also heavy algorithm we use now.
+This can improve numerical stability on each pixel context prediction, however we get them as a broken images now (lack of accuracy?).
+However, this have some slight meanings adding orthogonality context into input stream they should behaves better on each pixel bit context.
+
 # Usage:
-    ./predga?(32|64)?(mp)? <in0.ppm> ...
+    ./predg[sa]?(32|64)?(mp)? <in0.ppm> ...
     ./qredg(32|64)?(mp)? <in0out.ppm> ...
     ./ddpmopt(32|64)?(mp)? + <in0out.pgm> <in0in.ppm> ... > cache.txt
     ./ddpmopt(32|64)?(mp)? - <in0.ppm> ... < cache.txt
@@ -176,4 +181,5 @@ We might re-re-leave this repository with this update, however, if there's some 
 2024/09/29 update readme. leave the repository really.
 2024/10/05 add predga.cc and compile option.
 2024/10/26 fix predvall meaning after p2/README.md:Tips on reseed.
+2024/10/31 add predgs.cc.
 
