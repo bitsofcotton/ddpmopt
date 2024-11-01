@@ -2213,11 +2213,8 @@ template <typename T> inline SimpleMatrix<T> SimpleMatrix<T>::SVD() const {
   res.I();
   for(int i = 0; i <= sym.rows() + 1; i ++) {
     auto svd(sym.SVD1d());
-    sym = (svd.first * sym * svd.second).transpose();
-    if(i & 1)
-      res = svd.second.transpose() * res;
-    else
-      res = svd.first * res;
+    sym = svd.first * sym * svd.second;
+    res = svd.first * res;
   }
   return res;
 }

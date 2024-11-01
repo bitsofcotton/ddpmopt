@@ -42,6 +42,7 @@ template <typename T> vector<vector<SimpleMatrix<T> > > convert(const vector<vec
       inL[i][j] = work[j].SVD();
       inR[i][j] = work[j].transpose().SVD().transpose();
       inD[i][j] = inL[i][j] * work[j] * inR[i][j];
+      cerr << inD[i][j];
     }
   }
   inL = normalize<num_t>(inL);
