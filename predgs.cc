@@ -95,34 +95,46 @@ template <typename T> vector<vector<SimpleMatrix<T> > > convert(const vector<vec
 }
 
 template <typename T> vector<SimpleMatrix<T> > revert(const vector<SimpleMatrix<T> >& in) {
+  vector<SimpleMatrix<T> > outL;
+  vector<SimpleMatrix<T> > outD;
+  vector<SimpleMatrix<T> > outR;
   vector<SimpleMatrix<T> > res;
-  res.resize(in.size() / ACCURACY / 3);
-  for(int i = 0; i < res.size(); i ++) {
-    auto L(in[i * ACCURACY * 3]);
-    auto D(in[i * ACCURACY * 3 + ACCURACY]);
-    auto R(in[i * ACCURACY * 3 + ACCURACY * 2]);
-    for(int ii = 0; ii < L.rows(); ii ++)
-      for(int jj = 0; jj < L.cols(); jj ++)
-        L(ii, jj) -= num_t(int(1)) / num_t(int(2));
-    for(int ii = 0; ii < D.rows(); ii ++)
-      for(int jj = 0; jj < D.cols(); jj ++)
-        D(ii, jj) -= num_t(int(1)) / num_t(int(2));
-    for(int ii = 0; ii < R.rows(); ii ++)
-      for(int jj = 0; jj < R.cols(); jj ++)
-        R(ii, jj) -= num_t(int(1)) / num_t(int(2));
-    for(int j = 1; j < ACCURACY; j ++) {
-      for(int ii = 0; ii < L.rows(); ii ++)
-        for(int jj = 0; jj < L.cols(); jj ++)
-          L(ii, jj) += (in[i * ACCURACY * 3 + j](ii, jj) - num_t(int(1)) / num_t(int(2)) ) * pow(num_t(int(2)), - num_t(int(j)) );
-      for(int ii = 0; ii < D.rows(); ii ++)
-        for(int jj = 0; jj < D.cols(); jj ++)
-          D(ii, jj) += (in[i * ACCURACY * 3 + ACCURACY + j](ii, jj) - num_t(int(1)) / num_t(int(2)) ) * pow(num_t(int(2)), - num_t(int(j)) );
-      for(int ii = 0; ii < R.rows(); ii ++)
-        for(int jj = 0; jj < R.cols(); jj ++)
-          R(ii, jj) += (in[i * ACCURACY * 3 + ACCURACY * 2 + j](ii, jj) - num_t(int(1)) / num_t(int(2)) ) * pow(num_t(int(2)), - num_t(int(j)) );
-    }
-    res[i] = L * D * R;
+  outL.resize(in.size() / ACCURACY / 3);
+  outD.resize(in.size() / ACCURACY / 3);
+  outR.resize(in.size() / ACCURACY / 3);
+  for(int i = 0; i < outL.size(); i ++) {
+    outL[i] = in[i * ACCURACY];
+    for(int ii = 0; ii < outL[i].rows(); ii ++)
+      for(int jj = 0; jj < outL[i].cols(); jj ++)
+        outL[i](ii, jj) -= num_t(int(1)) / num_t(int(2));
+    for(int j = 1; j < ACCURACY; j ++)
+      for(int ii = 0; ii < outL[i].rows(); ii ++)
+        for(int jj = 0; jj < outL[i].cols(); jj ++)
+          outL[i](ii, jj) += (in[i * ACCURACY + j](ii, jj) - num_t(int(1)) / num_t(int(2)) ) * pow(num_t(int(2)), - num_t(int(j)) );
   }
+  for(int i = 0; i < outD.size(); i ++) {
+    outD[i] = move(in[i * ACCURACY + in.size() / 3]);
+    for(int ii = 0; ii < outD[i].rows(); ii ++)
+      for(int jj = 0; jj < outD[i].cols(); jj ++)
+        outD[i](ii, jj) -= num_t(int(1)) / num_t(int(2));
+    for(int j = 1; j < ACCURACY; j ++)
+      for(int ii = 0; ii < outD[i].rows(); ii ++)
+        for(int jj = 0; jj < outD[i].cols(); jj ++)
+          outD[i](ii, jj) += (in[i * ACCURACY + j + in.size() / 3](ii, jj) - num_t(int(1)) / num_t(int(2)) ) * pow(num_t(int(2)), - num_t(int(j)) );
+  }
+  for(int i = 0; i < outR.size(); i ++) {
+    outR[i] = move(in[i * ACCURACY + in.size() / 3 * 2]);
+    for(int ii = 0; ii < outR[i].rows(); ii ++)
+      for(int jj = 0; jj < outR[i].cols(); jj ++)
+        outR[i](ii, jj) -= num_t(int(1)) / num_t(int(2));
+    for(int j = 1; j < ACCURACY; j ++)
+      for(int ii = 0; ii < outR[i].rows(); ii ++)
+        for(int jj = 0; jj < outR[i].cols(); jj ++)
+          outR[i](ii, jj) += (in[i * ACCURACY + j + in.size() / 3 * 2](ii, jj) - num_t(int(1)) / num_t(int(2)) ) * pow(num_t(int(2)), - num_t(int(j)) );
+  }
+  res.resize(outL.size());
+  for(int i = 0; i < res.size(); i ++)
+    res[i] = outL[i].transpose() * outD[i] * outR[i].transpose();
   return res;
 }
 
