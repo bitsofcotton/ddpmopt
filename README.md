@@ -15,28 +15,27 @@ We use at least 2\*((whole input size))\*sizeof(num_t) in heap resource, with be
 # Tips around c++ compilers
 Some of the lieonn.hh operator \>\> class doesn't work as expected, might be compilers' bug.
 
-# Tips on prediction
+# Tips on prediction on objected images
 If we use pqredg with goki_check_cc:test.py:bit command, we suppose the input image series as some of the functions to effect to or data to be effected by paired images also the pixel contexts.
 
-The plain \[pq\]redg predictor uses first order shallow copying structures but it's saturated by in/output, 3 predictor uses 2nd order enough bits for predictions, 6 predictor is enough for multiple layer algebraic copying structure, 9 predictor is enough for algorithm decomposition including inverse of them, so in the worst case, 9 predictor handles the prediction with simple but shall not be enough complexity on information amount P01 predictor copying structure with the decomposition, however, in the flat algorithm meaning, it's equivalent to plain or 3 predictors.
+# Tips on multiple layers prediction
+The plain \[pq\]redg predictor uses first order shallow copying structures but it's saturated by in/output, 3 predictor uses 2nd order enough bits for predictions, 6 predictor is enough for multiple layer algebraic copying structure, 9 predictor is enough for algorithm decomposition including inverse of them, usually they're equivalent to plain predictors from surface looking.
 
 So n-predictor is useful when the problem needs some of the internal bit-wise structure is worse complex case they needs very large accuracy depends on input dimension number, stacking predictor reduces them.
 
-Also, we need to adjust the prediction depth to fight with internal states the image stream really have vs the image size or input number dimension chase. However we need to shrink input images to certain sizes depends on input number. Either, if we suppose the prediction is done by only one function and they're pure function with small number of initialized internal states, 3 predictor is enough for them, if we don't have an interest on second order, plain predictor is enough.
+# Tips on predicting complex structures
+With some of the reseed alike input stream needs P012L predictor instead of P01 predictor this condition is eliminated with huge input numbers they unveils reseed algorithm enough but the exceeds condition rarely satisfied.
 
-We can try to do raw prediction quint with \[pq\]redgn.\*, this is because of our p1/pp3.cc experiments also p8/README.md. A rough sketch of their validity is: doing quad cause valishes variables on given stream as a prediction, so they remains noise for structure subtracted form we suppose, so once more prediction causes noise also predicted so the result is something continuous without gamma condition. A pp3n \| p0 test causes almost linear on surface but there's much of the gulfs appeares, so the gulf itself is the appearence of unobserved internal states in this condition, so we can feed some of the additional internal states on surface as p2/cr.py:z command however, if they suddenly appears with hidden algorithm dimension part, we cannot predict at all, this condition includes some of the hand made manipulation on the stream.
+# Tips on prediction base dimensions
+Something sparse with jammer input stream they effects base dimension we select needs larger dimensions on the base, this condition is defined there's no unique pure functions on the stream the variables dimension they have, this condition is eliminated with in/output (de)?compression this condition ask shirks the result of algorithms to some of the upper cardinals with compressing sparsity into dense ones on somewhere usually we should have to increase the base dimensions with or without bitsofcotton/masp from entropy reason.
 
-Sometimes goki_check_cc:collect operation improves output images, this is because we can get curvature of them as continuous part of the whole image context.
-
-\[PQ\]redg are predicting by invariant they can get return something continue result on datastream-prediction inner product. This improves finite combinations up to aleph_0 but works very well on some of the soft PRNG tests.
-
-# Tips on cherry picking
+# Tips on cherry picking the result
 We should \*cherry pick\* a best parameter on predv1, instead of them, we have predga.cc for pseudo predict all of the params and cherry pick after them.
 
 # Tips on qredg
 A qredg often have white out result, this is a lack of the accuracy on pnext cached taylor series. So if make the taylor series with upper accuracy, this is improved otherwise we need to do qredg on extra-small images.
 
-# Tips on improving numerical stability
+# Tips on improving numerical stability (inspecting)
 A predgs.cc do pseudo-SVD before and after to predict which now needs square images also heavy algorithm we use now.
 This can improve numerical stability on each pixel context prediction, however we get them as a broken images now, this is from lack of accuracy on SVD depends on QR decomposition we use. (However, this might be same result with Eigen library SVD some years ago).
 This have some slight meanings adding orthogonality context into input stream they should behaves better on each pixel bit context. We are inspecting whether we need this or not.
@@ -183,4 +182,5 @@ We might re-re-leave this repository with this update, however, if there's some 
 2024/10/26 fix predvall meaning after p2/README.md:Tips on reseed.
 2024/10/31 add predgs.cc.
 2024/11/01 fix last predgs.cc index map, update readme, accuracy is not enough for SVD.
+2024/11/02 update readme.
 

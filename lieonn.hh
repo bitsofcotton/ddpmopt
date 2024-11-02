@@ -6873,7 +6873,7 @@ template <typename T, typename U> ostream& predTOC(ostream& os, const U& input, 
     }
   }
   os << input;
-  const auto p(predSTen<T>(in, idx));
+  const auto p(predSTen<T>(in, idx, 3));
   for(int i = 0; i < p.size(); i ++) {
     corpus<T, U> pstats;
     pstats.corpust = p[i];
