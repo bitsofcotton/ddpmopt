@@ -15,12 +15,12 @@ CXXFLAGS+=	-std=c++11
 LDFLAGS+=	-lc++ -L/usr/local/lib
 #LDFLAGS+=	-lestdc++ -L/usr/local/lib
 
-CLEANFILES= *.o ddpmopt ddpmopt32 predg predg32 predga predga32 predgs predgs32 qredg qredg32 ddpmoptmp ddpmopt32mp predgmp predg32mp predgamp predga32mp predgsmp predgs32mp qredgmp qredg32mp tcont tcont32
+CLEANFILES= *.o ddpmopt ddpmopt32 predg predg32 qredg qredg32 ddpmoptmp ddpmopt32mp predgmp predg32mp qredgmp qredg32mp tcont tcont32
 
 clean:
 	@rm -rf ${CLEANFILES}
 
-all:	ddpmopt ddpmopt32 predg predg32 predga predga32 predgs predgs32 qredg qredg32 ddpmoptmp ddpmopt32mp predgmp predg32mp predgamp predga32mp predgsmp predgs32mp qredgmp qredg32mp tcont tcont32
+all:	ddpmopt ddpmopt32 predg predg32 qredg qredg32 ddpmoptmp ddpmopt32mp predgmp predg32mp qredgmp qredg32mp tcont tcont32
 
 ddpmopt:
 	${CXX} ${CXXFLAGS} -static -o ddpmopt ddpmopt.cc
@@ -44,26 +44,6 @@ predg32mp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=32 -o predg32mp predg.cc
 predg64mp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=64 -o predg64mp predg.cc
-predga:
-	${CXX} ${CXXFLAGS} -static -o predga predga.cc
-predga32:
-	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=32 -o predga32 predga.cc
-predgamp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -o predgamp predga.cc
-predga32mp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=32 -o predga32mp predga.cc
-predga64mp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=64 -o predga64mp predga.cc
-predgs:
-	${CXX} ${CXXFLAGS} -static -o predgs predgs.cc
-predgs32:
-	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=32 -o predgs32 predgs.cc
-predgsmp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -o predgsmp predgs.cc
-predgs32mp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=32 -o predgs32mp predgs.cc
-predgs64mp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=64 -o predgs64mp predgs.cc
 qredg:
 	${CXX} ${CXXFLAGS} -static -o qredg qredg.cc
 qredg32:

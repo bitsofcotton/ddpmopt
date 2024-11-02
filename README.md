@@ -10,13 +10,13 @@ We need to do ulimit or edit /etc/login.conf for large malloc use cases required
 
 Using this with mimalloc or so can increase memory usage with multi thread on some systems.
 
-We use at least 2\*((whole input size))\*sizeof(num_t) in heap resource, with better resource efficiency allocator, it's up to (2+\epsilon)\*... NOT for any allocators.
+We use at least 2\*((whole input size))\*sizeof(num_t) in heap resource, with better resource efficiency allocator.
 
 # Tips around c++ compilers
 Some of the lieonn.hh operator \>\> class doesn't work as expected, might be compilers' bug.
 
 # Tips on prediction on objected images
-If we use pqredg with goki_check_cc:test.py:bit command, we suppose the input image series as some of the functions to effect to or data to be effected by paired images also the pixel contexts.
+We suppose the input image series as some of the functions to effect to or data to be effected by paired images also the pixel contexts in F\_p.
 
 # Tips on multiple layers prediction
 The plain \[pq\]redg predictor uses first order shallow copying structures but it's saturated by in/output, 3 predictor uses 2nd order enough bits for predictions, 6 predictor is enough for multiple layer algebraic copying structure, 9 predictor is enough for algorithm decomposition including inverse of them, usually they're equivalent to plain predictors from surface looking.
@@ -29,19 +29,27 @@ With some of the reseed alike input stream needs P012L predictor instead of P01 
 # Tips on prediction base dimensions
 Something sparse with jammer input stream they effects base dimension we select needs larger dimensions on the base, this condition is defined there's no unique pure functions on the stream the variables dimension they have, this condition is eliminated with in/output (de)?compression this condition ask shirks the result of algorithms to some of the upper cardinals with compressing sparsity into dense ones on somewhere usually we should have to increase the base dimensions with or without bitsofcotton/masp from entropy reason.
 
+# Tips on contexts
+We use whole image context to insert context then predict with such each pixel context. So each image consistency is used and applied for the output.
+
+We can use orthogonal context insertion, however, this isn't matches our senses, such things are useful to get numerical stability context only and are viewed broken by our senses.
+
+We can use some feature quantity based transforms we can get them by machine learning converted into tan Ax form.
+In such case, we use vectorized input image x, y:=tan Ax for feature quantities, weight them by \[x, y\] or only predict the {y} stream, then, invert x=f(y).
+This matches our senses on viewing the image.
+
+Instead of them, we use pqredg for whole image context with each pixel prediction. So this means output is all of the outer coverable contexts traced prediction. However, the prediction dimension is the matter for this.
+
 # Tips on cherry picking the result
-We should \*cherry pick\* a best parameter on predv1, instead of them, we have predga.cc for pseudo predict all of the params and cherry pick after them.
+We should \*cherry pick\* a best parameter on predv1, instead of them, we have rot \< 0 for pseudo predict all of the params and cherry pick after them but they produces only half of the input valid condition.
 
 # Tips on qredg
 A qredg often have white out result, this is a lack of the accuracy on pnext cached taylor series. So if make the taylor series with upper accuracy, this is improved otherwise we need to do qredg on extra-small images.
 
-# Tips on improving numerical stability (inspecting)
-A predgs.cc do pseudo-SVD before and after to predict which now needs square images also heavy algorithm we use now.
-This can improve numerical stability on each pixel context prediction, however we get them as a broken images now, this is from lack of accuracy on SVD depends on QR decomposition we use. (However, this might be same result with Eigen library SVD some years ago).
-This have some slight meanings adding orthogonality context into input stream they should behaves better on each pixel bit context. We are inspecting whether we need this or not.
-
 # Usage:
-    ./predg[sa]?(32|64)?(mp)? <in0.ppm> ...
+    ./predg(32|64)?(mp)? <rot> <in0.ppm> ...
+    # rot < 0 to get all outputs, 0 < rot for normal use.
+    # |rot| is used for number of rotations to get bump map.
     ./qredg(32|64)?(mp)? <in0out.ppm> ...
     ./ddpmopt(32|64)?(mp)? + <in0out.pgm> <in0in.ppm> ... > cache.txt
     ./ddpmopt(32|64)?(mp)? - <in0.ppm> ... < cache.txt
@@ -182,5 +190,5 @@ We might re-re-leave this repository with this update, however, if there's some 
 2024/10/26 fix predvall meaning after p2/README.md:Tips on reseed.
 2024/10/31 add predgs.cc.
 2024/11/01 fix last predgs.cc index map, update readme, accuracy is not enough for SVD.
-2024/11/02 update readme.
+2024/11/02 update readme. elim predgs.cc, predga.cc.
 

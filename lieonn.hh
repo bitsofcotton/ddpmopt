@@ -4193,13 +4193,18 @@ template <typename T> static inline vector<SimpleMatrix<T> > normalize(const vec
   return normalize<T>(w, upper)[0];
 }
 
-template <typename T> static inline SimpleVector<T> normalize(const SimpleVector<T>& in, const T& upper = T(1)) {
+template <typename T> static inline SimpleMatrix<T> normalize(const SimpleMatrix<T>& in, const T& upper = T(1)) {
   vector<vector<SimpleMatrix<T> > > w;
   w.resize(1);
-  w[0].resize(1);
-  w[0][0].resize(1, in.size());
-  w[0][0].row(0) = in;
-  return normalize<T>(w, upper)[0][0].row(0);
+  w[0].resize(1, in);
+  return normalize<T>(w, upper)[0][0];
+}
+
+template <typename T> static inline SimpleVector<T> normalize(const SimpleVector<T>& in, const T& upper = T(1)) {
+  SimpleMatrix<T> w;
+  w.resize(1, in.size());
+  w.row(0) = in;
+  return normalize<T>(w, upper).row(0);
 }
 
 template <typename T> static inline vector<SimpleMatrix<T> > autoLevel(const vector<SimpleMatrix<T> >& data, const int& count = 0) {
