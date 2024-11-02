@@ -17,6 +17,7 @@ Some of the lieonn.hh operator \>\> class doesn't work as expected, might be com
 
 # Tips on prediction on objected images
 We suppose the input image series as some of the functions to effect to or data to be effected by paired images also the pixel contexts in F\_p.
+However, instead of using F_2, we need P01 base dimension larger than 4 in such case in fact.
 
 # Tips on multiple layers prediction
 The plain \[pq\]redg predictor uses first order shallow copying structures but it's saturated by in/output, 3 predictor uses 2nd order enough bits for predictions, 6 predictor is enough for multiple layer algebraic copying structure, 9 predictor is enough for algorithm decomposition including inverse of them, usually they're equivalent to plain predictors from surface looking.
@@ -39,6 +40,15 @@ In such case, we use vectorized input image x, y:=tan Ax for feature quantities,
 This matches our senses on viewing the image.
 
 Instead of them, we use pqredg for whole image context with each pixel prediction. So this means output is all of the outer coverable contexts traced prediction. However, the prediction dimension is the matter for this.
+
+# Tips around relation to bitsofcotton/masp
+We can use detecting such feature quantities by bitsofcotton/masp.
+However, this isn't unveils deep structure they behaves to operatable in the picture set by itself.
+So we need to do bitsofcotton/isolate and match to known algorithms.
+
+# Tips on adding pseudo bump map dimension
+We add the z-axis handle on input before to pqredg's predv.
+This is only to ease our mind however this can add some z-axis based context slight on prediction.
 
 # Tips on cherry picking the result
 We should \*cherry pick\* a best parameter on predv1, instead of them, we have rot \< 0 for pseudo predict all of the params and cherry pick after them but they produces only half of the input valid condition.

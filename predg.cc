@@ -34,7 +34,7 @@ int main(int argc, const char* argv[]) {
   cerr << "Coherent: sqrt(2): " << sqrt<num_t>(Complex<num_t>(num_t(2))) << endl;
   vector<vector<SimpleMatrix<num_t> > > in;
   in.reserve(argc - 1);
-  for(int i = 1; i < argc; i ++) {
+  for(int i = 2; i < argc; i ++) {
     vector<SimpleMatrix<num_t> > work;
     if(! loadp2or3<num_t>(work, argv[i])) continue;
     in.emplace_back(work.size() == 3 ? rgb2xyz<num_t>(work) : move(work));
