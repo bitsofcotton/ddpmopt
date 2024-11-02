@@ -29,6 +29,7 @@ With some of the reseed alike input stream needs P012L predictor instead of P01 
 
 # Tips on prediction base dimensions
 Something sparse with jammer input stream they effects base dimension we select needs larger dimensions on the base, this condition is defined there's no unique pure functions on the stream the variables dimension they have, this condition is eliminated with in/output (de)?compression this condition ask shirks the result of algorithms to some of the upper cardinals with compressing sparsity into dense ones on somewhere usually we should have to increase the base dimensions with or without bitsofcotton/masp from entropy reason.
+Usually, the condition larger than 4 dimension is come from some of the jammer like inputs nor brand new data feed input by input stream.
 
 # Tips on contexts
 We use whole image context to insert context then predict with such each pixel context. So each image consistency is used and applied for the output.
@@ -41,10 +42,14 @@ This matches our senses on viewing the image.
 
 Instead of them, we use pqredg for whole image context with each pixel prediction. So this means output is all of the outer coverable contexts traced prediction. However, the prediction dimension is the matter for this.
 
+Also, adding bump map into one of a color in the picture isn't improves output enough, this is because it's only some alpha in R^1 adding and balancing on whole picture context. To do such bump map extension, we should input picture01.ppm picture01-bump.ppm ... stream instead of the original stream.
+
 # Tips around relation to bitsofcotton/masp
 We can use detecting such feature quantities by bitsofcotton/masp.
 However, this isn't unveils deep structure they behaves to operatable in the picture set by itself.
 So we need to do bitsofcotton/isolate and match to known algorithms.
+
+Also, periodical projection transform before and after prediction is the matter when we count on the predictors as a brand new information feeder, the new information entropy is come from some of the masp generated (or not) vectors in the program.
 
 # Tips on adding pseudo bump map dimension
 We add the z-axis handle on input before to pqredg's predv.
@@ -57,9 +62,8 @@ We should \*cherry pick\* a best parameter on predv1, instead of them, we have r
 A qredg often have white out result, this is a lack of the accuracy on pnext cached taylor series. So if make the taylor series with upper accuracy, this is improved otherwise we need to do qredg on extra-small images.
 
 # Usage:
-    ./predg(32|64)?(mp)? <rot> <in0.ppm> ...
-    # rot < 0 to get all outputs, 0 < rot for normal use.
-    # |rot| is used for number of rotations to get bump map.
+    ./predg(32|64)?(mp)? <mode> <in0.ppm> ...
+    # mode == '0' for normal use, mode == 'a' to get all outputs.
     ./qredg(32|64)?(mp)? <in0out.ppm> ...
     ./ddpmopt(32|64)?(mp)? + <in0out.pgm> <in0in.ppm> ... > cache.txt
     ./ddpmopt(32|64)?(mp)? - <in0.ppm> ... < cache.txt
