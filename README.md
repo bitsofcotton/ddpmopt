@@ -10,7 +10,7 @@ We need to do ulimit or edit /etc/login.conf for large malloc use cases required
 
 Using this with mimalloc or so can increase memory usage with multi thread on some systems.
 
-We use at least 2\*((whole input size))\*sizeof(num_t) in heap resource, with better resource efficiency allocator.
+We use at least 2\*((whole input size))\*sizeof(num_t) in heap resource.
 
 # Tips around c++ compilers
 Some of the lieonn.hh operator \>\> class doesn't work as expected, might be compilers' bug.
@@ -45,8 +45,8 @@ Instead of them, we use pqredg for whole image context with each pixel predictio
 Also, adding bump map into one of a color in the picture isn't improves output enough, this is because it's only some alpha in R^1 adding and balancing on whole picture context. To do such bump map extension, we should input picture01.ppm picture01-bump.ppm ... stream instead of the original stream.
 
 # Tips around relation to bitsofcotton/masp
-We can use detecting such feature quantities by bitsofcotton/masp.
-However, this isn't unveils deep structure they behaves to operatable in the picture set by itself.
+We can use bitsofcotton/masp detecting such feature quantities.
+However, this isn't unveil deep structure they behaves to be operatable in the picture set by itself.
 So we need to do bitsofcotton/isolate and match to known algorithms.
 
 Also, periodical projection transform before and after prediction is the matter when we count on the predictors as a brand new information feeder, the new information entropy is come from some of the masp generated (or not) vectors in the program.
