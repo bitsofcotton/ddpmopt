@@ -51,10 +51,6 @@ So we need to do bitsofcotton/isolate and match to known algorithms.
 
 Also, periodical projection transform before and after prediction is the matter when we count on the predictors as a brand new information feeder, the new information entropy is come from some of the masp generated (or not) vectors in the program.
 
-# Tips on adding pseudo bump map dimension
-We add the z-axis handle on input before to pqredg's predv.
-This is only to ease our mind however this can add some z-axis based context slight on prediction.
-
 # Tips on cherry picking the result
 We should \*cherry pick\* a best parameter on predv1, instead of them, we have rot \< 0 for pseudo predict all of the params and cherry pick after them but they produces only half of the input valid condition.
 

@@ -46,7 +46,7 @@ int main(int argc, const char* argv[]) {
         normalize<num_t>(p[0].size() == 3 ? xyz2rgb<num_t>(p[0]) : p[0])) )
           cerr << "failed to save." << endl;
     in.reserve(argc - 1);
-    for(int i = 1; i < argc; i ++) {
+    for(int i = 2; i < argc; i ++) {
       vector<SimpleMatrix<num_t> > work;
       if(! loadp2or3<num_t>(work, argv[i])) continue;
       in.emplace_back(work.size() == 3 ? rgb2xyz<num_t>(work) : move(work));
