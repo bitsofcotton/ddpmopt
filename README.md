@@ -28,8 +28,13 @@ So n-predictor is useful when the problem needs some of the internal bit-wise st
 With some of the reseed alike input stream needs P012L predictor instead of P01 predictor this condition is eliminated with huge input numbers they unveils reseed algorithm enough but the exceeds condition rarely satisfied.
 
 # Tips on prediction base dimensions
-Something sparse with jammer input stream they effects base dimension we select needs larger dimensions on the base, this condition is defined there's no unique pure functions on the stream the variables dimension they have, this condition is eliminated with in/output (de)?compression this condition ask shirks the result of algorithms to some of the upper cardinals with compressing sparsity into dense ones on somewhere usually we should have to increase the base dimensions with or without bitsofcotton/masp from entropy reason.
+Something sparse with jammer input stream effects base dimension we select needs larger dimensions on the base, this condition is defined there's no unique pure functions on the stream the variables dimension they have.
+This condition can be eliminated with in/output (de)?compression this condition ask shirks the result of algorithms to some of the upper cardinals with compressing sparsity into dense ones on somewhere usually we should have to increase the base dimensions with or without bitsofcotton/masp from entropy reason.
+
 Usually, the condition larger than 4 dimension is come from some of the jammer like inputs nor brand new data feed input by input stream.
+However, we predict the stream with them and continuity after them in pqredg.
+So this effects if input stream is enough dense in another words stream is stable for input entropy one by one meaning, the result is reasonable in the continuity meaning.
+Some of the PRNG tests causes this valid but there's something new entropy feed, they fails with gulfs depends on the range we use in the range.
 
 # Tips on contexts
 We use whole image context to insert context then predict with such each pixel context. So each image consistency is used and applied for the output.
@@ -47,12 +52,12 @@ Also, adding bump map into one of a color in the picture isn't improves output e
 # Tips around relation to bitsofcotton/masp
 We can use bitsofcotton/masp detecting such feature quantities.
 However, this isn't unveil deep structure they behaves to be operatable in the picture set by itself.
-So we need to do bitsofcotton/isolate and match to known algorithms.
+So we need to do bitsofcotton/isolate and match to known algorithms with the handle parameters we want to operate.
 
 Also, periodical projection transform before and after prediction is the matter when we count on the predictors as a brand new information feeder, the new information entropy is come from some of the masp generated (or not) vectors in the program.
 
 # Tips on cherry picking the result
-We should \*cherry pick\* a best parameter on predv1, instead of them, we have rot \< 0 for pseudo predict all of the params and cherry pick after them but they produces only half of the input valid condition.
+We should \*cherry pick\* a best parameter on predv1 this is because of the tips on prediction base dimensions, instead of them, we have mode == 'a' for pseudo predict all of the params and cherry pick after them but they produces only half of the input valid condition.
 
 # Tips on qredg
 A qredg often have white out result, this is a lack of the accuracy on pnext cached taylor series. So if make the taylor series with upper accuracy, this is improved otherwise we need to do qredg on extra-small images.
@@ -66,8 +71,8 @@ A qredg often have white out result, this is a lack of the accuracy on pnext cac
     ./tcont [xyit] <in0.ppm> ...
     cp `./tcont i <in0.ppm> ... | sort | head -n ... | tr '\n' ' '` outdir
 
-# Re-Re-Leave
-We might re-re-leave this repository with this update, however, if there's some sort of the reason to improve, we re-re-open here, also, lieonn.hh change might be updated even we leave here.
+# Re-Re-Re-Leave
+We might re-re-re-leave this repository with this update, however, if there's some sort of the reason to improve, we re-re-re-open here, also, lieonn.hh change might be updated even we leave here.
 
 # Real close
 2023/03/01
@@ -201,4 +206,5 @@ We might re-re-leave this repository with this update, however, if there's some 
 2024/10/31 add predgs.cc.
 2024/11/01 fix last predgs.cc index map, update readme, accuracy is not enough for SVD.
 2024/11/02 update readme. elim predgs.cc, predga.cc.
+2024/11/03 update readme. rerere-leave here.
 
