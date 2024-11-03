@@ -4455,10 +4455,17 @@ template <typename T, int nprogress = 3> static inline vector<SimpleVector<T> > 
   SimpleVector<SimpleVector<T> > in;
   in.entity = move(in0);
   vector<SimpleVector<T> > res;
-  for(int start = 0; start < in.size() / 2; start ++)
-    for(int step = 1; step < (in.size() - start) / 2; step ++)
-      for(int unit = step; unit < (in.size() - start) / 2 - step; unit ++) {
-        cerr << " *** " << start << " / " << in.size() / 2 << ", " << step << " / " << (in.size() - start) / 2 << ", " << unit << " / " << (in.size() - start) / 2 - step * 2 + 1 << " ***" << endl;
+  const auto leastunit(3);
+  const auto leastdim(4 * 2 - 1 + leastunit);
+  for(int start = 0; start < in.size() - leastdim; start ++)
+    for(int step = 1; step < in.size() - leastdim - start; step ++)
+      for(int unit = leastunit; unit <= in.size() - leastdim - start - step; unit ++) {
+        if(in.size() - start - unit + 1 < leastdim - leastunit) continue;
+        if(unit <= step) continue;
+        cerr << " *** " << start << " / " << in.size() - leastdim << ", ";
+        cerr << step << " / " << in.size() - leastdim - start << ", ";
+        cerr << unit << " / " << in.size() - leastdim - step + 1 << " ***";
+        cerr << endl;
         SimpleVector<SimpleVector<T> > p;
         p.entity.reserve(unit);
         for(int i = 0; i < unit; i ++)
@@ -4474,13 +4481,14 @@ template <typename T, int nprogress = 3> static inline vector<SimpleVector<T> > 
               T(int(2)) - T(int(1)) ) *
                 (in[i - ip.rows() + in.size()][j] * T(int(2)) - T(int(1)) );
         }
-        for(int j = 0; j < ip.rows() - step; j ++)
-          for(int k = 0; k < step; k ++) {
+        for(int k = 0; k < step; k ++)
+          for(int j = 0; j < ip.rows(); j ++) {
+            if(ip.rows() - j - k <= 0) continue;
             SimpleVector<T> work(in[0].size());
             work.O();
             // N.B. we need gamma complement after this.
             //      dftcache need to be single thread on first call.
-            work[0] = (P0maxRank0<T>(step - k).next(ip.col(0).subVector(j, ip.rows() - j)) *
+            work[0] = (P0maxRank0<T>(step - k).next(ip.col(0).subVector(j, ip.rows() - j - k)) *
               (p[p.size() - 1 - k][0] * T(int(2)) - T(int(1)) ) + T(int(1)) ) / T(int(2));
 #if defined(_OPENMP)
 #pragma for schedule(static, 1)
@@ -4488,7 +4496,7 @@ template <typename T, int nprogress = 3> static inline vector<SimpleVector<T> > 
             for(int i = 1; i < work.size(); i ++) {
               if(nprogress && ! (i % (work.size() / nprogress)) )
                 cerr << i << " / " << work.size() << endl;
-              work[i] = (P0maxRank0<T>(step - k).next(ip.col(i).subVector(j, ip.rows() - j)) *
+              work[i] = (P0maxRank0<T>(step - k).next(ip.col(i).subVector(j, ip.rows() - j - k)) *
                 (p[p.size() - 1 - k][i] * T(int(2)) - T(int(1)) ) + T(int(1)) ) / T(int(2));
             }
             res.emplace_back(move(work));

@@ -57,7 +57,7 @@ So we need to do bitsofcotton/isolate and match to known algorithms with the han
 Also, periodical projection transform before and after prediction is the matter when we count on the predictors as a brand new information feeder, the new information entropy is come from some of the masp generated (or not) vectors in the program.
 
 # Tips on cherry picking the result
-We should \*cherry pick\* a best parameter on predv1 this is because of the tips on prediction base dimensions, instead of them, we have mode == 'a' for pseudo predict all of the params and cherry pick after them but they produces only half of the input valid condition.
+We should \*cherry pick\* a best parameter on predv1 this is because of the tips on prediction base dimensions, we have mode == 'a' for pseudo predict all of the params and cherry pick after them they produces all possible contexts we can have on least internal states with pure function on our meaning also no external information addition but is very heavy to run.
 
 # Tips on qredg
 A qredg often have white out result, this is a lack of the accuracy on pnext cached taylor series. So if make the taylor series with upper accuracy, this is improved otherwise we need to do qredg on extra-small images.
@@ -206,5 +206,5 @@ We might re-re-re-leave this repository with this update, however, if there's so
 2024/10/31 add predgs.cc.
 2024/11/01 fix last predgs.cc index map, update readme, accuracy is not enough for SVD.
 2024/11/02 update readme. elim predgs.cc, predga.cc.
-2024/11/03 update readme. rerere-leave here.
+2024/11/03 update readme. rerere-leave here. predg.cc a cmd list up fix.
 
