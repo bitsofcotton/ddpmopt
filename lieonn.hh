@@ -1432,8 +1432,8 @@ template <typename T> using complex = Complex<T>;
   typedef uint64_t myuint;
   typedef int64_t  myint;
   // XXX:
-  // typedef long double myfloat;
-  typedef double myfloat;
+  typedef long double myfloat;
+  //typedef double myfloat;
 #elif _FLOAT_BITS_ == 8
   typedef uint8_t myuint;
   typedef int8_t  myint;
@@ -4684,6 +4684,27 @@ static const vector<int>& pnTinySingle(const int& upper = 1) {
   return pn;
 }
 
+// N.B. start flip/flop
+template <typename T> static inline SimpleMatrix<T> flip(const SimpleMatrix<T>& d) {
+  auto res(d);
+#if defined(_OPENMP)
+#pragma omp parallel for schedule(static, 1)
+#endif
+  for(int i = 0; i < d.rows(); i ++)
+    res.row(res.rows() - 1 - i) = d.row(i);
+  return res;
+}
+
+template <typename T> static inline SimpleMatrix<T> flop(const SimpleMatrix<T>& d) {
+  auto res(d);
+#if defined(_OPENMP)
+#pragma omp parallel for schedule(static, 1)
+#endif
+  for(int i = 0; i < d.cols(); i ++)
+    res.setCol(res.cols() - 1 - i, d.col(i));
+  return res;
+}
+
 
 // N.B. start isolate
 template <typename T> static inline SimpleMatrix<T> harmlessSymmetrizeSquare(const SimpleMatrix<T>& m) {
@@ -5020,26 +5041,6 @@ template <typename T> SimpleMatrix<T> sharpen(const int& size) {
     cerr << "." << flush;
   }
   return s;
-}
-
-template <typename T> static inline SimpleMatrix<T> flip(const SimpleMatrix<T>& d) {
-  auto res(d);
-#if defined(_OPENMP)
-#pragma omp parallel for schedule(static, 1)
-#endif
-  for(int i = 0; i < d.rows(); i ++)
-    res.row(res.rows() - 1 - i) = d.row(i);
-  return res;
-}
-
-template <typename T> static inline SimpleMatrix<T> flop(const SimpleMatrix<T>& d) {
-  auto res(d);
-#if defined(_OPENMP)
-#pragma omp parallel for schedule(static, 1)
-#endif
-  for(int i = 0; i < d.cols(); i ++)
-    res.setCol(res.cols() - 1 - i, d.col(i));
-  return res;
 }
 
 template <typename T> static inline SimpleMatrix<T> normalize(SimpleMatrix<T>& data, const T& upper = T(1)) {

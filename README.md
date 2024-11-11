@@ -24,9 +24,6 @@ The plain \[pq\]redg predictor uses first order shallow copying structures but i
 
 So n-predictor is useful when the problem needs some of the internal bit-wise structure is worse complex case they needs very large accuracy depends on input dimension number, stacking predictor reduces them.
 
-# Tips on predicting complex structures
-With some of the reseed alike input stream needs P012L predictor instead of P01 predictor this condition is eliminated with huge input numbers they unveils reseed algorithm enough but the exceeds condition rarely satisfied.
-
 # Tips on prediction base dimensions
 Something sparse with jammer input stream effects base dimension we select needs larger dimensions on the base, this condition is defined there's no unique pure functions on the stream the variables dimension they have.
 This condition can be eliminated with in/output (de)?compression this condition ask shirks the result of algorithms to some of the upper cardinals with compressing sparsity into dense ones on somewhere usually we should have to increase the base dimensions with or without bitsofcotton/masp from entropy reason.
@@ -207,4 +204,5 @@ We might re-re-re-leave this repository with this update, however, if there's so
 2024/11/01 fix last predgs.cc index map, update readme, accuracy is not enough for SVD.
 2024/11/02 update readme. elim predgs.cc, predga.cc.
 2024/11/03 update readme. rerere-leave here. predg.cc a cmd list up fix.
+2024/11/12 delete tips on reseeding, reseeding is not so harder. replaced flip, flop template function in lieonn suitable with gcc however 128bit long double isn't compile on our main pc environment.
 
