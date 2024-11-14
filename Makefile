@@ -19,12 +19,12 @@ LDFLAGS+=	-lc++ -L/usr/local/lib
 # Same as -mlong-double-128
 #LDFLAGS+=	-lquadmath -lm
 
-CLEANFILES= *.o ddpmopt ddpmopt32 predg predg32 qredg qredg32 ddpmoptmp ddpmopt32mp predgmp predg32mp qredgmp qredg32mp tcont tcont32
+CLEANFILES= *.o ddpmopt ddpmopt32 ddpmopt64 ddpmoptmp ddpmopt32mp ddpmopt64mp
 
 clean:
 	@rm -rf ${CLEANFILES}
 
-all:	ddpmopt ddpmopt32 predg predg32 qredg qredg32 ddpmoptmp ddpmopt32mp predgmp predg32mp qredgmp qredg32mp tcont tcont32
+all:	ddpmopt ddpmopt32 ddpmopt64 ddpmoptmp ddpmopt32mp ddpmopt64mp
 
 ddpmopt:
 	${CXX} ${CXXFLAGS} -static -o ddpmopt ddpmopt.cc
@@ -38,26 +38,4 @@ ddpmopt32mp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=32 -o ddpmopt32mp ddpmopt.cc
 ddpmopt64mp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=64 -o ddpmopt64mp ddpmopt.cc
-predg:
-	${CXX} ${CXXFLAGS} -static -o predg predg.cc
-predg32:
-	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=32 -o predg32 predg.cc
-predgmp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -o predgmp predg.cc
-predg32mp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=32 -o predg32mp predg.cc
-predg64mp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=64 -o predg64mp predg.cc
-qredg:
-	${CXX} ${CXXFLAGS} -static -o qredg qredg.cc
-qredg32:
-	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=32 -o qredg32 qredg.cc
-qredgmp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -o qredgmp qredg.cc
-qredg32mp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=32 -o qredg32mp qredg.cc
-tcont:
-	${CXX} ${CXXFLAGS} -static -o tcont tcont.cc
-tcont32:
-	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=32 -o tcont32 tcont.cc
 

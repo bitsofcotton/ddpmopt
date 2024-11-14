@@ -34,9 +34,10 @@ using std::istringstream;
 int main(int argc, const char* argv[]) {
 //#define int int64_t
 #define int int32_t
-  assert(1 < argc);
-  const auto sz(2);
-  const auto m(argv[1][0]);
+  const auto  sz(2);
+  const auto& m(argv[1][0]);
+  if(argc <= 1 || argv[1][1] != '\0') goto usage;
+  cerr << "Coherent: sqrt(2): " << sqrt<num_t>(Complex<num_t>(num_t(2))) << endl;
   if(m == '-') {
     vector<SimpleVector<num_t> > L;
     std::string s;
@@ -134,7 +135,158 @@ int main(int argc, const char* argv[]) {
       if(vv.dot(vv) != num_t(int(0))) cout << vv;
     }
     cout << endl;
-  }
+  } else if(m == '0' || m == 'a') {
+    vector<vector<SimpleMatrix<num_t> > > in;
+    in.reserve(argc - 1);
+    for(int i = 2; i < argc; i ++) {
+      vector<SimpleMatrix<num_t> > work;
+      if(! loadp2or3<num_t>(work, argv[i])) continue;
+      in.emplace_back(work.size() == 3 ? rgb2xyz<num_t>(work) : move(work));
+    }
+    if(m == '0') {
+      auto p(predMat<num_t>(in = normalize<num_t>(in), - 1, 1));
+      assert(p.size() == 1);
+      if(! savep2or3<num_t>("predg.ppm",
+          normalize<num_t>(p[0].size() == 3 ? xyz2rgb<num_t>(p[0]) : p[0])) )
+            cerr << "failed to save." << endl;
+      in.reserve(argc - 1);
+      for(int i = 2; i < argc; i ++) {
+        vector<SimpleMatrix<num_t> > work;
+        if(! loadp2or3<num_t>(work, argv[i])) continue;
+        in.emplace_back(work.size() == 3 ? rgb2xyz<num_t>(work) : move(work));
+      }
+    }
+    {
+      auto p(m == 'a' ?
+        predMat<num_t>(in = normalize<num_t>(in), 0, 0) :
+        predMat<num_t>(in = normalize<num_t>(in)));
+      for(int i = 0; i < p.size(); i ++) {
+        if(! savep2or3<num_t>((string("predg-") + to_string(i) +
+          string(".ppm")).c_str(),
+            normalize<num_t>(p[i].size() == 3 ? xyz2rgb<num_t>(p[i]) : p[i])) )
+              cerr << "failed to save." << endl;
+      }
+    }
+  } else if(m == 'q') {
+    for(int i0 = 1; i0 < argc; i0 ++) {
+      vector<SimpleMatrix<num_t> > work;
+      if(! loadp2or3<num_t>(work, argv[i0])) continue;
+      work = normalize<num_t>(work.size() == 3 ? rgb2xyz<num_t>(work) : work);
+      vector<vector<SimpleVector<num_t> > > pwork;
+      pwork.resize(work[0].rows());
+      for(int i = 0; i < pwork.size(); i ++) {
+        pwork[i].reserve(work.size());
+        for(int j = 0; j < work.size(); j ++)
+          pwork[i].emplace_back(work[j].row(i));
+      }
+      auto p(predVec<num_t>(pwork));
+      vector<SimpleMatrix<num_t> > wwork(work.size(),
+        SimpleMatrix<num_t>(work[0].rows() + p.size(), work[0].cols()).O());
+      for(int j = 0; j < work.size(); j ++)
+        wwork[j].setMatrix(0, 0, work[j]);
+      for(int i = 0; i < p.size(); i ++)
+        for(int j = 0; j < p[i].size(); j ++)
+          wwork[j].row(i - p.size() + wwork[j].rows()) = move(p[i][j]);
+      if(! savep2or3<num_t>(argv[i0], normalize<num_t>(wwork.size() == 3 ?
+        xyz2rgb<num_t>(wwork) : wwork) ) )
+          cerr << "failed to save." << endl;
+    }
+  } else if(m == 'x' || m == 'y' || m == 'i' || m == 't') {
+    vector<num_t> score;
+    score.resize(argc + 1, num_t(int(0)));
+    switch(argv[1][0]) {
+    case 'x':
+    case 'i':
+      for(int i0 = 2; i0 < argc; i0 ++) {
+        vector<SimpleMatrix<num_t> > work;
+        P0maxRank<num_t> p;
+        if(! loadp2or3<num_t>(work, argv[i0])) continue;
+        for(int i = 0; i < work.size(); i ++)
+          for(int ii = 0; ii < work[i].rows(); ii ++) {
+            idFeeder<num_t> w(3);
+            for(int jj = 0; jj < work[i].cols(); jj ++) {
+              if(w.full) {
+                const auto pp(p.next(w.res));
+                score[i0] += (pp - work[i](ii, jj)) * (pp - work[i](ii, jj));
+              } 
+              w.next(work[i](ii, jj));
+            }
+          }
+        if(argv[1][0] == 'x')
+          score[i0] /= num_t(work[0].rows() * work[0].cols() * work.size());
+      }
+      if(argv[1][0] == 'x') break;
+    case 'y':
+      for(int i0 = 2; i0 < argc; i0 ++) {
+        vector<SimpleMatrix<num_t> > work;
+        P0maxRank<num_t> p;
+        if(! loadp2or3<num_t>(work, argv[i0])) continue;
+        for(int i = 0; i < work.size(); i ++)
+          for(int jj = 0; jj < work[i].cols(); jj ++) {
+            idFeeder<num_t> w(3);
+            for(int ii = 0; ii < work[i].rows(); ii ++) {
+              if(w.full) {
+                const auto pp(p.next(w.res));
+                score[i0] += (pp - work[i](ii, jj)) * (pp - work[i](ii, jj));
+              } 
+              w.next(work[i](ii, jj));
+            }
+          }
+        score[i0] /= num_t(work[0].rows() * work[0].cols() * work.size());
+      }
+      break;
+    case 't':
+      {
+        vector<vector<SimpleMatrix<num_t> > > b;
+        b.resize(argc + 1);
+        for(int i = 2; i < argc; i ++) {
+          vector<SimpleMatrix<num_t> > work;
+          if(! loadp2or3<num_t>(work, argv[i])) continue;
+          b[i] = move(work);
+          assert(b[i].size() == b[2].size() &&
+            b[i][0].rows() == b[2][0].rows() &&
+            b[i][0].cols() == b[2][0].cols());
+        }
+        P0maxRank<num_t> p;
+        int cnt(0);
+        for(int i = 0; i < b[2][0].rows(); i ++)
+          for(int j = 0; j < b[2][0].cols(); j ++)
+            for(int k = 0; k < b[2].size(); k ++) {
+              idFeeder<num_t> w(3);
+              for(int ii = 2; ii < b.size(); ii ++, cnt ++) {
+                if(! b[ii].size()) continue;
+                if(w.full) {
+                  const auto pp(p.next(w.res));
+                  score[0] += (pp - b[ii][k](i, j)) * (pp - b[ii][k](i, j));
+                }
+                w.next(b[ii][k](i, j));
+              }
+            }
+        score[0] /= num_t(cnt);
+      }
+      break;
+    }
+    if(argv[1][0] == 'x' || argv[1][0] == 'y' || argv[1][0] == 'i')
+      for(int i = 2; i < argc; i ++)
+        cout << sqrt(score[i]) << ", " << argv[i] << endl;
+    else
+      cout << sqrt(score[0]) << ", whole image index" << endl;
+    return 0;
+  } else goto usage;
+  cerr << "Done" << endl;
   return 0;
+ usage:
+  cerr << "Usage:" << endl;
+  cerr << "# copy color structure" << endl;
+  cerr << argv[0] << " + <in0out.pgm> <in0in.ppm> ... > cache.txt" << endl;
+  cerr << "# apply color structure" << endl;
+  cerr << argv[0] << " - <in0.ppm> ... < cache.txt" << endl;
+  cerr << "# predict next image mode === '0' for normal, mode == 'a' to get all." << endl;
+  cerr << argv[0] << " [0a] <in0.ppm> ..." << endl;
+  cerr << "# predict down scanlines." << endl;
+  cerr << argv[0] << " q <in0out.ppm> ..." << endl;
+  cerr << "# show continuity" << endl;
+  cerr << argv[0] << " [xyit] <in0.ppm> ..." << endl;
+  return - 1;
 }
 

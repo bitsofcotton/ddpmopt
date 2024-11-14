@@ -60,13 +60,17 @@ We should \*cherry pick\* a best parameter on predv1 this is because of the tips
 A qredg often have white out result, this is a lack of the accuracy on pnext cached taylor series. So if make the taylor series with upper accuracy, this is improved otherwise we need to do qredg on extra-small images.
 
 # Usage:
-    ./predg(32|64)?(mp)? <mode> <in0.ppm> ...
-    # mode == '0' for normal use, mode == 'a' to get all outputs.
-    ./qredg(32|64)?(mp)? <in0out.ppm> ...
+    # copy color structure
     ./ddpmopt(32|64)?(mp)? + <in0out.pgm> <in0in.ppm> ... > cache.txt
+    # apply color structure
     ./ddpmopt(32|64)?(mp)? - <in0.ppm> ... < cache.txt
-    ./tcont [xyit] <in0.ppm> ...
-    cp `./tcont i <in0.ppm> ... | sort | head -n ... | tr '\n' ' '` outdir
+    # predict next image mode === '0' for normal, mode == 'a' to get all.
+    ./ddpmopt(32|64)?(mp)? [0a] <in0.ppm> ...
+    # predict down scanlines.
+    ./ddpmopt(32|64)?(mp)? q <in0out.ppm> ...
+    # show continuity
+    ./ddpmopt(32|64)?(mp)? [xyit] <in0.ppm> ...
+    cp `./ddpmopt(32|64)?(mp)? i <in0.ppm> ... | sort | head -n ... | tr '\n' ' '` outdir
 
 # Re-Re-Re-Leave
 We might re-re-re-leave this repository with this update, however, if there's some sort of the reason to improve, we re-re-re-open here, also, lieonn.hh change might be updated even we leave here.
@@ -205,4 +209,5 @@ We might re-re-re-leave this repository with this update, however, if there's so
 2024/11/02 update readme. elim predgs.cc, predga.cc.
 2024/11/03 update readme. rerere-leave here. predg.cc a cmd list up fix.
 2024/11/12 delete tips on reseeding, reseeding is not so harder. replaced flip, flop template function in lieonn suitable with gcc however 128bit long double isn't compile on our main pc environment.
+2024/11/14 integreate all commands on this repository into ddpmopt.cc but the binary is very fat.
 
