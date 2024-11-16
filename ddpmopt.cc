@@ -205,7 +205,7 @@ int main(int argc, const char* argv[]) {
       for(int ii = 0; ii < out[0].rows(); ii ++)
         for(int jj = 0; jj < out[0].cols(); jj ++, pp ++)
           for(int j = 0; j < out.size(); j ++)
-            out[j](ii, jj) = ep[pp][0][j];
+            out[j](ii, jj) = p[pp][0][j];
       if(! savep2or3<num_t>((string("predgw-") + to_string(i) + string(".ppm")).c_str(),
           normalize<num_t>(out.size() == 3 ? xyz2rgb<num_t>(out) : out)) )
             cerr << "failed to save." << endl;
