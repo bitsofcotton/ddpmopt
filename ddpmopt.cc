@@ -167,6 +167,49 @@ int main(int argc, const char* argv[]) {
               cerr << "failed to save." << endl;
       }
     }
+  } else if(m == 'w') {
+    vector<vector<SimpleMatrix<num_t> > > in;
+    in.reserve(argc - 1);
+    int wp(0);
+    int c(0);
+    for(int i = 2; i < argc; i ++) {
+      vector<SimpleMatrix<num_t> > work;
+      if(! loadp2or3<num_t>(work, argv[i])) continue;
+      wp += work[0].rows() * work[0].cols();
+      c   = max(c, int(work.size()));
+      in.emplace_back(work.size() == 3 ? rgb2xyz<num_t>(work) : move(work));
+    }
+    vector<vector<SimpleVector<num_t> > > ep;
+    ep.resize(wp);
+    int pp(0);
+    for(int i = 0; i < in.size(); i ++)
+      for(int j = 0; j < in[i][0].rows(); j ++)
+        for(int k = 0; k < in[i][0].cols(); k ++, pp ++) {
+          ep[pp].resize(1, SimpleVector<num_t>(c * 2).O());
+          for(int m = 0; m < c; m ++)
+            ep[pp][0][m] = in[i][m % in[i].size()](j, k);
+        }
+    assert(pp == wp);
+    for(pp = 0; pp < ep.size(); pp ++)
+      for(int m = 0; m < c; m ++)
+        ep[ep.size() - pp - 1][0][c + m] = ep[pp][0][m];
+    assert(pp == wp);
+    auto p(predVec<num_t>(ep = normalize<num_t>(ep)));
+    assert(in[0][0].rows() * in[0][0].cols() <= p.size());
+    for(int i = 0, pp = 0; i < p.size() / (in[0][0].rows() * in[0][0].cols()); i ++) {
+      vector<SimpleMatrix<num_t> > out(c);
+      for(int j = 0; j < out.size(); j ++) {
+        out[j].resize(in[0][0].rows(), in[0][0].cols());
+        out[j].O();
+      }
+      for(int ii = 0; ii < out[0].rows(); ii ++)
+        for(int jj = 0; jj < out[0].cols(); jj ++, pp ++)
+          for(int j = 0; j < out.size(); j ++)
+            out[j](ii, jj) = ep[pp][0][j];
+      if(! savep2or3<num_t>((string("predgw-") + to_string(i) + string(".ppm")).c_str(),
+          normalize<num_t>(out.size() == 3 ? xyz2rgb<num_t>(out) : out)) )
+            cerr << "failed to save." << endl;
+    }
   } else if(m == 'q') {
     for(int i0 = 1; i0 < argc; i0 ++) {
       vector<SimpleMatrix<num_t> > work;
@@ -283,6 +326,8 @@ int main(int argc, const char* argv[]) {
   cerr << argv[0] << " - <in0.ppm> ... < cache.txt" << endl;
   cerr << "# predict next image mode === '0' for normal, mode == 'a' to get all." << endl;
   cerr << argv[0] << " [0a] <in0.ppm> ..." << endl;
+  cerr << "# predict with whole pixel context" << endl;
+  cerr << argv[0] << " w <in0.ppm> <in0-4.ppm> ..." << endl;
   cerr << "# predict down scanlines." << endl;
   cerr << argv[0] << " q <in0out.ppm> ..." << endl;
   cerr << "# show continuity" << endl;

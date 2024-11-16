@@ -4200,6 +4200,26 @@ template <typename T> static inline SimpleMatrix<T> normalize(const SimpleMatrix
   return normalize<T>(w, upper)[0][0];
 }
 
+template <typename T> static inline vector<vector<SimpleVector<T> > > normalize(const vector<vector<SimpleVector<T> > >& in, const T& upper = T(1)) {
+  vector<vector<SimpleMatrix<T> > > w;
+  w.resize(in.size());
+  for(int i = 0; i < in.size(); i ++) {
+    w[i].resize(in[i].size(), SimpleMatrix<T>(1, in[i][0].size()).O());
+    for(int j = 0; j < in[i].size(); j ++)
+      w[i][j].row(0) = in[i][j];
+  }
+  auto res(normalize<T>(w, upper));
+  w.resize(0);
+  vector<vector<SimpleVector<T> > > v;
+  v.resize(res.size());
+  for(int i = 0; i < res.size(); i ++) {
+    v[i].resize(res[i].size(), SimpleVector<T>(res[i][0].cols()).O());
+    for(int j = 0; j < v[i].size(); j ++)
+      v[i][j] = res[i][j].row(0);
+  }
+  return v;
+}
+
 template <typename T> static inline SimpleVector<T> normalize(const SimpleVector<T>& in, const T& upper = T(1)) {
   SimpleMatrix<T> w;
   w.resize(1, in.size());
@@ -4354,7 +4374,7 @@ template <typename T, int nprogress = 100> SimpleVector<T> predv0(const vector<S
 #pragma omp parallel for schedule(static, 1)
 #endif
   for(int j = 0; j < in[0].size(); j ++) {
-    if(nprogress && ! (j % (in[0].size() / nprogress)) )
+    if(nprogress && ! (j % max(1, in[0].size() / nprogress)) )
       cerr << j << " / " << in[0].size() << ", " << strloop << endl;
     idFeeder<T> buf(in.size());
     for(int i = 0; i < in.size(); i ++)
@@ -4419,7 +4439,7 @@ template <typename T, int nprogress = 100> static inline SimpleVector<T> predv1(
 #pragma for schedule(static, 1)
 #endif
   for(int i = 1; i < res.size(); i ++) {
-    if(nprogress && ! (i % (res.size() / nprogress)) )
+    if(nprogress && ! (i % max(1, res.size() / nprogress)) )
       cerr << i << " / " << res.size() << endl;
     res[i] = (P0maxRank0<T>(step).next(ip.col(i)) *
       (p[p.size() - 1][i] * T(int(2)) - T(int(1)) ) + T(int(1)) ) / T(int(2));

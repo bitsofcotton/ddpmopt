@@ -59,6 +59,11 @@ We should \*cherry pick\* a best parameter on predv1 this is because of the tips
 # Tips on qredg
 A qredg often have white out result, this is a lack of the accuracy on pnext cached taylor series. So if make the taylor series with upper accuracy, this is improved otherwise we need to do qredg on extra-small images.
 
+# Pseudo backport specific
+We want to backport bitsofcotton/specific result as a specific value prediction they project meanings, however our machine is too slow to calculate also this beats with whole pixel prediction on speed, so we can do bitsofcotton/masp 4 command generated specific values for seed of the predictors as ddpmopt w command.
+
+If input stream size ratio (input number vs. input graphics size) is better one, the predicted image also be better one differed to raw predg whole image context each pixel prediction.
+
 # Usage:
     # copy color structure
     ./ddpmopt(32|64)?(mp)? + <in0out.pgm> <in0in.ppm> ... > cache.txt
@@ -66,6 +71,8 @@ A qredg often have white out result, this is a lack of the accuracy on pnext cac
     ./ddpmopt(32|64)?(mp)? - <in0.ppm> ... < cache.txt
     # predict next image mode === '0' for normal, mode == 'a' to get all.
     ./ddpmopt(32|64)?(mp)? [0a] <in0.ppm> ...
+    # predict with whole pixel context
+    ./ddpmopt w <in0.ppm> <in0-4.ppm> ...
     # predict down scanlines.
     ./ddpmopt(32|64)?(mp)? q <in0out.ppm> ...
     # show continuity
@@ -210,4 +217,5 @@ We might re-re-re-leave this repository with this update, however, if there's so
 2024/11/03 update readme. rerere-leave here. predg.cc a cmd list up fix.
 2024/11/12 delete tips on reseeding, reseeding is not so harder. replaced flip, flop template function in lieonn suitable with gcc however 128bit long double isn't compile on our main pc environment.
 2024/11/14 integreate all commands on this repository into ddpmopt.cc but the binary is very fat.
+2024/11/17 add w command.
 
