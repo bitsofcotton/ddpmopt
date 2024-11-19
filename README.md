@@ -220,5 +220,5 @@ We might re-re-re-leave this repository with this update, however, if there's so
 2024/11/12 delete tips on reseeding, reseeding is not so harder. replaced flip, flop template function in lieonn suitable with gcc however 128bit long double isn't compile on our main pc environment.
 2024/11/14 integreate all commands on this repository into ddpmopt.cc but the binary is very fat.
 2024/11/17 add w command.
-2024/11/19 improved lieonn.hh:taylor command speed and accuracy this causes q command better works. update readme. something error occured first upload of this change on github.com.
+2024/11/19 improved lieonn.hh:taylor command speed and accuracy this causes q command better works. update readme. something error occured first upload of this change on github.com. this change leads us to pnext r variable doubles.
 
