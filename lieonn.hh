@@ -2799,9 +2799,20 @@ template <typename T> static inline SimpleVector<T> taylor(const int& size, cons
   const auto residue0(step - T(step00));
   const auto step0(step00 == size - 1 || abs(residue0) <= T(int(1)) / T(int(2)) ? step00 : step00 + 1);
   const auto residue(step - T(step0));
+  if(residue == T(int(0))) return SimpleVector<T>(size).ek(step0);
+  // N.B. following code is equivalent to exp each dft.
+  //      this improves both accuracy and speed.
+  auto res(dft<T>(size));
+  static const auto Pi(T(int(4)) * atan2(T(int(1)), T(int(1)) ));
+#if defined(_OPENMP)
+#pragma omp parallel for schedule(static, 1)
+#endif
+  for(int i = 0; i < res.rows(); i ++)
+    res.row(i) *= exp(complex<T>(T(int(0)), T(int(2)) * Pi * T(i) / T(res.rows()) ));
+  return (res.transpose() * dft<T>(- size).row(step0)).template real<T>();
+/*
   SimpleVector<T> res(size);
   res.ek(step0);
-  if(residue == T(int(0))) return res;
   const auto Dt(diff<T>(size).transpose());
         auto dt(Dt.col(step0) * residue);
   // N.B.
@@ -2818,6 +2829,7 @@ template <typename T> static inline SimpleVector<T> taylor(const int& size, cons
     dt   = Dt * dt * residue / T(i);
   }
   return res;
+*/
 }
 
 template <typename T> static inline SimpleVector<T> linearInvariant(const SimpleMatrix<T>& in) {
@@ -4170,9 +4182,16 @@ template <typename T> static inline vector<vector<SimpleMatrix<T> > > normalize(
             }
             fixed = true;
           }
-  if(MM == mm || ! fixed)
-    return data;
   auto result(data);
+  if(MM == mm) {
+    for(int kk = 0; kk < data.size(); kk ++)
+      for(int k = 0; k < data[kk].size(); k ++)
+        for(int i = 0; i < data[kk][k].rows(); i ++)
+          for(int j = 0; j < data[kk][k].cols(); j ++)
+            result[kk][k](i, j) = T(int(1)) / T(int(2));
+    return result;
+  } else if(! fixed)
+    return result;
   for(int kk = 0; kk < data.size(); kk ++)
     for(int k = 0; k < data[kk].size(); k ++)
       for(int i = 0; i < data[kk][k].rows(); i ++)
@@ -4450,10 +4469,10 @@ template <typename T, int nprogress = 100> static inline SimpleVector<T> predv1(
 template <typename T, int nprogress = 100> static inline vector<SimpleVector<T> > predv(const SimpleVector<SimpleVector<T> >& in, int unit = - 1, int nstep = - 1) {
   if(nstep < 0) {
     if(unit < 0) unit  = in.size() / 3;
-    nstep = max(int(1), int(sqrt(T(unit)) ));
+    nstep = max(int(1), min(int(max(sqrt(T(unit)), T(unit / 2))), int(in.size())));
   } else if(unit < 0)
     unit  = min(int(in.size() / 3), nstep * nstep);
-  assert(nstep * nstep <= unit);
+  assert(min(nstep * 2, nstep * nstep) < in.size());
   vector<SimpleVector<T> > res;
   res.reserve(nstep);
   for(int i = 0; i < nstep; i ++) {
