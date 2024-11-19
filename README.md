@@ -33,6 +33,8 @@ However, we predict the stream with them and continuity after them in pqredg.
 So this effects if input stream is enough dense in another words stream is stable for input entropy one by one meaning, the result is reasonable in the continuity meaning.
 Some of the PRNG tests causes this valid but there's something new entropy feed, they fails with gulfs depends on the range we use in the range.
 
+To get better entropy stream from input, we can use bitsofcotton/goki_check_cc:test.py mmovegle command to get partial file list from input filename stream for pseudo ones.
+
 # Tips on contexts
 We use whole image context to insert context then predict with such each pixel context. So each image consistency is used and applied for the output.
 
@@ -44,27 +46,20 @@ This matches our senses on viewing the image.
 
 Instead of them, we use pqredg for whole image context with each pixel prediction. So this means output is all of the outer coverable contexts traced prediction. However, the prediction dimension is the matter for this.
 
-Also, adding bump map into one of a color in the picture isn't improves output enough, this is because it's only some alpha in R^1 adding and balancing on whole picture context. To do such bump map extension, we should input picture01.ppm picture01-bump.ppm ... stream instead of the original stream.
+Also, adding bump map into one of a color in the picture isn't improves output enough, this is because it's only some alpha in R^1 adding and balancing on whole picture context. To do such bump map extension, we should input picture01.ppm picture01-bump.ppm ... stream instead of the original stream with doubled variable dimensions of predictors.
 
 # Tips around relation to bitsofcotton/masp
 We can use bitsofcotton/masp detecting such feature quantities.
 However, this isn't unveil deep structure they behaves to be operatable in the picture set by itself.
 So we need to do bitsofcotton/isolate and match to known algorithms with the handle parameters we want to operate.
 
-Also, periodical projection transform before and after prediction is the matter when we count on the predictors as a brand new information feeder, the new information entropy is come from some of the masp generated (or not) vectors in the program.
-
-# Tips on cherry picking the result
-We should \*cherry pick\* a best parameter on predv1 this is because of the tips on prediction base dimensions, we have mode == 'a' for pseudo predict all of the params and cherry pick after them they produces all possible contexts we can have on least internal states with pure function on our meaning also no external information addition but is very heavy to run.
-
 # Pseudo backport specific
 We want to backport bitsofcotton/specific result as a specific value prediction they project meanings, however our machine is too slow to calculate also this beats with whole pixel prediction on speed, so we can do bitsofcotton/masp 4 command generated specific values for seed of the predictors as ddpmopt w command.
 
-If input stream size ratio (input number vs. input graphics size) is better one, the predicted image also be better one differed to raw predg whole image context each pixel prediction.
+If input stream size ratio (input number vs. input graphics size) is better one, the predicted image also be better one differed to raw predg whole image context each pixel prediction. However, the whole pixel context prediction is heavy enough to calculate even with tiny images.
 
-# Tips for open problem around \[xyit\], \[0aqw\] commads.
-We can reduce input entropy transition glitch from prediction perspective with absent some of the inputstream as to generate new input stream.
-
-We might need to implement this to get better resulsts from fixed input stream.
+# Tips on cherry picking the result
+We should \*cherry pick\* a best parameter on predv1 this is because of the tips on prediction base dimensions, we have mode == 'a' for pseudo predict all of the params and cherry pick after them they produces all possible contexts we can have on least internal states with pure function on our meaning also no external information addition but is very heavy to run.
 
 # Usage:
     # copy color structure
@@ -221,4 +216,5 @@ We might re-re-re-leave this repository with this update, however, if there's so
 2024/11/14 integreate all commands on this repository into ddpmopt.cc but the binary is very fat.
 2024/11/17 add w command.
 2024/11/19 improved lieonn.hh:taylor command speed and accuracy this causes q command better works. update readme. something error occured first upload of this change on github.com. this change leads us to pnext r variable doubles.
+2024/11/20 update readme for recent knowns.
 
