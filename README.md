@@ -56,13 +56,15 @@ Also, periodical projection transform before and after prediction is the matter 
 # Tips on cherry picking the result
 We should \*cherry pick\* a best parameter on predv1 this is because of the tips on prediction base dimensions, we have mode == 'a' for pseudo predict all of the params and cherry pick after them they produces all possible contexts we can have on least internal states with pure function on our meaning also no external information addition but is very heavy to run.
 
-# Tips on qredg
-A qredg often have white out result, this is a lack of the accuracy on pnext cached taylor series. So if make the taylor series with upper accuracy, this is improved otherwise we need to do qredg on extra-small images.
-
 # Pseudo backport specific
 We want to backport bitsofcotton/specific result as a specific value prediction they project meanings, however our machine is too slow to calculate also this beats with whole pixel prediction on speed, so we can do bitsofcotton/masp 4 command generated specific values for seed of the predictors as ddpmopt w command.
 
 If input stream size ratio (input number vs. input graphics size) is better one, the predicted image also be better one differed to raw predg whole image context each pixel prediction.
+
+# Tips for open problem around \[xyit\], \[0aqw\] commads.
+We can reduce input entropy transition glitch from prediction perspective with absent some of the inputstream as to generate new input stream.
+
+We might need to implement this to get better resulsts from fixed input stream.
 
 # Usage:
     # copy color structure
@@ -218,4 +220,5 @@ We might re-re-re-leave this repository with this update, however, if there's so
 2024/11/12 delete tips on reseeding, reseeding is not so harder. replaced flip, flop template function in lieonn suitable with gcc however 128bit long double isn't compile on our main pc environment.
 2024/11/14 integreate all commands on this repository into ddpmopt.cc but the binary is very fat.
 2024/11/17 add w command.
+2024/11/19 improved lieonn.hh:taylor command speed and accuracy this causes q command better works. update readme. something error occured first upload of this change on github.com.
 
