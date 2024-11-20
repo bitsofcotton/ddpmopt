@@ -35,6 +35,8 @@ Some of the PRNG tests causes this valid but there's something new entropy feed,
 
 To get better entropy stream from input, we can use bitsofcotton/goki_check_cc:test.py mmovegle command to get partial file list from input filename stream for pseudo ones.
 
+Also, we should \*cherry pick\* a best parameter on predv1 so to avoid gulf based failures, we have mode == 'a' for pseudo predict all of the params and cherry pick after them they produces all possible contexts we can have on least internal states with pure function on our meaning also no external information addition but is very heavy to run.
+
 # Tips on contexts
 We use whole image context to insert context then predict with such each pixel context. So each image consistency is used and applied for the output.
 
@@ -48,18 +50,14 @@ Instead of them, we use pqredg for whole image context with each pixel predictio
 
 Also, adding bump map into one of a color in the picture isn't improves output enough, this is because it's only some alpha in R^1 adding and balancing on whole picture context. To do such bump map extension, we should input picture01.ppm picture01-bump.ppm ... stream instead of the original stream with doubled variable dimensions of predictors.
 
-# Tips around relation to bitsofcotton/masp
+# Tips around relation to bitsofcotton/masp, bitsofcotton/specific
 We can use bitsofcotton/masp detecting such feature quantities.
 However, this isn't unveil deep structure they behaves to be operatable in the picture set by itself.
 So we need to do bitsofcotton/isolate and match to known algorithms with the handle parameters we want to operate.
 
-# Pseudo backport specific
-We want to backport bitsofcotton/specific result as a specific value prediction they project meanings, however our machine is too slow to calculate also this beats with whole pixel prediction on speed, so we can do bitsofcotton/masp 4 command generated specific values for seed of the predictors as ddpmopt w command.
-
-If input stream size ratio (input number vs. input graphics size) is better one, the predicted image also be better one differed to raw predg whole image context each pixel prediction. However, the whole pixel context prediction is heavy enough to calculate even with tiny images.
-
-# Tips on cherry picking the result
-We should \*cherry pick\* a best parameter on predv1 this is because of the tips on prediction base dimensions, we have mode == 'a' for pseudo predict all of the params and cherry pick after them they produces all possible contexts we can have on least internal states with pure function on our meaning also no external information addition but is very heavy to run.
+Also, decomposing masp, we want to backport bitsofcotton/specific result as a specific value prediction they project meanings, however our machine is too slow to calculate also this beats with whole pixel prediction on speed, so we can do bitsofcotton/masp 4 command generated specific values for seed of the predictors as ddpmopt w command.
+In fact, we should align P01 predictors so to predict with w command.
+We don't use them because of the speed of our machine avoids them from input picture size reason.
 
 # Usage:
     # copy color structure
@@ -217,4 +215,5 @@ We might re-re-re-leave this repository with this update, however, if there's so
 2024/11/17 add w command.
 2024/11/19 improved lieonn.hh:taylor command speed and accuracy this causes q command better works. update readme. something error occured first upload of this change on github.com. this change leads us to pnext r variable doubles.
 2024/11/20 update readme for recent knowns.
+2024/11/20 update readme.
 
