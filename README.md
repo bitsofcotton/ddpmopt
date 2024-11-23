@@ -55,7 +55,7 @@ We can use bitsofcotton/masp detecting such feature quantities.
 However, this isn't unveil deep structure they behaves to be operatable in the picture set by itself.
 So we need to do bitsofcotton/isolate and match to known algorithms with the handle parameters we want to operate.
 
-Also, decomposing masp, we want to backport bitsofcotton/specific result as a specific value prediction they project meanings, however our machine is too slow to calculate also this beats with whole pixel prediction on speed, so we can do bitsofcotton/masp 4 command generated specific values for seed of the predictors as ddpmopt w command.
+Also, decomposing masp, we want to backport bitsofcotton/specific result as a specific value prediction they project meanings, however our machine is too slow to calculate also this beats with whole pixel prediction on speed, so we can do bitsofcotton/masp '-' command generated specific values for seed of the predictors as ddpmopt w command.
 In fact, we should align P01 predictors so to predict with w command.
 We don't use them because of the speed of our machine avoids them from input picture size reason.
 
