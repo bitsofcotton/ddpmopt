@@ -315,6 +315,80 @@ int main(int argc, const char* argv[]) {
     else
       cout << sqrt(score[0]) << ", whole image index" << endl;
     return 0;
+  } else if(m == 'c') {
+    vector<vector<SimpleMatrix<num_t> > > in;
+    in.reserve(argc - 2 + 1);
+    for(int i0 = 2; i0 < argc; i0 ++) {
+      vector<SimpleMatrix<num_t> > work;
+      if(! loadp2or3<num_t>(work, argv[i0])) continue;
+      in.emplace_back(move(work));
+      assert(in[0].size() == in[in.size() - 1].size() &&
+             in[0][0].rows() == in[in.size() - 1][0].rows() &&
+             in[0][0].cols() == in[in.size() - 1][0].cols() );
+    }
+    cerr << "y" << flush;
+    auto jy(in);
+    auto left(diff<num_t>(jy[0][0].rows()));
+#if defined(_OPENMP)
+#pragma omp parallel for schedule(static, 1)
+#endif
+    for(int i = 0; i < in.size(); i ++) {
+      cerr << "." << flush;
+      for(int j = 0; j < in[i].size(); j ++)
+        jy[i][j] = left * in[i][j];
+    }
+    cerr << "x" << flush;
+    auto jx(in);
+    auto right(diff<num_t>(jy[0][0].cols()).transpose());
+#if defined(_OPENMP)
+#pragma omp parallel for schedule(static, 1)
+#endif
+    for(int i = 0; i < in.size(); i ++) {
+      cerr << "." << flush;
+      for(int j = 0; j < in[i].size(); j ++)
+        jx[i][j] = in[i][j] * right;
+    }
+    cerr << "z" << flush;
+    auto jz(in);
+    auto middle(diff<num_t>(jz.size()));
+    for(int i = 0; i < in[0].size(); i ++) {
+#if defined(_OPENMP)
+#pragma omp parallel for schedule(static, 1)
+#endif
+      for(int j = 0; j < in[0][0].rows(); j ++) {
+        cerr << "." << flush;
+        for(int k = 0; k < in[0][0].cols(); k ++) {
+          SimpleVector<num_t> work(in.size());
+          for(int m = 0; m < work.size(); m ++)
+            work[m] = in[m][i](j, k);
+          work = middle * work;
+          for(int m = 0; m < work.size(); m ++)
+            jz[m][i](j, k) = work[m];
+        }
+      }
+    }
+    cerr << endl << "eigen: " << flush;
+    // [[1, 0, 0, jx], [0, 1, 0, jy], [0, 0, 1, jz], [jx, jy, jz, z]]
+#if defined(_OPENMP)
+#pragma omp parallel for schedule(static, 1)
+#endif
+    for(int i = 0; i < in.size(); i ++) {
+      cerr << "." << flush;
+      for(int j = 0; j < in[i].size(); j ++)
+        for(int k = 0; k < in[i][j].rows(); k ++)
+          for(int m = 0; m < in[i][j].cols(); m ++) {
+            SimpleMatrix<num_t> work(4, 4);
+            work.I();
+            work(3, 0) = work(0, 3) = jx[i][j](k, m);
+            work(3, 1) = work(1, 3) = jy[i][j](k, m);
+            work(3, 2) = work(2, 3) = jz[i][j](k, m);
+            work(3, 3) = work(3, 3) = in[i][j](k, m);
+            in[i][j](k, m) = work.determinant();
+          }
+    }
+    for(int i = 0; i < in.size(); i ++)
+      if(! savep2or3<num_t>((string(argv[i + 2]) + string("-c3.ppm")).c_str(), normalize<num_t>(in[i]) ) )
+        cerr << "failed to save." << endl;
   } else goto usage;
   cerr << "Done" << endl;
   return 0;
@@ -332,6 +406,8 @@ int main(int argc, const char* argv[]) {
   cerr << argv[0] << " q <in0out.ppm> ..." << endl;
   cerr << "# show continuity" << endl;
   cerr << argv[0] << " [xyit] <in0.ppm> ..." << endl;
+  cerr << "# some of the volume curvature like transform" << endl;
+  cerr << argv[0] << " c <in0.ppm> ..." << endl;
   return - 1;
 }
 

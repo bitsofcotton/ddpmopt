@@ -50,6 +50,11 @@ Instead of them, we use pqredg for whole image context with each pixel predictio
 
 Also, adding bump map into one of a color in the picture isn't improves output enough, this is because it's only some alpha in R^1 adding and balancing on whole picture context. To do such bump map extension, we should input picture01.ppm picture01-bump.ppm ... stream instead of the original stream with doubled variable dimensions of predictors.
 
+# Tips on adding continuity
+We can add some of the continuity by ddpmopt c command, this is pseudo volume curvature using determinant of jacobian. However, this isn't get enough improved output.
+
+This is also to add some of the continuity into input context.
+
 # Tips around relation to bitsofcotton/masp, bitsofcotton/specific
 We can use bitsofcotton/masp detecting such feature quantities.
 However, this isn't unveil deep structure they behaves to be operatable in the picture set by itself.
@@ -72,6 +77,8 @@ We don't use them because of the speed of our machine avoids them from input pic
     ./ddpmopt(32|64)?(mp)? q <in0out.ppm> ...
     # show continuity
     ./ddpmopt(32|64)?(mp)? [xyit] <in0.ppm> ...
+    # some of the volume curvature like transform
+    ./ddpmopt(32|64)?(mp)? c <in0.ppm> ...
     cp `./ddpmopt(32|64)?(mp)? i <in0.ppm> ... | sort | head -n ... | tr '\n' ' '` outdir
 
 # Re-Re-Re-Leave
@@ -216,4 +223,5 @@ We might re-re-re-leave this repository with this update, however, if there's so
 2024/11/19 improved lieonn.hh:taylor command speed and accuracy this causes q command better works. update readme. something error occured first upload of this change on github.com. this change leads us to pnext r variable doubles.
 2024/11/20 update readme for recent knowns.
 2024/11/20 update readme.
+2024/11/30 add c command. update readme.
 
