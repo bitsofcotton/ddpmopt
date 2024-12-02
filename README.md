@@ -224,4 +224,5 @@ We might re-re-re-leave this repository with this update, however, if there's so
 2024/11/20 update readme for recent knowns.
 2024/11/20 update readme.
 2024/11/30 add c command. update readme.
+2024/12/02 taylor improvement, taylor function reclose with this.
 
