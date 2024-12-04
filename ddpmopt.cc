@@ -197,43 +197,29 @@ int main(int argc, const char* argv[]) {
     auto p(predVec<num_t>(ep = normalize<num_t>(ep)));
     assert(in[0][0].rows() * in[0][0].cols() <= p.size());
     for(int i = 0, pp = 0; i < p.size() / (in[0][0].rows() * in[0][0].cols()); i ++) {
-      vector<SimpleMatrix<num_t> > outf(c), outb(c);
+      vector<SimpleMatrix<num_t> > outf(c);
       for(int j = 0; j < outf.size(); j ++) {
         outf[j].resize(in[0][0].rows(), in[0][0].cols());
-        outb[j].resize(in[0][0].rows(), in[0][0].cols());
         outf[j].O();
-        outb[j].O();
       }
       for(int ii = 0; ii < outf[0].rows(); ii ++)
         for(int jj = 0; jj < outf[0].cols() && pp < p.size(); jj ++, pp ++)
-          for(int j = 0; j < outf.size(); j ++) {
+          for(int j = 0; j < outf.size(); j ++)
             outf[j](ii, jj) = p[pp][0][j];
-            outb[j](ii, jj) = p[pp][0][j + c];
-          }
-      if(! savep2or3<num_t>((string("predgw-f") + to_string(i) + string(".ppm")).c_str(),
+      if(! savep2or3<num_t>((string("predgw-") + to_string(i) + string(".ppm")).c_str(),
           normalize<num_t>(outf.size() == 3 ? xyz2rgb<num_t>(outf) : outf)) )
-            cerr << "failed to save." << endl;
-      if(! savep2or3<num_t>((string("predgw-b") + to_string(i) + string(".ppm")).c_str(),
-          normalize<num_t>(outb.size() == 3 ? xyz2rgb<num_t>(outb) : outb)) )
-            cerr << "failed to save." << endl;
-      vector<SimpleMatrix<num_t> > outwf(c), outwb(c);
+        cerr << "failed to save." << endl;
+      vector<SimpleMatrix<num_t> > outwf(c);
       for(int j = 0; j < outwf.size(); j ++) {
         outwf[j].resize(1, 4);
-        outwb[j].resize(1, 4);
         outwf[j].O();
-        outwb[j].O();
       }
       for(int ii = 0; ii < 4 && pp < p.size(); ii ++, pp ++)
-        for(int j = 0; j < outwf.size(); j ++) {
+        for(int j = 0; j < outwf.size(); j ++)
           outwf[j](0, ii) = p[pp][0][j];
-          outwb[j](0, ii) = p[pp][0][j + c];
-        }
-      if(! savep2or3<num_t>((string("predgw-wf") + to_string(i) + string(".ppm")).c_str(),
+      if(! savep2or3<num_t>((string("predgw-4-") + to_string(i) + string(".ppm")).c_str(),
           normalize<num_t>(outwf.size() == 3 ? xyz2rgb<num_t>(outwf) : outwf)) )
-            cerr << "failed to save." << endl;
-      if(! savep2or3<num_t>((string("predgw-wb") + to_string(i) + string(".ppm")).c_str(),
-          normalize<num_t>(outwb.size() == 3 ? xyz2rgb<num_t>(outwb) : outwb)) )
-            cerr << "failed to save." << endl;
+        cerr << "failed to save." << endl;
     }
   } else if(m == 'q') {
     for(int i0 = 1; i0 < argc; i0 ++) {

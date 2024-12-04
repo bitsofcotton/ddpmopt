@@ -60,7 +60,9 @@ We can use bitsofcotton/masp detecting such feature quantities.
 However, this isn't unveil deep structure they behaves to be operatable in the picture set by itself.
 So we need to do bitsofcotton/isolate and match to known algorithms with the handle parameters we want to operate.
 
-Also, decomposing masp, we want to backport bitsofcotton/specific result as a specific value prediction they project meanings, however this beats with whole pixel prediction on speed, so we can do bitsofcotton/masp '-' command generated specific values as a input of ddpmopt w command they causes 2 of the input graphics abstraction layers mixed prediction but they should be stable with the hypothesis we made (however, we might need stacked layers to predict as PP3 or so).
+Also, we want to decompose some of the meanings by bitsofcotton/specific and backport them into here, however, implementation of them isn't now.
+
+Beating their decomposition speed, we can do bitsofcotton/masp '-' command generated specific values as a input of ddpmopt w command they causes 2 of the input graphics abstraction layers mixed prediction but they should be stable with the hypothesis we made. So whole pixel context prediction is predicted to get better result than each graphics each pixel context.
 
 # Usage:
     # copy color structure
@@ -224,4 +226,5 @@ We might re-re-re-leave this repository with this update, however, if there's so
 2024/11/30 add c command. update readme.
 2024/12/02 taylor improvement, taylor function reclose with this.
 2024/12/03 w command fix also readme.md update.
+2024/12/04 fix w command output, backward had a glitch, so eliminated. update readme.
 
