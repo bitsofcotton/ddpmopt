@@ -4420,6 +4420,10 @@ template <typename T, int nprogress = 20> SimpleVector<T> predv0(const vector<Si
 // N.B. after testing with some of the PRNG series, subtract combination
 //      is continuous condition the hypothesis we made -- is continuous gets
 //      better results for us.
+// N.B. after github.com/bitsofcotton/p2 upload and p1 change,
+//      some of the PRNG test meaning broken. so revert them.
+//      (changed p1/pp3.cc predv1 call to predv0 call causes split predictions
+//       however the command line chain meaning unchanged.)
 template <typename T, int nprogress = 20> static inline SimpleVector<T> predv1(const SimpleVector<SimpleVector<T> >& in, const int& step = 1) {
   assert(0 < step && in.size() && 1 < in[0].size());
   // N.B. we specify what width in ordinary we get better result in average.
@@ -4449,25 +4453,10 @@ template <typename T, int nprogress = 20> static inline SimpleVector<T> predv1(c
         T(int(2)) - T(int(1)) ) *
           (in[i - ip.rows() + in.size()][j] * T(int(2)) - T(int(1)) );
   }
-  SimpleMatrix<T> iq(ip.rows() - step, res.size());
-  for(int i = 0; i < step; i ++)
-    iq.row(i).O();
-  for(int j = step; j < iq.rows(); j ++) {
-    cerr << j << " / " << iq.rows() << endl;
-    iq(j, 0) = P0maxRank0<T>(step).next(ip.col(0).subVector(0, j)) *
-      ip(j + step, 0);
-#if defined(_OPENMP)
-#pragma omp parallel for schedule(static, 1)
-#endif
-    for(int k = 1; k < res.size(); k ++) {
-      iq(j, k) = P0maxRank0<T>(step).next(ip.col(k).subVector(0, j)) *
-        ip(j + step, k);
-    }
-  }
   // N.B. we need gamma complement after this.
   //      dftcache need to be single thread on first call.
-  // N.B. we bet combination subtracted series is continuous -- is continuous.
-  res[0] = (P0maxRank0<T>(step).next(iq.col(0)) * ip(ip.rows() - 1, 0) *
+  // N.B. we bet combination subtracted series is continuous.
+  res[0] = (P0maxRank0<T>(step).next(ip.col(0)) *
     (p[p.size() - 1][0] * T(int(2)) - T(int(1)) ) + T(int(1)) ) / T(int(2));
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
@@ -4475,7 +4464,7 @@ template <typename T, int nprogress = 20> static inline SimpleVector<T> predv1(c
   for(int i = 1; i < res.size(); i ++) {
     if(nprogress && ! (i % max(1, res.size() / nprogress)) )
       cerr << i << " / " << res.size() << endl;
-    res[i] = (P0maxRank0<T>(step).next(iq.col(i)) * ip(ip.rows() - 1, i) *
+    res[i] = (P0maxRank0<T>(step).next(ip.col(i)) *
       (p[p.size() - 1][i] * T(int(2)) - T(int(1)) ) + T(int(1)) ) / T(int(2));
   }
   return res;
