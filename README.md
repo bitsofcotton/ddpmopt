@@ -10,7 +10,7 @@ We need to do ulimit or edit /etc/login.conf for large malloc use cases required
 
 Using this with mimalloc or so can increase memory usage with multi thread on some systems.
 
-We use at least 2\*((whole input size))\*sizeof(num_t) in heap resource.
+We use at least (3 + 1/3)\*((whole input size))\*sizeof(num_t) in heap resource.
 
 # Tips around c++ compilers
 Some of the lieonn.hh operator \>\> class doesn't work as expected, might be compilers' bug.
@@ -31,11 +31,11 @@ This condition can be eliminated with in/output (de)?compression this condition 
 Usually, the condition larger than 4 dimension is come from some of the jammer like inputs nor brand new data feed input by input stream.
 However, we predict the stream with them and continuity after them in pqredg.
 So this effects if input stream is enough dense in another words stream is stable for input entropy one by one meaning, the result is reasonable in the continuity meaning.
-Some of the PRNG tests causes this valid but there's something new entropy feed, they fails with gulfs depends on the range we use in the range.
+Some of the PRNG tests causes this valid but there's something new parameters on entropy feeding ratio, they fails with gulfs depends on the range we use in the range.
 
-To get better entropy stream from input, we can use bitsofcotton/goki_check_cc:test.py mmovegle command to get partial file list from input filename stream for pseudo ones.
+To get better entropy stream from input, we can use bitsofcotton/goki_check_cc:test.py mmovegle command to get partial file list from input filename stream for pseudo ones. Also, we have ddpmopt c command to smooth inputs.
 
-Also, we should \*cherry pick\* a best parameter on predv1 so to avoid gulf based failures, we have mode == 'a' for pseudo predict all of the params and cherry pick after them they produces all possible contexts we can have on least internal states with pure function on our meaning also no external information addition but is very heavy to run.
+However, we should \*cherry pick\* a results on some of the index after prediction. This is because we often meet gulf based failures in general.
 
 # Tips on contexts
 We use whole image context to insert context then predict with such each pixel context. So each image consistency is used and applied for the output.
@@ -45,15 +45,6 @@ We can use orthogonal context insertion, however, this isn't matches our senses,
 We can use some feature quantity based transforms we can get them by machine learning converted into tan Ax form.
 In such case, we use vectorized input image x, y:=tan Ax for feature quantities, weight them by \[x, y\] or only predict the {y} stream, then, invert x=f(y).
 This matches our senses on viewing the image.
-
-Instead of them, we use pqredg for whole image context with each pixel prediction. So this means output is all of the outer coverable contexts traced prediction. However, the prediction dimension is the matter for this.
-
-Also, adding bump map into one of a color in the picture isn't improves output enough, this is because it's only some alpha in R^1 adding and balancing on whole picture context. To do such bump map extension, we should input picture01.ppm picture01-bump.ppm ... stream instead of the original stream with doubled variable dimensions of predictors.
-
-# Tips on adding continuity
-We can add some of the continuity by ddpmopt c command, this is pseudo volume curvature using determinant of jacobian. However, this isn't get enough improved output.
-
-This is also to add some of the continuity into input context.
 
 # Tips around relation to bitsofcotton/masp, bitsofcotton/specific
 We can use bitsofcotton/masp detecting such feature quantities.
@@ -69,12 +60,12 @@ Beating their decomposition speed, we can do bitsofcotton/masp '-' command gener
     ./ddpmopt(32|64)?(mp)? + <in0out.pgm> <in0in.ppm> ... > cache.txt
     # apply color structure
     ./ddpmopt(32|64)?(mp)? - <in0.ppm> ... < cache.txt
-    # predict next image mode === '0' for normal, mode == 'a' to get all.
-    ./ddpmopt(32|64)?(mp)? [0a] <in0.ppm> ...
+    # predict following images
+    ./ddpmopt(32|64)?(mp)? [Pp] <in0.ppm> ...
     # predict with whole pixel context
     ./ddpmopt w <in0.ppm> <in0-4.ppm> ...
     # predict down scanlines.
-    ./ddpmopt(32|64)?(mp)? q <in0out.ppm> ...
+    ./ddpmopt(32|64)?(mp)? [Qq] <in0out.ppm> ...
     # show continuity
     ./ddpmopt(32|64)?(mp)? [xyit] <in0.ppm> ...
     # some of the volume curvature like transform
@@ -227,4 +218,5 @@ We might re-re-re-leave this repository with this update, however, if there's so
 2024/12/02 taylor improvement, taylor function reclose with this.
 2024/12/03 w command fix also readme.md update.
 2024/12/04 fix w command output, backward had a glitch, so eliminated. update readme.
+2024/12/05 backport p1 | p0 results, brush up code, replace [0a] command to p command, update readme.
 

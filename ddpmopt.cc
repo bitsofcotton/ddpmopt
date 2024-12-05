@@ -135,7 +135,7 @@ int main(int argc, const char* argv[]) {
       if(vv.dot(vv) != num_t(int(0))) cout << vv;
     }
     cout << endl;
-  } else if(m == '0' || m == 'a') {
+  } else if(m == 'p' || m == 'P') {
     vector<vector<SimpleMatrix<num_t> > > in;
     in.reserve(argc - 1);
     for(int i = 2; i < argc; i ++) {
@@ -143,29 +143,12 @@ int main(int argc, const char* argv[]) {
       if(! loadp2or3<num_t>(work, argv[i])) continue;
       in.emplace_back(work.size() == 3 ? rgb2xyz<num_t>(work) : move(work));
     }
-    if(m == '0') {
-      auto p(predMat<num_t>(in = normalize<num_t>(in), - 1, 1));
-      assert(p.size() == 1);
-      if(! savep2or3<num_t>("predg.ppm",
-          normalize<num_t>(p[0].size() == 3 ? xyz2rgb<num_t>(p[0]) : p[0])) )
+    auto p(predMat<num_t>(in = normalize<num_t>(in), m == 'p' ? 0 : 1));
+    for(int i = 0; i < p.size(); i ++) {
+      if(! savep2or3<num_t>((string("predg-") + to_string(i) +
+        string(".ppm")).c_str(),
+          normalize<num_t>(p[i].size() == 3 ? xyz2rgb<num_t>(p[i]) : p[i])) )
             cerr << "failed to save." << endl;
-      in.reserve(argc - 1);
-      for(int i = 2; i < argc; i ++) {
-        vector<SimpleMatrix<num_t> > work;
-        if(! loadp2or3<num_t>(work, argv[i])) continue;
-        in.emplace_back(work.size() == 3 ? rgb2xyz<num_t>(work) : move(work));
-      }
-    }
-    {
-      auto p(m == 'a' ?
-        predMat<num_t>(in = normalize<num_t>(in), 0, 0) :
-        predMat<num_t>(in = normalize<num_t>(in)));
-      for(int i = 0; i < p.size(); i ++) {
-        if(! savep2or3<num_t>((string("predg-") + to_string(i) +
-          string(".ppm")).c_str(),
-            normalize<num_t>(p[i].size() == 3 ? xyz2rgb<num_t>(p[i]) : p[i])) )
-              cerr << "failed to save." << endl;
-      }
     }
   } else if(m == 'w') {
     vector<vector<SimpleMatrix<num_t> > > in;
@@ -221,7 +204,7 @@ int main(int argc, const char* argv[]) {
           normalize<num_t>(outwf.size() == 3 ? xyz2rgb<num_t>(outwf) : outwf)) )
         cerr << "failed to save." << endl;
     }
-  } else if(m == 'q') {
+  } else if(m == 'q' || m == 'Q') {
     for(int i0 = 1; i0 < argc; i0 ++) {
       vector<SimpleMatrix<num_t> > work;
       if(! loadp2or3<num_t>(work, argv[i0])) continue;
@@ -233,7 +216,7 @@ int main(int argc, const char* argv[]) {
         for(int j = 0; j < work.size(); j ++)
           pwork[i].emplace_back(work[j].row(i));
       }
-      auto p(predVec<num_t>(pwork));
+      auto p(predVec<num_t>(pwork, m == 'q' ? 0 : 1));
       vector<SimpleMatrix<num_t> > wwork(work.size(),
         SimpleMatrix<num_t>(work[0].rows() + p.size(), work[0].cols()).O());
       for(int j = 0; j < work.size(); j ++)
@@ -409,8 +392,8 @@ int main(int argc, const char* argv[]) {
   cerr << argv[0] << " + <in0out.pgm> <in0in.ppm> ... > cache.txt" << endl;
   cerr << "# apply color structure" << endl;
   cerr << argv[0] << " - <in0.ppm> ... < cache.txt" << endl;
-  cerr << "# predict next image mode === '0' for normal, mode == 'a' to get all." << endl;
-  cerr << argv[0] << " [0a] <in0.ppm> ..." << endl;
+  cerr << "# predict following images" << endl;
+  cerr << argv[0] << " p <in0.ppm> ..." << endl;
   cerr << "# predict with whole pixel context" << endl;
   cerr << argv[0] << " w <in0.ppm> <in0-4.ppm> ..." << endl;
   cerr << "# predict down scanlines." << endl;
