@@ -33,9 +33,9 @@ However, we predict the stream with them and continuity after them in pqredg.
 So this effects if input stream is enough dense in another words stream is stable for input entropy one by one meaning, the result is reasonable in the continuity meaning.
 Some of the PRNG tests causes this valid but there's something new parameters on entropy feeding ratio, they fails with gulfs depends on the range we use in the range.
 
-To get better entropy stream from input, we can use bitsofcotton/goki_check_cc:test.py mmovegle command to get partial file list from input filename stream for pseudo ones. Also, we have ddpmopt c command to smooth inputs.
+In some auto tune entropy feeding, we can do goki_check_cc:test.py:egeppred command.
 
-However, we should \*cherry pick\* a results on some of the index after prediction. This is because we often meet gulf based failures in general.
+We sometimes fail on the prediction from prediction gulf failure reason. Otherwise, better to use with.
 
 # Tips on contexts
 We use whole image context to insert context then predict with such each pixel context. So each image consistency is used and applied for the output.
@@ -46,14 +46,13 @@ We can use some feature quantity based transforms we can get them by machine lea
 In such case, we use vectorized input image x, y:=tan Ax for feature quantities, weight them by \[x, y\] or only predict the {y} stream, then, invert x=f(y).
 This matches our senses on viewing the image.
 
-# Tips around relation to bitsofcotton/masp, bitsofcotton/specific
 We can use bitsofcotton/masp detecting such feature quantities.
 However, this isn't unveil deep structure they behaves to be operatable in the picture set by itself.
 So we need to do bitsofcotton/isolate and match to known algorithms with the handle parameters we want to operate.
 
 Also, we want to decompose some of the meanings by bitsofcotton/specific and backport them into here, however, implementation of them isn't now.
 
-Beating their decomposition speed, we can do bitsofcotton/masp '-' command generated specific values as a input of ddpmopt w command they causes 2 of the input graphics abstraction layers mixed prediction but they should be stable with the hypothesis we made. So whole pixel context prediction is predicted to get better result than each graphics each pixel context.
+Beating their decomposition speed, we can do goki_check_cc:test.py:wgpred command they have pixel context prediction is predicted to get better result than each graphics each pixel context but they're heavy enough to run.
 
 # Usage:
     # copy color structure
