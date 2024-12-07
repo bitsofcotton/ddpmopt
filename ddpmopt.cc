@@ -380,8 +380,9 @@ int main(int argc, const char* argv[]) {
             in[i][j](k, m) = work.determinant();
           }
     }
+    in = normalize<num_t>(in);
     for(int i = 0; i < in.size(); i ++)
-      if(! savep2or3<num_t>((string(argv[i + 2]) + string("-c3.ppm")).c_str(), normalize<num_t>(in[i]) ) )
+      if(! savep2or3<num_t>((string(argv[i + 2]) + string("-c3.ppm")).c_str(), in[i]) )
         cerr << "failed to save." << endl;
   } else goto usage;
   cerr << "Done" << endl;

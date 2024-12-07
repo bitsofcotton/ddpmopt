@@ -218,4 +218,5 @@ We might re-re-re-leave this repository with this update, however, if there's so
 2024/12/03 w command fix also readme.md update.
 2024/12/04 fix w command output, backward had a glitch, so eliminated. update readme.
 2024/12/05 backport p1 | p0 results, brush up code, replace [0a] command to p command, update readme.
+2024/12/07 c command fix.
 

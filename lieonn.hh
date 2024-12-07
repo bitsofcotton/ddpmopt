@@ -4442,12 +4442,12 @@ template <typename T, int nprogress = 20> static inline SimpleVector<T> predv(co
   SimpleVector<T> res(in[0].size());
   res.O();
   SimpleMatrix<T> ip(p.size(), res.size());
-  for(int i = 0; i < step; i ++)
+  for(int i = 0; i < start + step; i ++)
     ip.row(i).O();
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
-  for(int i = step; i < ip.rows(); i ++) {
+  for(int i = start + step; i < ip.rows(); i ++) {
     for(int j = 0; j < ip.cols(); j ++)
       ip(i, j) = (p[i - ip.rows() + p.size() - step][j] *
         T(int(2)) - T(int(1)) ) *
@@ -4471,7 +4471,7 @@ template <typename T, int nprogress = 20> static inline SimpleVector<T> predv(co
 }
 
 template <typename T, int nprogress = 20> static inline vector<SimpleVector<T> > predv(const SimpleVector<SimpleVector<T> >& in) {
-  const auto nstep(in.size() / 2);
+  const auto nstep(in.size() / 2 - 8);
   vector<SimpleVector<T> > res;
   res.reserve(nstep);
   for(int i = 0; i < nstep; i ++) {
