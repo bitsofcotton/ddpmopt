@@ -10,7 +10,7 @@ We need to do ulimit or edit /etc/login.conf for large malloc use cases required
 
 Using this with mimalloc or so can increase memory usage with multi thread on some systems.
 
-We use at least 3.5\*((whole input size))\*sizeof(num_t) in heap resource.
+We use at least 3\*((whole input size))\*sizeof(num_t) in heap resource.
 
 # Tips around c++ compilers
 Some of the lieonn.hh operator \>\> class doesn't work as expected, might be compilers' bug.
@@ -59,12 +59,12 @@ Beating their decomposition speed, we can do goki_check_cc:test.py:wgpred comman
     ./ddpmopt(32|64)?(mp)? + <in0out.pgm> <in0in.ppm> ... > cache.txt
     # apply color structure
     ./ddpmopt(32|64)?(mp)? - <in0.ppm> ... < cache.txt
-    # predict following images
-    ./ddpmopt(32|64)?(mp)? [Pp] <in0.ppm> ...
+    # predict following image
+    ./ddpmopt(32|64)?(mp)? p <in0.ppm> ...
     # predict with whole pixel context
     ./ddpmopt w <in0.ppm> <in0-4.ppm> ...
-    # predict down scanlines.
-    ./ddpmopt(32|64)?(mp)? [Qq] <in0out.ppm> ...
+    # predict down scanline
+    ./ddpmopt(32|64)?(mp)? q <in0out.ppm> ...
     # show continuity
     ./ddpmopt(32|64)?(mp)? [xyit] <in0.ppm> ...
     # some of the volume curvature like transform

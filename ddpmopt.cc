@@ -135,7 +135,7 @@ int main(int argc, const char* argv[]) {
       if(vv.dot(vv) != num_t(int(0))) cout << vv;
     }
     cout << endl;
-  } else if(m == 'p' || m == 'P') {
+  } else if(m == 'p') {
     vector<vector<SimpleMatrix<num_t> > > in;
     in.reserve(argc - 1);
     for(int i = 2; i < argc; i ++) {
@@ -143,13 +143,10 @@ int main(int argc, const char* argv[]) {
       if(! loadp2or3<num_t>(work, argv[i])) continue;
       in.emplace_back(work.size() == 3 ? rgb2xyz<num_t>(work) : move(work));
     }
-    auto p(predMat<num_t>(in = normalize<num_t>(in), m == 'p' ? 0 : 1));
-    for(int i = 0; i < p.size(); i ++) {
-      if(! savep2or3<num_t>((string("predg-") + to_string(i) +
-        string(".ppm")).c_str(),
-          normalize<num_t>(p[i].size() == 3 ? xyz2rgb<num_t>(p[i]) : p[i])) )
-            cerr << "failed to save." << endl;
-    }
+    auto p(predMat<num_t>(in = normalize<num_t>(in)));
+    if(! savep2or3<num_t>("predg.ppm",
+        normalize<num_t>(p.size() == 3 ? xyz2rgb<num_t>(p) : p)) )
+          cerr << "failed to save." << endl;
   } else if(m == 'w') {
     vector<vector<SimpleMatrix<num_t> > > in;
     in.reserve(argc - 1);
@@ -177,34 +174,36 @@ int main(int argc, const char* argv[]) {
       for(int m = 0; m < c; m ++)
         ep[ep.size() - pp - 1][0][c + m] = ep[pp][0][m];
     assert(pp == wp);
-    auto p(predVec<num_t>(ep = normalize<num_t>(ep)));
-    assert(in[0][0].rows() * in[0][0].cols() <= p.size());
-    for(int i = 0, pp = 0; i < p.size() / (in[0][0].rows() * in[0][0].cols()); i ++) {
-      vector<SimpleMatrix<num_t> > outf(c);
-      for(int j = 0; j < outf.size(); j ++) {
-        outf[j].resize(in[0][0].rows(), in[0][0].cols());
-        outf[j].O();
-      }
-      for(int ii = 0; ii < outf[0].rows(); ii ++)
-        for(int jj = 0; jj < outf[0].cols() && pp < p.size(); jj ++, pp ++)
-          for(int j = 0; j < outf.size(); j ++)
-            outf[j](ii, jj) = p[pp][0][j];
-      if(! savep2or3<num_t>((string("predgw-") + to_string(i) + string(".ppm")).c_str(),
-          normalize<num_t>(outf.size() == 3 ? xyz2rgb<num_t>(outf) : outf)) )
-        cerr << "failed to save." << endl;
-      vector<SimpleMatrix<num_t> > outwf(c);
-      for(int j = 0; j < outwf.size(); j ++) {
-        outwf[j].resize(1, 4);
-        outwf[j].O();
-      }
-      for(int ii = 0; ii < 4 && pp < p.size(); ii ++, pp ++)
-        for(int j = 0; j < outwf.size(); j ++)
-          outwf[j](0, ii) = p[pp][0][j];
-      if(! savep2or3<num_t>((string("predgw-4-") + to_string(i) + string(".ppm")).c_str(),
-          normalize<num_t>(outwf.size() == 3 ? xyz2rgb<num_t>(outwf) : outwf)) )
-        cerr << "failed to save." << endl;
+    ep = normalize<num_t>(ep);
+    vector<SimpleMatrix<num_t> > outf(c);
+    for(int j = 0; j < outf.size(); j ++) {
+      outf[j].resize(in[0][0].rows(), in[0][0].cols());
+      outf[j].O();
     }
-  } else if(m == 'q' || m == 'Q') {
+    pp = 1;
+    for(int ii = 0; ii < outf[0].rows(); ii ++)
+      for(int jj = 0; jj < outf[0].cols(); jj ++, pp ++) {
+        auto p(predVec<num_t>(ep, pp));
+        for(int j = 0; j < outf.size(); j ++)
+          outf[j](ii, jj) = p[0][j];
+      }
+    if(! savep2or3<num_t>("predgw.ppm",
+      normalize<num_t>(outf.size() == 3 ? xyz2rgb<num_t>(outf) : outf)) )
+        cerr << "failed to save." << endl;
+    vector<SimpleMatrix<num_t> > outwf(c);
+    for(int j = 0; j < outwf.size(); j ++) {
+      outwf[j].resize(1, 4);
+      outwf[j].O();
+    }
+    for(int ii = 0; ii < 4; ii ++, pp ++) {
+      auto p(predVec<num_t>(ep, pp));
+      for(int j = 0; j < outwf.size(); j ++)
+        outwf[j](0, ii) = p[0][j];
+    }
+    if(! savep2or3<num_t>("predgw4.ppm",
+      normalize<num_t>(outwf.size() == 3 ? xyz2rgb<num_t>(outwf) : outwf)) )
+        cerr << "failed to save." << endl;
+  } else if(m == 'q') {
     for(int i0 = 1; i0 < argc; i0 ++) {
       vector<SimpleMatrix<num_t> > work;
       if(! loadp2or3<num_t>(work, argv[i0])) continue;
@@ -216,14 +215,13 @@ int main(int argc, const char* argv[]) {
         for(int j = 0; j < work.size(); j ++)
           pwork[i].emplace_back(work[j].row(i));
       }
-      auto p(predVec<num_t>(pwork, m == 'q' ? 0 : 1));
+      auto p(predVec<num_t>(pwork));
       vector<SimpleMatrix<num_t> > wwork(work.size(),
-        SimpleMatrix<num_t>(work[0].rows() + p.size(), work[0].cols()).O());
+        SimpleMatrix<num_t>(work[0].rows() + 1, work[0].cols()).O());
       for(int j = 0; j < work.size(); j ++)
         wwork[j].setMatrix(0, 0, work[j]);
-      for(int i = 0; i < p.size(); i ++)
-        for(int j = 0; j < p[i].size(); j ++)
-          wwork[j].row(i - p.size() + wwork[j].rows()) = move(p[i][j]);
+      for(int j = 0; j < p.size(); j ++)
+        wwork[j].row(wwork[j].rows()) = move(p[j]);
       if(! savep2or3<num_t>(argv[i0], normalize<num_t>(wwork.size() == 3 ?
         xyz2rgb<num_t>(wwork) : wwork) ) )
           cerr << "failed to save." << endl;
