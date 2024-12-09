@@ -183,7 +183,8 @@ int main(int argc, const char* argv[]) {
     pp = 1;
     for(int ii = 0; ii < outf[0].rows(); ii ++)
       for(int jj = 0; jj < outf[0].cols(); jj ++, pp ++) {
-        auto p(predVec<num_t>(ep, pp));
+        auto wep(ep);
+        auto p(predVec<num_t>(wep, pp));
         for(int j = 0; j < outf.size(); j ++)
           outf[j](ii, jj) = p[0][j];
       }
@@ -196,7 +197,8 @@ int main(int argc, const char* argv[]) {
       outwf[j].O();
     }
     for(int ii = 0; ii < 4; ii ++, pp ++) {
-      auto p(predVec<num_t>(ep, pp));
+      auto wep(ep);
+      auto p(predVec<num_t>(wep, pp));
       for(int j = 0; j < outwf.size(); j ++)
         outwf[j](0, ii) = p[0][j];
     }
@@ -221,7 +223,7 @@ int main(int argc, const char* argv[]) {
       for(int j = 0; j < work.size(); j ++)
         wwork[j].setMatrix(0, 0, work[j]);
       for(int j = 0; j < p.size(); j ++)
-        wwork[j].row(wwork[j].rows()) = move(p[j]);
+        wwork[j].row(wwork[j].rows() - 1) = move(p[j]);
       if(! savep2or3<num_t>(argv[i0], normalize<num_t>(wwork.size() == 3 ?
         xyz2rgb<num_t>(wwork) : wwork) ) )
           cerr << "failed to save." << endl;

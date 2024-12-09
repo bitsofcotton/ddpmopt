@@ -4470,17 +4470,17 @@ template <typename T, int nprogress = 20> static inline SimpleVector<T> predv(co
   return res;
 }
 
-template <typename T, int nprogress = 20> static inline SimpleVector<T> predv(const SimpleVector<SimpleVector<T> >& in) {
+template <typename T, int nprogress = 20> static inline SimpleVector<T> predv(SimpleVector<SimpleVector<T> >& in) {
   const auto nstep(in.size() / 3 - 8);
   SimpleVector<T> res(in[0].size());
   res.O();
   for(int i = 0; i < nstep; i ++) {
     cerr << " *** PREDV STEP : " << i << " / " << nstep << " ***" << endl;
-    res +=
-      predv<T, nprogress>(in.subVector(0, in.size() - i),
-        i + 1).subVector(0, res.size());
+    res += predv<T, nprogress>(in, i + 1).subVector(0, res.size());
+    in.resize(in.size() - 1);
   }
-  return res;
+  in.resize(0);
+  return res /= T(int(nstep));
 }
 
 template <typename T, int nprogress = 20> static inline SimpleVector<T> predv(vector<SimpleVector<T> >& in, const int& step) {
@@ -4520,7 +4520,6 @@ template <typename T> vector<SimpleVector<T> > predVec(vector<vector<SimpleVecto
   const auto size1(in0[0][0].size());
   in0.resize(0);
   auto p(step ? predv<T>(in, step) : predv<T>(in));
-  in.resize(0);
   vector<SimpleVector<T> > res;
   res.resize(size0);
   for(int j = 0; j < res.size(); j ++)
@@ -4548,7 +4547,6 @@ template <typename T> vector<SimpleMatrix<T> > predMat(vector<vector<SimpleMatri
   const auto cols(in0[0][0].cols());
   in0.resize(0);
   auto p(step ? predv<T>(in, step) : predv<T>(in));
-  in.resize(0);
   vector<SimpleMatrix<T> > res;
   res.resize(size);
   for(int j = 0; j < res.size(); j ++) {
@@ -4592,7 +4590,6 @@ template <typename T> SimpleSparseTensor<T> predSTen(vector<SimpleSparseTensor<T
   }
   in0.resize(0);
   auto p(step ? predv<T>(in, step) : predv<T>(in));
-  in.resize(0);
   SimpleSparseTensor<T> res;
   for(int j = 0, cnt = 0; j < idx.size(); j ++)
     for(int k = 0; k < idx.size(); k ++)

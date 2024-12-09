@@ -10,7 +10,7 @@ We need to do ulimit or edit /etc/login.conf for large malloc use cases required
 
 Using this with mimalloc or so can increase memory usage with multi thread on some systems.
 
-We use at least 3\*((whole input size))\*sizeof(num_t) in heap resource.
+We use at least 2\*((whole input size))\*sizeof(num_t) in heap resource.
 
 # Tips around c++ compilers
 Some of the lieonn.hh operator \>\> class doesn't work as expected, might be compilers' bug.
@@ -219,4 +219,5 @@ We might re-re-re-leave this repository with this update, however, if there's so
 2024/12/04 fix w command output, backward had a glitch, so eliminated. update readme.
 2024/12/05 backport p1 | p0 results, brush up code, replace [0a] command to p command, update readme.
 2024/12/07 c command fix.
+2024/12/09 changed to output only a single prediction. w command crash fix, memory efficiency improve. q command crash fix.
 
