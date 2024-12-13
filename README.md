@@ -62,7 +62,7 @@ Beating their decomposition speed, we can do goki_check_cc:test.py:wgpred comman
     # predict following image
     ./ddpmopt(32|64)?(mp)? p <in0.ppm> ...
     # predict with whole pixel context
-    ./ddpmopt w <in0.ppm> <in0-4.ppm> ...
+    ./ddpmopt(32|64)?(mp)? w <in0.ppm> <in0-4.ppm> ...
     # predict down scanline
     ./ddpmopt(32|64)?(mp)? q <in0out.ppm> ...
     # show continuity
@@ -73,6 +73,8 @@ Beating their decomposition speed, we can do goki_check_cc:test.py:wgpred comman
 
 # Re-Re-Re-Leave
 We might re-re-re-leave this repository with this update, however, if there's some sort of the reason to improve, we re-re-re-open here, also, lieonn.hh change might be updated even we leave here.
+
+Leave here but might return here after another implementations.
 
 # Real close
 2023/03/01
@@ -220,4 +222,6 @@ We might re-re-re-leave this repository with this update, however, if there's so
 2024/12/05 backport p1 | p0 results, brush up code, replace [0a] command to p command, update readme.
 2024/12/07 c command fix.
 2024/12/09 changed to output only a single prediction. w command crash fix, memory efficiency improve. q command crash fix.
+2024/12/11 fix readme w command usage.
+2024/12/13 leave here, might return here.
 
