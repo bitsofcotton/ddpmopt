@@ -2284,6 +2284,7 @@ template <typename T> inline SimpleVector<T> SimpleMatrix<T>::zeroFix(const Simp
     const auto& iidx(fidx[idx].second);
     const auto  orth(this->col(iidx));
     const auto  n2(orth.dot(orth));
+    // N.B. rank(*this) on call is max rank, should not be singular.
     if(n2 <= epsilon())
       continue;
     if(T(int(0)) < fidx[idx].first &&
@@ -2310,7 +2311,7 @@ template <typename T> inline SimpleVector<T> SimpleMatrix<T>::zeroFix(const Simp
       fidx.reserve(this->cols());
       const auto on(projectionPt(one));
       for(int j = 0; j < this->cols(); j ++)
-        fidx.emplace_back(make_pair(abs(on[j]), i));
+        fidx.emplace_back(make_pair(abs(on[j]), j));
       sort(fidx.begin(), fidx.end());
       i -= rfidxsz - fidx.size();
     }
