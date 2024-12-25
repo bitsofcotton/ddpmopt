@@ -10,7 +10,7 @@ We need to do ulimit or edit /etc/login.conf for large malloc use cases required
 
 Using this with mimalloc or so can increase memory usage with multi thread on some systems.
 
-We use at least 2\*((whole input size))\*sizeof(num_t) in heap resource.
+We use at least 3\*((whole input size))\*sizeof(num_t) in heap resource.
 
 # Tips around c++ compilers
 Some of the lieonn.hh operator \>\> class doesn't work as expected, might be compilers' bug.
@@ -53,6 +53,9 @@ So we need to do bitsofcotton/isolate and match to known algorithms with the han
 Also, we want to decompose some of the meanings by bitsofcotton/specific and backport them into here, however, implementation of them isn't now.
 
 Beating their decomposition speed, we can do goki_check_cc:test.py:wgpred command they have pixel context prediction is predicted to get better result than each graphics each pixel context but they're heavy enough to run.
+
+# Tips on montecarlo
+We're using montecarlo method to get prediction, this is needed also this might because of adding the average contexts outside needs some addition to the information but we're getting .9 probability in ideal.
 
 # Usage:
     # copy color structure
@@ -224,4 +227,5 @@ Leave here but might return here after another implementations.
 2024/12/09 changed to output only a single prediction. w command crash fix, memory efficiency improve. q command crash fix.
 2024/12/11 fix readme w command usage.
 2024/12/13 leave here, might return here.
+2024/12/26 use montecarlo method instead of doing each step average on prediction.
 

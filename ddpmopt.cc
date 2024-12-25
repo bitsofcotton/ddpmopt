@@ -10,6 +10,7 @@
 #include <cctype>
 #include <random>
 #include <assert.h>
+#include <stdlib.h>
 
 //#define int int64_t
 #define int int32_t
@@ -32,6 +33,9 @@ using std::istringstream;
 
 #undef int
 int main(int argc, const char* argv[]) {
+#if defined(NOARCFOUR)
+  srandomdev();
+#endif
 //#define int int64_t
 #define int int32_t
   const auto  sz(2);
@@ -143,7 +147,7 @@ int main(int argc, const char* argv[]) {
       if(! loadp2or3<num_t>(work, argv[i])) continue;
       in.emplace_back(work.size() == 3 ? rgb2xyz<num_t>(work) : move(work));
     }
-    auto p(predMat<num_t>(in = normalize<num_t>(in)));
+    auto p(predMat<num_t>(in = normalize<num_t>(in), 1));
     if(! savep2or3<num_t>("predg.ppm",
         normalize<num_t>(p.size() == 3 ? xyz2rgb<num_t>(p) : p)) )
           cerr << "failed to save." << endl;
