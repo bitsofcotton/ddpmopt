@@ -169,14 +169,10 @@ int main(int argc, const char* argv[]) {
     for(int i = 0; i < in.size(); i ++)
       for(int j = 0; j < in[i][0].rows(); j ++)
         for(int k = 0; k < in[i][0].cols(); k ++, pp ++) {
-          ep[pp].resize(1, SimpleVector<num_t>(c * 2).O());
+          ep[pp].resize(1, SimpleVector<num_t>(c).O());
           for(int m = 0; m < c; m ++)
             ep[pp][0][m] = in[i][m % in[i].size()](j, k);
         }
-    assert(pp == wp);
-    for(pp = 0; pp < ep.size(); pp ++)
-      for(int m = 0; m < c; m ++)
-        ep[ep.size() - pp - 1][0][c + m] = ep[pp][0][m];
     assert(pp == wp);
     ep = normalize<num_t>(ep);
     vector<SimpleMatrix<num_t> > outf(c);
@@ -210,7 +206,7 @@ int main(int argc, const char* argv[]) {
       normalize<num_t>(outwf.size() == 3 ? xyz2rgb<num_t>(outwf) : outwf)) )
         cerr << "failed to save." << endl;
   } else if(m == 'q') {
-    for(int i0 = 1; i0 < argc; i0 ++) {
+    for(int i0 = 2; i0 < argc; i0 ++) {
       vector<SimpleMatrix<num_t> > work;
       if(! loadp2or3<num_t>(work, argv[i0])) continue;
       work = normalize<num_t>(work.size() == 3 ? rgb2xyz<num_t>(work) : work);
@@ -221,13 +217,19 @@ int main(int argc, const char* argv[]) {
         for(int j = 0; j < work.size(); j ++)
           pwork[i].emplace_back(work[j].row(i));
       }
-      auto p(predVec<num_t>(pwork));
+      const auto ext(work[0].rows() / 3 - 16);
       vector<SimpleMatrix<num_t> > wwork(work.size(),
-        SimpleMatrix<num_t>(work[0].rows() + 1, work[0].cols()).O());
+        SimpleMatrix<num_t>(work[0].rows() + ext, work[0].cols()).O());
       for(int j = 0; j < work.size(); j ++)
         wwork[j].setMatrix(0, 0, work[j]);
-      for(int j = 0; j < p.size(); j ++)
-        wwork[j].row(wwork[j].rows() - 1) = move(p[j]);
+      for(int i = 0; i < ext; i ++) {
+        auto pwt(pwork);
+        pwork.emplace_back(predVec<num_t>(pwt));
+      }
+      for(int i = 0; i < ext; i ++)
+        for(int j = 0; j < wwork.size(); j ++)
+          wwork[j].row(wwork[j].rows() + i - ext) =
+            move(pwork[i - ext + pwork.size()][j]);
       if(! savep2or3<num_t>(argv[i0], normalize<num_t>(wwork.size() == 3 ?
         xyz2rgb<num_t>(wwork) : wwork) ) )
           cerr << "failed to save." << endl;
@@ -397,7 +399,7 @@ int main(int argc, const char* argv[]) {
   cerr << argv[0] << " + <in0out.pgm> <in0in.ppm> ... > cache.txt" << endl;
   cerr << "# apply color structure" << endl;
   cerr << argv[0] << " - <in0.ppm> ... < cache.txt" << endl;
-  cerr << "# predict following images" << endl;
+  cerr << "# predict following image" << endl;
   cerr << argv[0] << " p <in0.ppm> ..." << endl;
   cerr << "# predict with whole pixel context" << endl;
   cerr << argv[0] << " w <in0.ppm> <in0-4.ppm> ..." << endl;

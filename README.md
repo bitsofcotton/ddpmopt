@@ -66,7 +66,7 @@ We're using montecarlo method to get prediction, this is needed also this might 
     ./ddpmopt(32|64)?(mp)? p <in0.ppm> ...
     # predict with whole pixel context
     ./ddpmopt(32|64)?(mp)? w <in0.ppm> <in0-4.ppm> ...
-    # predict down scanline
+    # predict down scanlines
     ./ddpmopt(32|64)?(mp)? q <in0out.ppm> ...
     # show continuity
     ./ddpmopt(32|64)?(mp)? [xyit] <in0.ppm> ...
@@ -228,4 +228,5 @@ Leave here but might return here after another implementations.
 2024/12/11 fix readme w command usage.
 2024/12/13 leave here, might return here.
 2024/12/26 use montecarlo method instead of doing each step average on prediction.
+2024/12/28 fix 'q', 'w' commands with last change.
 
