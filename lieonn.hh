@@ -4510,6 +4510,111 @@ template <typename T, int nprogress = 6> static inline SimpleVector<T> predv(vec
 //      awared predictors they have a better prediction concerned with some
 //      series of a PRNG tests.
 
+// N.B. predv4 is for masp generated -4.ppm predictors.
+// XXX: this is shallow predictor differed to predv... functions.
+//      we need to do P0maxRank after this for predictions in general.
+template <typename T, int nprogress = 6> static inline SimpleVector<T> predv4(vector<SimpleVector<T> >& in0, const int& recur = 11) {
+  assert(1 < in0.size() && ! (in0[in0.size() - 1].size() & 0x03) &&
+         ! (in0.size() & 1));
+  static const T zero(0);
+  static const T one(1);
+  static const T two(2);
+  SimpleVector<T> res(in0[in0.size() - 2].size());
+  res.O();
+  vector<SimpleVector<T> > in;
+  in.resize(in0.size());
+  for(int i = 0; i < in0.size(); i ++) {
+    in[i].resize(in0[i].size() + 1);
+    in[i].setVector(1, in0[i]);
+  }
+  for(int i0 = 0; i0 < recur; i0 ++) {
+    vector<SimpleVector<T> > inw;
+    inw.reserve(in.size());
+    SimpleVector<T> nwork(in.size());
+    for(int i = 0; i < in.size(); i ++) {
+#if defined(NOARCFOUR)
+      in[i][0] = T(random()) / T(int(RAND_MAX));
+#else
+      in[i][0] = T(arc4random_uniform(0xffff)) / T(int(0x10000));
+#endif
+      auto inww(makeProgramInvariant<T>(in[i], - T(int(1)), true));
+      inw.emplace_back(inww.first);
+      nwork[i] = inww.second;
+    }
+    SimpleMatrix<T> gwork0(res.size(), inw.size() / 2 - 1);
+    gwork0.O();
+#if defined(_OPENMP)
+#pragma omp parallel for schedule(static, 1)
+#endif
+    for(int i = 8; i < gwork0.rows(); i ++) {
+      // N.B. imported from P01 class.
+      SimpleMatrix<T> toeplitz0(gwork0.cols() - 1, 7);
+      for(int j = 0; j < toeplitz0.rows(); j ++) {
+        SimpleVector<T> vw(5);
+        vw.O();
+        vw.setVector(0, inw[j * 2 + 1].subVector(1, 4));
+        // XXX: following throws floating point exception, non zero divide.
+        //  1 + ((i / (in[in.size() - 2].size() / in[in.size() - 1].size())) & (~ 0x03)), 4));
+        vw[4] = inw[j * 2 + 2][1 + i];
+        toeplitz0.row(toeplitz0.rows() - j - 1) =
+          makeProgramInvariant<T>(vw, T(int(toeplitz0.rows() - j)) / T(int(toeplitz0.rows() + 1)) ).first;
+      }
+      for(int i1 = 9; i1 <= toeplitz0.rows(); i1 ++) {
+        if(nprogress && ! (i1 % max(int(1), int(toeplitz0.rows() / nprogress))) )
+          cerr << i1 << " / " << toeplitz0.rows() << " : " << i << " / " << in[0].size() << " : " << i0 << " / " << recur << endl;
+        SimpleMatrix<T> toeplitz(i1, toeplitz0.cols());
+        for(int j = 0; j < toeplitz.rows(); j ++)
+          toeplitz.row(j) = toeplitz0.row(j);
+        const auto invariant(linearInvariant<T>(toeplitz));
+        SimpleVector<T> work(5);
+        work.O();
+        work.setVector(0, inw[inw.size() - 1].subVector(1, 4));
+        work[work.size() - 1] = zero;
+        auto last(sqrt(work.dot(work)));
+        for(int ii = 0;
+                ii < 2 * int(- log(SimpleMatrix<T>().epsilon()) / log(two) )
+                && sqrt(work.dot(work) * SimpleMatrix<T>().epsilon()) <
+                   abs(work[work.size() - 1] - last); ii ++) {
+          last = work[work.size() - 1];
+          const auto work2(makeProgramInvariant<T>(work, one));
+          work[work.size() - 1] = revertProgramInvariant<T>(make_pair(
+            - (invariant.dot(work2.first) - invariant[4] * work2.first[4]) /
+            invariant[4], work2.second));
+        }
+        gwork0(i, i1) = work[work.size() - 1];
+      }
+    }
+    for(int i1 = 9; i1 < gwork0.cols(); i1 ++) {
+      const auto nnwork(nwork.subVector(0, i1));
+      const auto nseconds(sqrt(nnwork.dot(nnwork)));
+      gwork0.setCol(i1, revertProgramInvariant<T>(make_pair(
+        makeProgramInvariant<T>(normalize<T>(gwork0.col(i1)), - T(int(1)), true).first,
+          PP0<T>().next(nnwork / nseconds, 0) * nseconds), true).subVector(0, gwork0.rows()) );
+    }
+    auto gwork1(gwork0);
+    gwork1.O();
+    // N.B. imported from predv1.
+    for(int i = 0; i < gwork1.rows(); i ++)
+      for(int j = 10; j < gwork1.cols(); j ++)
+        gwork1(i, j) = (gwork0(i, j - 1) * T(int(2)) - T(int(1)) ) *
+          (in[(j - gwork1.cols()) * 2 + in.size()][i] * T(int(2)) -
+            T(int(1)) );
+    auto gres(res);
+    gres.O();
+    res[0] += (P0maxRank0<T>().next(gwork1.row(0)) *
+      (gwork0(0, gwork0.cols() - 1) * T(int(2)) - T(int(1)) ) + T(int(1)) ) /
+        T(int(2));
+#if defined(_OPENMP)
+#pragma omp parallel for schedule(static, 1)
+#endif
+    for(int i = 1; i < gres.size(); i ++)
+      res[i] += (P0maxRank0<T>().next(gwork1.row(i)) *
+        (gwork0(i, gwork0.cols() - 1) * T(int(2)) - T(int(1)) ) + T(int(1)) ) /
+          T(int(2));
+  }
+  return res;
+}
+
 template <typename T> vector<SimpleVector<T> > predVec(vector<vector<SimpleVector<T> > >& in0, const int& step = 1) {
   assert(in0.size() && in0[0].size() && in0[0][0].size());
   vector<SimpleVector<T> > in;

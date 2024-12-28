@@ -2,7 +2,7 @@ CXX=	clang++
 #CXX=	eg++
 
 # compiler flags.
-#CXXFLAGS+=	-O0 -mtune=generic -gfull
+##CXXFLAGS+=	-O0 -mtune=generic -gfull
 CXXFLAGS+=	-Ofast -mtune=native -gfull
 #CXXFLAGS+=	-O3 -mtune=native -g3
 # This doesn't work, we need operator >>, operator << with ongoing stdlibc++.

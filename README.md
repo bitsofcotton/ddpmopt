@@ -229,4 +229,5 @@ Leave here but might return here after another implementations.
 2024/12/13 leave here, might return here.
 2024/12/26 use montecarlo method instead of doing each step average on prediction.
 2024/12/28 fix 'q', 'w' commands with last change.
+2024/12/29 update 'w' commands suitable with predv1 method impementation is predv4.
 

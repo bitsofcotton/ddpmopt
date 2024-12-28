@@ -153,57 +153,32 @@ int main(int argc, const char* argv[]) {
           cerr << "failed to save." << endl;
   } else if(m == 'w') {
     vector<vector<SimpleMatrix<num_t> > > in;
-    in.reserve(argc - 1);
-    int wp(0);
-    int c(0);
+    in.reserve(argc - 2);
     for(int i = 2; i < argc; i ++) {
       vector<SimpleMatrix<num_t> > work;
       if(! loadp2or3<num_t>(work, argv[i])) continue;
-      wp += work[0].rows() * work[0].cols();
-      c   = max(c, int(work.size()));
       in.emplace_back(work.size() == 3 ? rgb2xyz<num_t>(work) : move(work));
     }
-    vector<vector<SimpleVector<num_t> > > ep;
-    ep.resize(wp);
-    int pp(0);
-    for(int i = 0; i < in.size(); i ++)
-      for(int j = 0; j < in[i][0].rows(); j ++)
-        for(int k = 0; k < in[i][0].cols(); k ++, pp ++) {
-          ep[pp].resize(1, SimpleVector<num_t>(c).O());
-          for(int m = 0; m < c; m ++)
-            ep[pp][0][m] = in[i][m % in[i].size()](j, k);
-        }
-    assert(pp == wp);
-    ep = normalize<num_t>(ep);
-    vector<SimpleMatrix<num_t> > outf(c);
-    for(int j = 0; j < outf.size(); j ++) {
-      outf[j].resize(in[0][0].rows(), in[0][0].cols());
-      outf[j].O();
+    in = normalize<num_t>(in);
+    vector<SimpleVector<num_t> > work;
+    work.resize(in.size());
+    for(int i = 0; i < in.size(); i ++) {
+      work[i].resize(in[i].size() * in[i][0].rows() * in[i][0].cols());
+      for(int j = 0; j < in[i].size(); j ++)
+        for(int k = 0; k < in[i][j].rows(); k ++)
+          work[i].setVector(j * in[i][0].rows() * in[i][0].cols() +
+            k * in[i][0].cols(), in[i][j].row(k));
     }
-    pp = 1;
-    for(int ii = 0; ii < outf[0].rows(); ii ++)
-      for(int jj = 0; jj < outf[0].cols(); jj ++, pp ++) {
-        auto wep(ep);
-        auto p(predVec<num_t>(wep, pp));
-        for(int j = 0; j < outf.size(); j ++)
-          outf[j](ii, jj) = p[0][j];
-      }
+    auto vp(predv4<num_t>(work));
+    vector<SimpleMatrix<num_t> > p;
+    p.resize(in[0].size());
+    for(int i = 0; i < p.size(); i ++) {
+      p[i].resize(in[0][0].rows(), in[0][0].cols());
+      for(int j = 0; j < p[i].rows(); j ++)
+        p[i].row(j) = vp.subVector(i * p[0].rows() * p[0].cols() + j * p[0].cols(), p[0].cols());
+    }
     if(! savep2or3<num_t>("predgw.ppm",
-      normalize<num_t>(outf.size() == 3 ? xyz2rgb<num_t>(outf) : outf)) )
-        cerr << "failed to save." << endl;
-    vector<SimpleMatrix<num_t> > outwf(c);
-    for(int j = 0; j < outwf.size(); j ++) {
-      outwf[j].resize(1, 4);
-      outwf[j].O();
-    }
-    for(int ii = 0; ii < 4; ii ++, pp ++) {
-      auto wep(ep);
-      auto p(predVec<num_t>(wep, pp));
-      for(int j = 0; j < outwf.size(); j ++)
-        outwf[j](0, ii) = p[0][j];
-    }
-    if(! savep2or3<num_t>("predgw4.ppm",
-      normalize<num_t>(outwf.size() == 3 ? xyz2rgb<num_t>(outwf) : outwf)) )
+      normalize<num_t>(p.size() == 3 ? xyz2rgb<num_t>(p) : p)) )
         cerr << "failed to save." << endl;
   } else if(m == 'q') {
     for(int i0 = 2; i0 < argc; i0 ++) {
