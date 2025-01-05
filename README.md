@@ -35,8 +35,7 @@ Some of the PRNG tests causes this valid but there's something new parameters on
 
 In some auto tune entropy feeding, we can do goki_check_cc:test.py:egeppred command.
 
-# Tips on montecarlo
-We're using montecarlo method to get prediction, this is needed also this might because of adding the average contexts outside needs some addition to the information but we're getting .9 probability in ideal.
+However, if we met gulf on prediction concerned with internal states series the stream have, we cannot predict at all on the range.
 
 # Tips on contexts
 We use whole image context to insert context then predict with such each pixel context. So each image consistency is used and applied for the output.
@@ -56,6 +55,8 @@ Also, we want to decompose some of the meanings by bitsofcotton/specific and bac
 Beating their decomposition speed, we can do goki_check_cc:test.py:wgpred command they have pixel context prediction is predicted to get better result than each graphics each pixel context but they're heavy enough to run.
 
 The wgpred command is omitter on shortcut for decomposing and apply to the predictions, this might includes specific -&gt; {y} prediction -&gt; reverse chain by finding some of the patterns but they doesn't have handles what information to omit for predictions.
+
+However, either wgpred command have a glitch same as egeppred command having some gulf when we're bad luck.
 
 # Usage:
     # copy color structure
@@ -231,4 +232,5 @@ Leave here but might return here after another implementations.
 2024/12/28 fix 'q', 'w' commands with last change.
 2024/12/29 update 'w' commands suitable with predv1 method impementation is predv4.
 2024/12/30 update readme.
+2025/01/06 eliminate condorcet's jury method, they've no effects.
 

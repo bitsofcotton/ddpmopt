@@ -33,9 +33,6 @@ using std::istringstream;
 
 #undef int
 int main(int argc, const char* argv[]) {
-#if defined(NOARCFOUR)
-  srandomdev();
-#endif
 //#define int int64_t
 #define int int32_t
   const auto  sz(2);
