@@ -33,7 +33,7 @@ However, we predict the stream with them and continuity after them in pqredg.
 So this effects if input stream is enough dense in another words stream is stable for input entropy one by one meaning, the result is reasonable in the continuity meaning.
 Some of the PRNG tests causes this valid but there's something new parameters on entropy feeding ratio, they fails with gulfs depends on the range we use in the range.
 
-In some auto tune entropy feeding, we can do goki_check_cc:test.py:egeppred command.
+In some auto tune entropy feeding, we can do goki_check_cc:test.py:pred command.
 
 However, if we met gulf on prediction concerned with internal states series the stream have, we cannot predict at all on the range.
 
@@ -52,11 +52,11 @@ So we need to do bitsofcotton/isolate and match to known algorithms with the han
 
 Also, we want to decompose some of the meanings by bitsofcotton/specific and backport them into here, however, implementation of them isn't now.
 
-Beating their decomposition speed, we can do goki_check_cc:test.py:wgpred command they have pixel context prediction is predicted to get better result than each graphics each pixel context but they're heavy enough to run.
+Beating their decomposition speed, we can do goki_check_cc:test.py:pred command (curdir)w...-bit.ppm output they have pixel context prediction is predicted to get better result than each graphics each pixel context but they're heavy enough to run.
 
-The wgpred command is omitter on shortcut for decomposing and apply to the predictions, this might includes specific -&gt; {y} prediction -&gt; reverse chain by finding some of the patterns but they doesn't have handles what information to omit for predictions.
+The pred command (curdir)w...-bit.ppm output is omitter on shortcut for decomposing and apply to the predictions, this might includes specific -&gt; {y} prediction -&gt; reverse chain by finding some of the patterns but they doesn't have handles what information to omit for predictions.
 
-However, either wgpred command have a glitch same as egeppred command having some gulf when we're bad luck.
+However, either pred command (curdir)w...-bit.ppm output have a glitch same as curdir-bit.ppm command having some gulf when we're bad luck.
 
 # Usage:
     # copy color structure
@@ -233,4 +233,5 @@ Leave here but might return here after another implementations.
 2024/12/29 update 'w' commands suitable with predv1 method impementation is predv4.
 2024/12/30 update readme.
 2025/01/06 eliminate condorcet's jury method, they've no effects.
+2025/01/06 update readme for compatible with latest goki_check_cc.
 
