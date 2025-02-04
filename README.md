@@ -10,7 +10,7 @@ We need to do ulimit or edit /etc/login.conf for large malloc use cases required
 
 Using this with mimalloc or so can increase memory usage with multi thread on some systems.
 
-We use at least ((whole input size))\*sizeof(num_t) in heap resource.
+We use at least 2\*((whole input size))\*sizeof(num_t) in heap resource.
 
 # Tips around c++ compilers
 Some of the lieonn.hh operator \>\> class doesn't work as expected, might be compilers' bug.
@@ -235,4 +235,6 @@ Leave here but might return here after another implementations.
 2025/01/06 eliminate condorcet's jury method, they've no effects.
 2025/01/06 update readme for compatible with latest goki_check_cc.
 2025/01/27 improve pred... memory usage without predv4.
+2025/02/01 fix readme memory usage notation.
+2025/02/05 predv function to get better prediction - real value distribution by PRNG tests.
 
