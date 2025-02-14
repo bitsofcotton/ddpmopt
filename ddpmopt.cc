@@ -148,6 +148,13 @@ int main(int argc, const char* argv[]) {
     if(! savep2or3<num_t>("predg.ppm",
         normalize<num_t>(p.size() == 3 ? xyz2rgb<num_t>(p) : p)) )
           cerr << "failed to save." << endl;
+    vector<SimpleMatrix<num_t> > d;
+    if(loadp2or3<num_t>(d, argv[argc - 1])) {
+      for(int i = 0; i < p.size(); i ++)
+        p[i] -= d[i];
+      if(! savep2or3<num_t>("predg-diff.ppm", normalize<num_t>(p)) )
+        cerr << "failed to save." << endl;
+    }
   } else if(m == 'w') {
     vector<vector<SimpleMatrix<num_t> > > in;
     in.reserve(argc - 2);

@@ -237,4 +237,5 @@ Leave here but might return here after another implementations.
 2025/01/27 improve pred... memory usage without predv4.
 2025/02/01 fix readme memory usage notation.
 2025/02/05 predv function to get better prediction - real value distribution by PRNG tests.
+2025/02/15 add PP0 as PSVD ... as a dead code, they doesn't improve output enough on our machines with small number of inputs.
 
