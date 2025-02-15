@@ -4723,6 +4723,50 @@ template <typename T, int nprogress = 20> static inline SimpleVector<T> predv(co
   return res;
 }
 
+// N.B. predv only returns last one picture on some of our tests with real
+//      data, but is effective returns better results with PRNG tests.
+//      so with real data, we only apply P0maxRank to each pixel.
+template <typename T, int nprogress = 20> static inline SimpleVector<T> predvp0(const vector<SimpleVector<T> >& in, const int& step = 1) {
+  assert(0 < step && in.size() && 1 < in[0].size());
+  SimpleVector<T> seconds(in.size());
+  seconds.O();
+#if defined(_OPENMP)
+#pragma omp parallel for schedule(static, 1)
+#endif
+  for(int i = 0; i < seconds.size(); i ++)  {
+    seconds[i] = makeProgramInvariant<T>(in[i], - T(int(1)), true).second;
+  }
+  SimpleVector<T> p(in[0].size());
+  p.O();
+  // N.B. we need first call single threaded.
+  {
+    const int j(0);
+    if(nprogress && ! (j % max(int(1), int(in[0].size() / nprogress))) )
+      cerr << j << " / " << in[0].size() << endl;
+    idFeeder<T> buf(seconds.size());
+    for(int i = 0; i < seconds.size(); i ++)
+      buf.next(makeProgramInvariantPartial<T>(in[i][j], seconds[i], true));
+    assert(buf.full);
+    p[j] = P0maxRank<T>(step).next(buf.res);
+  }
+#if defined(_OPENMP)
+#pragma omp parallel for schedule(static, 1)
+#endif
+  for(int j = 1; j < in[0].size(); j ++) {
+    if(nprogress && ! (j % max(int(1), int(in[0].size() / nprogress))) )
+      cerr << j << " / " << in[0].size() << endl;
+    idFeeder<T> buf(seconds.size());
+    for(int i = 0; i < seconds.size(); i ++)
+      buf.next(makeProgramInvariantPartial<T>(in[i][j], seconds[i], true));
+    assert(buf.full);
+    p[j] = P0maxRank<T>(step).next(buf.res);
+  }
+  const auto nseconds(sqrt(seconds.dot(seconds)));
+  return revertProgramInvariant<T>(make_pair(
+    makeProgramInvariant<T>(normalize<T>(p), - T(int(1)), true).first,
+      P0maxRank<T>(step).next(seconds / nseconds) * nseconds), true);
+}
+
 // N.B. instead of recursive doing sliding input length (they hardly depends
 //      on first some steps), we use montecarlo method.
 //      recur == 11 is enough to get probability around .9 when we're using
@@ -4754,9 +4798,9 @@ template <typename T, int nprogress = 6> static inline SimpleVector<T> predv4(ve
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
-  for(int i = 8; i < gwork0.rows(); i ++) {
+  for(int i = 0; i < gwork0.rows(); i ++) {
     // N.B. imported from P01 class.
-    SimpleMatrix<T> toeplitz0(gwork0.cols() - 1, 7);
+    SimpleMatrix<T> toeplitz0(gwork0.cols(), 7);
     for(int j = 0; j < toeplitz0.rows(); j ++) {
       SimpleVector<T> vw(5);
       vw.O();
@@ -4789,10 +4833,10 @@ template <typename T, int nprogress = 6> static inline SimpleVector<T> predv4(ve
           - (invariant.dot(work2.first) - invariant[4] * work2.first[4]) /
           invariant[4], work2.second));
       }
-      gwork0(i, i1) = work[work.size() - 1];
+      gwork0(i, i1 - 1) = work[work.size() - 1];
     }
   }
-  for(int i1 = 9; i1 < gwork0.cols(); i1 ++) {
+  for(int i1 = 8; i1 < gwork0.cols(); i1 ++) {
     const auto nnwork(nwork.subVector(0, i1));
     const auto nseconds(sqrt(nnwork.dot(nnwork)));
     gwork0.setCol(i1, revertProgramInvariant<T>(make_pair(
@@ -4803,24 +4847,21 @@ template <typename T, int nprogress = 6> static inline SimpleVector<T> predv4(ve
   gwork1.O();
   // N.B. imported from predv1.
   for(int i = 0; i < gwork1.rows(); i ++)
-    for(int j = 10; j < gwork1.cols(); j ++)
-      gwork1(i, j) = (gwork0(i, j - 1) * T(int(2)) - T(int(1)) ) *
-        (in[(j - gwork1.cols()) * 2 + in.size()][i] * T(int(2)) -
-          T(int(1)) );
-  res[0] = (P0maxRank0<T>().next(gwork1.row(0)) *
-    (gwork0(0, gwork0.cols() - 1) * T(int(2)) - T(int(1)) ) + T(int(1)) ) /
-      T(int(2));
+    for(int j = 9; j < gwork1.cols(); j ++)
+      gwork1(i, j) = in[(j - gwork1.cols()) * 2 + in.size()][i] -
+        gwork0(i, j - 1);
+  res[0] = (P0maxRank0<T>().next(gwork1.row(0)) + gwork0(0, gwork0.cols() - 1) +
+    T(int(4)) ) / T(int(8));
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
   for(int i = 1; i < res.size(); i ++)
-    res[i] = (P0maxRank0<T>().next(gwork1.row(i)) *
-      (gwork0(i, gwork0.cols() - 1) * T(int(2)) - T(int(1)) ) + T(int(1)) ) /
-        T(int(2));
+    res[i] = (P0maxRank0<T>().next(gwork1.row(i)) +
+      gwork0(i, gwork0.cols() - 1) + T(int(4)) ) / T(int(8));
   return res;
 }
 
-template <typename T> vector<SimpleVector<T> > predVec(vector<vector<SimpleVector<T> > >& in0, const int& step = 1) {
+template <typename T, bool use_p0 = false> vector<SimpleVector<T> > predVec(vector<vector<SimpleVector<T> > >& in0, const int& step = 1) {
   assert(in0.size() && in0[0].size() && in0[0][0].size());
   vector<SimpleVector<T> > in;
   in.resize(in0.size());
@@ -4836,7 +4877,7 @@ template <typename T> vector<SimpleVector<T> > predVec(vector<vector<SimpleVecto
   const auto size0(in0[0].size());
   const auto size1(in0[0][0].size());
   in0.resize(0);
-  auto p(predv<T>(in, step));
+  auto p(use_p0 ? predvp0<T>(in, step) : predv<T>(in, step));
   vector<SimpleVector<T> > res;
   res.resize(size0);
   for(int j = 0; j < res.size(); j ++)
@@ -4844,7 +4885,7 @@ template <typename T> vector<SimpleVector<T> > predVec(vector<vector<SimpleVecto
   return res;
 }
 
-template <typename T> vector<SimpleMatrix<T> > predMat(vector<vector<SimpleMatrix<T> > >& in0, const int& step = 1) {
+template <typename T, bool use_p0 = false> vector<SimpleMatrix<T> > predMat(vector<vector<SimpleMatrix<T> > >& in0, const int& step = 1) {
   assert(in0.size() && in0[0].size() && in0[0][0].rows() && in0[0][0].cols());
   vector<SimpleVector<T> > in;
   in.resize(in0.size());
@@ -4863,7 +4904,7 @@ template <typename T> vector<SimpleMatrix<T> > predMat(vector<vector<SimpleMatri
   const auto rows(in0[0][0].rows());
   const auto cols(in0[0][0].cols());
   in0.resize(0);
-  auto p(predv<T>(in, step));
+  auto p(use_p0 ? predvp0<T>(in, step) : predv<T>(in, step));
   vector<SimpleMatrix<T> > res;
   res.resize(size);
   for(int j = 0; j < res.size(); j ++) {

@@ -144,7 +144,7 @@ int main(int argc, const char* argv[]) {
       if(! loadp2or3<num_t>(work, argv[i])) continue;
       in.emplace_back(work.size() == 3 ? rgb2xyz<num_t>(work) : move(work));
     }
-    auto p(predMat<num_t>(in = normalize<num_t>(in), 1));
+    auto p(predMat<num_t, true>(in = normalize<num_t>(in), 1));
     if(! savep2or3<num_t>("predg.ppm",
         normalize<num_t>(p.size() == 3 ? xyz2rgb<num_t>(p) : p)) )
           cerr << "failed to save." << endl;
@@ -196,7 +196,7 @@ int main(int argc, const char* argv[]) {
         for(int j = 0; j < work.size(); j ++)
           pwork[i].emplace_back(work[j].row(i));
       }
-      const auto ext(work[0].rows() / 3 - 16);
+      const int ext(sqrt(num_t(work[0].rows())));
       vector<SimpleMatrix<num_t> > wwork(work.size(),
         SimpleMatrix<num_t>(work[0].rows() + ext, work[0].cols()).O());
       for(int j = 0; j < work.size(); j ++)
