@@ -4836,7 +4836,7 @@ template <typename T, int nprogress = 6> static inline SimpleVector<T> predv4(ve
       gwork0(i, i1 - 1) = work[work.size() - 1];
     }
   }
-  for(int i1 = 8; i1 < gwork0.cols(); i1 ++) {
+  for(int i1 = 9; i1 < gwork0.cols(); i1 ++) {
     const auto nnwork(nwork.subVector(0, i1));
     const auto nseconds(sqrt(nnwork.dot(nnwork)));
     gwork0.setCol(i1, revertProgramInvariant<T>(make_pair(
