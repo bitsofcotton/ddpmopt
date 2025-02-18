@@ -58,6 +58,15 @@ The pred command (curdir)w...-bit.ppm output is omitter on shortcut for decompos
 
 However, either pred command (curdir)w...-bit.ppm output have a glitch same as curdir-bit.ppm command having some gulf when we're bad luck.
 
+# PSVD as a dead code also running aground
+We can apply PSVD to each of context predictions to fight with timing-related conditions with many of input set into argv.
+
+However, our computation system must be infected, so we cannot test them because it is similar to the context we cook with blinded eyes with brand-new tool sets without any of helps.
+
+On our system, it's the condition /usr/local disk space is suspicious but pkg_check -F doesn't find any of suspicious ones case also predvp0 returns white/black outed results with nbit operations since AFTER first some try on calculations they returns ok also AFTER the upload to github.com, this should not be happened normal cases we work with.
+
+<!-- This either could come from our localizer isn't selected such operation case, this breaks whole our metaphysical contemplations without our permissions from deep inside our minds, might came from someones' dishonesty. -->
+
 # Usage:
     # copy color structure
     ./ddpmopt(32|64)?(mp)? + <in0out.pgm> <in0in.ppm> ... > cache.txt
@@ -239,4 +248,5 @@ Leave here but might return here after another implementations.
 2025/02/05 predv function to get better prediction - real value distribution by PRNG tests.
 2025/02/15 add PP0 as PSVD ... as a dead code, they doesn't improve output enough on our machines with small number of inputs.
 2025/02/16 fix predv4 alignments affects all of outputs w command.
+2025/02/18 revert using predvp0 to using predv, they might come from infection.
 

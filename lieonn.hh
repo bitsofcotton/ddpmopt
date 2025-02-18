@@ -4422,6 +4422,8 @@ template <typename T> static inline SimpleMatrix<T> center(const SimpleMatrix<T>
 // N.B. we are targetting the structure they appears additional states after
 //      additional states on given input range. so we don't use PdeltaOnce.
 // N.B. we get almost same broken result between following PSVD and raw P01.
+//      however, this might be come from deep inside infections.
+//      so we keep the code set on here but broken with certain compiler vers.
 // template <typename T> using PP0 = PSVD<T, P01<T, P0maxRank<T>, true> >;
 template <typename T> using PP0 = P01<T, P01delim<T>, true>;
 
