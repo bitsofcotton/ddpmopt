@@ -37,6 +37,8 @@ In some auto tune entropy feeding, we can do goki_check_cc:test.py:pred command.
 
 However, if we met gulf on prediction concerned with internal states series the stream have, we cannot predict at all on the range.
 
+Either, PSVD class can be used to avoid timing-related prediction fails which we don't need them because we only focus on auto tuned entropy feeded streams.
+
 # Tips on contexts
 We use whole image context to insert context then predict with such each pixel context. So each image consistency is used and applied for the output.
 
@@ -52,20 +54,9 @@ So we need to do bitsofcotton/isolate and match to known algorithms with the han
 
 Also, we want to decompose some of the meanings by bitsofcotton/specific and backport them into here, however, implementation of them isn't now.
 
-Beating their decomposition speed, we can do goki_check_cc:test.py:pred command (curdir)w...-bit.ppm output they have pixel context prediction is predicted to get better result than each graphics each pixel context but they're heavy enough to run.
-
 The pred command (curdir)w...-bit.ppm output is omitter on shortcut for decomposing and apply to the predictions, this might includes specific -&gt; {y} prediction -&gt; reverse chain by finding some of the patterns but they doesn't have handles what information to omit for predictions.
 
 However, either pred command (curdir)w...-bit.ppm output have a glitch same as curdir-bit.ppm command having some gulf when we're bad luck.
-
-# PSVD as a dead code also running aground
-We can apply PSVD to each of context predictions to fight with timing-related conditions with many of input set into argv.
-
-However, our computation system must be infected, so we cannot test them because it is similar to the context we cook with blinded eyes with brand-new tool sets without any of helps.
-
-On our system, it's the condition /usr/local disk space is suspicious but pkg_check -F doesn't find any of suspicious ones case also predvp0 returns white/black outed results with nbit operations since AFTER first some try on calculations they returns ok also AFTER the upload to github.com, this should not be happened normal cases we work with.
-
-<!-- This either could come from our localizer isn't selected such operation case, this breaks whole our metaphysical contemplations without our permissions from deep inside our minds, might came from someones' dishonesty. -->
 
 # Usage:
     # copy color structure
@@ -249,4 +240,5 @@ Leave here but might return here after another implementations.
 2025/02/15 add PP0 as PSVD ... as a dead code, they doesn't improve output enough on our machines with small number of inputs.
 2025/02/16 fix predv4 alignments affects all of outputs w command.
 2025/02/18 revert using predvp0 to using predv, they might come from infection.
+2025/02/20 move include comments into lieonn.hh .
 
