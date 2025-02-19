@@ -56,7 +56,8 @@ Also, we want to decompose some of the meanings by bitsofcotton/specific and bac
 
 The pred command (curdir)w...-bit.ppm output is omitter on shortcut for decomposing and apply to the predictions, this might includes specific -&gt; {y} prediction -&gt; reverse chain by finding some of the patterns but they doesn't have handles what information to omit for predictions.
 
-However, either pred command (curdir)w...-bit.ppm output have a glitch same as curdir-bit.ppm command having some gulf when we're bad luck.
+Also, these predictors doesn't handle what meaning to omit on next image, so is composition around collection of predictions.
+Either, pred command (curdir)w...-bit.ppm output have a glitch same as curdir-bit.ppm command having some gulf when we're bad luck, either we cannot get proper prediction collection composition from small number of the input contexts.
 
 # Usage:
     # copy color structure
@@ -75,8 +76,8 @@ However, either pred command (curdir)w...-bit.ppm output have a glitch same as c
     ./ddpmopt(32|64)?(mp)? c <in0.ppm> ...
     cp `./ddpmopt(32|64)?(mp)? i <in0.ppm> ... | sort | head -n ... | tr '\n' ' '` outdir
 
-# Re-Re-Re-Leave
-We might re-re-re-leave this repository with this update, however, if there's some sort of the reason to improve, we re-re-re-open here, also, lieonn.hh change might be updated even we leave here.
+# Re4-Leave
+We might re4-leave this repository with this update, however, if there's some sort of the reason to improve, we re4-open here, also, lieonn.hh change might be updated even we leave here.
 
 Leave here but might return here after another implementations.
 
@@ -240,5 +241,5 @@ Leave here but might return here after another implementations.
 2025/02/15 add PP0 as PSVD ... as a dead code, they doesn't improve output enough on our machines with small number of inputs.
 2025/02/16 fix predv4 alignments affects all of outputs w command.
 2025/02/18 revert using predvp0 to using predv, they might come from infection.
-2025/02/20 move include comments into lieonn.hh .
+2025/02/20 move include comments into lieonn.hh . update reamde.md fix meaning on predictions we will re freeze with this.
 
