@@ -242,4 +242,5 @@ Leave here but might return here after another implementations.
 2025/02/16 fix predv4 alignments affects all of outputs w command.
 2025/02/18 revert using predvp0 to using predv, they might come from infection.
 2025/02/20 move include comments into lieonn.hh . update reamde.md fix meaning on predictions we will re freeze with this.
+2025/02/22 not optimal but better looking q command output size with specifying step to predictor.
 

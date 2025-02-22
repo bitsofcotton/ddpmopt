@@ -196,19 +196,18 @@ int main(int argc, const char* argv[]) {
         for(int j = 0; j < work.size(); j ++)
           pwork[i].emplace_back(work[j].row(i));
       }
-      const int ext(sqrt(num_t(work[0].rows())));
+      // N.B. not optimal but better looking.
+      const int ext(log(num_t(work[0].rows())) / log(num_t(int(2))));
       vector<SimpleMatrix<num_t> > wwork(work.size(),
         SimpleMatrix<num_t>(work[0].rows() + ext, work[0].cols()).O());
       for(int j = 0; j < work.size(); j ++)
         wwork[j].setMatrix(0, 0, work[j]);
       for(int i = 0; i < ext; i ++) {
         auto pwt(pwork);
-        pwork.emplace_back(predVec<num_t>(pwt));
-      }
-      for(int i = 0; i < ext; i ++)
+        auto n(predVec<num_t>(pwt, i + 1));
         for(int j = 0; j < wwork.size(); j ++)
-          wwork[j].row(wwork[j].rows() + i - ext) =
-            move(pwork[i - ext + pwork.size()][j]);
+          wwork[j].row(work[0].rows() + i) = move(n[j]);
+      }
       if(! savep2or3<num_t>(argv[i0], normalize<num_t>(wwork.size() == 3 ?
         xyz2rgb<num_t>(wwork) : wwork) ) )
           cerr << "failed to save." << endl;
