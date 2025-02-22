@@ -2,6 +2,8 @@
 Apply some of the filter to input stream.
 We can use this for bitsofcotton/i2g filtered images.
 
+N.B. we use only input data streams, so this repository doesn't uses external models.
+
 # Context
 There exists Denoising Diffusion Probabilistic Models (DDPM; Ho et al. 2020). So this is another try on them but different flavoured one, we only focus to apply each pixel context to color image into monochrome one, which have the structure completely depends on filters' multiple meaning or complexity.
 
@@ -243,4 +245,5 @@ Leave here but might return here after another implementations.
 2025/02/18 revert using predvp0 to using predv, they might come from infection.
 2025/02/20 move include comments into lieonn.hh . update reamde.md fix meaning on predictions we will re freeze with this.
 2025/02/22 not optimal but better looking q command output size with specifying step to predictor.
+2025/02/23 add readme.md notes.
 
