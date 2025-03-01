@@ -46,6 +46,10 @@ We use whole image context to insert context then predict with such each pixel c
 
 We can use orthogonal context insertion, however, this isn't matches our senses, such things are useful to get numerical stability context only and are viewed broken by our senses.
 
+Either we also can use DFT/IDFT each of input graphics by both x-axis and y-axis, however they breaks output graphics because even if we have 2/3 predictioin and using monte-carlo method, the error on each coefficients comes with whole graphics context. So the first intention is to insert output graphics continuity with separated coefficients, however we get broken result on them.
+However, using P0DFT context to input graphics set can increase continuity on separated each inputs however, either, such insertion z-axis (prediction direction) DFT meaned continuity can leads us explicit relation on better large number of last parts with predicted outputs, however this returns only yellow outed graphics result on our infected machine, so we cannot test them on our machine at all.
+So we're using goki_check_cc:test.py:pred... commands to complement continuity, we don't need them in entropy feeding controlled condition.
+
 We can use some feature quantity based transforms we can get them by machine learning converted into tan Ax form.
 In such case, we use vectorized input image x, y:=tan Ax for feature quantities, weight them by \[x, y\] or only predict the {y} stream, then, invert x=f(y).
 This matches our senses on viewing the image.
@@ -246,4 +250,5 @@ Leave here but might return here after another implementations.
 2025/02/20 move include comments into lieonn.hh . update reamde.md fix meaning on predictions we will re freeze with this.
 2025/02/22 not optimal but better looking q command output size with specifying step to predictor.
 2025/02/23 add readme.md notes.
+2025/03/01 add readme.md note around DFT.
 
