@@ -144,7 +144,7 @@ int main(int argc, const char* argv[]) {
       if(! loadp2or3<num_t>(work, argv[i])) continue;
       in.emplace_back(work.size() == 3 ? rgb2xyz<num_t>(work) : move(work));
     }
-    auto p(predMat<num_t, true>(in = normalize<num_t>(in), 1));
+    auto p(predMat<num_t>(in = normalize<num_t>(in), 1));
     if(! savep2or3<num_t>("predg.ppm",
         normalize<num_t>(p.size() == 3 ? xyz2rgb<num_t>(p) : p)) )
           cerr << "failed to save." << endl;
@@ -368,6 +368,65 @@ int main(int argc, const char* argv[]) {
     for(int i = 0; i < in.size(); i ++)
       if(! savep2or3<num_t>((string(argv[i + 2]) + string("-c3.ppm")).c_str(), in[i]) )
         cerr << "failed to save." << endl;
+  } else if(m == 'T') {
+    vector<vector<SimpleMatrix<num_t> > > in;
+    in.reserve(argc - 2 + 1);
+    vector<SimpleMatrix<num_t> > p;
+    vector<vector<SimpleMatrix<int> > > pc;
+    for(int i0 = 2; i0 < argc; i0 ++) {
+      vector<SimpleMatrix<num_t> > work;
+      if(! loadp2or3<num_t>(work, argv[i0])) continue;
+      if(pc.size()) {
+        for(int j = 0; j < p.size(); j ++)
+          for(int k = 0; k < p[j].rows(); k ++)
+            for(int m = 0; m < p[j].cols(); m ++) {
+              p[j](k, m) =
+                (sgn<num_t>(p[j](k, m) - num_t(int(1)) / num_t(int(2)) )
+                 + num_t(int(1)) ) / num_t(int(2));
+              p[j](k, m) = abs(p[j](k, m) - work[j](k, m));
+            }
+        cout << in.size() - 9 << " : " << endl;
+        for(int i = 0; i < pc.size(); i ++)
+          for(int j = 0; j < pc[i].size(); j ++) {
+            const auto rr(p[0].rows() / pc[i][0].rows());
+            const auto cc(p[0].cols() / pc[i][0].cols());
+            for(int k = 0; k < pc[i][j].rows(); k ++)
+              for(int n = 0; n < pc[i][j].cols(); n ++) {
+                num_t work(int(0));
+                int   cnt(0);
+                for(int kk = k * rr; kk < min(p[j].rows(), (k + 1) * rr); kk ++)
+                  for(int nn = n * cc; nn < min(p[j].cols(), (n + 1) * cc);
+                    nn ++, cnt ++)
+                    work += p[j](kk, nn);
+                if(cnt) work /= num_t(cnt);
+                if(work < num_t(int(1)) / num_t(int(2))) pc[i][j](k, n) ++;
+              }
+            cout << pc[i][j];
+          }
+      }
+      in.emplace_back(move(work));
+      if(i0 == argc - 1) break;
+      if(9 < in.size()) {
+        auto in2(in);
+        p = predMat<num_t>(in2 = normalize<num_t>(in2));
+        if(! pc.size()) {
+          vector<SimpleMatrix<int> > work;
+          work.resize(p.size());
+          for(int j = 0; j < work.size(); j ++)
+            work[j] = SimpleMatrix<int>(p[j].rows(), p[j].cols()).O();
+          pc.emplace_back(move(work));
+          for(int i = 1;
+            0 <= i && 1 < pc[i - 1][0].rows() && 1 < pc[i - 1][0].cols();
+            i ++) {
+            auto work(pc[i - 1]);
+            for(int j = 0; j < work.size(); j ++)
+              work[j] = SimpleMatrix<int>(work[j].rows() / 2,
+                work[j].cols() / 2).O();
+            pc.emplace_back(move(work));
+          }
+        }
+      }
+    }
   } else goto usage;
   cerr << "Done" << endl;
   return 0;
@@ -377,16 +436,18 @@ int main(int argc, const char* argv[]) {
   cerr << argv[0] << " + <in0out.pgm> <in0in.ppm> ... > cache.txt" << endl;
   cerr << "# apply color structure" << endl;
   cerr << argv[0] << " - <in0.ppm> ... < cache.txt" << endl;
-  cerr << "# predict following image" << endl;
+  cerr << "# predict following image (each bit input)" << endl;
   cerr << argv[0] << " p <in0.ppm> ..." << endl;
-  cerr << "# predict with whole pixel context" << endl;
+  cerr << "# predict with whole pixel context (each bit input)" << endl;
   cerr << argv[0] << " w <in0.ppm> <in0-4.ppm> ..." << endl;
-  cerr << "# predict down scanlines." << endl;
+  cerr << "# predict down scanlines. (each bit input)" << endl;
   cerr << argv[0] << " q <in0out.ppm> ..." << endl;
   cerr << "# show continuity" << endl;
   cerr << argv[0] << " [xyit] <in0.ppm> ..." << endl;
   cerr << "# some of the volume curvature like transform" << endl;
   cerr << argv[0] << " c <in0.ppm> ..." << endl;
+  cerr << "# test input series of graphics predictable or not (each bit input)" << endl;
+  cerr << argv[0] << " T <in0.ppm> ..." << endl;
   return - 1;
 }
 

@@ -65,6 +65,11 @@ The pred command (curdir)w...-bit.ppm output is omitter on shortcut for decompos
 Also, these predictors doesn't handle what meaning to omit on next image, so is composition around collection of predictions.
 Either, pred command (curdir)w...-bit.ppm output have a glitch same as curdir-bit.ppm command having some gulf when we're bad luck, either we cannot get proper prediction collection composition from small number of the input contexts.
 
+# T command
+We have T command for gokibin bit preprocessed graphics stream testing.
+If output is better than .5 probability and stable for some of the shrinked size, the gokibin nbit reversed outputs' shrinked image can have some of the meanings for them.
+We might need to separate prediction when only last 1x1 size matrix is stable case.
+
 # Usage:
     # copy color structure
     ./ddpmopt(32|64)?(mp)? + <in0out.pgm> <in0in.ppm> ... > cache.txt
@@ -251,4 +256,5 @@ Leave here but might return here after another implementations.
 2025/02/22 not optimal but better looking q command output size with specifying step to predictor.
 2025/02/23 add readme.md notes.
 2025/03/01 add readme.md note around DFT.
+2025/03/03 add T command for test. revert subtraction to multiplication and sgn method to have gokibin bit preprocessed inputs.
 
