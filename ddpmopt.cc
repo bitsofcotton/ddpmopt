@@ -223,6 +223,13 @@ int main(int argc, const char* argv[]) {
         for(int j = 0; j < wwork.size(); j ++)
           wwork[j].row(work[0].rows() + i) = n[j] + pwork[9 + 2 * (1 + i)][j];
       }
+      vector<SimpleMatrix<num_t> > nwork;
+      nwork.resize(wwork.size());
+      for(int i = 0; i < nwork.size(); i ++)
+        nwork[i] = wwork[i].subMatrix(work[0].rows(), 0, ext, work[0].cols());
+      nwork = normalize<num_t>(nwork);
+      for(int i = 0; i < nwork.size(); i ++)
+        wwork[i].setMatrix(work[0].rows(), 0, nwork[i]);
       if(! savep2or3<num_t>(argv[i0], normalize<num_t>(wwork.size() == 3 ?
         xyz2rgb<num_t>(wwork) : wwork) ) )
           cerr << "failed to save." << endl;
