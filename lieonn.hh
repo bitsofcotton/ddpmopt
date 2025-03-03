@@ -4483,6 +4483,8 @@ template <typename T, int nprogress = 20> SimpleVector<T> predv0(const vector<Si
 //      some of the PRNG test meaning broken. so revert them.
 //      (changed p1/pp3.cc predv call to predv0 call causes split predictions
 //       however the command line chain meaning unchanged.)
+// Important N.B. we use this function with delta input, [start + step + 1, -0[
+//                summation output.
 template <typename T, bool raw = false, int nprogress = 20> static inline SimpleVector<T> predv(vector<SimpleVector<T> >& in, const int& step = 1) {
   assert(0 < step && in.size() && 1 < in[0].size());
   // N.B. we use whole width to get better result in average.
@@ -4532,8 +4534,8 @@ template <typename T, bool raw = false, int nprogress = 20> static inline Simple
         (p[p.size() - 1][0] * T(int(2)) - T(int(1)) ) + T(int(1)) ) / T(int(2));
   else {
     res.O();
-    for(int j = p.size() / 2; j < p.size(); j ++)
-      res[0] += (j == p.size() - 1 ? T(int(1)) : - T(int(1))) *
+    for(int j = start + step + 1; j < p.size(); j ++)
+      res[0] +=
         (P0maxRank0<T>(step).next(ip.col(0).subVector(0, j + 1)) *
           (p[j][0] * T(int(2)) - T(int(1)) ) + T(int(1)) ) / T(int(2));
   }
@@ -4547,8 +4549,8 @@ template <typename T, bool raw = false, int nprogress = 20> static inline Simple
       res[i] = (P0maxRank0<T>(step).next(ip.col(i)) *
         (p[p.size() - 1][i] * T(int(2)) - T(int(1)) ) + T(int(1)) ) / T(int(2));
     else
-      for(int j = p.size() / 2; j < p.size(); j ++)
-        res[i] += (j == p.size() - 1 ? T(int(1)) : - T(int(1))) *
+      for(int j = start + step + 1; j < p.size(); j ++)
+        res[i] +=
           (P0maxRank0<T>(step).next(ip.col(i).subVector(0, j + 1)) *
             (p[j][i] * T(int(2)) - T(int(1)) ) + T(int(1)) ) / T(int(2));
   }
@@ -4579,6 +4581,8 @@ template <typename T, bool raw = false, int nprogress = 20> static inline Simple
 
 // N.B. predv4 is for masp generated -4.ppm predictors.
 //      mostly with slight speed hacks.
+// N.B. we also make hypothesis on this function as delta input,
+//      [11, -0[ range summation output.
 template <typename T, bool raw = false, int nprogress = 6> static inline SimpleVector<T> predv4(vector<SimpleVector<T> >& in) {
   assert(1 < in.size() && (in[in.size() - 1].size() == 4 ||
                            in[in.size() - 1].size() == 12) );
@@ -4660,8 +4664,8 @@ template <typename T, bool raw = false, int nprogress = 6> static inline SimpleV
         T(int(1)) ) / T(int(2));
   else {
     res.O();
-    for(int j = gwork1.cols() / 2; j < gwork1.cols(); j ++)
-      res[0] += (j == gwork1.cols() - 1 ? T(int(1)) : - T(int(1))) *
+    for(int j = 11; j < gwork1.cols(); j ++)
+      res[0] +=
         (P0maxRank0<T>().next(gwork1.row(0).subVector(0, j + 1)) *
           (gwork0(0, j) * T(int(2)) - T(int(1)) ) + T(int(1)) ) / T(int(2));
   }
@@ -4669,13 +4673,13 @@ template <typename T, bool raw = false, int nprogress = 6> static inline SimpleV
 #pragma omp parallel for schedule(static, 1)
 #endif
   for(int i = 1; i < res.size(); i ++)
-    for(int j = gwork1.cols() / 2; j < gwork1.cols(); j ++)
+    for(int j = 11; j < gwork1.cols(); j ++)
       if(raw)
         res[i] = (P0maxRank0<T>().next(gwork1.row(i)) *
           (gwork0(i, gwork0.cols() - 1) * T(int(2)) - T(int(1)) ) +
             T(int(1)) ) / T(int(2));
       else
-        res[i] += (j == gwork1.cols() - 1 ? T(int(1)) : - T(int(1))) *
+        res[i] +=
           (P0maxRank0<T>().next(gwork1.row(i).subVector(0, j + 1)) *
             (gwork0(i, j) * T(int(2)) - T(int(1)) ) + T(int(1)) ) / T(int(2));
   return res;

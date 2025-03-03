@@ -144,17 +144,26 @@ int main(int argc, const char* argv[]) {
       if(! loadp2or3<num_t>(work, argv[i])) continue;
       in.emplace_back(work.size() == 3 ? rgb2xyz<num_t>(work) : move(work));
     }
-    auto p(predMat<num_t>(in = normalize<num_t>(in), 1));
+    in = normalize<num_t>(in);
+    const auto sbuf(in[11]);
+    for(int i = 0; i < in.size() - 1; i ++)
+      for(int j = 0; j < in[i].size(); j ++)
+        in[i][j] = in[i + 1][j] - in[i][j];
+    in.resize(in.size() - 1);
+    for(int i = 0; i < in.size(); i ++)
+      for(int j = 0; j < in[i].size(); j ++)
+        for(int ii = 0; ii < in[i][j].rows(); ii ++)
+          for(int jj = 0; jj < in[i][j].cols(); jj ++)
+            // N.B. buggy CPU float.
+            in[i][j](ii, jj) = (in[i][j](ii, jj) + num_t(int(1)) +
+              sqrt(SimpleMatrix<num_t>().epsilon()) ) / num_t(int(2)) /
+              (num_t(int(1)) + sqrt(sqrt(SimpleMatrix<num_t>().epsilon())) );
+    auto p(predMat<num_t>(in));
+    for(int i = 0; i < p.size(); i ++)
+      p[i] += sbuf[i];
     if(! savep2or3<num_t>("predg.ppm",
         normalize<num_t>(p.size() == 3 ? xyz2rgb<num_t>(p) : p)) )
           cerr << "failed to save." << endl;
-    vector<SimpleMatrix<num_t> > d;
-    if(loadp2or3<num_t>(d, argv[argc - 1])) {
-      for(int i = 0; i < p.size(); i ++)
-        p[i] -= d[i];
-      if(! savep2or3<num_t>("predg-diff.ppm", normalize<num_t>(p)) )
-        cerr << "failed to save." << endl;
-    }
   } else if(m == 'w') {
     vector<vector<SimpleMatrix<num_t> > > in;
     in.reserve(argc - 2);
@@ -173,7 +182,7 @@ int main(int argc, const char* argv[]) {
           work[i].setVector(j * in[i][0].rows() * in[i][0].cols() +
             k * in[i][0].cols(), in[i][j].row(k));
     }
-    auto vp(predv4<num_t>(work));
+    auto vp(predv4<num_t, true>(work));
     vector<SimpleMatrix<num_t> > p;
     p.resize(in[0].size());
     for(int i = 0; i < p.size(); i ++) {
@@ -196,6 +205,18 @@ int main(int argc, const char* argv[]) {
         for(int j = 0; j < work.size(); j ++)
           pwork[i].emplace_back(work[j].row(i));
       }
+      auto dpwork(pwork = normalize<num_t>(pwork));
+      for(int i = 0; i < dpwork.size() - 1; i ++)
+        for(int j = 0; j < dpwork[i].size(); j ++)
+          dpwork[i][j] = dpwork[i + 1][j] - dpwork[i][j];
+      dpwork.resize(dpwork.size() - 1);
+      for(int i = 0; i < dpwork.size() - 1; i ++)
+        for(int j = 0; j < dpwork[i].size(); j ++)
+          for(int k = 0; k < dpwork[i][j].size(); k ++)
+            // N.B. buggy CPU float.
+            dpwork[i][j][k] = (dpwork[i][j][k] + num_t(int(1)) +
+              sqrt(SimpleMatrix<num_t>().epsilon()) ) / num_t(int(2)) /
+              (num_t(int(1)) + sqrt(sqrt(SimpleMatrix<num_t>().epsilon())) );
       // N.B. not optimal but better looking.
       const int ext(log(num_t(work[0].rows())) / log(num_t(int(2))));
       vector<SimpleMatrix<num_t> > wwork(work.size(),
@@ -203,10 +224,10 @@ int main(int argc, const char* argv[]) {
       for(int j = 0; j < work.size(); j ++)
         wwork[j].setMatrix(0, 0, work[j]);
       for(int i = 0; i < ext; i ++) {
-        auto pwt(pwork);
+        auto pwt(dpwork);
         auto n(predVec<num_t>(pwt, i + 1));
         for(int j = 0; j < wwork.size(); j ++)
-          wwork[j].row(work[0].rows() + i) = move(n[j]);
+          wwork[j].row(work[0].rows() + i) = n[j] + pwork[9 + 2 * (1 + i)][j];
       }
       if(! savep2or3<num_t>(argv[i0], normalize<num_t>(wwork.size() == 3 ?
         xyz2rgb<num_t>(wwork) : wwork) ) )
@@ -406,7 +427,7 @@ int main(int argc, const char* argv[]) {
                   + num_t(int(1)) ) / num_t(int(2));
                 pc[i][j](k, n) += workr;
                 cout << "g: " << abs(workr - orig) * num_t(int(2)) << endl;
-                cout << "s: " << abs(pc[i][j](k, j) - origa) / num_t(in.size() - 9) * num_t(int(2)) << endl;
+                cout << "s: " << abs(pc[i][j](k, n) - origa) / num_t(in.size() - 9) * num_t(int(2)) << endl;
               }
             cout << endl;
           }
