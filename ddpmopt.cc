@@ -154,10 +154,7 @@ int main(int argc, const char* argv[]) {
       for(int j = 0; j < in[i].size(); j ++)
         for(int ii = 0; ii < in[i][j].rows(); ii ++)
           for(int jj = 0; jj < in[i][j].cols(); jj ++)
-            // N.B. buggy CPU float.
-            in[i][j](ii, jj) = (in[i][j](ii, jj) + num_t(int(1)) +
-              sqrt(SimpleMatrix<num_t>().epsilon()) ) / num_t(int(2)) /
-              (num_t(int(1)) + sqrt(sqrt(SimpleMatrix<num_t>().epsilon())) );
+            in[i][j](ii, jj) = (in[i][j](ii, jj) + num_t(int(1))) / num_t(int(2));
     auto p(predMat<num_t>(in));
     for(int i = 0; i < p.size(); i ++)
       p[i] += sbuf[i];
@@ -205,18 +202,15 @@ int main(int argc, const char* argv[]) {
         for(int j = 0; j < work.size(); j ++)
           pwork[i].emplace_back(work[j].row(i));
       }
-      auto dpwork(pwork = normalize<num_t>(pwork));
+      auto dpwork(pwork);
       for(int i = 0; i < dpwork.size() - 1; i ++)
         for(int j = 0; j < dpwork[i].size(); j ++)
           dpwork[i][j] = dpwork[i + 1][j] - dpwork[i][j];
       dpwork.resize(dpwork.size() - 1);
-      for(int i = 0; i < dpwork.size() - 1; i ++)
+      for(int i = 0; i < dpwork.size(); i ++)
         for(int j = 0; j < dpwork[i].size(); j ++)
           for(int k = 0; k < dpwork[i][j].size(); k ++)
-            // N.B. buggy CPU float.
-            dpwork[i][j][k] = (dpwork[i][j][k] + num_t(int(1)) +
-              sqrt(SimpleMatrix<num_t>().epsilon()) ) / num_t(int(2)) /
-              (num_t(int(1)) + sqrt(sqrt(SimpleMatrix<num_t>().epsilon())) );
+            dpwork[i][j][k] = (dpwork[i][j][k] + num_t(int(1))) / num_t(int(2));
       // N.B. not optimal but better looking.
       const int ext(log(num_t(work[0].rows())) / log(num_t(int(2))));
       vector<SimpleMatrix<num_t> > wwork(work.size(),
