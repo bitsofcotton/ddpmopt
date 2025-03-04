@@ -144,20 +144,9 @@ int main(int argc, const char* argv[]) {
       if(! loadp2or3<num_t>(work, argv[i])) continue;
       in.emplace_back(work.size() == 3 ? rgb2xyz<num_t>(work) : move(work));
     }
-    in = normalize<num_t>(in);
-    const auto sbuf(in[11]);
-    for(int i = 0; i < in.size() - 1; i ++)
-      for(int j = 0; j < in[i].size(); j ++)
-        in[i][j] = in[i + 1][j] - in[i][j];
-    in.resize(in.size() - 1);
-    for(int i = 0; i < in.size(); i ++)
-      for(int j = 0; j < in[i].size(); j ++)
-        for(int ii = 0; ii < in[i][j].rows(); ii ++)
-          for(int jj = 0; jj < in[i][j].cols(); jj ++)
-            in[i][j](ii, jj) = (in[i][j](ii, jj) + num_t(int(1))) / num_t(int(2));
-    auto p(predMat<num_t>(in));
-    for(int i = 0; i < p.size(); i ++)
-      p[i] += sbuf[i];
+    // N.B. with good spreaded input, we can suppose original as a 'T' command
+    //      case.
+    auto p(predMat<num_t>(in = normalize<num_t>(in)));
     if(! savep2or3<num_t>("predg.ppm",
         normalize<num_t>(p.size() == 3 ? xyz2rgb<num_t>(p) : p)) )
           cerr << "failed to save." << endl;
@@ -202,15 +191,8 @@ int main(int argc, const char* argv[]) {
         for(int j = 0; j < work.size(); j ++)
           pwork[i].emplace_back(work[j].row(i));
       }
-      auto dpwork(pwork);
-      for(int i = 0; i < dpwork.size() - 1; i ++)
-        for(int j = 0; j < dpwork[i].size(); j ++)
-          dpwork[i][j] = dpwork[i + 1][j] - dpwork[i][j];
-      dpwork.resize(dpwork.size() - 1);
-      for(int i = 0; i < dpwork.size(); i ++)
-        for(int j = 0; j < dpwork[i].size(); j ++)
-          for(int k = 0; k < dpwork[i][j].size(); k ++)
-            dpwork[i][j][k] = (dpwork[i][j][k] + num_t(int(1))) / num_t(int(2));
+      // N.B. same as 'p' cmd, we can suppose original as 'T' command input
+      //      with long range but not in general.
       // N.B. not optimal but better looking.
       const int ext(log(num_t(work[0].rows())) / log(num_t(int(2))));
       vector<SimpleMatrix<num_t> > wwork(work.size(),
@@ -218,18 +200,11 @@ int main(int argc, const char* argv[]) {
       for(int j = 0; j < work.size(); j ++)
         wwork[j].setMatrix(0, 0, work[j]);
       for(int i = 0; i < ext; i ++) {
-        auto pwt(dpwork);
+        auto pwt(pwork);
         auto n(predVec<num_t>(pwt, i + 1));
         for(int j = 0; j < wwork.size(); j ++)
-          wwork[j].row(work[0].rows() + i) = n[j] + pwork[9 + 2 * (1 + i)][j];
+          wwork[j].row(work[0].rows() + i) = move(n[j]);
       }
-      vector<SimpleMatrix<num_t> > nwork;
-      nwork.resize(wwork.size());
-      for(int i = 0; i < nwork.size(); i ++)
-        nwork[i] = wwork[i].subMatrix(work[0].rows(), 0, ext, work[0].cols());
-      nwork = normalize<num_t>(nwork);
-      for(int i = 0; i < nwork.size(); i ++)
-        wwork[i].setMatrix(work[0].rows(), 0, nwork[i]);
       if(! savep2or3<num_t>(argv[i0], normalize<num_t>(wwork.size() == 3 ?
         xyz2rgb<num_t>(wwork) : wwork) ) )
           cerr << "failed to save." << endl;
@@ -424,25 +399,29 @@ int main(int argc, const char* argv[]) {
                   orig  /= num_t(cnt);
                   origa /= num_t(cnt);
                 }
-                workr = (sgn<num_t>(workr - num_t(int(1)) / num_t(int(2)) )
-                  + num_t(int(1)) ) / num_t(int(2));
+                // N.B. for stricter test but we don't need such a restriction:
+                // workr = (sgn<num_t>(workr - num_t(int(1)) / num_t(int(2)) )
+                //   + num_t(int(1)) ) / num_t(int(2));
                 pc[i][j](k, n) += workr;
                 cout << "g: " << abs(workr - orig) * num_t(int(2)) << endl;
                 cout << "s: " << abs(pc[i][j](k, n) - origa) / num_t(in.size() - 9) * num_t(int(2)) << endl;
+                cout << "w: " << abs(pc[i][j](k, n) - origa) * num_t(int(2)) << endl;
               }
             cout << endl;
           }
         cout << endl;
         // N.B. output can be checked as:
-        //      tail -n ... < output | python3 p2/cr.py t 1 > outR
+        //      tail -n ... < output | grep [gsw]: | cut -f 2 -d : |
+        //        python3 p2/cr.py t 1 > outR
         //      with R.app, myv <- read.csv("outR")
-        //                  hist(yv[,1],breaks=seq(0,2,length.out=...))
+        //                  hist(yv[,1],breaks=seq(0,...,length.out=...))
+        // N.B. s: and w: are in the walk condition.
       }
       in.emplace_back(move(work));
       if(i0 == argc - 1) break;
       if(9 < in.size()) {
         auto in2(in);
-        p = predMat<num_t, true>(in2 = normalize<num_t>(in2));
+        p = predMat<num_t>(in2 = normalize<num_t>(in2));
         if(! pc.size()) {
           avg.resize(p.size());
           for(int j = 0; j < avg.size(); j ++)

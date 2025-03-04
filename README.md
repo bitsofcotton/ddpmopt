@@ -257,5 +257,5 @@ Leave here but might return here after another implementations.
 2025/02/23 add readme.md notes.
 2025/03/01 add readme.md note around DFT.
 2025/03/03 add T command for test. revert subtraction to multiplication and sgn method to have gokibin bit preprocessed inputs.
-2025/03/04 apply T command tests into original p, w, q command.
+2025/03/04 apply T command tests into original p, w, q command. either revert to original p, w, q commands with renewing T command test.
 

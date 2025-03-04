@@ -4485,7 +4485,9 @@ template <typename T, int nprogress = 20> SimpleVector<T> predv0(const vector<Si
 //       however the command line chain meaning unchanged.)
 // Important N.B. we use this function with delta input, [start + step + 1, -0[
 //                summation output.
-template <typename T, bool raw = false, int nprogress = 20> static inline SimpleVector<T> predv(vector<SimpleVector<T> >& in, const int& step = 1) {
+//                however, we correct them with real input, so raw option isn't
+//                needed.
+template <typename T, int nprogress = 20> static inline SimpleVector<T> predv(vector<SimpleVector<T> >& in, const int& step = 1) {
   assert(0 < step && in.size() && 1 < in[0].size());
   // N.B. we use whole width to get better result in average.
   //      this is equivalent to the command: p1 | p0 :
@@ -4529,30 +4531,16 @@ template <typename T, bool raw = false, int nprogress = 20> static inline Simple
   //      monte-carlo methods, however, with some of the test we have isn't
   //      get better result them (only returns last one image), so they're
   //      eliminated.
-  if(raw)
-    res[0] = (P0maxRank0<T>(step).next(ip.col(0)) *
-        (p[p.size() - 1][0] * T(int(2)) - T(int(1)) ) + T(int(1)) ) / T(int(2));
-  else {
-    res.O();
-    for(int j = start + step + 1; j < p.size(); j ++)
-      res[0] +=
-        (P0maxRank0<T>(step).next(ip.col(0).subVector(0, j + 1)) *
-          (p[j][0] * T(int(2)) - T(int(1)) ) + T(int(1)) ) / T(int(2));
-  }
+  res[0] = (P0maxRank0<T>(step).next(ip.col(0)) *
+    (p[p.size() - 1][0] * T(int(2)) - T(int(1)) ) + T(int(1)) ) / T(int(2));
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
   for(int i = 1; i < res.size(); i ++) {
     if(nprogress && ! (i % max(int(1), int(res.size() / nprogress))) )
       cerr << i << " / " << res.size() << endl;
-    if(raw)
-      res[i] = (P0maxRank0<T>(step).next(ip.col(i)) *
-        (p[p.size() - 1][i] * T(int(2)) - T(int(1)) ) + T(int(1)) ) / T(int(2));
-    else
-      for(int j = start + step + 1; j < p.size(); j ++)
-        res[i] +=
-          (P0maxRank0<T>(step).next(ip.col(i).subVector(0, j + 1)) *
-            (p[j][i] * T(int(2)) - T(int(1)) ) + T(int(1)) ) / T(int(2));
+    res[i] = (P0maxRank0<T>(step).next(ip.col(i)) *
+      (p[p.size() - 1][i] * T(int(2)) - T(int(1)) ) + T(int(1)) ) / T(int(2));
   }
   in.resize(0);
   return res;
@@ -4583,7 +4571,7 @@ template <typename T, bool raw = false, int nprogress = 20> static inline Simple
 //      mostly with slight speed hacks.
 // N.B. we also make hypothesis on this function as delta input,
 //      [11, -0[ range summation output.
-template <typename T, bool raw = false, int nprogress = 6> static inline SimpleVector<T> predv4(vector<SimpleVector<T> >& in) {
+template <typename T, int nprogress = 6> static inline SimpleVector<T> predv4(vector<SimpleVector<T> >& in) {
   assert(1 < in.size() && (in[in.size() - 1].size() == 4 ||
                            in[in.size() - 1].size() == 12) );
   static const T zero(0);
@@ -4658,34 +4646,21 @@ template <typename T, bool raw = false, int nprogress = 6> static inline SimpleV
         (in[(j - gwork1.cols()) * 2 + in.size()][i] * T(int(2)) - T(int(1)) ) *
         (gwork0(i, j - 1) * T(int(2)) - T(int(1)) );
   // N.B. same logic as predv, we bet only the sign of them.
-  if(raw)
-    res[0] = (P0maxRank0<T>().next(gwork1.row(0)) *
-      (gwork0(0, gwork0.cols() - 1) * T(int(2)) - T(int(1)) ) +
-        T(int(1)) ) / T(int(2));
-  else {
-    res.O();
-    for(int j = 11; j < gwork1.cols(); j ++)
-      res[0] +=
-        (P0maxRank0<T>().next(gwork1.row(0).subVector(0, j + 1)) *
-          (gwork0(0, j) * T(int(2)) - T(int(1)) ) + T(int(1)) ) / T(int(2));
-  }
+  res[0] = (P0maxRank0<T>().next(gwork1.row(0)) *
+    (gwork0(0, gwork0.cols() - 1) * T(int(2)) - T(int(1)) ) +
+      T(int(1)) ) / T(int(2));
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
   for(int i = 1; i < res.size(); i ++)
     for(int j = 11; j < gwork1.cols(); j ++)
-      if(raw)
-        res[i] = (P0maxRank0<T>().next(gwork1.row(i)) *
-          (gwork0(i, gwork0.cols() - 1) * T(int(2)) - T(int(1)) ) +
-            T(int(1)) ) / T(int(2));
-      else
-        res[i] +=
-          (P0maxRank0<T>().next(gwork1.row(i).subVector(0, j + 1)) *
-            (gwork0(i, j) * T(int(2)) - T(int(1)) ) + T(int(1)) ) / T(int(2));
+      res[i] = (P0maxRank0<T>().next(gwork1.row(i)) *
+        (gwork0(i, gwork0.cols() - 1) * T(int(2)) - T(int(1)) ) +
+          T(int(1)) ) / T(int(2));
   return res;
 }
 
-template <typename T, bool raw = false> vector<SimpleVector<T> > predVec(vector<vector<SimpleVector<T> > >& in0, const int& step = 1) {
+template <typename T> vector<SimpleVector<T> > predVec(vector<vector<SimpleVector<T> > >& in0, const int& step = 1) {
   assert(in0.size() && in0[0].size() && in0[0][0].size());
   vector<SimpleVector<T> > in;
   in.resize(in0.size());
@@ -4701,7 +4676,7 @@ template <typename T, bool raw = false> vector<SimpleVector<T> > predVec(vector<
   const auto size0(in0[0].size());
   const auto size1(in0[0][0].size());
   in0.resize(0);
-  auto p(predv<T, raw>(in, step));
+  auto p(predv<T>(in, step));
   vector<SimpleVector<T> > res;
   res.resize(size0);
   for(int j = 0; j < res.size(); j ++)
@@ -4726,7 +4701,7 @@ template <typename T, bool raw = false> vector<SimpleVector<T> > predVec(vector<
 //      monte-carlo 11*11 times isn't changed this situation.
 // N.B. we're now using better algorithm than sliding DFT implemented
 //      on predv they uses statistics continuity as half of output.
-template <typename T, bool raw = false> vector<SimpleMatrix<T> > predMat(vector<vector<SimpleMatrix<T> > >& in0, const int& step = 1) {
+template <typename T> vector<SimpleMatrix<T> > predMat(vector<vector<SimpleMatrix<T> > >& in0, const int& step = 1) {
   assert(in0.size() && in0[0].size() && in0[0][0].rows() && in0[0][0].cols());
   vector<SimpleVector<T> > in;
   in.resize(in0.size());
@@ -4745,7 +4720,7 @@ template <typename T, bool raw = false> vector<SimpleMatrix<T> > predMat(vector<
   const auto rows(in0[0][0].rows());
   const auto cols(in0[0][0].cols());
   in0.resize(0);
-  auto p(predv<T, raw>(in, step));
+  auto p(predv<T>(in, step));
   vector<SimpleMatrix<T> > res;
   res.resize(size);
   for(int j = 0; j < res.size(); j ++) {
@@ -4756,7 +4731,7 @@ template <typename T, bool raw = false> vector<SimpleMatrix<T> > predMat(vector<
   return res;
 }
 
-template <typename T, bool raw = false> SimpleSparseTensor<T> predSTen(vector<SimpleSparseTensor<T> >& in0, const vector<int>& idx, const int& step = 1) {
+template <typename T> SimpleSparseTensor<T> predSTen(vector<SimpleSparseTensor<T> >& in0, const vector<int>& idx, const int& step = 1) {
   assert(idx.size() && in0.size());
   // N.B. we don't do input scaling.
   // N.B. the data we target is especially string stream corpus.
@@ -4790,7 +4765,7 @@ template <typename T, bool raw = false> SimpleSparseTensor<T> predSTen(vector<Si
               (in0[i][idx[j]][idx[k]][idx[m]] + T(int(1))) / T(int(2));
   }
   in0.resize(0);
-  auto p(predv<T, raw>(in, step));
+  auto p(predv<T>(in, step));
   SimpleSparseTensor<T> res;
   for(int j = 0, cnt = 0; j < idx.size(); j ++)
     for(int k = 0; k < idx.size(); k ++)
