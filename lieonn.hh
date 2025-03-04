@@ -4679,7 +4679,7 @@ template <typename T, int nprogress = 6> static inline pair<SimpleVector<T>, Sim
       (gwork0(i, gwork0.cols() - 1) * T(int(2)) - T(int(1)) ) +
         T(int(1)) ) / T(int(2));
     for(int j = 11; j < gwork1.cols() - 1; j ++)
-      resc[i] -= (P0maxRank0<T>().next(gwork1.row(i).subVector(i, j + 1))
+      resc[i] -= (P0maxRank0<T>().next(gwork1.row(i).subVector(0, j + 1))
         * (gwork0(i, gwork0.cols() - 1) * T(int(2)) - T(int(1)) ) +
           T(int(1)) ) / T(int(2));
   }
