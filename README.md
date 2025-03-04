@@ -68,7 +68,8 @@ Either, pred command (curdir)w...-bit.ppm output have a glitch same as curdir-bi
 # T command
 We have T command for gokibin bit preprocessed graphics stream testing.
 If output is better than .5 probability and stable for some of the shrinked size, the gokibin nbit reversed outputs' shrinked image can have some of the meanings for them.
-We might need to separate prediction when only last 1x1 size matrix is stable case.
+
+Either, T command uses raw predictions but it can be being attacked, so \[pqw\] command outputs uses second one if the condition is true but we need at least 4 of them.
 
 # Usage:
     # copy color structure
@@ -258,4 +259,5 @@ Leave here but might return here after another implementations.
 2025/03/01 add readme.md note around DFT.
 2025/03/03 add T command for test. revert subtraction to multiplication and sgn method to have gokibin bit preprocessed inputs.
 2025/03/04 apply T command tests into original p, w, q command. either revert to original p, w, q commands with renewing T command test.
+2025/03/05 our invariant condition is being attacked, we use 2 of dimension output but in fact we need at least 4 dimension output for all.
 

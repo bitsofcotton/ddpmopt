@@ -148,7 +148,12 @@ int main(int argc, const char* argv[]) {
     //      case.
     auto p(predMat<num_t>(in = normalize<num_t>(in)));
     if(! savep2or3<num_t>("predg.ppm",
-        normalize<num_t>(p.size() == 3 ? xyz2rgb<num_t>(p) : p)) )
+        normalize<num_t>(p.first.size() == 3 ?
+          xyz2rgb<num_t>(p.first) : p.first)) )
+          cerr << "failed to save." << endl;
+    if(! savep2or3<num_t>("predgc.ppm",
+        normalize<num_t>(p.second.size() == 3 ?
+          xyz2rgb<num_t>(p.second) : p.second)) )
           cerr << "failed to save." << endl;
   } else if(m == 'w') {
     vector<vector<SimpleMatrix<num_t> > > in;
@@ -169,15 +174,28 @@ int main(int argc, const char* argv[]) {
             k * in[i][0].cols(), in[i][j].row(k));
     }
     auto vp(predv4<num_t, true>(work));
-    vector<SimpleMatrix<num_t> > p;
-    p.resize(in[0].size());
-    for(int i = 0; i < p.size(); i ++) {
-      p[i].resize(in[0][0].rows(), in[0][0].cols());
-      for(int j = 0; j < p[i].rows(); j ++)
-        p[i].row(j) = vp.subVector(i * p[0].rows() * p[0].cols() + j * p[0].cols(), p[0].cols());
+    pair<vector<SimpleMatrix<num_t> >, vector<SimpleMatrix<num_t> > > p;
+    p.first.resize(in[0].size());
+    p.second.resize(in[0].size());
+    for(int i = 0; i < p.first.size(); i ++) {
+      p.first[ i].resize(in[0][0].rows(), in[0][0].cols());
+      p.second[i].resize(in[0][0].rows(), in[0][0].cols());
+      for(int j = 0; j < p.first[i].rows(); j ++) {
+        p.first[i].row(j) =
+          vp.first.subVector(i * p.first[0].rows() * p.first[0].cols() +
+            j * p.first[0].cols(), p.first[0].cols());
+        p.second[i].row(j) =
+          vp.second.subVector(i * p.second[0].rows() * p.second[0].cols() +
+            j * p.second[0].cols(), p.second[0].cols());
+      }
     }
     if(! savep2or3<num_t>("predgw.ppm",
-      normalize<num_t>(p.size() == 3 ? xyz2rgb<num_t>(p) : p)) )
+      normalize<num_t>(p.first.size() == 3 ?
+        xyz2rgb<num_t>(p.first) : p.first)) )
+        cerr << "failed to save." << endl;
+    if(! savep2or3<num_t>("predgwc.ppm",
+      normalize<num_t>(p.second.size() == 3 ?
+        xyz2rgb<num_t>(p.second) : p.second)) )
         cerr << "failed to save." << endl;
   } else if(m == 'q') {
     for(int i0 = 2; i0 < argc; i0 ++) {
@@ -199,15 +217,22 @@ int main(int argc, const char* argv[]) {
         SimpleMatrix<num_t>(work[0].rows() + ext, work[0].cols()).O());
       for(int j = 0; j < work.size(); j ++)
         wwork[j].setMatrix(0, 0, work[j]);
+      auto wwork2(wwork);
       for(int i = 0; i < ext; i ++) {
         auto pwt(pwork);
         auto n(predVec<num_t>(pwt, i + 1));
-        for(int j = 0; j < wwork.size(); j ++)
-          wwork[j].row(work[0].rows() + i) = move(n[j]);
+        for(int j = 0; j < wwork.size(); j ++) {
+          wwork[j].row( work[0].rows() + i) = move(n.first[j]);
+          wwork2[j].row(work[0].rows() + i) = move(n.second[j]);
+        }
       }
       if(! savep2or3<num_t>(argv[i0], normalize<num_t>(wwork.size() == 3 ?
         xyz2rgb<num_t>(wwork) : wwork) ) )
           cerr << "failed to save." << endl;
+      if(! savep2or3<num_t>((string(argv[i0]) + string("-2.ppm")).c_str(),
+        normalize<num_t>(wwork2.size() == 3 ?
+          xyz2rgb<num_t>(wwork2) : wwork2) ) )
+            cerr << "failed to save." << endl;
     }
   } else if(m == 'x' || m == 'y' || m == 'i' || m == 't') {
     vector<num_t> score;
@@ -421,7 +446,7 @@ int main(int argc, const char* argv[]) {
       if(i0 == argc - 1) break;
       if(9 < in.size()) {
         auto in2(in);
-        p = predMat<num_t>(in2 = normalize<num_t>(in2));
+        p = predMat<num_t>(in2 = normalize<num_t>(in2)).first;
         if(! pc.size()) {
           avg.resize(p.size());
           for(int j = 0; j < avg.size(); j ++)
