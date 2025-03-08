@@ -39,14 +39,14 @@ In some auto tune entropy feeding, we can do goki_check_cc:test.py:pred command.
 
 However, if we met gulf on prediction concerned with internal states series the stream have, we cannot predict at all on the range.
 
-Either, PSVD class can be used to avoid timing-related prediction fails which we don't need them because we only focus on auto tuned entropy feeded streams.
+Either, PSVD class can be used to avoid timing-related prediction fails but they needs phase period on input numbers. So we eliminated them.
 
 # Tips on contexts
 We use whole image context to insert context then predict with such each pixel context. So each image consistency is used and applied for the output.
 
 We can use orthogonal context either DFT context insertion, however, this isn't matches our senses, such things are useful to get numerical stability context only and are viewed broken by our senses. This might be because of even 2/3 prediction we have condition, the noise the result have can causes whole graphics spreaded result.
-Either we're using goki_check_cc:test.py:pred... commands to complement continuity, we don't need them in entropy feeding controlled condition.
-Either, 'T' test says they're rare case we need to use such entropy feeding control in bitwise condition.
+
+Either we're using goki_check_cc:test.py:pred... commands or monte-carlo methods in lieonn.hh:predv template parameter to complement continuity, we don't need them with some of the slice we gain.
 
 We can use some feature quantity based transforms we can get them by machine learning converted into tan Ax form.
 In such case, we use vectorized input image x, y:=tan Ax for feature quantities, weight them by \[x, y\] or only predict the {y} stream, then, invert x=f(y).
@@ -259,4 +259,5 @@ Leave here but might return here after another implementations.
 2025/03/04 apply T command tests into original p, w, q command. either revert to original p, w, q commands with renewing T command test.
 2025/03/05 our invariant condition is being attacked, we use 2 of dimension output but in fact we need at least 4 dimension output for all.
 2025/03/06 yellow output is lead by small input number, also some readme fix we often don't need entropy feeding control.
+2025/03/09 brush up lieonn.hh phase periodical jamming matters. we only make hypothesis PRNG we use isn't match the predictor/original stream phase period they have.
 
