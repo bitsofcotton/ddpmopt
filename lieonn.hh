@@ -4510,7 +4510,7 @@ template <typename T, int nprogress = 20> static inline pair<SimpleVector<T>, Si
 //      in the most of the cases, we don't need P012L with better PRNGs.
 //      we suppose phase period doesn't connected to the original structures.
 template <typename T, int nrecur = 0, int nprogress = 20> static inline pair<SimpleVector<T>, SimpleVector<T> > predv(vector<SimpleVector<T> >& in, const int& step = 1) {
-  if(! nrecur) return predv1(in, step);
+  if(! nrecur) return predv1<T, nprogress>(in, step);
   pair<SimpleVector<T>, SimpleVector<T> > res;
   res.first.resize(in[0].size());
   res.second.resize(in[0].size());
@@ -4526,7 +4526,7 @@ template <typename T, int nrecur = 0, int nprogress = 20> static inline pair<Sim
         rin[i][j] = (rin[i][j] + T(random() % 0x20000) / T(0x20000 - 1)) / T(int(2));
 #endif
     // N.B. PRNG parts going to gray + small noise with large enough nrecur.
-    auto n(predv1(rin, step));
+    auto n(predv1<T, nprogress>(rin, step));
     res.first  += n.first;
     res.second += n.second;
   }

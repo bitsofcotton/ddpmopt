@@ -35,11 +35,7 @@ However, we predict the stream with them and continuity after them in pqredg.
 So this effects if input stream is enough dense in another words stream is stable for input entropy one by one meaning, the result is reasonable in the continuity meaning.
 Some of the PRNG tests causes this valid but there's something new parameters on entropy feeding ratio, they fails with gulfs depends on the range we use in the range.
 
-In some auto tune entropy feeding, we can do goki_check_cc:test.py:pred command.
-
-However, if we met gulf on prediction concerned with internal states series the stream have, we cannot predict at all on the range.
-
-Either, PSVD class can be used to avoid timing-related prediction fails but they needs phase period on input numbers. So we eliminated them.
+In some auto tune entropy feeding, we can do goki_check_cc:test.py:pred command or predv nrecur template specification.
 
 # Tips on contexts
 We use whole image context to insert context then predict with such each pixel context. So each image consistency is used and applied for the output.
@@ -62,6 +58,10 @@ The pred command (curdir)w...-bit.ppm output is omitter on shortcut for decompos
 
 Also, these predictors doesn't handle what meaning to omit on next image, so is composition around collection of predictions.
 Either, pred command (curdir)w...-bit.ppm output have a glitch same as curdir-bit.ppm command having some gulf when we're bad luck, either we cannot get proper prediction collection composition from small number of the input contexts.
+
+# Tips on mixing PRNG to gain original stream
+If ideal PRNG is given to our predv, we can output some of the nrecur specified ddpmopt command and result is at least 4 of candidate we get.
+However, such a PRNG condition is hard because they must have algorithms' eigen vector to be changed by selecting seed by theirselves.
 
 # T command
 We have T command for gokibin bit preprocessed graphics stream testing.
@@ -260,4 +260,5 @@ Leave here but might return here after another implementations.
 2025/03/05 our invariant condition is being attacked, we use 2 of dimension output but in fact we need at least 4 dimension output for all.
 2025/03/06 yellow output is lead by small input number, also some readme fix we often don't need entropy feeding control.
 2025/03/09 brush up lieonn.hh phase periodical jamming matters. we only make hypothesis PRNG we use isn't match the predictor/original stream phase period they have.
+2025/03/11 add and fix readme. close.
 
