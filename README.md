@@ -17,6 +17,8 @@ We use at least 2\*((whole input size))\*sizeof(num_t) in heap resource.
 # Tips around c++ compilers
 Some of the lieonn.hh operator \>\> class doesn't work as expected, might be compilers' bug.
 
+Either, we might be in invariant prediction catched as getting to be invariant result controlled condition.
+
 # Tips on prediction on objected images
 We suppose the input image series as some of the functions to effect to or data to be effected by paired images also the pixel contexts in F\_p.
 However, instead of using F_2, we need P01 base dimension larger than 4 in such case in fact.
@@ -57,10 +59,12 @@ Also, we want to decompose some of the meanings by bitsofcotton/specific and bac
 The pred command (curdir)w...-bit.ppm output is omitter on shortcut for decomposing and apply to the predictions, this might includes specific -&gt; {y} prediction -&gt; reverse chain by finding some of the patterns but they doesn't have handles what information to omit for predictions.
 
 Also, these predictors doesn't handle what meaning to omit on next image, so is composition around collection of predictions.
-Either, pred command (curdir)w...-bit.ppm output have a glitch same as curdir-bit.ppm command having some gulf when we're bad luck, either we cannot get proper prediction collection composition from small number of the input contexts.
+
+The goki_check_cc:test.py:\[pq\]red\+\+ command shrink image into reasonable parameters on surface condition they includes some omitting meanings.
+We looked some of the graphics set result, they might be what we wanted to get but not the actually one but ok for us, so we close this repository with this condition.
 
 # Tips on mixing PRNG to gain original stream
-If ideal PRNG is given to our predv, we can output some of the nrecur specified ddpmopt command and result is at least 4 of candidate we get.
+If ideal PRNG is given to our predv, we can output some of the nrecur specified ddpmopt command and result is at least 4 of candidate we get one of them shall be well.
 However, such a PRNG condition is hard because they must have algorithms' eigen vector to be changed by selecting seed by theirselves.
 
 # T command
@@ -74,20 +78,22 @@ Either, T command uses raw predictions but it can be being attacked, so \[pqw\] 
     ./ddpmopt(32|64)?(mp)? + <in0out.pgm> <in0in.ppm> ... > cache.txt
     # apply color structure
     ./ddpmopt(32|64)?(mp)? - <in0.ppm> ... < cache.txt
-    # predict following image
+    # predict following image (each bit input)
     ./ddpmopt(32|64)?(mp)? p <in0.ppm> ...
-    # predict with whole pixel context
+    # predict with whole pixel context (each bit input)
     ./ddpmopt(32|64)?(mp)? w <in0.ppm> <in0-4.ppm> ...
-    # predict down scanlines
+    # predict down scanlines. (each bit input)
     ./ddpmopt(32|64)?(mp)? q <in0out.ppm> ...
     # show continuity
     ./ddpmopt(32|64)?(mp)? [xyit] <in0.ppm> ...
     # some of the volume curvature like transform
     ./ddpmopt(32|64)?(mp)? c <in0.ppm> ...
+    # test input series of graphics predictable or not (each bit input)
+    ./ddpmopt(32|64)?(mp)? T <in0.ppm> ...
     cp `./ddpmopt(32|64)?(mp)? i <in0.ppm> ... | sort | head -n ... | tr '\n' ' '` outdir
 
 # Re4-Leave
-We might re4-leave this repository with this update, however, if there's some sort of the reason to improve, we re4-open here, also, lieonn.hh change might be updated even we leave here.
+We might re5-leave this repository with this update except for lieonn.hh updates.
 
 Leave here but might return here after another implementations.
 
@@ -261,4 +267,5 @@ Leave here but might return here after another implementations.
 2025/03/06 yellow output is lead by small input number, also some readme fix we often don't need entropy feeding control.
 2025/03/09 brush up lieonn.hh phase periodical jamming matters. we only make hypothesis PRNG we use isn't match the predictor/original stream phase period they have.
 2025/03/11 add and fix readme. close.
+2025/03/12 brush up readme, freeze.
 
