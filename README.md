@@ -2,7 +2,7 @@
 Apply some of the filter to input stream.
 We can use this for bitsofcotton/i2g filtered images.
 
-N.B. we use only input data streams, so this repository doesn't uses external models.
+N.B. we use only input data streams, so this repository doesn't use external models.
 
 # Context
 There exists Denoising Diffusion Probabilistic Models (DDPM; Ho et al. 2020). So this is another try on them but different flavoured one, we only focus to apply each pixel context to color image into monochrome one, which have the structure completely depends on filters' multiple meaning or complexity.
@@ -35,16 +35,16 @@ This condition can be eliminated with in/output (de)?compression this condition 
 Usually, the condition larger than 4 dimension is come from some of the jammer like inputs nor brand new data feed input by input stream.
 However, we predict the stream with them and continuity after them in pqredg.
 So this effects if input stream is enough dense in another words stream is stable for input entropy one by one meaning, the result is reasonable in the continuity meaning.
-Some of the PRNG tests causes this valid but there's something new parameters on entropy feeding ratio, they fails with gulfs depends on the range we use in the range.
 
-In some auto tune entropy feeding, we can do goki_check_cc:test.py:pred command or predv nrecur template specification.
+Some of the PRNG tests causes this valid but there's something new parameters on entropy feeding ratio, they fails with gulfs depends on the range we use in the range.
+In some auto tune entropy feeding, we can do goki_check_cc:test.py:qred command or predv nrecur template specification.
 
 # Tips on contexts
 We use whole image context to insert context then predict with such each pixel context. So each image consistency is used and applied for the output.
 
 We can use orthogonal context either DFT context insertion, however, this isn't matches our senses, such things are useful to get numerical stability context only and are viewed broken by our senses. This might be because of even 2/3 prediction we have condition, the noise the result have can causes whole graphics spreaded result.
 
-Either we're using goki_check_cc:test.py:pred... commands or monte-carlo methods in lieonn.hh:predv template parameter to complement continuity, we don't need them with some of the slice we gain.
+Either we're using goki_check_cc:test.py:qred... commands or monte-carlo methods in lieonn.hh:predv template parameter to complement entropy continuity, we don't need them with some of the slice we gain.
 
 We can use some feature quantity based transforms we can get them by machine learning converted into tan Ax form.
 In such case, we use vectorized input image x, y:=tan Ax for feature quantities, weight them by \[x, y\] or only predict the {y} stream, then, invert x=f(y).
@@ -63,15 +63,15 @@ Also, these predictors doesn't handle what meaning to omit on next image, so is 
 The goki_check_cc:test.py:\[pq\]red\+\+ command shrink image into reasonable parameters on surface condition they includes some omitting meanings.
 We looked some of the graphics set result, they might be what we wanted to get but not the actually one but ok for us, so we close this repository with this condition.
 
-# Tips on mixing PRNG to gain original stream
-If ideal PRNG is given to our predv, we can output some of the nrecur specified ddpmopt command and result is at least 4 of candidate we get one of them shall be well.
-However, such a PRNG condition is hard because they must have algorithms' eigen vector to be changed by selecting seed by theirselves.
+We get pPqQ command to get 4 of the candidates from original stream or PRNG mixed stream.
+If we're lucky, one of the candidates can be used for next predicted images.
+However, PQ command returns pseudo next one they doesn't be added delta start point in another words offset, however we select this method because of output glance.
 
 # T command
 We have T command for gokibin bit preprocessed graphics stream testing.
-If output is better than .5 probability and stable for some of the shrinked size, the gokibin nbit reversed outputs' shrinked image can have some of the meanings for them.
+If output is better than .5 probability and stable for some of the shrinked size, the gokibin bit reversed outputs' shrinked image can have some of the meanings for them.
 
-Either, T command uses raw predictions but it can be being attacked, so \[pqw\] command outputs uses second one if the condition is true but we need at least 4 of them.
+Either, T command uses raw predictions but it can be being attacked, so \[pPqQw\] command outputs uses second one if the condition is true but we need at least 4 of them.
 
 # Usage:
     # copy color structure
@@ -79,11 +79,11 @@ Either, T command uses raw predictions but it can be being attacked, so \[pqw\] 
     # apply color structure
     ./ddpmopt(32|64)?(mp)? - <in0.ppm> ... < cache.txt
     # predict following image (each bit input)
-    ./ddpmopt(32|64)?(mp)? p <in0.ppm> ...
+    ./ddpmopt(32|64)?(mp)? \[pP\] <in0.ppm> ...
     # predict with whole pixel context (each bit input)
     ./ddpmopt(32|64)?(mp)? w <in0.ppm> <in0-4.ppm> ...
     # predict down scanlines. (each bit input)
-    ./ddpmopt(32|64)?(mp)? q <in0out.ppm> ...
+    ./ddpmopt(32|64)?(mp)? \[qQ\] <in0out.ppm> ...
     # show continuity
     ./ddpmopt(32|64)?(mp)? [xyit] <in0.ppm> ...
     # some of the volume curvature like transform
@@ -268,4 +268,5 @@ Leave here but might return here after another implementations.
 2025/03/09 brush up lieonn.hh phase periodical jamming matters. we only make hypothesis PRNG we use isn't match the predictor/original stream phase period they have.
 2025/03/11 add and fix readme. close.
 2025/03/12 brush up readme, freeze.
+2025/03/13 add PQ command, update readme around 4 of candidate results.
 

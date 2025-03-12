@@ -3350,6 +3350,9 @@ template <typename T> const SimpleVector<T>& pnextcacher(const int& size, const 
   assert(0 < size && 0 <= step);
   if(! _PNEXT_ON_MEMORY_) {
     static SimpleVector<T> nonthreadsafe;
+    static int thisstep(0);
+    if(nonthreadsafe.size() == size && thisstep == step) return nonthreadsafe;
+    thisstep = step;
     return nonthreadsafe = (dft<T>(- size) * (dft<T>(size * 2).subMatrix(0, 0, size, size * 2) * taylorc<T>(size * 2, T(step < 0 ? step * 2 : (size + step) * 2 - 1), T(step < 0 ? step * 2 + 2 : (size + step) * 2 - 3)) )).template real<T>();
   }
   static vector<vector<SimpleVector<T> > > cp;

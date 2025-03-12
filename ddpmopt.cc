@@ -155,6 +155,50 @@ int main(int argc, const char* argv[]) {
         normalize<num_t>(p.second.size() == 3 ?
           xyz2rgb<num_t>(p.second) : p.second)) )
           cerr << "failed to save." << endl;
+  } else if(m == 'P') {
+    // N.B. we need 4 of the different candidates for the results with
+    //      same PRNG. if we're lucky enough, the raw predMat can returns
+    //      reasonable 4.
+    vector<vector<SimpleMatrix<num_t> > > in;
+    in.reserve(argc - 1);
+    for(int i = 2; i < argc; i ++) {
+      vector<SimpleMatrix<num_t> > work;
+      if(! loadp2or3<num_t>(work, argv[i])) continue;
+      in.emplace_back(work.size() == 3 ? rgb2xyz<num_t>(work) : move(work));
+    }
+    in = normalize<num_t>(in);
+    // N.B. we get better information on raw delta only. don't know why.
+    //      but this is to make start of stream is white out input.
+    // const auto sbuf(in[11]);
+    // const auto lbuf(in[in.size() - 1])
+    for(int i = 0; i < in.size() - 1; i ++)
+      for(int j = 0; j < in[i].size(); j ++)
+        in[i][j] = in[i + 1][j] - in[i][j];
+    in.resize(in.size() - 1);
+    for(int i = 0; i < in.size(); i ++)
+      for(int j = 0; j < in[i].size(); j ++)
+        for(int ii = 0; ii < in[i][j].rows(); ii ++)
+          for(int jj = 0; jj < in[i][j].cols(); jj ++)
+            in[i][j](ii, jj) = (in[i][j](ii, jj) + num_t(int(1))) / num_t(int(2));
+    auto q(predMat<num_t>(in));
+    for(int j = 0; j < q.first.size(); j ++) {
+      for(int ii = 0; ii < q.first[j].rows(); ii ++)
+        for(int jj = 0; jj < q.first[j].cols(); jj ++) {
+          q.first[j](ii, jj)  =
+            q.first[ j](ii, jj) * num_t(int(2)) - num_t(int(1));
+          q.second[j](ii, jj) =
+            q.second[j](ii, jj) * num_t(int(2)) - num_t(int(1));
+        }
+      q.second[j] = q.first[j] * num_t(int(2)) - q.second[j];
+    }
+    if(! savep2or3<num_t>("qredg.ppm",
+        normalize<num_t>(q.first.size() == 3 ?
+          xyz2rgb<num_t>(q.first) : q.first)) )
+          cerr << "failed to save." << endl;
+    if(! savep2or3<num_t>("qredgc.ppm",
+        normalize<num_t>(q.second.size() == 3 ?
+          xyz2rgb<num_t>(q.second) : q.second)) )
+          cerr << "failed to save." << endl;
   } else if(m == 'w') {
     vector<vector<SimpleMatrix<num_t> > > in;
     in.reserve(argc - 2);
@@ -197,7 +241,7 @@ int main(int argc, const char* argv[]) {
       normalize<num_t>(p.second.size() == 3 ?
         xyz2rgb<num_t>(p.second) : p.second)) )
         cerr << "failed to save." << endl;
-  } else if(m == 'q') {
+  } else if(m == 'q' || m == 'Q') {
     for(int i0 = 2; i0 < argc; i0 ++) {
       vector<SimpleMatrix<num_t> > work;
       if(! loadp2or3<num_t>(work, argv[i0])) continue;
@@ -218,18 +262,66 @@ int main(int argc, const char* argv[]) {
       for(int j = 0; j < work.size(); j ++)
         wwork[j].setMatrix(0, 0, work[j]);
       auto wwork2(wwork);
+      if(m == 'Q') {
+        for(int i = 0; i < pwork.size() - 1; i ++)
+          for(int j = 0; j < pwork[i].size(); j ++)
+            pwork[i][j] = pwork[i + 1][j] - pwork[i][j];
+        pwork.resize(pwork.size() - 1);
+        for(int i = 0; i < pwork.size(); i ++)
+          for(int j = 0; j < pwork[i].size(); j ++)
+            for(int k = 0; k < pwork[i][j].size(); k ++)
+              pwork[i][j][k] = (pwork[i][j][k] + num_t(int(1))) / num_t(int(2));
+      }
       for(int i = 0; i < ext; i ++) {
         auto pwt(pwork);
         auto n(predVec<num_t>(pwt, i + 1));
         for(int j = 0; j < wwork.size(); j ++) {
           wwork[j].row( work[0].rows() + i) = move(n.first[j]);
           wwork2[j].row(work[0].rows() + i) = move(n.second[j]);
+          if(m == 'Q') {
+            // N.B. same as 'P' command, we make hypothesis prediction beginning
+            //      is white outed one.
+            wwork2[j] = wwork[j] * num_t(int(2)) - wwork2[j];
+            for(int k = 0; k < wwork[j].cols(); k ++) {
+              wwork[ j](work[0].rows() + i, k) =
+                wwork[ j](work[0].rows() + i, k) * num_t(int(2)) -
+                  num_t(int(1));
+              wwork2[j](work[0].rows() + i, k) =
+                wwork2[j](work[0].rows() + i, k) * num_t(int(2)) -
+                  num_t(int(1));
+            }
+          }
         }
       }
-      if(! savep2or3<num_t>(argv[i0], normalize<num_t>(wwork.size() == 3 ?
+      if(m == 'Q') {
+        for(int i = 0; i < ext; i ++)
+          for(int j = 0; j < wwork.size(); j ++) {
+            wwork[j].row(work[0].rows() + i) +=
+              wwork[j].row(work[0].rows() + i - 1);
+            wwork2[j].row(work[0].rows() + i) +=
+              wwork2[j].row(work[0].rows() + i - 1);
+          }
+        auto wworknpart(wwork);
+        for(int j = 0; j < wwork.size(); j ++)
+          wworknpart[j] = wwork[j].subMatrix(work[0].rows(), 0, ext, work[0].cols());
+        wworknpart = normalize<num_t>(wworknpart);
+        for(int j = 0; j < wwork.size(); j ++)
+          wwork[j].setMatrix(work[0].rows(), 0, wworknpart[j]);
+      }
+      auto wwork2npart(wwork2);
+      for(int j = 0; j < wwork2.size(); j ++)
+        wwork2npart[j] = wwork2[j].subMatrix(work[0].rows(), 0, ext, work[0].cols());
+      wwork2npart = normalize<num_t>(wwork2npart);
+      for(int j = 0; j < wwork2.size(); j ++)
+        wwork2[j].setMatrix(work[0].rows(), 0, wwork2npart[j]);
+      if(! savep2or3<num_t>(m == 'q' ? argv[i0] :
+        (string(argv[i0]) + string("-3.ppm")).c_str(),
+        normalize<num_t>(wwork.size() == 3 ?
         xyz2rgb<num_t>(wwork) : wwork) ) )
           cerr << "failed to save." << endl;
-      if(! savep2or3<num_t>((string(argv[i0]) + string("-2.ppm")).c_str(),
+      if(! savep2or3<num_t>(m == 'q' ?
+        (string(argv[i0]) + string("-2.ppm")).c_str() :
+        (string(argv[i0]) + string("-4.ppm")).c_str(),
         normalize<num_t>(wwork2.size() == 3 ?
           xyz2rgb<num_t>(wwork2) : wwork2) ) )
             cerr << "failed to save." << endl;
@@ -400,7 +492,7 @@ int main(int argc, const char* argv[]) {
       vector<SimpleMatrix<num_t> > work;
       if(! loadp2or3<num_t>(work, argv[i0])) continue;
       if(pc.size()) {
-        cout << " --- " << in.size() - 9 << " --- " << endl;
+        cout << " --- " << in.size() - 11 << " --- " << endl;
         for(int i = 0; i < pc.size(); i ++)
           for(int j = 0; j < pc[i].size(); j ++) {
             if(! i) avg[j] += work[j];
@@ -429,7 +521,7 @@ int main(int argc, const char* argv[]) {
                 //   + num_t(int(1)) ) / num_t(int(2));
                 pc[i][j](k, n) += workr;
                 cout << "g: " << abs(workr - orig) * num_t(int(2)) << endl;
-                cout << "s: " << abs(pc[i][j](k, n) - origa) / num_t(in.size() - 9) * num_t(int(2)) << endl;
+                cout << "s: " << abs(pc[i][j](k, n) - origa) / num_t(in.size() - 11) * num_t(int(2)) << endl;
                 cout << "w: " << abs(pc[i][j](k, n) - origa) * num_t(int(2)) << endl;
               }
             cout << endl;
@@ -444,7 +536,7 @@ int main(int argc, const char* argv[]) {
       }
       in.emplace_back(move(work));
       if(i0 == argc - 1) break;
-      if(9 < in.size()) {
+      if(11 < in.size()) {
         auto in2(in);
         p = predMat<num_t>(in2 = normalize<num_t>(in2)).first;
         if(! pc.size()) {
@@ -474,7 +566,7 @@ int main(int argc, const char* argv[]) {
   cerr << "# apply color structure" << endl;
   cerr << argv[0] << " - <in0.ppm> ... < cache.txt" << endl;
   cerr << "# predict following image (each bit input)" << endl;
-  cerr << argv[0] << " p <in0.ppm> ..." << endl;
+  cerr << argv[0] << " [pP] <in0.ppm> ..." << endl;
   cerr << "# predict with whole pixel context (each bit input)" << endl;
   cerr << argv[0] << " w <in0.ppm> <in0-4.ppm> ..." << endl;
   cerr << "# predict down scanlines. (each bit input)" << endl;
