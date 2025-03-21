@@ -66,6 +66,7 @@ We looked some of the graphics set result, they might be what we wanted to get b
 We get pPqQ command to get 4 of the candidates from original stream or PRNG mixed stream.
 If we're lucky, one of the candidates can be used for next predicted images.
 However, PQ command returns pseudo next one they doesn't be added delta start point in another words offset, however we select this method because of output glance.
+Either, in the invariant controlled condition in any of the inputs, outputting 4 of the candidates should work well, however, we only calculate a paired candidates at once, so 3 of candidates are upper bound of pPqQ output, this is enough in because of representation of combination of binary tree condition.
 
 # T command
 We have T command for gokibin bit preprocessed graphics stream testing.
@@ -269,4 +270,5 @@ Leave here but might return here after another implementations.
 2025/03/11 add and fix readme. close.
 2025/03/12 brush up readme, freeze.
 2025/03/13 add PQ command, update readme around 4 of candidate results.
+2025/03/22 close with this Readme.md.
 
