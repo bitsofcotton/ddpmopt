@@ -74,6 +74,15 @@ If output is better than .5 probability and stable for some of the shrinked size
 
 Either, T command uses raw predictions but it can be being attacked, so \[pPqQw\] command outputs uses second one if the condition is true but we need at least 4 of them.
 
+# Infection
+We're in prediction result controlled condition, so we don't get actual output images to confirm result, so we need to implement this repository only with the hypothesis we firstly have and their implementation is correct or not one.
+
+Since bitsofcotton/p2 result seems their internal-states-rich 3-way output is correct but we don't have their strategy because we only target the graphics stream they have non shrinked or non regression stories.
+
+Even so, we should have the counter measure to result is controlled condition, however we have T command output, so we applied them into second one outputs, so we close with this.
+
+However, if we find some of the bug on the hypothesis and implementation is differ, we return and fix here.
+
 # Usage:
     # copy color structure
     ./ddpmopt(32|64)?(mp)? + <in0out.pgm> <in0in.ppm> ... > cache.txt
@@ -93,7 +102,7 @@ Either, T command uses raw predictions but it can be being attacked, so \[pPqQw\
     ./ddpmopt(32|64)?(mp)? T <in0.ppm> ...
     cp `./ddpmopt(32|64)?(mp)? i <in0.ppm> ... | sort | head -n ... | tr '\n' ' '` outdir
 
-# Re4-Leave
+# Re5-Leave
 We might re5-leave this repository with this update except for lieonn.hh updates.
 
 Leave here but might return here after another implementations.
@@ -271,4 +280,5 @@ Leave here but might return here after another implementations.
 2025/03/12 brush up readme, freeze.
 2025/03/13 add PQ command, update readme around 4 of candidate results.
 2025/03/22 close with this Readme.md.
+2025/04/01 add readme.md because we're in infected condition, also close because of the condition.
 
