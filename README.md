@@ -22,6 +22,7 @@ Either, we might be in invariant prediction catched as getting to be invariant r
 # Tips on prediction on objected images
 We suppose the input image series as some of the functions to effect to or data to be effected by paired images also the pixel contexts in F\_p.
 However, instead of using F_2, we need P01 base dimension larger than 4 in such case in fact.
+After then, we adjust omitted:in/output ratio on F_2 case. We might need this because only single layered learning needs some of the better reasons to calculate in such algorithms.
 
 # Tips on multiple layers prediction
 The plain \[pq\]redg predictor uses first order shallow copying structures but it's saturated by in/output, 3 predictor uses 2nd order enough bits for predictions, 6 predictor is enough for multiple layer algebraic copying structure, 9 predictor is enough for algorithm decomposition including inverse of them, usually they're equivalent to plain predictors from surface looking.
@@ -281,4 +282,5 @@ Leave here but might return here after another implementations.
 2025/03/13 add PQ command, update readme around 4 of candidate results.
 2025/03/22 close with this Readme.md.
 2025/04/01 add readme.md because we're in infected condition, also close because of the condition.
+2025/04/17 auto tune dimension in F_2 case other than 4 dimension to target.
 
