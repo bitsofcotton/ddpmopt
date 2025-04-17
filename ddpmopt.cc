@@ -255,8 +255,8 @@ int main(int argc, const char* argv[]) {
       }
       // N.B. same as 'p' cmd, we can suppose original as 'T' command input
       //      with long range but not in general.
-      // N.B. not optimal but better looking.
-      const int ext(log(num_t(work[0].rows())) / log(num_t(int(2))));
+      // N.B. 10 + 1 * 2 < work[0].rows() / step.
+      const int ext(work[0].rows() / 12);
       vector<SimpleMatrix<num_t> > wwork(work.size(),
         SimpleMatrix<num_t>(work[0].rows() + ext, work[0].cols()).O());
       for(int j = 0; j < work.size(); j ++)
