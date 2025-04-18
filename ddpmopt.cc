@@ -256,25 +256,25 @@ int main(int argc, const char* argv[]) {
       // N.B. same as 'p' cmd, we can suppose original as 'T' command input
       //      with long range but not in general.
       // N.B. 10 + 1 * 2 < work[0].rows() / step.
-      const int ext(work[0].rows() / 12);
+      const int ext(work[0].rows() / (m == 'Q' ? 13 : 12));
       vector<SimpleMatrix<num_t> > wwork(work.size(),
         SimpleMatrix<num_t>(work[0].rows() + ext, work[0].cols()).O());
       for(int j = 0; j < work.size(); j ++)
         wwork[j].setMatrix(0, 0, work[j]);
       auto wwork2(wwork);
-      if(m == 'Q') {
-        for(int i = 0; i < pwork.size() - 1; i ++)
-          for(int j = 0; j < pwork[i].size(); j ++)
-            pwork[i][j] = pwork[i + 1][j] - pwork[i][j];
-        pwork.resize(pwork.size() - 1);
-        for(int i = 0; i < pwork.size(); i ++)
-          for(int j = 0; j < pwork[i].size(); j ++)
-            for(int k = 0; k < pwork[i][j].size(); k ++)
-              pwork[i][j][k] = (pwork[i][j][k] + num_t(int(1))) / num_t(int(2));
-      }
       for(int i = 0; i < ext; i ++) {
-        auto pwt(pwork);
-        auto n(predVec<num_t>(pwt, i + 1));
+        auto pwt(skipX<vector<SimpleVector<num_t> > >(pwork, i + 1));
+        if(m == 'Q') {
+          for(int i = 0; i < pwt.size() - 1; i ++)
+            for(int j = 0; j < pwt[i].size(); j ++)
+              pwt[i][j] = pwt[i + 1][j] - pwt[i][j];
+          pwt.resize(pwt.size() - 1);
+          for(int i = 0; i < pwt.size(); i ++)
+            for(int j = 0; j < pwt[i].size(); j ++)
+              for(int k = 0; k < pwt[i][j].size(); k ++)
+                pwt[i][j][k] = (pwt[i][j][k] + num_t(int(1))) / num_t(int(2));
+        }
+        auto n(predVec<num_t>(pwt));
         for(int j = 0; j < wwork.size(); j ++) {
           wwork[j].row( work[0].rows() + i) = move(n.first[j]);
           wwork2[j].row(work[0].rows() + i) = move(n.second[j]);
