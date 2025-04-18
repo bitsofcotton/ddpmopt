@@ -284,4 +284,5 @@ Leave here but might return here after another implementations.
 2025/04/01 add readme.md because we're in infected condition, also close because of the condition.
 2025/04/17 auto tune dimension in F_2 case other than 4 dimension to target.
 2025/04/18 qQ command strategy change.
+2025/04/19 rebrush up lieonn.hh easy to read whole, fix ind2vd lt, gt mis exchange.
 

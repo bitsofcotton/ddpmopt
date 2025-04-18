@@ -70,7 +70,7 @@ int main(int argc, const char* argv[]) {
           for(int m = 0; m < in.size(); m ++)
             work[m] = in[m](i, j);
           work[3] = num_t(int(1)) / num_t(int(2));
-          auto work2(makeProgramInvariant<num_t>(work, - num_t(int(1)), true).first);
+          auto work2(makeProgramInvariant<num_t>(work).first);
           assert(work2.size() == L[0].size());
           int idx(0);
           for(int m = 2; m < L.size(); m += 2) {
@@ -85,8 +85,8 @@ int main(int argc, const char* argv[]) {
                   && sqrt(work.dot(work) * SimpleMatrix<num_t>().epsilon()) <
                        abs(work[3] - last); ii ++) {
             last = work[3];
-            const auto work2(makeProgramInvariant<num_t>(work, - num_t(int(1)), true));
-            work[3] = revertProgramInvariant<num_t>(make_pair(L[idx + 1].dot(work2.first) * sgn<num_t>(L[idx].dot(work2.first)), work2.second), true);
+            const auto work2(makeProgramInvariant<num_t>(work));
+            work[3] = revertProgramInvariant<num_t>(make_pair(L[idx + 1].dot(work2.first) * sgn<num_t>(L[idx].dot(work2.first)), work2.second) );
           }
           out[0](i, j) = work[3];
         }
@@ -129,9 +129,9 @@ int main(int argc, const char* argv[]) {
     const auto c(crush<num_t>(v));
     for(int i = 0; i < c.size(); i ++) {
       if(! c[i].first.size()) continue;
-      auto vv(makeProgramInvariant<num_t>(c[i].first[0], - num_t(int(1)), true).first);
+      auto vv(makeProgramInvariant<num_t>(c[i].first[0]).first);
       for(int j = 1; j < c[i].first.size(); j ++)
-        vv += makeProgramInvariant<num_t>(c[i].first[j], - num_t(int(1)), true).first;
+        vv += makeProgramInvariant<num_t>(c[i].first[j]).first;
       vv /= num_t(c[i].first.size());
       if(vv.dot(vv) != num_t(int(0))) cout << vv;
     }
@@ -334,14 +334,13 @@ int main(int argc, const char* argv[]) {
     case 'i':
       for(int i0 = 2; i0 < argc; i0 ++) {
         vector<SimpleMatrix<num_t> > work;
-        P0maxRank<num_t> p;
         if(! loadp2or3<num_t>(work, argv[i0])) continue;
         for(int i = 0; i < work.size(); i ++)
           for(int ii = 0; ii < work[i].rows(); ii ++) {
             idFeeder<num_t> w(3);
             for(int jj = 0; jj < work[i].cols(); jj ++) {
               if(w.full) {
-                const auto pp(p.next(w.res));
+                const auto pp(p0maxNext<num_t>(w.res));
                 score[i0] += (pp - work[i](ii, jj)) * (pp - work[i](ii, jj));
               } 
               w.next(work[i](ii, jj));
@@ -354,14 +353,13 @@ int main(int argc, const char* argv[]) {
     case 'y':
       for(int i0 = 2; i0 < argc; i0 ++) {
         vector<SimpleMatrix<num_t> > work;
-        P0maxRank<num_t> p;
         if(! loadp2or3<num_t>(work, argv[i0])) continue;
         for(int i = 0; i < work.size(); i ++)
           for(int jj = 0; jj < work[i].cols(); jj ++) {
             idFeeder<num_t> w(3);
             for(int ii = 0; ii < work[i].rows(); ii ++) {
               if(w.full) {
-                const auto pp(p.next(w.res));
+                const auto pp(p0maxNext<num_t>(w.res));
                 score[i0] += (pp - work[i](ii, jj)) * (pp - work[i](ii, jj));
               } 
               w.next(work[i](ii, jj));
@@ -382,7 +380,6 @@ int main(int argc, const char* argv[]) {
             b[i][0].rows() == b[2][0].rows() &&
             b[i][0].cols() == b[2][0].cols());
         }
-        P0maxRank<num_t> p;
         int cnt(0);
         for(int i = 0; i < b[2][0].rows(); i ++)
           for(int j = 0; j < b[2][0].cols(); j ++)
@@ -391,7 +388,7 @@ int main(int argc, const char* argv[]) {
               for(int ii = 2; ii < b.size(); ii ++, cnt ++) {
                 if(! b[ii].size()) continue;
                 if(w.full) {
-                  const auto pp(p.next(w.res));
+                  const auto pp(p0maxNext<num_t>(w.res));
                   score[0] += (pp - b[ii][k](i, j)) * (pp - b[ii][k](i, j));
                 }
                 w.next(b[ii][k](i, j));
