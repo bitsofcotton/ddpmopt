@@ -11,6 +11,7 @@ CXXFLAGS+=	-Ofast -mtune=native -gfull
 #CXXFLAGS+=	-O2 -mtune=native -gfull
 #CXXFLAGS+=	-O0 -mtune=native -gfull
 #CXXFLAGS+=	-pg
+#CXXFLAGS+=	--analyze
 MPFLAGS=	-I/usr/local/include -L/usr/local/lib -lomp -fopenmp
 #MPFLAGS=	-I/usr/local/include -L/usr/local/lib -lgomp -fopenmp
 CXXFLAGS+=	-std=c++11

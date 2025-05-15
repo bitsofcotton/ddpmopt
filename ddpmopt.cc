@@ -148,13 +148,8 @@ int main(int argc, const char* argv[]) {
     //      case.
     auto p(predMat<num_t>(in = normalize<num_t>(in)));
     if(! savep2or3<num_t>("predg.ppm",
-        normalize<num_t>(p.first.size() == 3 ?
-          xyz2rgb<num_t>(p.first) : p.first)) )
-          cerr << "failed to save." << endl;
-    if(! savep2or3<num_t>("predgc.ppm",
-        normalize<num_t>(p.second.size() == 3 ?
-          xyz2rgb<num_t>(p.second) : p.second)) )
-          cerr << "failed to save." << endl;
+      normalize<num_t>(p.size() == 3 ? xyz2rgb<num_t>(p) : p) ))
+        cerr << "failed to save." << endl;
   } else if(m == 'P') {
     // N.B. we need 4 of the different candidates for the results with
     //      same PRNG. if we're lucky enough, the raw predMat can returns
@@ -181,24 +176,15 @@ int main(int argc, const char* argv[]) {
           for(int jj = 0; jj < in[i][j].cols(); jj ++)
             in[i][j](ii, jj) = (in[i][j](ii, jj) + num_t(int(1))) / num_t(int(2));
     auto q(predMat<num_t>(in));
-    for(int j = 0; j < q.first.size(); j ++) {
-      for(int ii = 0; ii < q.first[j].rows(); ii ++)
-        for(int jj = 0; jj < q.first[j].cols(); jj ++) {
-          q.first[j](ii, jj)  =
-            q.first[ j](ii, jj) * num_t(int(2)) - num_t(int(1));
-          q.second[j](ii, jj) =
-            q.second[j](ii, jj) * num_t(int(2)) - num_t(int(1));
+    for(int j = 0; j < q.size(); j ++)
+      for(int ii = 0; ii < q[j].rows(); ii ++)
+        for(int jj = 0; jj < q[j].cols(); jj ++) {
+          q[j](ii, jj)  =
+            q[j](ii, jj) * num_t(int(2)) - num_t(int(1));
         }
-      q.second[j] = q.first[j] * num_t(int(2)) - q.second[j];
-    }
     if(! savep2or3<num_t>("qredg.ppm",
-        normalize<num_t>(q.first.size() == 3 ?
-          xyz2rgb<num_t>(q.first) : q.first)) )
-          cerr << "failed to save." << endl;
-    if(! savep2or3<num_t>("qredgc.ppm",
-        normalize<num_t>(q.second.size() == 3 ?
-          xyz2rgb<num_t>(q.second) : q.second)) )
-          cerr << "failed to save." << endl;
+        normalize<num_t>(q.size() == 3 ? xyz2rgb<num_t>(q) : q)) )
+      cerr << "failed to save." << endl;
   } else if(m == 'w') {
     vector<vector<SimpleMatrix<num_t> > > in;
     in.reserve(argc - 2);
@@ -218,28 +204,16 @@ int main(int argc, const char* argv[]) {
             k * in[i][0].cols(), in[i][j].row(k));
     }
     auto vp(predv4<num_t, true>(work));
-    pair<vector<SimpleMatrix<num_t> >, vector<SimpleMatrix<num_t> > > p;
-    p.first.resize(in[0].size());
-    p.second.resize(in[0].size());
-    for(int i = 0; i < p.first.size(); i ++) {
-      p.first[ i].resize(in[0][0].rows(), in[0][0].cols());
-      p.second[i].resize(in[0][0].rows(), in[0][0].cols());
-      for(int j = 0; j < p.first[i].rows(); j ++) {
-        p.first[i].row(j) =
-          vp.first.subVector(i * p.first[0].rows() * p.first[0].cols() +
-            j * p.first[0].cols(), p.first[0].cols());
-        p.second[i].row(j) =
-          vp.second.subVector(i * p.second[0].rows() * p.second[0].cols() +
-            j * p.second[0].cols(), p.second[0].cols());
-      }
+    vector<SimpleMatrix<num_t> > p;
+    p.resize(in[0].size());
+    for(int i = 0; i < p.size(); i ++) {
+      p[i].resize(in[0][0].rows(), in[0][0].cols());
+      for(int j = 0; j < p[i].rows(); j ++)
+        p[i].row(j) = vp.subVector(i * p[0].rows() * p[0].cols() +
+          j * p[0].cols(), p[0].cols());
     }
     if(! savep2or3<num_t>("predgw.ppm",
-      normalize<num_t>(p.first.size() == 3 ?
-        xyz2rgb<num_t>(p.first) : p.first)) )
-        cerr << "failed to save." << endl;
-    if(! savep2or3<num_t>("predgwc.ppm",
-      normalize<num_t>(p.second.size() == 3 ?
-        xyz2rgb<num_t>(p.second) : p.second)) )
+      normalize<num_t>(p.size() == 3 ? xyz2rgb<num_t>(p) : p)) )
         cerr << "failed to save." << endl;
   } else if(m == 'q' || m == 'Q') {
     for(int i0 = 2; i0 < argc; i0 ++) {
@@ -261,7 +235,6 @@ int main(int argc, const char* argv[]) {
         SimpleMatrix<num_t>(work[0].rows() + ext, work[0].cols()).O());
       for(int j = 0; j < work.size(); j ++)
         wwork[j].setMatrix(0, 0, work[j]);
-      auto wwork2(wwork);
       for(int i = 0; i < ext; i ++) {
         auto pwt(skipX<vector<SimpleVector<num_t> > >(pwork, i + 1));
         if(m == 'Q') {
@@ -276,20 +249,14 @@ int main(int argc, const char* argv[]) {
         }
         auto n(predVec<num_t>(pwt));
         for(int j = 0; j < wwork.size(); j ++) {
-          wwork[j].row( work[0].rows() + i) = move(n.first[j]);
-          wwork2[j].row(work[0].rows() + i) = move(n.second[j]);
+          wwork[j].row(work[0].rows() + i) = move(n[j]);
           if(m == 'Q') {
             // N.B. same as 'P' command, we make hypothesis prediction beginning
             //      is white outed one.
-            wwork2[j] = wwork[j] * num_t(int(2)) - wwork2[j];
-            for(int k = 0; k < wwork[j].cols(); k ++) {
-              wwork[ j](work[0].rows() + i, k) =
-                wwork[ j](work[0].rows() + i, k) * num_t(int(2)) -
+            for(int k = 0; k < wwork[j].cols(); k ++)
+              wwork[j](work[0].rows() + i, k) =
+                wwork[j](work[0].rows() + i, k) * num_t(int(2)) -
                   num_t(int(1));
-              wwork2[j](work[0].rows() + i, k) =
-                wwork2[j](work[0].rows() + i, k) * num_t(int(2)) -
-                  num_t(int(1));
-            }
           }
         }
       }
@@ -298,33 +265,13 @@ int main(int argc, const char* argv[]) {
           for(int j = 0; j < wwork.size(); j ++) {
             wwork[j].row(work[0].rows() + i) +=
               wwork[j].row(work[0].rows() + i - 1);
-            wwork2[j].row(work[0].rows() + i) +=
-              wwork2[j].row(work[0].rows() + i - 1);
           }
-        auto wworknpart(wwork);
-        for(int j = 0; j < wwork.size(); j ++)
-          wworknpart[j] = wwork[j].subMatrix(work[0].rows(), 0, ext, work[0].cols());
-        wworknpart = normalize<num_t>(wworknpart);
-        for(int j = 0; j < wwork.size(); j ++)
-          wwork[j].setMatrix(work[0].rows(), 0, wworknpart[j]);
       }
-      auto wwork2npart(wwork2);
-      for(int j = 0; j < wwork2.size(); j ++)
-        wwork2npart[j] = wwork2[j].subMatrix(work[0].rows(), 0, ext, work[0].cols());
-      wwork2npart = normalize<num_t>(wwork2npart);
-      for(int j = 0; j < wwork2.size(); j ++)
-        wwork2[j].setMatrix(work[0].rows(), 0, wwork2npart[j]);
       if(! savep2or3<num_t>(m == 'q' ? argv[i0] :
-        (string(argv[i0]) + string("-3.ppm")).c_str(),
+        (string(argv[i0]) + string("2.ppm")).c_str(),
         normalize<num_t>(wwork.size() == 3 ?
         xyz2rgb<num_t>(wwork) : wwork) ) )
           cerr << "failed to save." << endl;
-      if(! savep2or3<num_t>(m == 'q' ?
-        (string(argv[i0]) + string("-2.ppm")).c_str() :
-        (string(argv[i0]) + string("-4.ppm")).c_str(),
-        normalize<num_t>(wwork2.size() == 3 ?
-          xyz2rgb<num_t>(wwork2) : wwork2) ) )
-            cerr << "failed to save." << endl;
     }
   } else if(m == 'x' || m == 'y' || m == 'i' || m == 't') {
     vector<num_t> score;
@@ -535,7 +482,7 @@ int main(int argc, const char* argv[]) {
       if(i0 == argc - 1) break;
       if(11 < in.size()) {
         auto in2(in);
-        p = predMat<num_t>(in2 = normalize<num_t>(in2)).first;
+        p = predMat<num_t>(in2 = normalize<num_t>(in2));
         if(! pc.size()) {
           avg.resize(p.size());
           for(int j = 0; j < avg.size(); j ++)
