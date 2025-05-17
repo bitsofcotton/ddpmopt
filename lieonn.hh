@@ -3609,7 +3609,7 @@ template <typename T, T (*f)(const SimpleVector<T>&, const int&), const bool non
   //      many of the exhaust of the calculation resource can be cached
   //      and unstable result, this might means invariant continuity
   //      improves when length == 3 also we have prediction direction on them.
-  SimpleMatrix<T> invariants(f == p0maxNext<T> ? 3
+  SimpleMatrix<T> invariants(f == p0max0next<T> ? 3
     : (f == p01delimNext<T> ? 1 : in.size() - unit),
       nonlinear ? varlen + 2 : varlen);
   invariants.O();
@@ -3741,24 +3741,23 @@ template <typename T> static inline SimpleVector<SimpleVector<T> > arctanFeeder(
 }
 
 // N.B. we omit high frequency part (1/f(x) input) to be treated better in P.
-template <typename T, T (*p)(const SimpleVector<T>&, const int&), bool arctanF = false> T pbond(const SimpleVector<T>& in) {
-  auto g(arctanF ? arctanFeeder<T>(in) : in);
-  if(g.size() <= 1) return T(int(0));
-  auto M(abs(g[0]));
-  for(int i = 1; i < g.size(); i ++)
-    M = max(M, g[i]);
+template <typename T, T (*p)(const SimpleVector<T>&, const int&)> static inline T pbond(SimpleVector<T> in) {
+  if(in.size() <= 1) return T(int(0));
+  auto M(abs(in[0]));
+  for(int i = 1; i < in.size(); i ++)
+    M = max(M, in[i]);
   // N.B. with 1-norm normalized input:
-  T m(g[0] /= M);
-  for(int i = 1; i < g.size(); i ++) m = min(m, g[i] /= M);
+  T m(in[0] /= M);
+  for(int i = 1; i < in.size(); i ++) m = min(m, in[i] /= M);
   // N.B. offset const.
   m -= T(int(1));
   // N.B. 0 < v, normalize with v's orthogonality:
-  T mavg(log(g[0] - m));
-  for(int i = 1; i < g.size(); i ++) mavg += log(g[i] - m);
-  mavg /= T(int(g.size()));
+  T mavg(log(in[0] - m));
+  for(int i = 1; i < in.size(); i ++) mavg += log(in[i] - m);
+  mavg /= T(int(in.size()));
   mavg  = exp(mavg);
   // N.B. we need nonlinear prediction, so * M before to predict.
-  return max(- M, min(M, p(g / mavg * M, 0) * mavg));
+  return max(- M, min(M, p((in *= M) /= mavg, 0) * mavg));
 }
 
 template <typename T, T (*p)(const SimpleVector<T>&, const int&)> static inline T p0p(const SimpleVector<T>& in, const int& unit = 3) {
@@ -3769,10 +3768,7 @@ template <typename T, T (*p)(const SimpleVector<T>&, const int&)> static inline 
   depth(0, 2) = (in[1] + T(int(1))) / T(int(2));
   depth.row(0).setVector(1, in.subVector(0, 2));
   for(int i = 2; i < in.size(); i ++) {
-    if(depth.rows() < i / 3) {
-      depth.entity.emplace_back(SimpleVector<T>(3));
-      depth.row(depth.rows() - 1).O();
-    }
+    if(depth.rows() < i / 3) depth.entity.emplace_back(SimpleVector<T>(3).O());
     bool chain(false);
     T    sign(int(1));
     auto d(in[i]);
@@ -3780,7 +3776,6 @@ template <typename T, T (*p)(const SimpleVector<T>&, const int&)> static inline 
     for(int j = 1; j < depth.rows(); j ++, chain = ! chain) {
       depth(j - 1, 0) = depth(j - 1, 1);
       depth(j - 1, 1) = depth(j - 1, 2);
-      depth(j - 1, 2) = d;
       if(! chain) {
         depth(j - 1, 2) = (d + sign) / T(int(2));
         depth(j, depth.cols() - 1) = d *= p(depth.row(j - 1), unit);
@@ -4220,11 +4215,17 @@ template <typename T> static inline vector<SimpleMatrix<T> > normalize(const vec
   return normalize<T>(w, upper)[0];
 }
 
+template <typename T> static inline SimpleMatrix<T> normalize(SimpleMatrix<T>& data, const T& upper = T(1)) {
+  vector<SimpleMatrix<T> > work;
+  work.emplace_back(move(data));
+  auto res(normalize<T>(work, upper)[0]);
+  data = move(work[0]);
+  return res;
+}
+
 template <typename T> static inline SimpleMatrix<T> normalize(const SimpleMatrix<T>& in, const T& upper = T(1)) {
-  vector<vector<SimpleMatrix<T> > > w;
-  w.resize(1);
-  w[0].resize(1, in);
-  return normalize<T>(w, upper)[0][0];
+  auto d(in);
+  return normalize<T>(d, upper)[0][0];
 }
 
 template <typename T> static inline vector<vector<SimpleVector<T> > > normalize(const vector<vector<SimpleVector<T> > >& in, const T& upper = T(1)) {
@@ -4245,14 +4246,6 @@ template <typename T> static inline vector<vector<SimpleVector<T> > > normalize(
       v[i][j] = res[i][j].row(0);
   }
   return v;
-}
-
-template <typename T> static inline SimpleMatrix<T> normalize(SimpleMatrix<T>& data, const T& upper = T(1)) {
-  vector<SimpleMatrix<T> > work;
-  work.emplace_back(move(data));
-  auto res(normalize<T>(work, upper)[0]);
-  data = move(work[0]);
-  return res;
 }
 
 template <typename T> static inline SimpleVector<T> normalize(const SimpleVector<T>& in, const T& upper = T(1)) {
@@ -4481,6 +4474,7 @@ template <typename T, int nprogress = 20> static inline SimpleVector<T> predv1(v
   for(int i = 1; i < res.size(); i ++) {
     res[i] = p0max0next<T>(ip.row(i));
   }
+  in.resize(0);
   return res;
 }
 
@@ -4497,33 +4491,10 @@ template <typename T, int nprogress = 20> static inline SimpleVector<T> predv1(v
 //      structure enough with ours.
 //      in the most of the cases, we don't need P012L with better PRNGs.
 //      we suppose phase period doesn't connected to the original structures.
-template <typename T, int nrecur = - 1, int nprogress = 20> static inline SimpleVector<T> predv(vector<SimpleVector<T> >& in) {
-  if(nrecur < 0) {
-    SimpleVector<T> p(in[0].size());
-    p.O();
-    idFeeder<T> buf(in.size());
-    for(int i = 0; i < in.size(); i ++)
-      buf.next(in[i][0]);
-    assert(buf.full);
-    p[0] = p0p<T, p0maxNext<T> >(buf.res);
-#if defined(_OPENMP)
-#pragma omp parallel for schedule(static, 1)
-#endif
-    for(int j = 1; j < in[0].size(); j ++) {
-      if(nprogress && ! (j % max(int(1), int(in[0].size() / nprogress))) )
-        cerr << j << " / " << in[0].size();
-      idFeeder<T> buf(in.size());
-      for(int i = 0; i < in.size(); i ++)
-        buf.next(in[i][j]);
-      assert(buf.full);
-      p[j] = p0p<T, p0maxNext<T> >(buf.res);
-    }
-    return normalize<T>(p);
-  } else if(! nrecur) {
-    auto res(normalize<T>(predv1<T, nprogress>(in)));
-    in.resize(0);
-    return res;
-  }
+// N.B. practically, nrecur == 0 with p0next0maxRank works well, we use this.
+//      nrecur == 11 * 11 with p0maxNext but we need huge computation time.
+template <typename T, int nrecur = 0, int nprogress = 20> static inline SimpleVector<T> predv(vector<SimpleVector<T> >& in) {
+  if(! nrecur) return normalize<T>(predv1<T, nprogress>(in));
   SimpleVector<T> res;
   res.resize(in[0].size());
   res.O();
@@ -4539,7 +4510,6 @@ template <typename T, int nrecur = - 1, int nprogress = 20> static inline Simple
     // N.B. PRNG parts going to gray + small noise with large enough nrecur.
     res += predv1<T, nprogress>(rin);
   }
-  in.resize(0);
   return normalize<T>(res);
 }
 
