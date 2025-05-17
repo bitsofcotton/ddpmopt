@@ -3741,37 +3741,68 @@ template <typename T> static inline SimpleVector<SimpleVector<T> > arctanFeeder(
 }
 
 // N.B. we omit high frequency part (1/f(x) input) to be treated better in P.
-template <typename T, T (*p)(const SimpleVector<T>&, const int&), bool arctanF = false> class PBond {
-public:
-  inline PBond(const int& status = 0) {
-    assert(0 <= status);
-    f = idFeeder<T>(status);
-    M = T(int(1));
-  }
-  inline ~PBond() { ; }
-  inline T next(const T& in) {
-    M = max(M, abs(in));
-    auto g(arctanF ? arctanFeeder<T>(f.next(in)) : f.next(in));
-    if(! f.full || g.size() <= 1) return T(int(0));
-    // N.B. with 1-norm normalized input:
-    T m(g[0] /= M);
-    for(int i = 1; i < g.size(); i ++) m = min(m, g[i] /= M);
-    // N.B. offset const.
-    m -= T(int(1));
-    // N.B. 0 < v, normalize with v's orthogonality:
-    T mavg(log(g[0] - m));
-    for(int i = 1; i < g.size(); i ++) mavg += log(g[i] - m);
-    mavg /= T(int(g.size()));
-    mavg  = exp(mavg);
-    // N.B. we need nonlinear prediction, so * M before to predict.
-    return max(- M, min(M, p(g / mavg * M, 0) * mavg));
-  }
-  idFeeder<T> f;
-  T M;
-};
+template <typename T, T (*p)(const SimpleVector<T>&, const int&), bool arctanF = false> T pbond(const SimpleVector<T>& in) {
+  auto g(arctanF ? arctanFeeder<T>(in) : in);
+  if(g.size() <= 1) return T(int(0));
+  auto M(abs(g[0]));
+  for(int i = 1; i < g.size(); i ++)
+    M = max(M, g[i]);
+  // N.B. with 1-norm normalized input:
+  T m(g[0] /= M);
+  for(int i = 1; i < g.size(); i ++) m = min(m, g[i] /= M);
+  // N.B. offset const.
+  m -= T(int(1));
+  // N.B. 0 < v, normalize with v's orthogonality:
+  T mavg(log(g[0] - m));
+  for(int i = 1; i < g.size(); i ++) mavg += log(g[i] - m);
+  mavg /= T(int(g.size()));
+  mavg  = exp(mavg);
+  // N.B. we need nonlinear prediction, so * M before to predict.
+  return max(- M, min(M, p(g / mavg * M, 0) * mavg));
+}
 
-template <typename T, bool atf = false> using PBond0 = PBond<T, p0maxNext<T>, atf>;
-template <typename T, bool atf = false> using PBond012 = PBond<T, p012next<T>, atf>;
+template <typename T, T (*p)(const SimpleVector<T>&, const int&)> static inline T p0p(const SimpleVector<T>& in, const int& unit = 3) {
+  if(in.size() < 7) return T(int(0));
+  SimpleMatrix<T> depth(1, 3);
+  depth(0, 0) = T(int(0));
+  depth(0, 1) = (in[0] + T(int(1))) / T(int(2));
+  depth(0, 2) = (in[1] + T(int(1))) / T(int(2));
+  depth.row(0).setVector(1, in.subVector(0, 2));
+  for(int i = 2; i < in.size(); i ++) {
+    if(depth.rows() < i / 3) {
+      depth.entity.emplace_back(SimpleVector<T>(3));
+      depth.row(depth.rows() - 1).O();
+    }
+    bool chain(false);
+    T    sign(int(1));
+    auto d(in[i]);
+    depth.row(0).setVector(1, in.subVector(0, 2));
+    for(int j = 1; j < depth.rows(); j ++, chain = ! chain) {
+      depth(j - 1, 0) = depth(j - 1, 1);
+      depth(j - 1, 1) = depth(j - 1, 2);
+      depth(j - 1, 2) = d;
+      if(! chain) {
+        depth(j - 1, 2) = (d + sign) / T(int(2));
+        depth(j, depth.cols() - 1) = d *= p(depth.row(j - 1), unit);
+      } else {
+        depth(j - 1, 2) = d * T(int(2)) - sign;
+        depth(j, depth.cols() - 1) = d -= p(depth.row(j - 1), unit);
+        sign = - sign;
+      }
+    }
+  }
+  if(depth.rows() < 2) return T(int(0));
+  T sign(depth.rows() / 2 & 1 ? - T(int(1)) : T(int(1)));
+  T M(int(0));
+  for(int j = depth.rows() - (depth.rows() & 1) - 1; 0 <= j; j --) {
+    if(j & 1) M += depth(j, 2) * sign;
+    else {
+      M *= depth(j, 2);
+      sign = - sign;
+    }
+  }
+  return M;
+}
 
 // N.B. if we use each progression for average into input one, they can
 //      improve the result. however, if prediction is almost linear,
@@ -4362,13 +4393,15 @@ template <typename T> static inline SimpleMatrix<T> center(const SimpleMatrix<T>
 //      we suppose first. so we eliminated them.
 // N.B. with using predv with PRNG, we can apply before applying PP0 P012L.
 //      our tests on PRNG can improves the result.
+// N.B. if we're in result is in control condition, we need to output at least
+//      a pair on the prediction, however, we discontinue such a implementation.
+// N.B. as ddpmopt:README.md, PP3 is least and enough normally.
 template <typename T> static inline T PP0(const SimpleVector<T>& in, const int& ratio) {
   return p01next<T, p01delimNext<T>, true>(in, ratio);
   // N.B. our test either goes better with this, don't know why.
   // return p0max0next<T>(in.subVector(in.size() - 3, 3), ratio);
 }
 
-// N.B. as ddpmopt:README.md, PP3 is least and enough normally.
 template <typename T, int nprogress = 20> static inline SimpleVector<T> predv0(const vector<SimpleVector<T> >& in, const int& sz, const string& strloop = string("")) {
   assert(0 < sz && sz <= in.size());
   // N.B. we need to initialize p0 vector.
@@ -4402,7 +4435,6 @@ template <typename T, int nprogress = 20> static inline SimpleVector<T> predv0(c
       PP0<T>(seconds / nseconds, unit) * nseconds) );
 }
 
-// N.B. we maybe in invariant controlled condition, so return 2 of candidates.
 template <typename T, int nprogress = 20> static inline SimpleVector<T> predv1(vector<SimpleVector<T> >& in) {
   static const auto step(1);
   assert(0 < step && 10 + step * 2 <= in.size() && 1 < in[0].size());
@@ -4417,7 +4449,6 @@ template <typename T, int nprogress = 20> static inline SimpleVector<T> predv1(v
   //      the contexts they can have implementation.
   SimpleVector<SimpleVector<T> > p;
   SimpleVector<T> res(in[0].size());
-  SimpleVector<T> resc(in[0].size());
   p.entity.reserve(in.size());
   // N.B. optimal with PP0
   const auto start(8 + step);
@@ -4425,52 +4456,32 @@ template <typename T, int nprogress = 20> static inline SimpleVector<T> predv1(v
     p.entity.emplace_back(SimpleVector<T>(in[0].size()).O());
   for(int i = start; i <= in.size(); i ++)
     p.entity.emplace_back(predv0<T, nprogress>(in, i, to_string(i) + string(" / ") + to_string(in.size())));
-  SimpleMatrix<T> ip(p.size(), res.size());
-  for(int i = 0; i < start + step; i ++)
-    ip.row(i).O();
+  SimpleMatrix<T> ip(res.size(), p.size());
+  ip.O();
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
-  for(int i = start + step; i < ip.rows(); i ++) {
-    for(int j = 0; j < ip.cols(); j ++)
-      ip(i, j) = in[i - ip.rows() + in.size()][j] *
-        p[i - ip.rows() + p.size() - step][j];
-  }
-  auto ipp(ip);
-  ipp.O();
-  for(int i = 3; i < ip.rows(); i ++) {
-    cerr << "pnext: " << i << " / " << ip.rows() << endl;
-    ipp(i, 0) = p0max0next<T>(ip.col(0).subVector(0, i + 1));
-#if defined(_OPENMP)
-#pragma omp parallel for schedule(static, 1)
-#endif
-    for(int j = 1; j < ip.cols(); j ++)
-      ipp(i, j) = p0max0next<T>(ip.col(j).subVector(0, i + 1));
+  for(int i = start + step; i < p.size(); i ++) {
+    for(int j = 0; j < res.size(); j ++)
+      ip(j, i) = in[i - p.size() + in.size()][j] * p[i - step][j];
   }
   // N.B. dftcache need to be single thread on first call.
-  // N.B. we bet combination subtracted series is continuous.
-  // N.B. once we used differences prediction, but now, we only bet their signs.
-  //      so the result is: pred2(in * pred(in)) * pred(in) ~
-  //        sgn(pred3(in)) * alpha.
-  // N.B. either, diferrences prediction is better friendly to upper layer
+  // N.B. either, differences prediction is better friendly to upper layer
   //      monte-carlo methods, however, with some of the test we have isn't
   //      get better result them (only returns last one image), so they're
   //      eliminated.
-  // N.B. we're in invariant controlled condition.
-  //      so raw real invariant is res, but we return {res, resc} for
-  //      res == 0 controlled conditions.
-  //      we can use delta input, sum output instead of this,
-  //      however we select resc condition because of P01 4 dimension condition.
-  //      if we do them with this hack, 4 dimensions we returns.
-  res[0] = p0max0next<T>(ipp.col(0)) * p[p.size() - 1][0];
+  // N.B. we bet orthogonal function phenomenon causes measurement condition
+  //      increase (0 <= vector condition with prediction walk).
+  // N.B. however, in this condition, we need scattered last input graphics
+  //      average to complete gray.
+  res[0] = p0max0next<T>(ip.row(0));
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
   for(int i = 1; i < res.size(); i ++) {
-    res[i] = p0max0next<T>(ipp.col(i)) * p[p.size() - 1][i];
+    res[i] = p0max0next<T>(ip.row(i));
   }
-  in.resize(0);
-  return normalize<T>(res);
+  return res;
 }
 
 // N.B. we apply PRNGs before to predict each of prediction in general.
@@ -4486,8 +4497,33 @@ template <typename T, int nprogress = 20> static inline SimpleVector<T> predv1(v
 //      structure enough with ours.
 //      in the most of the cases, we don't need P012L with better PRNGs.
 //      we suppose phase period doesn't connected to the original structures.
-template <typename T, int nrecur = 0, int nprogress = 20> static inline SimpleVector<T> predv(vector<SimpleVector<T> >& in) {
-  if(! nrecur) return predv1<T, nprogress>(in);
+template <typename T, int nrecur = - 1, int nprogress = 20> static inline SimpleVector<T> predv(vector<SimpleVector<T> >& in) {
+  if(nrecur < 0) {
+    SimpleVector<T> p(in[0].size());
+    p.O();
+    idFeeder<T> buf(in.size());
+    for(int i = 0; i < in.size(); i ++)
+      buf.next(in[i][0]);
+    assert(buf.full);
+    p[0] = p0p<T, p0maxNext<T> >(buf.res);
+#if defined(_OPENMP)
+#pragma omp parallel for schedule(static, 1)
+#endif
+    for(int j = 1; j < in[0].size(); j ++) {
+      if(nprogress && ! (j % max(int(1), int(in[0].size() / nprogress))) )
+        cerr << j << " / " << in[0].size();
+      idFeeder<T> buf(in.size());
+      for(int i = 0; i < in.size(); i ++)
+        buf.next(in[i][j]);
+      assert(buf.full);
+      p[j] = p0p<T, p0maxNext<T> >(buf.res);
+    }
+    return normalize<T>(p);
+  } else if(! nrecur) {
+    auto res(normalize<T>(predv1<T, nprogress>(in)));
+    in.resize(0);
+    return res;
+  }
   SimpleVector<T> res;
   res.resize(in[0].size());
   res.O();
@@ -4503,7 +4539,8 @@ template <typename T, int nrecur = 0, int nprogress = 20> static inline SimpleVe
     // N.B. PRNG parts going to gray + small noise with large enough nrecur.
     res += predv1<T, nprogress>(rin);
   }
-  return res /= T(nrecur);
+  in.resize(0);
+  return normalize<T>(res);
 }
 
 // N.B. predv only returns last one picture on some of our tests with real
@@ -4599,25 +4636,14 @@ template <typename T, int nprogress = 6> static inline SimpleVector<T> predv4(ve
     for(int j = 9; j < gwork1.cols(); j ++)
       gwork1(i, j) =
         in[(j - gwork1.cols()) * 2 + in.size()][i] * gwork0(i, j - 1);
-  auto gwork2(gwork1);
-  gwork2.O();
-  for(int i = 3; i < gwork2.cols(); i ++) {
-    cerr << "pnext: " << i << " / " << gwork2.cols() << endl;
-    gwork2(0, i) = p0max0next<T>(gwork1.row(0).subVector(0, i + 1));
-#if defined(_OPENMP)
-#pragma omp parallel for schedule(static, 1)
-#endif
-    for(int j = 1; j < gwork2.rows(); j ++)
-      gwork2(j, i) = p0max0next<T>(gwork1.row(j).subVector(0, i + 1));
-  }
   // N.B. dftcache need to be single thread on first call.
   // N.B. same logic as predv, we bet only the sign of them.
-  res[0] = p0max0next<T>(gwork2.row(0)) * gwork0(0, gwork0.cols() - 1);
+  res[0] = p0max0next<T>(gwork1.row(0));
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
   for(int i = 1; i < res.size(); i ++) {
-    res[i] = p0max0next<T>(gwork1.row(i)) * gwork0(i, gwork0.cols() - 1);
+    res[i] = p0max0next<T>(gwork1.row(i));
   }
   return normalize<T>(res);
 }
