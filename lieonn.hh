@@ -4391,8 +4391,6 @@ template <typename T> static inline SimpleMatrix<T> center(const SimpleMatrix<T>
 // N.B. as ddpmopt:README.md, PP3 is least and enough normally.
 template <typename T> static inline T PP0(const SimpleVector<T>& in, const int& ratio) {
   return p01next<T, p01delimNext<T>, true>(in, ratio);
-  // N.B. our test either goes better with this, don't know why.
-  // return p0max0next<T>(in.subVector(in.size() - 3, 3), ratio);
 }
 
 template <typename T, int nprogress = 20> static inline SimpleVector<T> predv0(const vector<SimpleVector<T> >& in, const int& sz, const string& strloop = string("")) {
@@ -4456,7 +4454,8 @@ template <typename T, int nprogress = 20> static inline SimpleVector<T> predv1(v
 #endif
   for(int i = start + step; i < p.size(); i ++) {
     for(int j = 0; j < res.size(); j ++)
-      ip(j, i) = in[i - p.size() + in.size()][j] * p[i - step][j];
+      ip(j, i) = (in[i - p.size() + in.size()][j] * T(int(2)) - T(int(1)) ) *
+        (p[i - step][j] * T(int(2)) - T(int(1)) );
   }
   // N.B. dftcache need to be single thread on first call.
   // N.B. either, differences prediction is better friendly to upper layer
@@ -4467,12 +4466,18 @@ template <typename T, int nprogress = 20> static inline SimpleVector<T> predv1(v
   //      increase (0 <= vector condition with prediction walk).
   // N.B. however, in this condition, we need scattered last input graphics
   //      average to complete gray.
-  res[0] = p0max0next<T>(ip.row(0));
+  // N.B. revert to original walk conditions, our sample non PRNG result
+  //      works well with this.
+  res[0] = (p0maxNext<T>(ip.row(0)) *
+    (p[p.size() - 1][0] * T(int(2)) - T(int(1))) + T(int(1)) ) / T(int(2))
+    + T(int(1)) / T(int(2));
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
   for(int i = 1; i < res.size(); i ++) {
-    res[i] = p0max0next<T>(ip.row(i));
+    res[i] = (p0maxNext<T>(ip.row(i)) *
+      (p[p.size() - 1][i] * T(int(2)) - T(int(1))) + T(int(1)) ) / T(int(2))
+      + T(int(1)) / T(int(2));
   }
   in.resize(0);
   return res;
@@ -4494,7 +4499,7 @@ template <typename T, int nprogress = 20> static inline SimpleVector<T> predv1(v
 // N.B. practically, nrecur == 0 with p0next0maxRank works well, we use this.
 //      nrecur == 11 * 11 with p0maxNext but we need huge computation time.
 template <typename T, int nrecur = 0, int nprogress = 20> static inline SimpleVector<T> predv(vector<SimpleVector<T> >& in) {
-  if(! nrecur) return normalize<T>(predv1<T, nprogress>(in));
+  if(! nrecur) return predv1<T, nprogress>(in);
   SimpleVector<T> res;
   res.resize(in[0].size());
   res.O();
@@ -4510,7 +4515,7 @@ template <typename T, int nrecur = 0, int nprogress = 20> static inline SimpleVe
     // N.B. PRNG parts going to gray + small noise with large enough nrecur.
     res += predv1<T, nprogress>(rin);
   }
-  return normalize<T>(res);
+  return res /= T(nrecur);
 }
 
 // N.B. predv only returns last one picture on some of our tests with real
@@ -4605,17 +4610,20 @@ template <typename T, int nprogress = 6> static inline SimpleVector<T> predv4(ve
   for(int i = 0; i < gwork1.rows(); i ++)
     for(int j = 9; j < gwork1.cols(); j ++)
       gwork1(i, j) =
-        in[(j - gwork1.cols()) * 2 + in.size()][i] * gwork0(i, j - 1);
+        (in[(j - gwork1.cols()) * 2 + in.size()][i] * T(int(2)) - T(int(1)) ) *
+        (gwork0(i, j - 1) * T(int(2)) - T(int(1)) );
   // N.B. dftcache need to be single thread on first call.
   // N.B. same logic as predv, we bet only the sign of them.
-  res[0] = p0max0next<T>(gwork1.row(0));
+  res[0] = (p0maxNext<T>(gwork1.row(0)) *
+    (gwork0(0, gwork0.cols() - 1) * T(int(2)) - T(int(1)) ) + T(int(1)) ) / T(int(2));
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
   for(int i = 1; i < res.size(); i ++) {
-    res[i] = p0max0next<T>(gwork1.row(i));
+    res[i] = (p0maxNext<T>(gwork1.row(i)) *
+      (gwork0(i, gwork0.cols() - 1) * T(int(2)) - T(int(1)) ) + T(int(1)) ) / T(int(2)) ;
   }
-  return normalize<T>(res);
+  return res;
 }
 
 template <typename T> vector<SimpleVector<T> > predVec(vector<vector<SimpleVector<T> > >& in0) {
