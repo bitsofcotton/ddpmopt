@@ -148,7 +148,7 @@ int main(int argc, const char* argv[]) {
     //      case.
     auto p(predMat<num_t>(in = normalize<num_t>(in)));
     if(! savep2or3<num_t>("predg.ppm",
-      normalize<num_t>(p.size() == 3 ? xyz2rgb<num_t>(p) : p) ))
+      p.size() == 3 ? xyz2rgb<num_t>(p) : move(p) ))
         cerr << "failed to save." << endl;
   } else if(m == 'P') {
     // N.B. we need 4 of the different candidates for the results with
@@ -161,29 +161,14 @@ int main(int argc, const char* argv[]) {
       if(! loadp2or3<num_t>(work, argv[i])) continue;
       in.emplace_back(work.size() == 3 ? rgb2xyz<num_t>(work) : move(work));
     }
-    in = normalize<num_t>(in);
     // N.B. we get better information on raw delta only. don't know why.
     //      but this is to make start of stream is white out input.
     // const auto sbuf(in[11]);
     // const auto lbuf(in[in.size() - 1])
-    for(int i = 0; i < in.size() - 1; i ++)
-      for(int j = 0; j < in[i].size(); j ++)
-        in[i][j] = in[i + 1][j] - in[i][j];
-    in.resize(in.size() - 1);
-    for(int i = 0; i < in.size(); i ++)
-      for(int j = 0; j < in[i].size(); j ++)
-        for(int ii = 0; ii < in[i][j].rows(); ii ++)
-          for(int jj = 0; jj < in[i][j].cols(); jj ++)
-            in[i][j](ii, jj) = (in[i][j](ii, jj) + num_t(int(1))) / num_t(int(2));
-    auto q(predMat<num_t>(in));
-    for(int j = 0; j < q.size(); j ++)
-      for(int ii = 0; ii < q[j].rows(); ii ++)
-        for(int jj = 0; jj < q[j].cols(); jj ++) {
-          q[j](ii, jj)  =
-            q[j](ii, jj) * num_t(int(2)) - num_t(int(1));
-        }
+    auto q(unOffsetHalf<num_t>(predMat<num_t>(
+      in = offsetHalf<num_t>(delta<num_t>(normalize<num_t>(in) )) )) );
     if(! savep2or3<num_t>("qredg.ppm",
-        normalize<num_t>(q.size() == 3 ? xyz2rgb<num_t>(q) : q)) )
+        q.size() == 3 ? xyz2rgb<num_t>(q) : move(q) ) )
       cerr << "failed to save." << endl;
   } else if(m == 'w') {
     vector<vector<SimpleMatrix<num_t> > > in;
@@ -236,41 +221,24 @@ int main(int argc, const char* argv[]) {
       for(int j = 0; j < work.size(); j ++)
         wwork[j].setMatrix(0, 0, work[j]);
       for(int i = 0; i < ext; i ++) {
-        auto pwt(skipX<vector<SimpleVector<num_t> > >(pwork, i + 1));
-        if(m == 'Q') {
-          for(int i = 0; i < pwt.size() - 1; i ++)
-            for(int j = 0; j < pwt[i].size(); j ++)
-              pwt[i][j] = pwt[i + 1][j] - pwt[i][j];
-          pwt.resize(pwt.size() - 1);
-          for(int i = 0; i < pwt.size(); i ++)
-            for(int j = 0; j < pwt[i].size(); j ++)
-              for(int k = 0; k < pwt[i][j].size(); k ++)
-                pwt[i][j][k] = (pwt[i][j][k] + num_t(int(1))) / num_t(int(2));
-        }
-        auto n(predVec<num_t>(pwt));
-        for(int j = 0; j < wwork.size(); j ++) {
+        auto n(m == 'Q' ?
+            unOffsetHalf<num_t>(predVec<num_t>(
+              offsetHalf<num_t>(delta<num_t>(
+                skipX<vector<SimpleVector<num_t> > >(pwork, i + 1) )) ))
+          : predVec<num_t>(skipX<vector<SimpleVector<num_t> > >(pwork, i + 1) )
+        );
+        for(int j = 0; j < wwork.size(); j ++)
           wwork[j].row(work[0].rows() + i) = move(n[j]);
-          if(m == 'Q') {
-            // N.B. same as 'P' command, we make hypothesis prediction beginning
-            //      is white outed one.
-            for(int k = 0; k < wwork[j].cols(); k ++)
-              wwork[j](work[0].rows() + i, k) =
-                wwork[j](work[0].rows() + i, k) * num_t(int(2)) -
-                  num_t(int(1));
-          }
-        }
       }
-      if(m == 'Q') {
+      if(m == 'Q')
         for(int i = 0; i < ext; i ++)
-          for(int j = 0; j < wwork.size(); j ++) {
+          for(int j = 0; j < wwork.size(); j ++)
             wwork[j].row(work[0].rows() + i) +=
-              wwork[j].row(work[0].rows() + i - 1);
-          }
-      }
-      if(! savep2or3<num_t>(m == 'q' ? argv[i0] :
-        (string(argv[i0]) + string("2.ppm")).c_str(),
-        normalize<num_t>(wwork.size() == 3 ?
-        xyz2rgb<num_t>(wwork) : wwork) ) )
+              wwork[j].row(work[0].rows() - 1);
+      if(! savep2or3<num_t>(m == 'q' ?
+        (string(argv[i0]) + string("q.ppm")).c_str() :
+        (string(argv[i0]) + string("Q.ppm")).c_str(),
+        wwork.size() == 3 ? xyz2rgb<num_t>(wwork) : move(wwork) ) )
           cerr << "failed to save." << endl;
     }
   } else if(m == 'x' || m == 'y' || m == 'i' || m == 't') {
@@ -514,7 +482,7 @@ int main(int argc, const char* argv[]) {
   cerr << "# predict with whole pixel context (each bit input)" << endl;
   cerr << argv[0] << " w <in0.ppm> <in0-4.ppm> ..." << endl;
   cerr << "# predict down scanlines. (each bit input)" << endl;
-  cerr << argv[0] << " q <in0out.ppm> ..." << endl;
+  cerr << argv[0] << " [qQ] <in0out.ppm> ..." << endl;
   cerr << "# show continuity" << endl;
   cerr << argv[0] << " [xyit] <in0.ppm> ..." << endl;
   cerr << "# some of the volume curvature like transform" << endl;
