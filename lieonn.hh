@@ -4894,7 +4894,8 @@ template <typename T> vector<vector<SimpleMatrix<T> > > predMat(vector<vector<Si
     }
   }
   auto p(predv<T>(in = offsetHalf<T>(in)));
-  for(int j = 0; j < res.size(); j ++) {
+  res[2].resize(size);
+  for(int j = 0; j < res[2].size(); j ++) {
     res[2][j].resize(rows, cols);
     for(int k = 0; k < rows; k ++)
       res[2][j].row(k) = p.subVector(j * rows * cols + k * cols, cols);

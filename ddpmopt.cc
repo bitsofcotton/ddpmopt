@@ -211,7 +211,7 @@ int main(int argc, const char* argv[]) {
           }
         }
         for(int k = 0; k < n.size(); k ++)
-          for(int j = 0; j < wwork.size(); j ++)
+          for(int j = 0; j < wwork[k].size(); j ++)
             wwork[k][j].row(work[0].rows() + i) = move(n[k][j]);
       }
       for(int i = 0; i < wwork.size(); i ++)
