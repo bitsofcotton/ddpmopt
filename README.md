@@ -64,9 +64,8 @@ Also, these predictors doesn't handle what meaning to omit on next image, so is 
 The goki_check_cc:test.py:\[pq\]red\+\+ command shrink image into reasonable parameters on surface condition they includes some omitting meanings.
 We looked some of the graphics set result, they might be what we wanted to get but not the actually one but ok for us, so we close this repository with this condition.
 
-We get pPqQ command to get 4 of the candidates from original stream or PRNG mixed stream.
+We get pq command to get 4 of the candidates from original stream or PRNG mixed stream.
 If we're lucky, one of the candidates can be used for next predicted images.
-However, PQ command returns pseudo next one they doesn't be added delta start point in another words offset, however we select this method because of output glance.
 Either, in the invariant controlled condition in any of the inputs, outputting 4 of the candidates should work well, however, we only calculate a paired candidates at once, so 3 of candidates are upper bound of pPqQ output, this is enough in because of representation of combination of binary tree condition.
 
 # T command
@@ -90,11 +89,11 @@ However, if we find some of the bug on the hypothesis and implementation is diff
     # apply color structure
     ./ddpmopt(32|64)?(mp)? - <in0.ppm> ... < cache.txt
     # predict following image (each bit input)
-    ./ddpmopt(32|64)?(mp)? \[pP\] <in0.ppm> ...
+    ./ddpmopt(32|64)?(mp)? p <in0.ppm> ...
     # predict with whole pixel context (each bit input)
     ./ddpmopt(32|64)?(mp)? w <in0.ppm> <in0-4.ppm> ...
     # predict down scanlines. (each bit input)
-    ./ddpmopt(32|64)?(mp)? \[qQ\] <in0out.ppm> ...
+    ./ddpmopt(32|64)?(mp)? q <in0out.ppm> ...
     # show continuity
     ./ddpmopt(32|64)?(mp)? [xyit] <in0.ppm> ...
     # some of the volume curvature like transform
@@ -286,4 +285,5 @@ Leave here but might return here after another implementations.
 2025/04/18 qQ command strategy change.
 2025/04/19 rebrush up lieonn.hh easy to read whole, fix ind2vd lt, gt mis exchange.
 2025/05/16 backport p2 result causes single output per each.
+2025/05/20 we eliminate PQ command delta in/output because of backporting p0/p0p.cc result.
 
