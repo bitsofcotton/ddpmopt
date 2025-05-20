@@ -19,7 +19,7 @@ Some of the lieonn.hh operator \>\> class doesn't work as expected, might be com
 
 Either, we might be in invariant prediction catched as getting to be invariant result controlled condition.
 
-# Tips on prediction on objected images
+# Tips on prediction on objected images on stieljes condition
 We suppose the input image series as some of the functions to effect to or data to be effected by paired images also the pixel contexts in F\_p.
 However, instead of using F_2, we need P01 base dimension larger than 4 in such case in fact.
 After then, we adjust omitted:in/output ratio on F_2 case. We might need this because only single layered learning needs some of the better reasons to calculate in such algorithms.
@@ -47,41 +47,22 @@ We can use orthogonal context either DFT context insertion, however, this isn't 
 
 Either we're using goki_check_cc:test.py:qred... commands or monte-carlo methods in lieonn.hh:predv template parameter to complement entropy continuity, we don't need them with some of the slice we gain.
 
-We can use some feature quantity based transforms we can get them by machine learning converted into tan Ax form.
-In such case, we use vectorized input image x, y:=tan Ax for feature quantities, weight them by \[x, y\] or only predict the {y} stream, then, invert x=f(y).
-This matches our senses on viewing the image.
+We can use some feature quantity based transforms we can get them by machine learning converted into tan Ax form, masp2catg pseudolly doing this, test.py:[PQ]red command additionaly doing this.
 
-We can use bitsofcotton/masp detecting such feature quantities.
-However, this isn't unveil deep structure they behaves to be operatable in the picture set by itself.
-So we need to do bitsofcotton/isolate and match to known algorithms with the handle parameters we want to operate.
-
-Also, we want to decompose some of the meanings by bitsofcotton/specific and backport them into here, however, implementation of them isn't now.
-
-The pred command (curdir)w...-bit.ppm output is omitter on shortcut for decomposing and apply to the predictions, this might includes specific -&gt; {y} prediction -&gt; reverse chain by finding some of the patterns but they doesn't have handles what information to omit for predictions.
-
+We want to decompose some of the meanings by bitsofcotton/specific and backport them into here, however, implementation of them isn't now.
 Also, these predictors doesn't handle what meaning to omit on next image, so is composition around collection of predictions.
 
 The goki_check_cc:test.py:\[pq\]red\+\+ command shrink image into reasonable parameters on surface condition they includes some omitting meanings.
 We looked some of the graphics set result, they might be what we wanted to get but not the actually one but ok for us, so we close this repository with this condition.
 
-We get pq command to get 4 of the candidates from original stream or PRNG mixed stream.
-If we're lucky, one of the candidates can be used for next predicted images.
-Either, in the invariant controlled condition in any of the inputs, outputting 4 of the candidates should work well, however, we only calculate a paired candidates at once, so 3 of candidates are upper bound of pPqQ output, this is enough in because of representation of combination of binary tree condition.
+We get pqred command to get 3 of the candidates from original stream or PRNG mixed stream to stand by each other when we're targetted which 2x force insert Riemann measureable condition and 1x insert Riemann-Stieljes measureable condition.
 
 # T command
 We have T command for gokibin bit preprocessed graphics stream testing.
 If output is better than .5 probability and stable for some of the shrinked size, the gokibin bit reversed outputs' shrinked image can have some of the meanings for them.
 
-Either, T command uses raw predictions but it can be being attacked, so \[pPqQw\] command outputs uses second one if the condition is true but we need at least 4 of them.
-
 # Infection
 We're in prediction result controlled condition, so we don't get actual output images to confirm result, so we need to implement this repository only with the hypothesis we firstly have and their implementation is correct or not one.
-
-Since bitsofcotton/p2 result seems their internal-states-rich 3-way output is correct but we don't have their strategy because we only target the graphics stream they have non shrinked or non regression stories.
-
-Even so, we should have the counter measure to result is controlled condition, however we have T command output, so we applied them into second one outputs, so we close with this.
-
-However, if we find some of the bug on the hypothesis and implementation is differ, we return and fix here.
 
 # Usage:
     # copy color structure
@@ -100,10 +81,9 @@ However, if we find some of the bug on the hypothesis and implementation is diff
     ./ddpmopt(32|64)?(mp)? c <in0.ppm> ...
     # test input series of graphics predictable or not (each bit input)
     ./ddpmopt(32|64)?(mp)? T <in0.ppm> ...
-    cp `./ddpmopt(32|64)?(mp)? i <in0.ppm> ... | sort | head -n ... | tr '\n' ' '` outdir
 
-# Re5-Leave
-We might re5-leave this repository with this update except for lieonn.hh updates.
+# Re6-Leave
+We might re6-leave this repository with this update except for lieonn.hh updates.
 
 Leave here but might return here after another implementations.
 
@@ -286,4 +266,5 @@ Leave here but might return here after another implementations.
 2025/04/19 rebrush up lieonn.hh easy to read whole, fix ind2vd lt, gt mis exchange.
 2025/05/16 backport p2 result causes single output per each.
 2025/05/20 we eliminate PQ command delta in/output because of backporting p0/p0p.cc result.
+2025/05/21 T command extend, update readme, reclose.
 

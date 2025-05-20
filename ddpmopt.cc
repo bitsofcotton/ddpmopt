@@ -376,44 +376,54 @@ int main(int argc, const char* argv[]) {
   } else if(m == 'T') {
     vector<vector<SimpleMatrix<num_t> > > in;
     in.reserve(argc - 2 + 1);
-    vector<SimpleMatrix<num_t> > p;
     vector<SimpleMatrix<num_t> > avg;
-    vector<vector<SimpleMatrix<num_t> > > pc;
+    vector<vector<SimpleMatrix<num_t> > > p;
+    vector<vector<vector<SimpleMatrix<num_t> > > > pc;
     for(int i0 = 2; i0 < argc; i0 ++) {
       vector<SimpleMatrix<num_t> > work;
       if(! loadp2or3<num_t>(work, argv[i0])) continue;
       if(pc.size()) {
         cout << " --- " << in.size() - 11 << " --- " << endl;
         for(int i = 0; i < pc.size(); i ++)
-          for(int j = 0; j < pc[i].size(); j ++) {
+          for(int j = 0; j < pc[i][0].size(); j ++) {
             if(! i) avg[j] += work[j];
-            const auto rr(p[0].rows() / pc[i][0].rows());
-            const auto cc(p[0].cols() / pc[i][0].cols());
-            for(int k = 0; k < pc[i][j].rows(); k ++)
-              for(int n = 0; n < pc[i][j].cols(); n ++) {
-                num_t workr(int(0));
+            const auto rr(p[0][0].rows() / pc[i][0][0].rows());
+            const auto cc(p[0][0].cols() / pc[i][0][0].cols());
+            for(int k = 0; k < pc[i][0][j].rows(); k ++)
+              for(int n = 0; n < pc[i][0][j].cols(); n ++) {
+                vector<num_t> workr;
                 num_t orig(int(0));
                 num_t origa(int(0));
                 int   cnt(0);
-                for(int kk = k * rr; kk < min(p[j].rows(), (k + 1) * rr); kk ++)
-                  for(int nn = n * cc; nn < min(p[j].cols(), (n + 1) * cc);
+                workr.resize(p.size(), int(0));
+                for(int kk = k * rr; kk < min(p[0][j].rows(), (k + 1) * rr); kk ++)
+                  for(int nn = n * cc; nn < min(p[0][j].cols(), (n + 1) * cc);
                     nn ++, cnt ++) {
-                    workr += p[j](kk, nn);
+                    for(int m = 0; m < p.size(); m ++)
+                      workr[m] += p[m][j](kk, nn);
                     orig  += work[j](kk, nn);
                     origa += avg[j](kk, nn);
                   }
                 if(cnt) {
-                  workr /= num_t(cnt);
+                  for(int m = 0; m < workr.size(); m ++) workr[m] /= num_t(cnt);
                   orig  /= num_t(cnt);
                   origa /= num_t(cnt);
                 }
                 // N.B. for stricter test but we don't need such a restriction:
                 // workr = (sgn<num_t>(workr - num_t(int(1)) / num_t(int(2)) )
                 //   + num_t(int(1)) ) / num_t(int(2));
-                pc[i][j](k, n) += workr;
-                cout << "g: " << abs(workr - orig) * num_t(int(2)) << endl;
-                cout << "s: " << abs(pc[i][j](k, n) - origa) / num_t(in.size() - 11) * num_t(int(2)) << endl;
-                cout << "w: " << abs(pc[i][j](k, n) - origa) * num_t(int(2)) << endl;
+                for(int m = 0; m < p.size(); m ++)
+                  pc[i][m][j](k, n) += workr[m];
+                cout << "g: ";
+                for(int m = 0; m < p.size(); m ++)
+                  cout << abs(workr[m] - orig) * num_t(int(2)) << ", ";
+                cout << endl << "s: ";
+                for(int m = 0; m < p.size(); m ++)
+                  cout << abs(pc[i][m][j](k, n) - origa) / num_t(in.size() - 11) * num_t(int(2)) << ", ";
+                cout << endl << "w: ";
+                for(int m = 0; m < p.size(); m ++)
+                  cout << abs(pc[i][m][j](k, n) - origa) * num_t(int(2)) << ", ";
+                cout << endl;
               }
             cout << endl;
           }
@@ -429,19 +439,23 @@ int main(int argc, const char* argv[]) {
       if(i0 == argc - 1) break;
       if(11 < in.size()) {
         auto in2(in);
-        p = predMat<num_t>(in2 = normalize<num_t>(in2))[2];
+        p = predMat<num_t>(in2 = normalize<num_t>(in2));
         if(! pc.size()) {
-          avg.resize(p.size());
+          avg.resize(p[0].size());
           for(int j = 0; j < avg.size(); j ++)
-            avg[j] = SimpleMatrix<num_t>(p[j].rows(), p[j].cols()).O();
-          pc.emplace_back(avg);
+            avg[j] = SimpleMatrix<num_t>(p[0][j].rows(), p[0][j].cols()).O();
+          pc.emplace_back(p);
+          for(int j = 0; j < pc[0].size(); j ++)
+            for(int k = 0; k < pc[0][j].size(); k ++)
+              pc[0][j][k].O();
           for(int i = 1;
-            0 <= i && 1 < pc[i - 1][0].rows() && 1 < pc[i - 1][0].cols();
+            0 <= i && 1 < pc[i - 1][0][0].rows() && 1 < pc[i - 1][0][0].cols();
             i ++) {
             auto work(pc[i - 1]);
-            for(int j = 0; j < work.size(); j ++)
-              work[j] = SimpleMatrix<num_t>(work[j].rows() / 2,
-                work[j].cols() / 2).O();
+            for(int k = 0; k < work.size(); k ++)
+              for(int j = 0; j < work[k].size(); j ++)
+                work[k][j] = SimpleMatrix<num_t>(work[k][j].rows() / 2,
+                  work[k][j].cols() / 2).O();
             pc.emplace_back(move(work));
           }
         }
