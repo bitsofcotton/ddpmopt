@@ -172,15 +172,15 @@ int main(int argc, const char* argv[]) {
     }
     auto vp(predv4<num_t, true>(work));
     vector<SimpleMatrix<num_t> > p;
-    p.resize(in[0].size());
+    p.resize(in[1].size());
     for(int i = 0; i < p.size(); i ++) {
-      p[i].resize(in[0][0].rows(), in[0][0].cols());
+      p[i].resize(in[1][0].rows(), in[1][0].cols());
       for(int j = 0; j < p[i].rows(); j ++)
         p[i].row(j) = vp.subVector(i * p[0].rows() * p[0].cols() +
           j * p[0].cols(), p[0].cols());
     }
     if(! savep2or3<num_t>("predgw.ppm",
-      normalize<num_t>(p.size() == 3 ? xyz2rgb<num_t>(p) : p)) )
+      normalize<num_t>(p.size() == 3 ? xyz2rgb<num_t>(p) : move(p))) )
         cerr << "failed to save." << endl;
   } else if(m == 'q') {
     for(int i0 = 2; i0 < argc; i0 ++) {
@@ -376,64 +376,49 @@ int main(int argc, const char* argv[]) {
   } else if(m == 'T') {
     vector<vector<SimpleMatrix<num_t> > > in;
     in.reserve(argc - 2 + 1);
-    vector<SimpleMatrix<num_t> > avg;
     vector<vector<SimpleMatrix<num_t> > > p;
-    vector<vector<vector<SimpleMatrix<num_t> > > > pc;
+    vector<std::pair<int, int> > pc;
     for(int i0 = 2; i0 < argc; i0 ++) {
       vector<SimpleMatrix<num_t> > work;
       if(! loadp2or3<num_t>(work, argv[i0])) continue;
       if(pc.size()) {
         cout << " --- " << in.size() - 11 << " --- " << endl;
-        for(int i = 0; i < pc.size(); i ++)
-          for(int j = 0; j < pc[i][0].size(); j ++) {
-            if(! i) avg[j] += work[j];
-            const auto rr(p[0][0].rows() / pc[i][0][0].rows());
-            const auto cc(p[0][0].cols() / pc[i][0][0].cols());
-            for(int k = 0; k < pc[i][0][j].rows(); k ++)
-              for(int n = 0; n < pc[i][0][j].cols(); n ++) {
+        for(int i = 0; i < p.size(); i ++)
+          for(int j = 0; j < p[i].size(); j ++) {
+            const auto rr(p[i][j].rows() / pc[i].first);
+            const auto cc(p[i][j].cols() / pc[i].second);
+            for(int k = 0; k < pc[i].first; k ++)
+              for(int n = 0; n < pc[i].second; n ++) {
                 vector<num_t> workr;
                 num_t orig(int(0));
-                num_t origa(int(0));
                 int   cnt(0);
                 workr.resize(p.size(), int(0));
-                for(int kk = k * rr; kk < min(p[0][j].rows(), (k + 1) * rr); kk ++)
-                  for(int nn = n * cc; nn < min(p[0][j].cols(), (n + 1) * cc);
+                for(int kk = k * rr; kk < min(p[i][j].rows(), (k + 1) * rr); kk ++)
+                  for(int nn = n * cc; nn < min(p[i][j].cols(), (n + 1) * cc);
                     nn ++, cnt ++) {
                     for(int m = 0; m < p.size(); m ++)
                       workr[m] += p[m][j](kk, nn);
-                    orig  += work[j](kk, nn);
-                    origa += avg[j](kk, nn);
+                    orig += work[j](kk, nn);
                   }
                 if(cnt) {
                   for(int m = 0; m < workr.size(); m ++) workr[m] /= num_t(cnt);
                   orig  /= num_t(cnt);
-                  origa /= num_t(cnt);
                 }
                 // N.B. for stricter test but we don't need such a restriction:
                 // workr = (sgn<num_t>(workr - num_t(int(1)) / num_t(int(2)) )
                 //   + num_t(int(1)) ) / num_t(int(2));
-                for(int m = 0; m < p.size(); m ++)
-                  pc[i][m][j](k, n) += workr[m];
-                cout << "g: ";
+                // also apply this on orig.
                 for(int m = 0; m < p.size(); m ++)
                   cout << abs(workr[m] - orig) * num_t(int(2)) << ", ";
-                cout << endl << "s: ";
-                for(int m = 0; m < p.size(); m ++)
-                  cout << abs(pc[i][m][j](k, n) - origa) / num_t(in.size() - 11) * num_t(int(2)) << ", ";
-                cout << endl << "w: ";
-                for(int m = 0; m < p.size(); m ++)
-                  cout << abs(pc[i][m][j](k, n) - origa) * num_t(int(2)) << ", ";
                 cout << endl;
               }
             cout << endl;
           }
         cout << endl;
         // N.B. output can be checked as:
-        //      tail -n ... < output | grep [gsw]: | cut -f 2 -d : |
-        //        python3 p2/cr.py t 1 > outR
+        //      tail -n ... < output | python3 p2/cr.py t 1 > outR
         //      with R.app, myv <- read.csv("outR")
         //                  hist(yv[,1],breaks=seq(0,...,length.out=...))
-        // N.B. s: and w: are in the walk condition.
       }
       in.emplace_back(move(work));
       if(i0 == argc - 1) break;
@@ -441,21 +426,12 @@ int main(int argc, const char* argv[]) {
         auto in2(in);
         p = predMat<num_t>(in2 = normalize<num_t>(in2));
         if(! pc.size()) {
-          avg.resize(p[0].size());
-          for(int j = 0; j < avg.size(); j ++)
-            avg[j] = SimpleMatrix<num_t>(p[0][j].rows(), p[0][j].cols()).O();
-          pc.emplace_back(p);
-          for(int j = 0; j < pc[0].size(); j ++)
-            for(int k = 0; k < pc[0][j].size(); k ++)
-              pc[0][j][k].O();
+          pc.emplace_back(make_pair(p[0][0].rows(), p[0][0].cols() ));
           for(int i = 1;
-            0 <= i && 1 < pc[i - 1][0][0].rows() && 1 < pc[i - 1][0][0].cols();
-            i ++) {
+            0 <= i && 1 < pc[i - 1].first && 1 < pc[i - 1].second; i ++) {
             auto work(pc[i - 1]);
-            for(int k = 0; k < work.size(); k ++)
-              for(int j = 0; j < work[k].size(); j ++)
-                work[k][j] = SimpleMatrix<num_t>(work[k][j].rows() / 2,
-                  work[k][j].cols() / 2).O();
+            work.first  /= 2;
+            work.second /= 2;
             pc.emplace_back(move(work));
           }
         }
@@ -473,7 +449,7 @@ int main(int argc, const char* argv[]) {
   cerr << "# predict following image (each bit input)" << endl;
   cerr << argv[0] << " p <in0.ppm> ..." << endl;
   cerr << "# predict with whole pixel context (each bit input)" << endl;
-  cerr << argv[0] << " w <in0.ppm> <in0-4.ppm> ..." << endl;
+  cerr << argv[0] << " w <in0-4.ppm> <in0.ppm> ... <addition-4.ppm>" << endl;
   cerr << "# predict down scanlines. (each bit input)" << endl;
   cerr << argv[0] << " q <in0out.ppm> ..." << endl;
   cerr << "# show continuity" << endl;

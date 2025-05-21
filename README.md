@@ -71,8 +71,8 @@ We're in prediction result controlled condition, so we don't get actual output i
     ./ddpmopt(32|64)?(mp)? - <in0.ppm> ... < cache.txt
     # predict following image (each bit input)
     ./ddpmopt(32|64)?(mp)? p <in0.ppm> ...
-    # predict with whole pixel context (each bit input)
-    ./ddpmopt(32|64)?(mp)? w <in0.ppm> <in0-4.ppm> ...
+    # reverse whole pixel context (each bit input)
+    ./ddpmopt(32|64)?(mp)? w <in0-4.ppm> <in0.ppm> ... <addition-4.ppm>
     # predict down scanlines. (each bit input)
     ./ddpmopt(32|64)?(mp)? q <in0out.ppm> ...
     # show continuity
@@ -267,4 +267,5 @@ Leave here but might return here after another implementations.
 2025/05/16 backport p2 result causes single output per each.
 2025/05/20 we eliminate PQ command delta in/output because of backporting p0/p0p.cc result.
 2025/05/21 T command extend, update readme, reclose.
+2025/05/21 slim down, w command out change.
 
