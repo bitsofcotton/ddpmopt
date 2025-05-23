@@ -196,8 +196,12 @@ int main(int argc, const char* argv[]) {
       }
       // N.B. same as 'p' cmd, we can suppose original as 'T' command input
       //      with long range but not in general.
-      // N.B. 10 + 1 * 2 < work[0].rows() / step.
-      const int ext(work[0].rows() / (m == 'Q' ? 13 : 12));
+#if defined(_FEED_MUCH_)
+      const int ext(work[0].rows() / 34);
+#else
+      // N.B. 10 + 1 * 2 < work[0].rows() / step for PP0.
+      const int ext(work[0].rows() / 12);
+#endif
       vector<vector<SimpleMatrix<num_t> > > wwork;
       for(int i = 0; i < ext; i ++) {
         auto n(predVec<num_t>(skipX<vector<SimpleVector<num_t> > >(pwork, i + 1) ));

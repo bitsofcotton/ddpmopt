@@ -64,6 +64,12 @@ If output is better than .5 probability and stable for some of the shrinked size
 # Infection
 We're in prediction result controlled condition, so we don't get actual output images to confirm result, so we need to implement this repository only with the hypothesis we firstly have and their implementation is correct or not one.
 
+# Tips on timing-related cultivated conditions
+We re-target cultivated conditions to do recursive on PP... predictors to shirked information amount copy to 1:1 reason.
+We're doing best on our meaning in such a condition but the jammer on them also exists so the stream not predictable nor invariant result forever exists.
+
+Usually, we only need 3 of the layers to fix 3^(3^3) for root information amount, however the tree can continue forever, so we bet the input stream is worse cultivated than we predict to get better result.
+
 # Usage:
     # copy color structure
     ./ddpmopt(32|64)?(mp)? + <in0out.pgm> <in0in.ppm> ... > cache.txt
@@ -82,8 +88,8 @@ We're in prediction result controlled condition, so we don't get actual output i
     # test input series of graphics predictable or not (each bit input)
     ./ddpmopt(32|64)?(mp)? T <in0.ppm> ...
 
-# Re6-Leave
-We might re6-leave this repository with this update except for lieonn.hh updates.
+# Re7-Leave
+We might re7-leave this repository with this update except for lieonn.hh updates.
 
 Leave here but might return here after another implementations.
 
@@ -268,4 +274,5 @@ Leave here but might return here after another implementations.
 2025/05/20 we eliminate PQ command delta in/output because of backporting p0/p0p.cc result.
 2025/05/21 T command extend, update readme, reclose.
 2025/05/21 slim down, w command out change.
+2025/05/23 retarget cultivated input stream but will close soon.
 

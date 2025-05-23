@@ -12,7 +12,6 @@ CXXFLAGS+=	-Ofast -mtune=native -gfull
 #CXXFLAGS+=	-O0 -mtune=native -gfull
 #CXXFLAGS+=	-pg
 #CXXFLAGS+=	--analyze
-#CXXFLAGS+=	-D_ARCFOUR_
 MPFLAGS=	-I/usr/local/include -L/usr/local/lib -lomp -fopenmp
 #MPFLAGS=	-I/usr/local/include -L/usr/local/lib -lgomp -fopenmp
 CXXFLAGS+=	-std=c++11
@@ -20,6 +19,10 @@ LDFLAGS+=	-lc++ -L/usr/local/lib
 #LDFLAGS+=	-lestdc++ -L/usr/local/lib
 # Same as -mlong-double-128
 #LDFLAGS+=	-lquadmath -lm
+
+# lieonn.hh compile options
+#CXXFLAGS+=	-D_ARCFOUR_
+CXXFLAGS+=	-D_FEED_MUCH_
 
 CLEANFILES= *.o ddpmopt ddpmopt32 ddpmopt64 ddpmoptmp ddpmopt32mp ddpmopt64mp
 
