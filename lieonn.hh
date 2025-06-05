@@ -95,7 +95,6 @@ public:
   inline DUInt(const DUInt<DUInt<T,bits>,bits*2>& src) { *this = src; }
   inline DUInt(DUInt<T,bits>&& src) { *this = src; }
   inline ~DUInt() { ; }
-  
   inline DUInt<T,bits>& operator ++ () {
     ++ e[0];
     if(!e[0]) ++ e[1];
@@ -412,7 +411,6 @@ public:
   inline SimpleFloat(const SimpleFloat<T,W,bits,U>& src) { *this = src; }
   inline SimpleFloat(SimpleFloat<T,W,bits,U>&& src) { *this = src; }
   inline ~SimpleFloat() { ; }
-  
   inline SimpleFloat<T,W,bits,U>  operator -  () const {
     auto work(*this);
     work.s ^= 1 << SIGN;
@@ -512,7 +510,6 @@ public:
     m  = T(mm >> bits);
     return ensureFlag();
   }
-
   inline SimpleFloat<T,W,bits,U>  operator %  (const SimpleFloat<T,W,bits,U>& src) const {
     return *this - (*this / src).floor() * src;
   }
@@ -624,7 +621,6 @@ public:
     }
     return fl;
   }
-
   inline SimpleFloat<T,W,bits,U>  abs()  const {
     auto work(*this);
     work.s &= ~ (1 << SIGN);
@@ -1188,7 +1184,6 @@ public:
     _imag = move(imag);
   }
   inline ~Complex() { ; }
-
   inline Complex<T>  operator ~  ()                    const {
     return Complex<T>(  _real, - _imag);
   }
@@ -1307,7 +1302,6 @@ public:
   inline             operator T    () const {
     return this->_real;
   }
-  
   const Complex<T>& i() const {
     const static auto I(Complex<T>(T(int(0)), T(int(1))));
     return I;
@@ -1489,7 +1483,6 @@ public:
   inline SimpleVector(const SimpleVector<T>& other) { *this = other; }
   inline SimpleVector(SimpleVector<T>&& other) { *this = other; }
   inline ~SimpleVector() { ; }
-  
   inline       SimpleVector<T>  operator -  () const {
     SimpleVector<T> res(entity.size());
 #if defined(_OPENMP)
@@ -1727,7 +1720,6 @@ public:
     }
     return is;
   }
-  
   vector<T> entity;
 };
 
@@ -1747,7 +1739,6 @@ public:
   inline SimpleMatrix(const SimpleMatrix<T>& other) { *this = other; }
   inline SimpleMatrix(SimpleMatrix<T>&& other) { *this = other; }
   inline ~SimpleMatrix() { ; }
-  
   inline       SimpleMatrix<T>  operator -  () const {
     SimpleMatrix<T> res(entity.size(), ecols);
 #if defined(_OPENMP)
@@ -2019,7 +2010,6 @@ public:
 #endif
     return eps;
   }
-
   friend ostream& operator << (ostream& os, const SimpleMatrix<T>& v) {
     SimpleMatrix<string> buf(v.rows(), v.cols());
     int M(0);
@@ -2781,7 +2771,6 @@ public:
   inline SimpleSparseVector(const SimpleSparseVector<T>& other) { *this = other; }
   inline SimpleSparseVector(SimpleSparseVector<T>&& other) { *this = other; }
   inline ~SimpleSparseVector() { ; }
-  
   inline SimpleSparseVector<T>  operator -  () const {
     auto res(*this);
     for(auto itr(res.entity.begin()); itr != res.entity.end(); ++ itr)
@@ -3058,7 +3047,8 @@ template <typename T> static inline pair<SimpleVector<T>, T> makeProgramInvarian
 }
 
 template <typename T> static inline T revertProgramInvariant(const pair<T, T>& in) {
-  const auto r0(in.first / in.second);
+  const auto r0(in.second == T(int(0)) ?
+    sgn<T>(in.second) / SimpleMatrix<T>().epsilon() : in.first / in.second);
   const auto r1(T(int(0)) < r0 ? r0 - floor(r0) : ceil(- r0) + r0);
   return T(int(0)) == r1 ? T(int(1)) : r1;
 }
@@ -3516,7 +3506,6 @@ template <typename T> static inline T p012next(const SimpleVector<T>& d) {
   auto sscore(zero);
   for(int i = 0; i < cat.size(); i ++) {
     if(! cat[i].first.size()) continue;
-    if(! (cat[i].first.size() <= cat[i].first[0].size() + 1)) cerr << "!" << flush;
     SimpleVector<T> avg(cat[i].first[0].size() + 1);
     avg.O();
     for(int j = 0; j < cat[i].first.size(); j ++)
@@ -3641,10 +3630,6 @@ template <typename T> static inline T p0maxNext(const SimpleVector<T>& in) {
   // return sumCNext<T, true, sumCNext<T, false, logCNext<T, logCNext<T, P0DFT<T, p0max0next<T> > > > > >(in);
 }
 
-template <typename T> static inline T p01delimNext(const SimpleVector<T>& in) {
-  return in[in.size() - 1];
-}
-
 // Get invariant structure that
 // \[- &alpha, &alpha;\[ register computer with deterministic calculation.
 // cf. bitsofcotton/randtools .
@@ -3711,7 +3696,7 @@ template <typename T, const bool cultivated = true, const bool nonlinear = true>
   }
   return - invariant.dot(work) / invariant[varlen - 1];
 }
- 
+
 // N.B. class-capsules for serial stream.
 template <typename T> class idFeeder {
 public:
@@ -3743,7 +3728,7 @@ public:
 private:
   int  t;
 };
-
+ 
 template <typename T> static inline int tanPio4Scale(const int& idx, const int& size) {
   const static T pio4(atan(T(int(1)) ));
   return int(tan(T(idx) / T(size) * pio4) / tan(pio4 / T(size)) );
@@ -3801,6 +3786,7 @@ template <typename T> static inline SimpleVector<SimpleVector<T> > arctanFeeder(
 // N.B. we omit high frequency part (1/f(x) input) to be treated better in P.
 template <typename T, T (*p)(const SimpleVector<T>&)> static inline T pbond(SimpleVector<T> in) {
   if(in.size() <= 1) return T(int(0));
+  for(int i = 0; i < in.size(); i ++) if(! isfinite(in[i])) return T(int(0));
   auto M(abs(in[0]));
   for(int i = 1; i < in.size(); i ++)
     M = max(M, in[i]);
@@ -3852,6 +3838,350 @@ template <typename T, T (*p)(const SimpleVector<T>&)> static inline T deep(const
       (M = - M) += depth[j].res[depth[j].res.size() - 1];
   }
   return M;
+}
+
+// N.B. pack p0, p01, p012 into one function with idFeeder reference chain.
+//      we should pack them into class capsule, however we don't because of
+//      portability.
+template <typename T, bool atf = false> static inline vector<T> p2next(const vector<T>& lastM, const SimpleVector<T>& p0, idFeeder<T>& p1, idFeeder<SimpleVector<T> >& f0, idFeeder<SimpleVector<T> >& f1, idFeeder<T>& r0, idFeeder<T>& r1, T& br0, int& t) {
+  vector<T> dn;
+  vector<T> M;
+  const auto& d(p0[p0.size() - 1]);
+  dn.reserve(6);
+  dn.emplace_back(lastM[0] * d);
+  dn.emplace_back(lastM[1] * lastM[0] * d);
+  dn.emplace_back(lastM[2] * lastM[1] * lastM[0] * d);
+  M.reserve(6);
+  M.emplace_back(pbond<T, p0maxNext<T> >(atf ? arctanFeeder<T>(p0) : p0));
+  {
+    SimpleVector<T> f0n(2);
+    f0n[0] = offsetHalf<T>(dn[0]);
+    f0n[1] = offsetHalf<T>(M[0]);
+    f0.next(move(f0n));
+  }
+  const auto af0(atf ? arctanFeeder<T>(f0.res) : f0.res);
+  if(9 < af0.size()) {
+    M.emplace_back(unOffsetHalf<T>(
+      predv0<T, 0>(af0.entity, af0.entity.size())[0] ));
+    M.emplace_back(pbond<T, p012next<T> >(atf ?
+      arctanFeeder<T>(r0.next(dn[1])) : r0.next(dn[1]) ));
+    br0 += dn[2];
+    if((t ++) & 1) {
+      br0 /= T(int(2));
+      dn.emplace_back(lastM[3] * br0);
+      dn.emplace_back(lastM[4] * lastM[3] * br0);
+      dn.emplace_back(lastM[5] * lastM[4] * lastM[3] * br0);
+      M.emplace_back(pbond<T, p0maxNext<T> >(atf ?
+        arctanFeeder<T>(p1.next(br0)) : p1.next(br0) ));
+      {
+        SimpleVector<T> f1n(2);
+        f1n[0] = offsetHalf<T>(dn[3]);
+        f1n[1] = offsetHalf<T>(M[3]);
+        f1.next(move(f1n));
+      }
+      const auto af1(atf ? arctanFeeder<T>(f1.res) : f1.res);
+      if(9 < af1.size())
+        M.emplace_back(unOffsetHalf<T>(
+          predv0<T, 0>(af1.entity, af1.entity.size())[0] ));
+      else
+        M.emplace_back(lastM[4]);
+      M.emplace_back(pbond<T, p012next<T> >(atf ?
+        arctanFeeder<T>(r1.next(dn[4])) : r1.next(dn[4]) ));
+      br0 = T(int(0));
+    } else {
+      for( ; dn.size() < 6; dn.emplace_back(T(int(0))) ) ;
+      for( ;  M.size() < 6;  M.emplace_back(lastM[M.size()]) ) ;
+    }
+  } else {
+    for( ; dn.size() < 6; dn.emplace_back(T(int(0))) ) ;
+    for( ;  M.size() < 6;  M.emplace_back(lastM[M.size()]) ) ;
+  }
+  return move(M);
+}
+
+// N.B. unit for prediction bricks.
+template <typename T> static inline pair<vector<T>, vector<T> > pbullet4(const SimpleVector<T>& in, vector<vector<T> >& lastM, vector<idFeeder<T> >& f0, vector<idFeeder<SimpleVector<T> > >& f1, vector<T>& br, int& t) {
+  vector<T> dn;
+  dn.reserve(4);
+  for(int i = 0; i < 4; i ++) {
+    dn.emplace_back(lastM[i][0] * in[in.size() - 1]);
+    for(int j = 1; j < lastM[i].size(); j ++)
+      dn[i] *= lastM[i][j];
+  }
+
+  vector<T> M;
+  M.reserve(dn.size());
+  M.emplace_back(  deep<T, p0maxNext<T> >(  in, 3));
+  M.emplace_back(- deep<T, p0maxNext<T> >(- in, 3));
+  auto t0(t);
+  lastM[2] = p2next<T, false>(lastM[2], in, f0[0], f1[0], f1[1], f0[1], f0[2], br[0], t0);
+  lastM[3] = p2next<T, true >(lastM[3], in, f0[3], f1[2], f1[3], f0[4], f0[5], br[1], t);
+  auto MM(lastM[2][0]);
+  for(int i = 1; i < lastM[2].size(); i ++) MM *= lastM[2][i];
+  M.emplace_back(MM);
+  MM = lastM[3][0];
+  for(int i = 1; i < lastM[3].size(); i ++) MM *= lastM[3][i];
+  M.emplace_back(move(MM));
+  lastM[0][0] = M[0];
+  lastM[1][0] = M[1];
+  return make_pair(move(dn), move(M));
+}
+
+// N.B. jammer to the predictor to make grip or lose grip.
+//      we want to use this jammer to lose usual grip on predictor.
+template <typename T> static inline pair<T, T> pSubesube(const T& d0, const pair<vector<T>, vector<T> >& j, const int& t, const vector<int>& idx = vector<int>()) {
+  assert(j.first.size() == j.second.size());
+  assert(! idx.size() || idx.size() == j.first.size());
+  T n2n(int(0));
+  T M2n(int(0));
+  for(int i = 0; i < j.first.size(); i ++)
+    n2n += j.first[i] * j.first[i];
+  for(int i = 0; i < j.second.size(); i ++)
+    M2n += j.second[i] * j.second[i];
+  const auto ridx(idx.size() ? idx[t % j.first.size()] : t % j.first.size());
+  const auto tt(t + 1);
+  const auto rridx(idx.size() ? idx[tt % j.first.size()] : tt % j.first.size());
+  const auto sq0(n2n - j.first[ridx] * j.first[ridx]);
+  const auto sqM(M2n - j.second[rridx] * j.second[rridx]);
+  const auto rd0( n2n == T(int(0)) || sq0 <= T(int(0)) ? T(int(0)) : d0 * sqrt(sq0 / n2n));
+  const auto absM(M2n == T(int(0)) || sqM <= T(int(0)) ? T(int(0)) :      sqrt(sqM / M2n));
+  return make_pair(rd0  * sgn<T>(j.first[  ridx] * (t & 1 ? T(1) : - T(1)) ),
+                   absM * sgn<T>(j.second[rridx] * (t & 1 ? - T(1) : T(1)) ) );
+}
+
+// N.B. one of the bricks stack condition, so not unique and verbose to impl.
+// N.B. this aims to kill 'jammer-like-behaviour on input stream feedback'.
+template <typename T> static inline T pSlipJamQuad3(const SimpleVector<T>& in, vector<idFeeder<T> >& pipe, vector<vector<vector<T> > >& lastM, vector<vector<idFeeder<T> > >& f0, vector<vector<idFeeder<SimpleVector<T> > > >& f1, vector<vector<T> >& br, vector<int>& shf, vector<int>& nshf, const int& t) {
+  vector<pair<vector<T>, vector<T> > > apb;
+  vector<pair<T, T> > aq;
+  apb.reserve(3 * 3 * 3);
+  aq.reserve(3 * 3 * 3);
+
+  auto t0(t);
+#define UPDPSJQ3(inp,qinp,sec,i) \
+  apb.emplace_back(pbullet4((inp), lastM[(i)], f0[(i)], f1[(i)], br[(i)], t0 = t)); \
+  for(int k = 0; k < apb[(i)].second.size(); k ++) apb[(i)].second[k] *= (sec); \
+  aq.emplace_back(pSubesube<T>((qinp), apb[(i)], t0 = t));
+
+  UPDPSJQ3(in,in[in.size()-1],T(1),0);
+  
+  pipe[0].next(aq[0].first);
+  UPDPSJQ3(pipe[0].res,aq[0].first,aq[0].second,1);
+  aq[1].second *= aq[0].second;
+  
+  pipe[1].next(aq[1].first);
+  UPDPSJQ3(pipe[1].res,in[in.size()-1],aq[1].second,2);
+  
+  pipe[2].next(aq[2].first);
+  UPDPSJQ3(pipe[2].res,aq[2].first,aq[2].second,3);
+  aq[3].second *= aq[2].second;
+  
+  pipe[3].next(aq[3].first);
+  UPDPSJQ3(pipe[3].res,aq[3].first,aq[3].second,4);
+  aq[4].second *= aq[3].second;
+  
+  pipe[4].next(aq[4].first);
+  UPDPSJQ3(pipe[4].res,in[in.size()-1],aq[4].second,5);
+  
+  pipe[5].next(aq[5].first);
+  UPDPSJQ3(pipe[5].res,aq[5].first,aq[5].second,6);
+  aq[6].second *= aq[5].second;
+  
+  pipe[6].next(aq[6].first);
+  UPDPSJQ3(pipe[6].res,aq[6].first,aq[6].second,7);
+  aq[7].second *= aq[6].second;
+
+  pipe[7].next(aq[7].first);
+  UPDPSJQ3(pipe[7].res,in[in.size()-1],aq[7].second,8);
+  
+#if defined(_ARCFOUR_)
+  const auto tridx(arc4random_uniform(5));
+#else
+  const auto tridx(random() % 6);
+#endif
+#undef UPDPSJQ3
+#define UPDPSJQ3(inp,qinp,sec,i) \
+  apb.emplace_back(pbullet4((inp), lastM[(i)], f0[(i)], f1[(i)], br[(i)], t0 = t)); \
+  for(int k = 0; k < apb[(i)].second.size(); k ++) apb[(i)].second[k] *= (sec); \
+  aq.emplace_back(pSubesube<T>((qinp), apb[(i)], tridx));
+
+  pipe[8].next(aq[8].first);
+  UPDPSJQ3(pipe[8].res,aq[8].first,aq[8].second,9);
+  aq[9].second *= aq[8].second;
+
+  pipe[9].next(aq[9].first);
+  UPDPSJQ3(pipe[9].res,aq[9].first,aq[9].second,10);
+  aq[10].second *= aq[9].second;
+
+  pipe[10].next(aq[10].first);
+  UPDPSJQ3(pipe[10].res,aq[8].first,aq[10].second,11);
+  aq[11].second *= aq[8].second;
+
+  
+  pipe[11].next(aq[11].first);
+  UPDPSJQ3(pipe[11].res,aq[11].first,aq[11].second,12);
+  aq[12].second *= aq[11].second;
+
+  pipe[12].next(aq[12].first);
+  UPDPSJQ3(pipe[12].res,aq[12].first,aq[12].second,13);
+  aq[13].second *= aq[12].second;
+
+  pipe[13].next(aq[13].first);
+  UPDPSJQ3(pipe[13].res,aq[8].first,aq[13].second,14);
+  aq[14].second *= aq[8].second;
+
+
+  pipe[14].next(aq[14].first);
+  UPDPSJQ3(pipe[14].res,aq[14].first,aq[14].second,15);
+  aq[15].second *= aq[14].second;
+
+  pipe[15].next(aq[15].first);
+  UPDPSJQ3(pipe[15].res,aq[15].first,aq[15].second,16);
+  aq[16].second *= aq[15].second;
+
+  pipe[16].next(aq[16].first);
+//  UPDPSJQ3(pipe[16].res,aq[8].first,aq[16].second,17);
+//  aq[17].second *= aq[8].second;
+  UPDPSJQ3(pipe[16].res,in[in.size() - 1],aq[16].second,17);
+
+   
+  shf[(t + 1) % shf.size()] = nshf[(t + 1) % shf.size()];
+  if(! ((t + 2) % shf.size()) ) {
+    for(int i = 0; i < nshf.size(); i ++) nshf[i] = i;
+    std::random_device seed_gen;
+    std::mt19937 engine(seed_gen());
+    std::shuffle(nshf.begin(), nshf.end(), engine);
+  }
+#undef UPDPSJQ3
+#define UPDPSJQ3(inp,qinp,sec,i) \
+  apb.emplace_back(pbullet4((inp), lastM[(i)], f0[(i)], f1[(i)], br[(i)], t0 = t)); \
+  for(int k = 0; k < apb[(i)].second.size(); k ++) apb[(i)].second[k] *= (sec); \
+  aq.emplace_back(pSubesube<T>((qinp), apb[(i)], t0 = t, shf));
+
+  pipe[17].next(aq[17].first);
+  UPDPSJQ3(pipe[17].res,aq[17].first,aq[17].second,18);
+  aq[18].second *= aq[17].second;
+
+  pipe[18].next(aq[18].first);
+  UPDPSJQ3(pipe[18].res,aq[18].first,aq[18].second,19);
+  aq[19].second *= aq[18].second;
+  
+  pipe[19].next(aq[19].first);
+  UPDPSJQ3(pipe[19].res,aq[17].first,aq[19].second,20);
+  aq[20].second *= aq[17].second;
+
+
+  pipe[20].next(aq[20].first);
+  UPDPSJQ3(pipe[20].res,aq[20].first,aq[20].second,21);
+  aq[21].second *= aq[20].second;
+  
+  pipe[21].next(aq[21].first);
+  UPDPSJQ3(pipe[21].res,aq[21].first,aq[21].second,22);
+  aq[22].second *= aq[21].second;
+
+  pipe[22].next(aq[22].first);
+  UPDPSJQ3(pipe[22].res,aq[17].first,aq[22].second,23);
+  aq[23].second *= aq[17].second;
+
+
+  pipe[23].next(aq[23].first);
+  UPDPSJQ3(pipe[23].res,aq[23].first,aq[23].second,24);
+  aq[24].second *= aq[23].second;
+
+  pipe[24].next(aq[24].first);
+  UPDPSJQ3(pipe[24].res,aq[24].first,aq[24].second,25);
+  aq[25].second *= aq[24].second;
+
+  pipe[25].next(aq[25].first);
+//  UPDPSJQ3(pipe[25].res,aq[17].first,aq[25].second,26);
+//  aq[26].second *= aq[17].second;
+  UPDPSJQ3(pipe[25].res,in[in.size()-1],aq[25].second,26);
+  
+#undef UPDPSJQ3
+
+  // XXX: test to return d value, non exact M value.
+  assert(apb.size() == aq.size());
+  return aq[aq.size() - 1].second;
+}
+
+template <typename T> class pslip_t {
+public:
+  inline pslip_t() {
+    pipe.resize(3 * 3 * 3 - 1);
+    {
+      vector<vector<T> > lM;
+      vector<T> llM;
+      llM.resize(1, T(int(0)));
+      lM.reserve(4);
+      lM.emplace_back(llM);
+      lM.emplace_back(llM);
+      llM.resize(6, T(int(0)));
+      lM.emplace_back(llM);
+      lM.emplace_back(llM);
+      lastM.resize(27, lM);
+    }
+    {
+      vector<idFeeder<T> > lf0;
+      vector<idFeeder<SimpleVector<T> > > lf1;
+      lf0.resize(6);
+      lf1.resize(4);
+      f0.resize(27, lf0);
+      f1.resize(27, lf1);
+    }
+    {
+      vector<T> lbr;
+      lbr.resize(2, T(int(0)));
+      br.resize(27, lbr);
+    }
+    pipe.resize(3 * 3 * 3 - 1);
+    std::random_device seed_gen;
+    std::mt19937 engine(seed_gen());
+    shf.resize(0);
+    shf.reserve(4);
+    for(int i = 0; i < 4; i ++)
+      shf.emplace_back(i);
+    std::shuffle(shf.begin(), shf.end(), engine);
+    nshf = shf;
+  }
+  vector<idFeeder<T> > pipe;
+  vector<vector<vector<T> > > lastM;
+  vector<vector<idFeeder<T> > > f0;
+  vector<vector<idFeeder<SimpleVector<T> > > > f1;
+  vector<vector<T> > br;
+  vector<int> shf;
+  vector<int> nshf;
+};
+
+template <typename T, int recur = 40> static inline T pVeryHeavyPossible(const SimpleVector<T>& in) {
+  vector<pslip_t<T> > pslip;
+  pslip.reserve(recur);
+  for(int i = 0; i < recur; i ++) pslip.emplace_back(pslip_t<T>());
+  vector<T> lastM;
+  vector<idFeeder<T> > f0;
+  vector<idFeeder<SimpleVector<T> > > f1;
+  lastM.resize(6, T(int(0)));
+  f0.resize(3);
+  f1.resize(2);
+  T    br(int(0));
+  auto M(br);
+  auto bM(br);
+  idFeeder<T> in2;
+  for(int i = 1; i <= in.size(); i ++) {
+    const auto& inn2(in2.next(in[i - 1] * bM));
+    bM = T(int(0));
+    const auto inb(in.subVector(0, i));
+    for(int j = 0; j < pslip.size(); j ++)
+      bM += pSlipJamQuad3(inb, pslip[j].pipe, pslip[j].lastM,
+        pslip[j].f0, pslip[j].f1, pslip[j].br, pslip[j].shf, pslip[j].nshf,
+        i - 1);
+    bM /= T(recur);
+    int ii(i - 1);
+    auto MM(p2next<T, true>(lastM, inn2, f0[0], f1[0], f1[1], f0[1], f0[2],
+      br, ii) );
+    M = MM[0];
+    for(int j = 1; j < MM.size(); j ++) M *= MM[j];
+  }
+  return bM * M;
 }
 
 // N.B. start det diag operations.
@@ -4470,6 +4800,28 @@ template <typename T, int nprogress = 20> static inline SimpleVector<T> predvp(c
   return p;
 }
 
+template <typename T, int nprogress = 20> static inline SimpleVector<T> predvq(const vector<SimpleVector<T> >& in) {
+  SimpleVector<T> p(in[0].size());
+  idFeeder<T> buf(in.size());
+  for(int i = 0; i < in.size(); i ++)
+    buf.next(in[i][0]);
+  assert(buf.full);
+  p[0] = pVeryHeavyPossible<T>(buf.res);
+#if defined(_OPENMP)
+#pragma omp parallel for schedule(static, 1)
+#endif
+  for(int j = 1; j < in[0].size(); j ++) {
+    if(nprogress && ! (j % max(int(1), int(in[0].size() / nprogress))) )
+      cerr << j << " / " << in[0].size() << endl;
+    idFeeder<T> buf(in.size());
+    for(int i = 0; i < in.size(); i ++)
+      buf.next(in[i][j]);
+    assert(buf.full);
+    p[j] = pVeryHeavyPossible<T>(buf.res);
+  }
+  return p;
+}
+
 template <typename T, int nprogress = 20> static inline SimpleVector<T> predv1(vector<SimpleVector<T> >& in) {
   static const auto step(1);
   assert(0 < step && 10 + step * 2 <= in.size() && 1 < in[0].size());
@@ -4604,7 +4956,7 @@ template <typename T, int nprogress = 20> static inline SimpleVector<T> predv4(v
       p01next<T>(nwork / nseconds) * nseconds));
 }
 
-template <typename T> vector<vector<SimpleVector<T> > > predVec(vector<vector<SimpleVector<T> > >& in0) {
+template <typename T, bool possible = false> vector<vector<SimpleVector<T> > > predVec(vector<vector<SimpleVector<T> > >& in0) {
   assert(in0.size() && in0[0].size() && in0[0][0].size());
   vector<SimpleVector<T> > in;
   in.resize(in0.size());
@@ -4624,6 +4976,16 @@ template <typename T> vector<vector<SimpleVector<T> > > predVec(vector<vector<Si
   for(int i = 0; i < in.size(); i ++)
     in[i] = - in[i];
   vector<vector<SimpleVector<T> > > res;
+  if(possible) {
+    res.resize(1);
+    for(int i = 0; i < in.size(); i ++)
+      in[i] = - in[i];
+    auto p(predvq<T>(in));
+    res[0].resize(size0);
+    for(int j = 0; j < res[0].size(); j ++)
+      res[0][j] = offsetHalf<T>(p.subVector(size1 * j, size1));
+    return res;
+  }
   res.resize(3);
   {
     auto p(predvp<T>(in));
@@ -4646,12 +5008,12 @@ template <typename T> vector<vector<SimpleVector<T> > > predVec(vector<vector<Si
   return res;
 }
 
-template <typename T> static inline vector<vector<SimpleVector<T> > > predVec(const vector<vector<SimpleVector<T> > >& in0) {
+template <typename T, bool possible = false> static inline vector<vector<SimpleVector<T> > > predVec(const vector<vector<SimpleVector<T> > >& in0) {
   auto res(in0);
-  return predVec<T>(res);
+  return predVec<T, possible>(res);
 }
 
-template <typename T> vector<vector<SimpleMatrix<T> > > predMat(vector<vector<SimpleMatrix<T> > >& in0) {
+template <typename T, bool possible = false> vector<vector<SimpleMatrix<T> > > predMat(vector<vector<SimpleMatrix<T> > >& in0) {
   // N.B. original DFT image[n] DFT conversion looks better with continuous
   //      input converted into discrete variables, however, our predictor isn't
   //      get 100% result, so some probability they slips, so their slips
@@ -4682,6 +5044,19 @@ template <typename T> vector<vector<SimpleMatrix<T> > > predMat(vector<vector<Si
   for(int i = 0; i < in.size(); i ++)
     in[i] = - in[i];
   vector<vector<SimpleMatrix<T> > > res;
+  if(possible) {
+    res.resize(1);
+    for(int i = 0; i < in.size(); i ++)
+      in[i] = - in[i];
+    auto p(predvq<T>(in));
+    res[0].resize(size);
+    for(int j = 0; j < res[0].size(); j ++) {
+      res[0][j].resize(rows, cols);
+      for(int k = 0; k < rows; k ++)
+        res[0][j].row(k) = offsetHalf<T>(p.subVector(j * rows * cols + k * cols, cols));
+    }
+    return res;
+  }
   res.resize(3);
   {
     auto p(predvp<T>(in));
@@ -4713,9 +5088,9 @@ template <typename T> vector<vector<SimpleMatrix<T> > > predMat(vector<vector<Si
   return res;
 }
 
-template <typename T> static inline vector<vector<SimpleMatrix<T> > > predMat(const vector<vector<SimpleMatrix<T> > >& in0) {
+template <typename T, bool possible = false> static inline vector<vector<SimpleMatrix<T> > > predMat(const vector<vector<SimpleMatrix<T> > >& in0) {
   auto res(in0);
-  return predMat<T>(res);
+  return predMat<T, possible>(res);
 }
 
 template <typename T> vector<SimpleSparseTensor<T> > predSTen(vector<SimpleSparseTensor<T> >& in0, const vector<int>& idx) {
@@ -5012,7 +5387,7 @@ template <typename T> bool loadobj(vector<SimpleVector<T> >& data, vector<Simple
   }
   return true;
 }
-  
+
 template <typename T> static inline bool saveMTL(const char* photo, const char* filename) {
   ofstream output;
   output.open(filename, std::ios::out);
@@ -5066,7 +5441,7 @@ template <typename T> static inline bool loaddat(const char* filename, string& h
   }
   return true;
 }
-  
+
 template <typename T> static inline bool savedat(const char* filename, string& header, vector<vector<T> >& data) {
   ofstream output;
   output.open(filename, std::ios::out);
@@ -5084,7 +5459,7 @@ template <typename T> static inline bool savedat(const char* filename, string& h
   }
   return true;
 }
-  
+
 template <typename T> static inline bool loadcenterr(vector<SimpleVector<T> >& center, vector<T>& r, const char* filename) {
   center = vector<SimpleVector<T> >();
   r      = vector<T>();
@@ -5735,7 +6110,6 @@ template <typename T> static inline vector<match_t<T> > matchPartial(const vecto
     m[i] = ~ m[i];
   return m;
 }
-
 
 template <typename T> static inline void drawMatchLine(SimpleMatrix<T>& map, const SimpleVector<T>& lref0, const SimpleVector<T>& lref1, const T& c) {
   int idxm(0);
@@ -6442,9 +6816,7 @@ public:
     this->dicts.resize(loop, vector<gram_t<U> >());
   }
   inline ~lword() { ; }
-  
   vector<gram_t<U> > compute(const U& input);
-
 private:
   inline bool       isin(const U& key) {
     assert(key.size() < dicts.size());
@@ -6454,7 +6826,6 @@ private:
     auto p(lower_bound(dict.begin(), dict.end(), key0));
     return dict.begin() <= p && p < dict.end() && p->str == key;
   }
-
   inline gram_t<U>& find(const U& key) {
     static gram_t<U> dummy;
     assert(key.size() < dicts.size());
@@ -6468,7 +6839,6 @@ private:
     }
     return *p;
   }
-
   inline void       assign(const gram_t<U>& val) {
     assert(val.str.size() < dicts.size());
     vector<gram_t<U> >& dict(dicts[val.str.size()]);
@@ -6489,7 +6859,6 @@ private:
       dict.erase(p);
     return;
   }
-
   vector<T>                   dict0;
   vector<vector<gram_t<U> > > dicts;
 };
@@ -6612,12 +6981,10 @@ public:
   typedef SimpleSparseTensor<T> Tensor;
 
   corpus(const U& input, const vector<U>& delimiter);
-
   inline corpus() { ; }
   inline corpus(const corpus<T, U>& other) { *this = other; }
   inline corpus(corpus<T, U>&& other) { *this = other; }
   inline ~corpus() { ; }
-
   inline U getAttributed(const vector<U>& highlight) const {
     U   result;
     int i;
@@ -7040,7 +7407,6 @@ template <typename T, typename U> U corpus<T, U>::serializeSub(const vector<int>
 template <typename T, typename U> pair<T, T> corpus<T, U>::compareStructure(const corpus<T, U>& src, const T& thresh, const T& thresh2) const {
   // get H-SVD singular values for each of them and sort:
   const auto s0(singularValues()), s1(src.singularValues());
-
   // get compared.
   pair<T, T> result;
   result.first = result.second = T(0);
@@ -7626,7 +7992,7 @@ template <typename T> static inline vector<T> cutText(const T& input, const vect
   return result;
 }
 
-static inline std::string utf8align(const std::string& tob) {
+static inline string utf8align(const string& tob) {
   int head = 0;
   while(head < tob.size() && (tob[head] & 0xc0) == 0x80) head ++;
   int tail = head;
@@ -7638,39 +8004,39 @@ static inline std::string utf8align(const std::string& tob) {
 }
 
 template <typename T, typename U> static inline void makelword(vector<U>& words, const U& input, const vector<U>& delimiter, const bool& show = false, const bool& utf8 = true, const int& limit = - 1) {
-  std::vector<gram_t<U> > found;
+  vector<gram_t<U> > found;
   const auto lwords(lword<char, U>(int(log(T(int(input.size() ))) / log(T(int(2)) ) )).compute(input));
   for(auto itr = lwords.begin(); itr != lwords.end(); ++ itr) {
     if(itr->rptr.size() < 2 && itr->str.size() < 3)
       continue;
-    const auto lb(std::lower_bound(found.begin(), found.end(), *itr));
+    const auto lb(lower_bound(found.begin(), found.end(), *itr));
     if(found.begin() <= lb && lb < found.end() && lb->str == itr->str)
       lb->rptr.insert(lb->rptr.end(), itr->rptr.begin(), itr->rptr.end());
     else
       found.emplace_back(*itr);
   }
   for(auto itr = found.begin(); itr != found.end(); ++ itr) {
-    std::sort(itr->rptr.begin(), itr->rptr.end());
-    itr->rptr.erase(std::unique(itr->rptr.begin(), itr->rptr.end()), itr->rptr.end());
+    sort(itr->rptr.begin(), itr->rptr.end());
+    itr->rptr.erase(unique(itr->rptr.begin(), itr->rptr.end()), itr->rptr.end());
   }
-  std::sort(found.begin(), found.end(), lessCount<U>);
-  found.erase(std::unique(found.begin(), found.end()), found.end());
+  sort(found.begin(), found.end(), lessCount<U>);
+  found.erase(unique(found.begin(), found.end()), found.end());
   if(0 < limit && limit < found.size()) found.resize(limit);
   words.reserve(words.size() + found.size());
   for(auto itr(found.begin()); itr < found.end(); ++ itr) {
     const auto tob(utf8 ? utf8align(itr->str) : itr->str);
     if(! tob.size()) continue;
     words.emplace_back(tob);
-    if(show) std::cout << tob << ", " << itr->rptr.size() << std::endl;
+    if(show) std::cout << tob << ", " << itr->rptr.size() << endl;
   }
-  std::sort(words.begin(), words.end());
-  words.erase(std::unique(words.begin(), words.end()), words.end());
+  sort(words.begin(), words.end());
+  words.erase(unique(words.begin(), words.end()), words.end());
   auto mydelim(delimiter);
   mydelim.insert(mydelim.end(), words.begin(), words.end());
   sort(mydelim.begin(), mydelim.end());
   auto inputs(cutText(input, words, mydelim));
-  std::sort(inputs.begin(), inputs.end());
-  inputs.erase(std::unique(inputs.begin(), inputs.end()), inputs.end());
+  sort(inputs.begin(), inputs.end());
+  inputs.erase(unique(inputs.begin(), inputs.end()), inputs.end());
   if(utf8)
     for(int i = 0; i < inputs.size(); i ++) {
       inputs[i] = utf8align(inputs[i]);
@@ -7678,11 +8044,11 @@ template <typename T, typename U> static inline void makelword(vector<U>& words,
     }
   else
     words.insert(words.end(), inputs.begin(), inputs.end());
-  std::sort(words.begin(), words.end());
-  words.erase(std::unique(words.begin(), words.end()), words.end());
+  sort(words.begin(), words.end());
+  words.erase(unique(words.begin(), words.end()), words.end());
   if(show)
     for(int i = 0; i < inputs.size(); i ++)
-      if(inputs[i].size()) std::cout << inputs[i] << ", 1" << std::endl;
+      if(inputs[i].size()) std::cout << inputs[i] << ", 1" << endl;
   return;
 }
 

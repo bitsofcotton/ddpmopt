@@ -146,7 +146,11 @@ int main(int argc, const char* argv[]) {
     }
     // N.B. with good spreaded input, we can suppose original as a 'T' command
     //      case.
+#if defined(_POSSIBLE_)
+    auto p(predMat<num_t, true>(in = normalize<num_t>(in)));
+#else
     auto p(predMat<num_t>(in = normalize<num_t>(in)));
+#endif
     for(int i = 0; i < p.size(); i ++)
       if(! savep2or3<num_t>(
         (string("predg") + to_string(i) + string(".ppm")).c_str(),
@@ -196,15 +200,15 @@ int main(int argc, const char* argv[]) {
       }
       // N.B. same as 'p' cmd, we can suppose original as 'T' command input
       //      with long range but not in general.
-#if defined(_FEED_MUCH_)
-      const int ext(work[0].rows() / 34);
-#else
       // N.B. 10 + 1 * 2 < work[0].rows() / step for PP0.
       const int ext(work[0].rows() / 12);
-#endif
       vector<vector<SimpleMatrix<num_t> > > wwork;
       for(int i = 0; i < ext; i ++) {
+#if defined(_POSSIBLE_)
+        auto n(predVec<num_t, true>(skipX<vector<SimpleVector<num_t> > >(pwork, i + 1) ));
+#else
         auto n(predVec<num_t>(skipX<vector<SimpleVector<num_t> > >(pwork, i + 1) ));
+#endif
         if(! i) {
           wwork.resize(n.size());
           for(int k = 0; k < n.size(); k ++) {
