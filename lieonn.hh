@@ -3729,60 +3729,6 @@ private:
   int  t;
 };
  
-template <typename T> static inline int tanPio4Scale(const int& idx, const int& size) {
-  const static T pio4(atan(T(int(1)) ));
-  return int(tan(T(idx) / T(size) * pio4) / tan(pio4 / T(size)) );
-}
-
-template <typename T> static inline int ceilInvTanPio4Scale(const int& y) {
-  const static T pio4(atan(T(int(1)) ));
-  // for( ; int(tan(pio4) / tan(pio4 / T(sz)) ) < y; sz ++) ;
-  return int(ceil(pio4 / atan(T(int(1)) / T(y)) ));
-}
-
-template <typename T> static inline SimpleVector<T> arctanFeeder(const SimpleVector<T>& in) {
-  const static SimpleVector<T> null;
-  if(! in.size()) return null;
-  const auto sz(ceilInvTanPio4Scale<T>(in.size()) - 1);
-  if(sz <= 1) return null;
-  SimpleVector<T> res(sz);
-  res.O();
-  for(int i = 0; i < res.size(); i ++)
-    for(int j = in.size() - tanPio4Scale<T>(i + 1, sz);
-            j < in.size() - tanPio4Scale<T>(i, sz); j ++)
-      res[res.size() - i - 1] += in[j];
-  // N.B. tanPio4Scale is monotonic increasingly function.
-  int denom(ceil(tanPio4Scale<T>(sz, sz) - tanPio4Scale<T>(sz - 1, sz)));
-  if(! denom) return null;
-  // XXX: CPU float glitch.
-  denom ++;
-  for(int i = 0; i < res.size(); i ++)
-    res[i] /= T(denom);
-  return res;
-}
-
-template <typename T> static inline SimpleVector<SimpleVector<T> > arctanFeeder(const SimpleVector<SimpleVector<T> >& in) {
-  const static SimpleVector<SimpleVector<T> > null;
-  if(! in.size()) return null;
-  const auto sz(ceilInvTanPio4Scale<T>(in.size()) - 1);
-  if(sz <= 1) return null;
-  SimpleVector<SimpleVector<T> > res(sz);
-  for(int i = 0; i < res.size(); i ++) {
-    res[i].resize(in[0].size());
-    res[i].O();
-  }
-  for(int i = 0; i < res.size(); i ++)
-    for(int j = in.size() - tanPio4Scale<T>(i + 1, sz);
-            j < in.size() - tanPio4Scale<T>(i, sz); j ++)
-      res[res.size() - i - 1] += in[j];
-  int denom(ceil(tanPio4Scale<T>(sz, sz) - tanPio4Scale<T>(sz - 1, sz)));
-  if(! denom) return null;
-  denom ++;
-  for(int i = 0; i < res.size(); i ++)
-    res[i] /= T(denom);
-  return res;
-}
-
 // N.B. we omit high frequency part (1/f(x) input) to be treated better in P.
 template <typename T, T (*p)(const SimpleVector<T>&)> static inline T pbond(SimpleVector<T> in) {
   if(in.size() <= 1) return T(int(0));
@@ -4052,40 +3998,6 @@ template <typename T> static inline T pSlipJamQuad3(const SimpleVector<T>& in, v
   assert(apb.size() == aq.size());
   lastM = move(apb);
   return aq[aq.size() - 1].second;
-}
-
-template <typename T> static inline vector<T> pSlipJam443(const SimpleVector<T>& in, vector<pslip_t<T> >& slip, const int& t){
-  assert(! (slip.size() & 3));
-  vector<T> M;
-  M.resize(slip.size());
-  M[0] = pSlipJamQuad3<T>(in, slip[0].pipe, slip[0].lastM, slip[0].shf, slip[0].nshf, t);
-#if defined(_OPENMP)
-#pragma omp parallel for schedule(static, 1)
-#endif
-  for(int i = 1; i < M.size(); i ++)
-    M[i] = pSlipJamQuad3<T>(in, slip[i].pipe, slip[i].lastM, slip[i].shf, slip[i].nshf, t);
-  vector<T> MM;
-  MM.resize(4, T(int(0)));
-  for(int i = 0; i < MM.size(); i ++) MM[i] = M[M.size() / MM.size() * i];
-  for(int i = 1; i < M.size() / MM.size(); i ++)
-    for(int j = 0; j < MM.size(); j ++)
-      MM[j] += M[i + M.size() / MM.size() * j];
-  for(int i = 0; i < MM.size(); i ++)
-    MM[i] /= T(M.size() / MM.size());
-  return move(MM);
-}
-
-template <typename T, int recur = 40> static inline T pVeryHeavyPossible(const SimpleVector<T>& in) {
-  vector<pslip_t<T> > pslip;
-  pslip.reserve(recur);
-  for(int i = 0; i < recur; i ++) pslip.emplace_back(pslip_t<T>());
-  T M(int(0));
-  idFeeder<T> in2(4);
-  for(int i = 1; i <= in.size(); i ++) {
-    const auto& inn2(in2.next(in[i - 1] * M));
-    auto res(pSlipJam443(in.subVector(0, i), pslip, i - 1));
-  }
-  return in2.res[0] * M;
 }
 
 // N.B. start det diag operations.
@@ -4704,28 +4616,6 @@ template <typename T, int nprogress = 20> static inline SimpleVector<T> predvp(c
   return p;
 }
 
-template <typename T, int nprogress = 20> static inline SimpleVector<T> predvq(const vector<SimpleVector<T> >& in) {
-  SimpleVector<T> p(in[0].size());
-  idFeeder<T> buf(in.size());
-  for(int i = 0; i < in.size(); i ++)
-    buf.next(in[i][0]);
-  assert(buf.full);
-  p[0] = pVeryHeavyPossible<T>(buf.res);
-#if defined(_OPENMP)
-#pragma omp parallel for schedule(static, 1)
-#endif
-  for(int j = 1; j < in[0].size(); j ++) {
-    if(nprogress && ! (j % max(int(1), int(in[0].size() / nprogress))) )
-      cerr << j << " / " << in[0].size() << endl;
-    idFeeder<T> buf(in.size());
-    for(int i = 0; i < in.size(); i ++)
-      buf.next(in[i][j]);
-    assert(buf.full);
-    p[j] = pVeryHeavyPossible<T>(buf.res);
-  }
-  return p;
-}
-
 template <typename T, int nprogress = 20> static inline SimpleVector<T> predv1(vector<SimpleVector<T> >& in) {
   static const auto step(1);
   assert(0 < step && 10 + step * 2 <= in.size() && 1 < in[0].size());
@@ -4880,16 +4770,6 @@ template <typename T, bool possible = false> vector<vector<SimpleVector<T> > > p
   for(int i = 0; i < in.size(); i ++)
     in[i] = - in[i];
   vector<vector<SimpleVector<T> > > res;
-  if(possible) {
-    res.resize(1);
-    for(int i = 0; i < in.size(); i ++)
-      in[i] = - in[i];
-    auto p(predvq<T>(in));
-    res[0].resize(size0);
-    for(int j = 0; j < res[0].size(); j ++)
-      res[0][j] = offsetHalf<T>(p.subVector(size1 * j, size1));
-    return res;
-  }
   res.resize(3);
   {
     auto p(predvp<T>(in));
@@ -4948,19 +4828,6 @@ template <typename T, bool possible = false> vector<vector<SimpleMatrix<T> > > p
   for(int i = 0; i < in.size(); i ++)
     in[i] = - in[i];
   vector<vector<SimpleMatrix<T> > > res;
-  if(possible) {
-    res.resize(1);
-    for(int i = 0; i < in.size(); i ++)
-      in[i] = - in[i];
-    auto p(predvq<T>(in));
-    res[0].resize(size);
-    for(int j = 0; j < res[0].size(); j ++) {
-      res[0][j].resize(rows, cols);
-      for(int k = 0; k < rows; k ++)
-        res[0][j].row(k) = offsetHalf<T>(p.subVector(j * rows * cols + k * cols, cols));
-    }
-    return res;
-  }
   res.resize(3);
   {
     auto p(predvp<T>(in));
