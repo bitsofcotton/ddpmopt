@@ -276,4 +276,5 @@ Leave here but might return here after another implementations.
 2025/05/21 slim down, w command out change.
 2025/05/23 retarget cultivated input stream but will close soon.
 2025/05/25 code cleaning, select FEED_MUCH as a single implementation default.
+2025/06/08 rework into possible thin layer but enough layers from p2 result.
 

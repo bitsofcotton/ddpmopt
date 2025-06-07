@@ -3729,28 +3729,6 @@ private:
   int  t;
 };
  
-// N.B. we omit high frequency part (1/f(x) input) to be treated better in P.
-template <typename T, T (*p)(const SimpleVector<T>&)> static inline T pbond(SimpleVector<T> in) {
-  if(in.size() <= 1) return T(int(0));
-  for(int i = 0; i < in.size(); i ++) if(! isfinite(in[i])) return T(int(0));
-  auto M(abs(in[0]));
-  for(int i = 1; i < in.size(); i ++)
-    M = max(M, in[i]);
-  if(M == T(int(0))) return T(int(0));
-  // N.B. with 1-norm normalized input:
-  T m(in[0] /= M);
-  for(int i = 1; i < in.size(); i ++) m = min(m, in[i] /= M);
-  // N.B. offset const.
-  m -= T(int(1));
-  // N.B. 0 < v, normalize with v's orthogonality:
-  T mavg(log(in[0] - m));
-  for(int i = 1; i < in.size(); i ++) mavg += log(in[i] - m);
-  mavg /= T(int(in.size()));
-  mavg  = exp(mavg);
-  // N.B. we need nonlinear prediction, so * M before to predict.
-  return max(- M, min(M, p((in *= M) /= mavg) * mavg));
-}
-
 template <typename T, T (*p)(const SimpleVector<T>&)> static inline T deep(const SimpleVector<T>& in, const int& unit = 3) {
   assert(1 < unit);
   vector<idFeeder<T> > depth;
@@ -4750,7 +4728,7 @@ template <typename T, int nprogress = 20> static inline SimpleVector<T> predv4(v
       p01next<T>(nwork / nseconds) * nseconds));
 }
 
-template <typename T, bool possible = false> vector<vector<SimpleVector<T> > > predVec(vector<vector<SimpleVector<T> > >& in0) {
+template <typename T> vector<vector<SimpleVector<T> > > predVec(vector<vector<SimpleVector<T> > >& in0) {
   assert(in0.size() && in0[0].size() && in0[0][0].size());
   vector<SimpleVector<T> > in;
   in.resize(in0.size());
@@ -4792,12 +4770,12 @@ template <typename T, bool possible = false> vector<vector<SimpleVector<T> > > p
   return res;
 }
 
-template <typename T, bool possible = false> static inline vector<vector<SimpleVector<T> > > predVec(const vector<vector<SimpleVector<T> > >& in0) {
+template <typename T> static inline vector<vector<SimpleVector<T> > > predVec(const vector<vector<SimpleVector<T> > >& in0) {
   auto res(in0);
-  return predVec<T, possible>(res);
+  return predVec<T>(res);
 }
 
-template <typename T, bool possible = false> vector<vector<SimpleMatrix<T> > > predMat(vector<vector<SimpleMatrix<T> > >& in0) {
+template <typename T> vector<vector<SimpleMatrix<T> > > predMat(vector<vector<SimpleMatrix<T> > >& in0) {
   // N.B. original DFT image[n] DFT conversion looks better with continuous
   //      input converted into discrete variables, however, our predictor isn't
   //      get 100% result, so some probability they slips, so their slips
@@ -4859,9 +4837,9 @@ template <typename T, bool possible = false> vector<vector<SimpleMatrix<T> > > p
   return res;
 }
 
-template <typename T, bool possible = false> static inline vector<vector<SimpleMatrix<T> > > predMat(const vector<vector<SimpleMatrix<T> > >& in0) {
+template <typename T> static inline vector<vector<SimpleMatrix<T> > > predMat(const vector<vector<SimpleMatrix<T> > >& in0) {
   auto res(in0);
-  return predMat<T, possible>(res);
+  return predMat<T>(res);
 }
 
 template <typename T> vector<SimpleSparseTensor<T> > predSTen(vector<SimpleSparseTensor<T> >& in0, const vector<int>& idx) {
@@ -7828,7 +7806,7 @@ template <typename T, typename U> static inline void makelword(vector<U>& words,
 // (00) predictions via linear sum/diff based some reformation input and revert:
 //      it's all integrated skipX concerns, the jammer either jam out us
 //      even *ANY* reformation and revert them in which way.
-//      so it's integrated int *linear* meanings to reform prediction vector.
+//      so it's integrated into *linear* meanings to reform prediction vector.
 //      eg. PdeltaOnce, Ppersistent, Pprogression, (P0DFT).
 //      they goes well because timing-related concerns A_0 ... A_k B x_0
 //      made initial entropy and A'^k B' x_0 -> x_k structures.
@@ -7839,6 +7817,11 @@ template <typename T, typename U> static inline void makelword(vector<U>& words,
 // (02) we eliminated predvall, we don't need them with whole internal states
 //      awared predictors they have a better prediction concerned with some
 //      series of a PRNG tests.
+// (03) arctanFeeder concerns intended to avoid some jammers.
+//      we shouldn't completely avoid the jammers by them because of the
+//      jammers' strategy can select *any* function.
+// (04) p2next: the p012next, p01next, p0...next integrator.
+//      it's verbose, we should target *thin-layered* ones they can grip stable.
 
 #define _SIMPLELIN_
 #endif
