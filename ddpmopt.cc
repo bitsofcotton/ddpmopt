@@ -12,8 +12,8 @@
 #include <assert.h>
 #include <stdlib.h>
 
-//#define int int64_t
 #define int int32_t
+//#define int int64_t
 #include "lieonn.hh"
 typedef myfloat num_t;
 
@@ -33,8 +33,8 @@ using std::istringstream;
 
 #undef int
 int main(int argc, const char* argv[]) {
-//#define int int64_t
 #define int int32_t
+//#define int int64_t
   const auto  sz(2);
   const auto& m(argv[1][0]);
   if(argc <= 1 || argv[1][1] != '\0') goto usage;
@@ -383,18 +383,18 @@ int main(int argc, const char* argv[]) {
       if(! loadp2or3<num_t>(work, argv[i0])) continue;
       if(pc.size()) {
         cout << " --- " << in.size() - 11 << " --- " << endl;
-        for(int i = 0; i < p.size(); i ++)
-          for(int j = 0; j < p[i].size(); j ++) {
-            const auto rr(p[i][j].rows() / pc[i].first);
-            const auto cc(p[i][j].cols() / pc[i].second);
+        for(int i = 0; i < pc.size(); i ++)
+          for(int j = 0; j < p[0].size(); j ++) {
+            const auto rr(p[0][j].rows() / pc[i].first);
+            const auto cc(p[0][j].cols() / pc[i].second);
             for(int k = 0; k < pc[i].first; k ++)
               for(int n = 0; n < pc[i].second; n ++) {
                 vector<num_t> workr;
                 num_t orig(int(0));
                 int   cnt(0);
                 workr.resize(p.size(), int(0));
-                for(int kk = k * rr; kk < min(p[i][j].rows(), (k + 1) * rr); kk ++)
-                  for(int nn = n * cc; nn < min(p[i][j].cols(), (n + 1) * cc);
+                for(int kk = k * rr; kk < min(p[0][j].rows(), (k + 1) * rr); kk ++)
+                  for(int nn = n * cc; nn < min(p[0][j].cols(), (n + 1) * cc);
                     nn ++, cnt ++) {
                     for(int m = 0; m < p.size(); m ++)
                       workr[m] += p[m][j](kk, nn);

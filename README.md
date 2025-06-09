@@ -61,8 +61,9 @@ We get pqred command to get 3 of the candidates from original stream or PRNG mix
 We have T command for gokibin bit preprocessed graphics stream testing.
 If output is better than .5 probability and stable for some of the shrinked size, the gokibin bit reversed outputs' shrinked image can have some of the meanings for them.
 
-# Infection
-We're in prediction result controlled condition, so we don't get actual output images to confirm result, so we need to implement this repository only with the hypothesis we firstly have and their implementation is correct or not one.
+However, we're in prediction result controlled condition, so we don't get actual output images to confirm result, so we need to implement this repository only with the hypothesis we firstly have and their implementation is correct or not one.
+
+So \_PERSISTENT\_ compile option only uses uint32_t for float operation and int32_t for index operation and void\* for pointer operation internal of C language we estimate the conclusion for arithmatic operations. So float operations' arithmatic operation is first order arithmatic logic only with addition and bit operation other than initializing/output (for raw integer type outputs) them we should rely on them.
 
 # Tips on timing-related cultivated conditions
 We re-target cultivated conditions to do recursive on PP... predictors to shirked information amount copy to 1:1 reason.
@@ -277,4 +278,5 @@ Leave here but might return here after another implementations.
 2025/05/23 retarget cultivated input stream but will close soon.
 2025/05/25 code cleaning, select FEED_MUCH as a single implementation default.
 2025/06/08 rework into possible thin layer but enough layers from p2 result.
+2025/06/10 persistent uint32_t use option with _PERSISTENT_ compile option but slightly use int32_t for index op and void* for pointer.
 

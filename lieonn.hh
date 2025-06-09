@@ -364,6 +364,9 @@ public:
   inline Signed(const Signed<T,bits>& src) {
     *this = src;
   }
+  inline bool operator != (const Signed<T,bits>& src) const {
+    return dynamic_cast<const T&>(*this) != dynamic_cast<const T&>(src);
+  }
   inline bool operator <  (const Signed<T,bits>& src) const {
     const auto mthis(int(*this >> (bits - 1)));
     const auto msrc( int(src   >> (bits - 1)));
@@ -647,11 +650,11 @@ public:
     return vuzero;
   }
   const SimpleFloat<T,W,bits,U>& zero()   const {
-    const static SimpleFloat<T,W,bits,U> vzero(0);
+    const static SimpleFloat<T,W,bits,U> vzero(T(int(0)));
     return vzero;
   }
   const SimpleFloat<T,W,bits,U>& one()    const {
-    const static SimpleFloat<T,W,bits,U> vone(1);
+    const static SimpleFloat<T,W,bits,U> vone(T(int(1)));
     return vone;
   }
   const SimpleFloat<T,W,bits,U>& two()    const {
@@ -728,12 +731,12 @@ private:
     return os << (const char*)(v.s & (1 << v.SIGN) ? "-" : "") << std::hex << T(v.m) << "*2^" << (const char*)(v.e < uzero ? "-" : "") << (v.e < uzero ? U(- v.e) : v.e) << " " << std::dec;
   }
   friend istream& operator >> (istream& is, SimpleFloat<T,W,bits,U>& v) {
-    const static SimpleFloat<T,W,bits,U> two(2);
-                 SimpleFloat<T,W,bits,U> e(0);
+    const static SimpleFloat<T,W,bits,U> two(T(int(2)));
+                 SimpleFloat<T,W,bits,U> e(T(int(0)));
     bool mode(false);
     bool sign(false);
     bool fsign(false);
-    v = SimpleFloat<T,W,bits,U>(0);
+    v = SimpleFloat<T,W,bits,U>(T(int(0)));
     while(! is.eof() && ! is.bad()) {
       const auto buf(is.get());
       if(buf != ' ' && buf != '\t' && buf != '\n') {
@@ -776,20 +779,20 @@ private:
       case '5': case '6': case '7': case '8': case '9':
         if(mode) {
           e <<= U(int(4));
-          e  += SimpleFloat<T,W,bits,U>(int(buf - '0'));
+          e  += SimpleFloat<T,W,bits,U>(T(int(buf - '0')));
         } else {
           v <<= U(int(4));
-          v  += SimpleFloat<T,W,bits,U>(int(buf - '0'));
+          v  += SimpleFloat<T,W,bits,U>(T(int(buf - '0')));
         }
         fsign = true;
         break;
       case 'a': case'b': case 'c': case 'd': case 'e': case 'f':
         if(mode) {
           e <<= U(int(4));
-          e  += SimpleFloat<T,W,bits,U>(int(buf - 'a' + 10));
+          e  += SimpleFloat<T,W,bits,U>(T(int(buf - 'a' + 10)));
         } else {
           v <<= U(int(4));
-          v  += SimpleFloat<T,W,bits,U>(int(buf - 'a' + 10));
+          v  += SimpleFloat<T,W,bits,U>(T(int(buf - 'a' + 10)));
         }
         fsign = true;
         break;
@@ -1403,72 +1406,90 @@ template <typename T> static inline T ccot(const T& s) {
 
 template <typename T> using complex = Complex<T>;
 
-#if !defined(_FLOAT_BITS_)
-  #include <cmath>
-  using namespace std;
-  typedef uint64_t myuint;
-  typedef int64_t  myint;
-  // XXX:
-  typedef long double myfloat;
-  //typedef double myfloat;
-#elif _FLOAT_BITS_ == 8
-  typedef uint8_t myuint;
-  typedef int8_t  myint;
-  typedef SimpleFloat<myuint, uint16_t, 8, myint> myfloat;
-#elif _FLOAT_BITS_ == 16
-  typedef uint16_t myuint;
-  typedef int16_t  myint;
-  typedef SimpleFloat<myuint, uint32_t, 16, myint> myfloat;
-#elif _FLOAT_BITS_ == 32
-  typedef uint32_t myuint;
-  typedef int32_t  myint;
-  typedef SimpleFloat<myuint, uint64_t, 32, myint> myfloat;
-#elif _FLOAT_BITS_ == 64
-  typedef uint64_t myuint;
-  typedef int64_t  myint;
-  typedef SimpleFloat<myuint, unsigned __int128, 64, myint> myfloat;
-#elif _FLOAT_BITS_ == 128
-  typedef DUInt<uint64_t, 64> uint128_t;
-  typedef Signed<uint128_t, 128> int128_t;
-  typedef uint128_t myuint;
-  typedef int128_t  myint;
-  typedef SimpleFloat<myuint, DUInt<myuint, 128>, 128, myint> myfloat;
-#elif _FLOAT_BITS_ == 256
-  typedef DUInt<uint64_t, 64> uint128_t;
-  typedef DUInt<uint128_t, 128> uint256_t;
-  typedef Signed<uint256_t, 256> int256_t;
-  typedef uint256_t myuint;
-  typedef int256_t  myint;
-  typedef SimpleFloat<myuint, DUInt<myuint, 256>, 256, myint> myfloat;
-#elif _FLOAT_BITS_ == 512
-  typedef DUInt<uint64_t, 64> uint128_t;
-  typedef DUInt<uint128_t, 128> uint256_t;
-  typedef DUInt<uint256_t, 256> uint512_t;
-  typedef Signed<uint512_t, 512> int512_t;
-  typedef uint512_t myuint;
-  typedef int512_t  myint;
-  typedef SimpleFloat<myuint, DUInt<myuint, 512>, 512, myint> myfloat;
-#elif _FLOAT_BITS_ == 1024
-  typedef DUInt<uint64_t, 64> uint128_t;
-  typedef DUInt<uint128_t, 128> uint256_t;
-  typedef DUInt<uint256_t, 256> uint512_t;
-  typedef DUInt<uint512_t, 512> uint1024_t;
-  typedef Signed<uint1024_t, 1024> int1024_t;
-  typedef uint1024_t myuint;
-  typedef int1024_t  myint;
-  typedef SimpleFloat<myuint, DUInt<myuint, 1024>, 1024, myint> myfloat;
-#elif _FLOAT_BITS_ == 2048
-  typedef DUInt<uint64_t, 64> uint128_t;
-  typedef DUInt<uint128_t, 128> uint256_t;
-  typedef DUInt<uint256_t, 256> uint512_t;
-  typedef DUInt<uint512_t, 512> uint1024_t;
-  typedef DUInt<uint1024_t, 1024> uint2048_t;
-  typedef Signed<uint2048_t, 2048> int2048_t;
-  typedef uint2048_t myuint;
-  typedef int2048_t  myint;
-  typedef SimpleFloat<myuint, DUInt<myuint, 2048>, 2048, myint> myfloat;
+#if defined(_PERSISTENT_)
+# if _FLOAT_BITS_ == 16
+    typedef DUInt<uint8_t> myuint;
+    typedef Signed<myuint, 16> myint;
+    typedef SimpleFloat<myuint, DUInt<myuint, 16>, 16, myint> myfloat;
+# elif _FLOAT_BITS_ == 32
+    typedef DUInt<uint16_t, 16> myuint;
+    typedef Signed<myuint, 32> myint;
+    typedef SimpleFloat<myuint, DUInt<myuint, 32>, 32, myint> myfloat;
+# elif _FLOAT_BITS_ == 64
+    typedef DUInt<uint32_t, 32> myuint;
+    typedef Signed<myuint, 64> myint;
+    typedef SimpleFloat<myuint, DUInt<myuint, 64>, 64, myint> myfloat;
+# else
+#   error cannot handle float
+# endif
 #else
-# error cannot handle float
+# if !defined(_FLOAT_BITS_)
+    #include <cmath>
+    using namespace std;
+    typedef uint64_t myuint;
+    typedef int64_t  myint;
+    // XXX:
+    typedef long double myfloat;
+    //typedef double myfloat;
+# elif _FLOAT_BITS_ == 8
+    typedef uint8_t myuint;
+    typedef int8_t  myint;
+    typedef SimpleFloat<myuint, uint16_t, 8, myint> myfloat;
+# elif _FLOAT_BITS_ == 16
+    typedef uint16_t myuint;
+    typedef int16_t  myint;
+    typedef SimpleFloat<myuint, uint32_t, 16, myint> myfloat;
+# elif _FLOAT_BITS_ == 32
+    typedef uint32_t myuint;
+    typedef int32_t  myint;
+    typedef SimpleFloat<myuint, uint64_t, 32, myint> myfloat;
+# elif _FLOAT_BITS_ == 64
+    typedef uint64_t myuint;
+    typedef int64_t  myint;
+    typedef SimpleFloat<myuint, unsigned __int128, 64, myint> myfloat;
+# elif _FLOAT_BITS_ == 128
+    typedef DUInt<uint64_t, 64> uint128_t;
+    typedef Signed<uint128_t, 128> int128_t;
+    typedef uint128_t myuint;
+    typedef int128_t  myint;
+    typedef SimpleFloat<myuint, DUInt<myuint, 128>, 128, myint> myfloat;
+# elif _FLOAT_BITS_ == 256
+    typedef DUInt<uint64_t, 64> uint128_t;
+    typedef DUInt<uint128_t, 128> uint256_t;
+    typedef Signed<uint256_t, 256> int256_t;
+    typedef uint256_t myuint;
+    typedef int256_t  myint;
+    typedef SimpleFloat<myuint, DUInt<myuint, 256>, 256, myint> myfloat;
+# elif _FLOAT_BITS_ == 512
+    typedef DUInt<uint64_t, 64> uint128_t;
+    typedef DUInt<uint128_t, 128> uint256_t;
+    typedef DUInt<uint256_t, 256> uint512_t;
+    typedef Signed<uint512_t, 512> int512_t;
+    typedef uint512_t myuint;
+    typedef int512_t  myint;
+    typedef SimpleFloat<myuint, DUInt<myuint, 512>, 512, myint> myfloat;
+# elif _FLOAT_BITS_ == 1024
+    typedef DUInt<uint64_t, 64> uint128_t;
+    typedef DUInt<uint128_t, 128> uint256_t;
+    typedef DUInt<uint256_t, 256> uint512_t;
+    typedef DUInt<uint512_t, 512> uint1024_t;
+    typedef Signed<uint1024_t, 1024> int1024_t;
+    typedef uint1024_t myuint;
+    typedef int1024_t  myint;
+    typedef SimpleFloat<myuint, DUInt<myuint, 1024>, 1024, myint> myfloat;
+#e lif _FLOAT_BITS_ == 2048
+    typedef DUInt<uint64_t, 64> uint128_t;
+    typedef DUInt<uint128_t, 128> uint256_t;
+    typedef DUInt<uint256_t, 256> uint512_t;
+    typedef DUInt<uint512_t, 512> uint1024_t;
+    typedef DUInt<uint1024_t, 1024> uint2048_t;
+    typedef Signed<uint2048_t, 2048> int2048_t;
+    typedef uint2048_t myuint;
+    typedef int2048_t  myint;
+    typedef SimpleFloat<myuint, DUInt<myuint, 2048>, 2048, myint> myfloat;
+# else
+#   error cannot handle float
+# endif
 #endif
 
 
@@ -2567,7 +2588,7 @@ template <typename T> static inline SimpleMatrix<T> exp(const SimpleMatrix<T>& m
   auto mm(exp01(m / T(myint(p))));
   auto res(m);
   for(res.I(); p; mm *= mm, p >>= 1)
-    if(bool(p & myuint(myint(int(1)))))
+    if(bool(p & myuint(int(1))))
       res *= mm;
   return res;
 }
@@ -3528,7 +3549,7 @@ template <typename T> static inline T p012next(const SimpleVector<T>& d) {
              T(int(avg.size())), vdp.second)) );
     }
     const auto vdp(makeProgramInvariant<T>(R2bin<T>(work)));
-    T score(0);
+    T score(int(0));
     for(int j = 0; j < work.size(); j ++)
       score += work[j] *
         bin2R<T>(revertProgramInvariant<T>(make_pair(avg[j], vdp.second)));
@@ -3792,8 +3813,8 @@ template <typename T> static inline pair<T, T> pSubesube(const T& d0, const pair
 
 template <typename T> class pslip_t {
 public:
-  inline pslip_t() {
-    pipe.resize(3 * 3 * 3 - 1);
+  inline pslip_t(const int& len = 0) {
+    pipe.resize(3 * 3 * 3 - 1, idFeeder<T>(len));
     M.resize(27 * 2);
     M.O();
     shf.resize(2, 0);
@@ -3828,7 +3849,7 @@ template <typename T> static inline T pSlipGulf0short(const SimpleVector<T>& in,
     make_pair(slip.M.subVector((i) * 2, 2).entity, \
       apb.subVector((i) * 2, 2).entity), t0 = t));
 
-  UPDPSJQ3(in,in[in.size()-1],T(1),0);
+  UPDPSJQ3(in,in[in.size()-1],T(int(1)),0);
   
   slip.pipe[0].next(aq[0].first);
   UPDPSJQ3(slip.pipe[0].res,aq[0].first,aq[0].second,1);

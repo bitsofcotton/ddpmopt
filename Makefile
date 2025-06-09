@@ -21,27 +21,29 @@ LDFLAGS+=	-lc++ -L/usr/local/lib
 #LDFLAGS+=	-lquadmath -lm
 
 # lieonn.hh compile options
-#CXXFLAGS+=	-D_ARCFOUR_
+CXXFLAGS+=	-D_ARCFOUR_
 
-CLEANFILES= *.o ddpmopt ddpmopt32 ddpmopt64 ddpmoptmp ddpmopt32mp ddpmopt64mp
+CLEANFILES= *.o ddpmopt ddpmopt32 ddpmopt64 ddpmoptp ddpmoptmp ddpmopt32mp ddpmopt64mp ddpmoptpmp
 
 clean:
 	@rm -rf ${CLEANFILES}
 
-all:	ddpmopt ddpmopt32 ddpmopt64 ddpmoptmp ddpmopt32mp ddpmopt64mp
+all:	ddpmopt ddpmopt32 ddpmopt64 ddpmoptp ddpmoptmp ddpmopt32mp ddpmopt64mp ddpmoptpmp
 
 ddpmopt:
-	${CXX} ${CXXFLAGS} -static -D_ARCFOUR_ -o ddpmopt ddpmopt.cc
+	${CXX} ${CXXFLAGS} -static -o ddpmopt ddpmopt.cc
 ddpmopt32:
-	${CXX} ${CXXFLAGS} -static -D_ARCFOUR_ -D_FLOAT_BITS_=32 -o ddpmopt32 ddpmopt.cc
+	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=32 -o ddpmopt32 ddpmopt.cc
 ddpmopt64:
-	${CXX} ${CXXFLAGS} -static -D_ARCFOUR_ -D_FLOAT_BITS_=64 -o ddpmopt64 ddpmopt.cc
+	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=64 -o ddpmopt64 ddpmopt.cc
+ddpmoptp:
+	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=64 -D_PERSISTENT_ -o ddpmoptp ddpmopt.cc
 ddpmoptmp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_ARCFOUR_ -o ddpmoptmp ddpmopt.cc
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -o ddpmoptmp ddpmopt.cc
 ddpmopt32mp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_ARCFOUR_ -D_FLOAT_BITS_=32 -o ddpmopt32mp ddpmopt.cc
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=32 -o ddpmopt32mp ddpmopt.cc
 ddpmopt64mp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_ARCFOUR_ -D_FLOAT_BITS_=64 -o ddpmopt64mp ddpmopt.cc
-ddpmopt128mp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_ARCFOUR_ -D_FLOAT_BITS_=128 -o ddpmopt128mp ddpmopt.cc
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=64 -o ddpmopt64mp ddpmopt.cc
+ddpmoptpmp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=64 -D_PERSISTENT_ -o ddpmoptpmp ddpmopt.cc
 
