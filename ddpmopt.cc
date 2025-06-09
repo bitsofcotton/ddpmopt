@@ -408,9 +408,9 @@ int main(int argc, const char* argv[]) {
                 // workr = (sgn<num_t>(workr - num_t(int(1)) / num_t(int(2)) )
                 //   + num_t(int(1)) ) / num_t(int(2));
                 // also apply this on orig.
-                for(int m = 0; m < p.size(); m ++)
+                for(int m = 0; m < p.size() - 1; m ++)
                   cout << abs(workr[m] - orig) * num_t(int(2)) << ", ";
-                cout << endl;
+                cout << abs(workr[p.size() - 1] - orig) * num_t(int(2)) << endl;
               }
             cout << endl;
           }

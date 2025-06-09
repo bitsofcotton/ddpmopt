@@ -3491,6 +3491,7 @@ template <typename T> static inline T p012next(const SimpleVector<T>& d) {
   if(M <= zero) return zero;
   const auto varlen(ind2vd(d.size()));
   vector<SimpleVector<T> > cache;
+  if(d.size() - varlen + 2 < 0) return zero;
   cache.reserve(d.size() - varlen + 2);
   for(int i = 0; i < d.size() - varlen - step + 2; i ++) {
     cache.emplace_back(d.subVector(i, varlen));
@@ -3764,15 +3765,6 @@ template <typename T, T (*p)(const SimpleVector<T>&)> static inline T deep(const
   return M;
 }
 
-// N.B. unit for prediction bricks.
-template <typename T> static inline vector<T> pbullet2(const SimpleVector<T>& in) {
-  vector<T> M;
-  M.reserve(2);
-  M.emplace_back(  deep<T, p0maxNext<T> >(  in, 3));
-  M.emplace_back(- deep<T, p0maxNext<T> >(- in, 3));
-  return M;
-}
-
 // N.B. jammer to the predictor to make grip or lose grip.
 //      we want to use this jammer to lose usual grip on predictor.
 template <typename T> static inline pair<T, T> pSubesube(const T& d0, const pair<vector<T>, vector<T> >& j, const int& t, const vector<int>& idx = vector<int>()) {
@@ -3802,71 +3794,70 @@ template <typename T> class pslip_t {
 public:
   inline pslip_t() {
     pipe.resize(3 * 3 * 3 - 1);
-    {
-      vector<T> lM;
-      lM.resize(2, T(int(0)));
-      lastM.resize(27, lM);
-    }
-    pipe.resize(3 * 3 * 3 - 1);
-    std::random_device seed_gen;
-    std::mt19937 engine(seed_gen());
-    shf.resize(0);
-    shf.reserve(2);
-    for(int i = 0; i < 2; i ++)
-      shf.emplace_back(i);
-    std::shuffle(shf.begin(), shf.end(), engine);
+    M.resize(27 * 2);
+    M.O();
+    shf.resize(2, 0);
+#if defined(_ARCFOUR_)
+    shf[arc4random() & 1] = 1;
+#else
+    shf[random() & 1] = 1;
+#endif
     nshf = shf;
   }
   vector<idFeeder<T> > pipe;
-  vector<vector<T> > lastM;
+  SimpleVector<T> M;
   vector<int> shf;
   vector<int> nshf;
 };
 
-// N.B. one of the bricks stack condition, so not unique and verbose to impl.
-// N.B. this aims to kill 'jammer-like-behaviour on input stream feedback'.
-template <typename T> static inline T pSlipJamQuad3(const SimpleVector<T>& in, vector<idFeeder<T> >& pipe, vector<vector<T> >& lastM, vector<int>& shf, vector<int>& nshf, const int& t) {
-  vector<vector<T> > apb;
+// N.B. persistent attack to jammer in deep p0maxNext short 3 layermeaning.
+//      this often efffects output streams' prediction gulf result
+//      to be shifted ones.
+template <typename T> static inline T pSlipGulf0short(const SimpleVector<T>& in, pslip_t<T>& slip, const int& t) {
+  SimpleVector<T> apb;
   vector<pair<T, T> > aq;
-  apb.reserve(3 * 3 * 3);
   aq.reserve(3 * 3 * 3);
+  apb.resize(3 * 3 * 3 * 2);
+  apb.O();
 
   auto t0(t);
 #define UPDPSJQ3(inp,qinp,sec,i) \
-  apb.emplace_back(pbullet2(inp)); \
-  for(int k = 0; k < apb[(i)].size(); k ++) apb[(i)][k] *= (sec); \
-  aq.emplace_back(pSubesube<T>((qinp), make_pair(lastM[(i)], apb[(i)]), t0 = t));
+  apb[(i) * 2]     =   deep<T, p0maxNext<T> >(  (inp), 3) * (sec); \
+  apb[(i) * 2 + 1] = - deep<T, p0maxNext<T> >(- (inp), 3) * (sec); \
+  aq.emplace_back(pSubesube<T>((qinp), \
+    make_pair(slip.M.subVector((i) * 2, 2).entity, \
+      apb.subVector((i) * 2, 2).entity), t0 = t));
 
   UPDPSJQ3(in,in[in.size()-1],T(1),0);
   
-  pipe[0].next(aq[0].first);
-  UPDPSJQ3(pipe[0].res,aq[0].first,aq[0].second,1);
+  slip.pipe[0].next(aq[0].first);
+  UPDPSJQ3(slip.pipe[0].res,aq[0].first,aq[0].second,1);
   aq[1].second *= aq[0].second;
   
-  pipe[1].next(aq[1].first);
-  UPDPSJQ3(pipe[1].res,in[in.size()-1],aq[1].second,2);
+  slip.pipe[1].next(aq[1].first);
+  UPDPSJQ3(slip.pipe[1].res,in[in.size()-1],aq[1].second,2);
   
-  pipe[2].next(aq[2].first);
-  UPDPSJQ3(pipe[2].res,aq[2].first,aq[2].second,3);
+  slip.pipe[2].next(aq[2].first);
+  UPDPSJQ3(slip.pipe[2].res,aq[2].first,aq[2].second,3);
   aq[3].second *= aq[2].second;
   
-  pipe[3].next(aq[3].first);
-  UPDPSJQ3(pipe[3].res,aq[3].first,aq[3].second,4);
+  slip.pipe[3].next(aq[3].first);
+  UPDPSJQ3(slip.pipe[3].res,aq[3].first,aq[3].second,4);
   aq[4].second *= aq[3].second;
   
-  pipe[4].next(aq[4].first);
-  UPDPSJQ3(pipe[4].res,in[in.size()-1],aq[4].second,5);
+  slip.pipe[4].next(aq[4].first);
+  UPDPSJQ3(slip.pipe[4].res,in[in.size()-1],aq[4].second,5);
   
-  pipe[5].next(aq[5].first);
-  UPDPSJQ3(pipe[5].res,aq[5].first,aq[5].second,6);
+  slip.pipe[5].next(aq[5].first);
+  UPDPSJQ3(slip.pipe[5].res,aq[5].first,aq[5].second,6);
   aq[6].second *= aq[5].second;
   
-  pipe[6].next(aq[6].first);
-  UPDPSJQ3(pipe[6].res,aq[6].first,aq[6].second,7);
+  slip.pipe[6].next(aq[6].first);
+  UPDPSJQ3(slip.pipe[6].res,aq[6].first,aq[6].second,7);
   aq[7].second *= aq[6].second;
 
-  pipe[7].next(aq[7].first);
-  UPDPSJQ3(pipe[7].res,in[in.size()-1],aq[7].second,8);
+  slip.pipe[7].next(aq[7].first);
+  UPDPSJQ3(slip.pipe[7].res,in[in.size()-1],aq[7].second,8);
   
 #if defined(_ARCFOUR_)
   const auto tridx(arc4random() & 1);
@@ -3875,106 +3866,111 @@ template <typename T> static inline T pSlipJamQuad3(const SimpleVector<T>& in, v
 #endif
 #undef UPDPSJQ3
 #define UPDPSJQ3(inp,qinp,sec,i) \
-  apb.emplace_back(pbullet2(inp)); \
-  for(int k = 0; k < apb[(i)].size(); k ++) apb[(i)][k] *= (sec); \
-  aq.emplace_back(pSubesube<T>((qinp), make_pair(lastM[(i)], apb[(i)]), tridx));
+  apb[(i) * 2]     =   deep<T, p0maxNext<T> >(  (inp), 3) * (sec); \
+  apb[(i) * 2 + 1] = - deep<T, p0maxNext<T> >(- (inp), 3) * (sec); \
+  aq.emplace_back(pSubesube<T>((qinp), \
+    make_pair(slip.M.subVector((i) * 2, 2).entity, \
+      apb.subVector((i) * 2, 2).entity), tridx));
 
-  pipe[8].next(aq[8].first);
-  UPDPSJQ3(pipe[8].res,aq[8].first,aq[8].second,9);
+  slip.pipe[8].next(aq[8].first);
+  UPDPSJQ3(slip.pipe[8].res,aq[8].first,aq[8].second,9);
   aq[9].second *= aq[8].second;
 
-  pipe[9].next(aq[9].first);
-  UPDPSJQ3(pipe[9].res,aq[9].first,aq[9].second,10);
+  slip.pipe[9].next(aq[9].first);
+  UPDPSJQ3(slip.pipe[9].res,aq[9].first,aq[9].second,10);
   aq[10].second *= aq[9].second;
 
-  pipe[10].next(aq[10].first);
-  UPDPSJQ3(pipe[10].res,aq[8].first,aq[10].second,11);
+  slip.pipe[10].next(aq[10].first);
+  UPDPSJQ3(slip.pipe[10].res,aq[8].first,aq[10].second,11);
   aq[11].second *= aq[8].second;
 
   
-  pipe[11].next(aq[11].first);
-  UPDPSJQ3(pipe[11].res,aq[11].first,aq[11].second,12);
+  slip.pipe[11].next(aq[11].first);
+  UPDPSJQ3(slip.pipe[11].res,aq[11].first,aq[11].second,12);
   aq[12].second *= aq[11].second;
 
-  pipe[12].next(aq[12].first);
-  UPDPSJQ3(pipe[12].res,aq[12].first,aq[12].second,13);
+  slip.pipe[12].next(aq[12].first);
+  UPDPSJQ3(slip.pipe[12].res,aq[12].first,aq[12].second,13);
   aq[13].second *= aq[12].second;
 
-  pipe[13].next(aq[13].first);
-  UPDPSJQ3(pipe[13].res,aq[8].first,aq[13].second,14);
+  slip.pipe[13].next(aq[13].first);
+  UPDPSJQ3(slip.pipe[13].res,aq[8].first,aq[13].second,14);
   aq[14].second *= aq[8].second;
 
 
-  pipe[14].next(aq[14].first);
-  UPDPSJQ3(pipe[14].res,aq[14].first,aq[14].second,15);
+  slip.pipe[14].next(aq[14].first);
+  UPDPSJQ3(slip.pipe[14].res,aq[14].first,aq[14].second,15);
   aq[15].second *= aq[14].second;
 
-  pipe[15].next(aq[15].first);
-  UPDPSJQ3(pipe[15].res,aq[15].first,aq[15].second,16);
+  slip.pipe[15].next(aq[15].first);
+  UPDPSJQ3(slip.pipe[15].res,aq[15].first,aq[15].second,16);
   aq[16].second *= aq[15].second;
 
-  pipe[16].next(aq[16].first);
-//  UPDPSJQ3(pipe[16].res,aq[8].first,aq[16].second,17);
+  slip.pipe[16].next(aq[16].first);
+//  UPDPSJQ3(slip.pipe[16].res,aq[8].first,aq[16].second,17);
 //  aq[17].second *= aq[8].second;
-  UPDPSJQ3(pipe[16].res,in[in.size() - 1],aq[16].second,17);
+  UPDPSJQ3(slip.pipe[16].res,in[in.size() - 1],aq[16].second,17);
 
    
-  shf[(t + 1) % shf.size()] = nshf[(t + 1) % shf.size()];
-  if(! ((t + 2) % shf.size()) ) {
-    for(int i = 0; i < nshf.size(); i ++) nshf[i] = i;
-    std::random_device seed_gen;
-    std::mt19937 engine(seed_gen());
-    std::shuffle(nshf.begin(), nshf.end(), engine);
+  slip.shf[(t + 1) % slip.shf.size()] = slip.nshf[(t + 1) % slip.shf.size()];
+  if(! ((t + 2) % slip.shf.size()) ) {
+    slip.nshf[0] = slip.nshf[1] = 0;
+#if defined(_ARCFOUR_)
+    slip.nshf[arc4random() & 1] = 1;
+#else
+    slip.nshf[random() & 1] = 1;
+#endif
   }
 #undef UPDPSJQ3
 #define UPDPSJQ3(inp,qinp,sec,i) \
-  apb.emplace_back(pbullet2(inp)); \
-  for(int k = 0; k < apb[(i)].size(); k ++) apb[(i)][k] *= (sec); \
-  aq.emplace_back(pSubesube<T>((qinp), make_pair(lastM[(i)], apb[(i)]), t0 = t, shf));
+  apb[(i) * 2]     =   deep<T, p0maxNext<T> >(  (inp), 3) * (sec); \
+  apb[(i) * 2 + 1] = - deep<T, p0maxNext<T> >(- (inp), 3) * (sec); \
+  aq.emplace_back(pSubesube<T>((qinp), \
+    make_pair(slip.M.subVector((i) * 2, 2).entity, \
+      apb.subVector((i) * 2, 2).entity), t0 = t, slip.shf));
 
-  pipe[17].next(aq[17].first);
-  UPDPSJQ3(pipe[17].res,aq[17].first,aq[17].second,18);
+  slip.pipe[17].next(aq[17].first);
+  UPDPSJQ3(slip.pipe[17].res,aq[17].first,aq[17].second,18);
   aq[18].second *= aq[17].second;
 
-  pipe[18].next(aq[18].first);
-  UPDPSJQ3(pipe[18].res,aq[18].first,aq[18].second,19);
+  slip.pipe[18].next(aq[18].first);
+  UPDPSJQ3(slip.pipe[18].res,aq[18].first,aq[18].second,19);
   aq[19].second *= aq[18].second;
   
-  pipe[19].next(aq[19].first);
-  UPDPSJQ3(pipe[19].res,aq[17].first,aq[19].second,20);
+  slip.pipe[19].next(aq[19].first);
+  UPDPSJQ3(slip.pipe[19].res,aq[17].first,aq[19].second,20);
   aq[20].second *= aq[17].second;
 
 
-  pipe[20].next(aq[20].first);
-  UPDPSJQ3(pipe[20].res,aq[20].first,aq[20].second,21);
+  slip.pipe[20].next(aq[20].first);
+  UPDPSJQ3(slip.pipe[20].res,aq[20].first,aq[20].second,21);
   aq[21].second *= aq[20].second;
   
-  pipe[21].next(aq[21].first);
-  UPDPSJQ3(pipe[21].res,aq[21].first,aq[21].second,22);
+  slip.pipe[21].next(aq[21].first);
+  UPDPSJQ3(slip.pipe[21].res,aq[21].first,aq[21].second,22);
   aq[22].second *= aq[21].second;
 
-  pipe[22].next(aq[22].first);
-  UPDPSJQ3(pipe[22].res,aq[17].first,aq[22].second,23);
+  slip.pipe[22].next(aq[22].first);
+  UPDPSJQ3(slip.pipe[22].res,aq[17].first,aq[22].second,23);
   aq[23].second *= aq[17].second;
 
 
-  pipe[23].next(aq[23].first);
-  UPDPSJQ3(pipe[23].res,aq[23].first,aq[23].second,24);
+  slip.pipe[23].next(aq[23].first);
+  UPDPSJQ3(slip.pipe[23].res,aq[23].first,aq[23].second,24);
   aq[24].second *= aq[23].second;
 
-  pipe[24].next(aq[24].first);
-  UPDPSJQ3(pipe[24].res,aq[24].first,aq[24].second,25);
+  slip.pipe[24].next(aq[24].first);
+  UPDPSJQ3(slip.pipe[24].res,aq[24].first,aq[24].second,25);
   aq[25].second *= aq[24].second;
 
-  pipe[25].next(aq[25].first);
-//  UPDPSJQ3(pipe[25].res,aq[17].first,aq[25].second,26);
+  slip.pipe[25].next(aq[25].first);
+//  UPDPSJQ3(slip.pipe[25].res,aq[17].first,aq[25].second,26);
 //  aq[26].second *= aq[17].second;
-  UPDPSJQ3(pipe[25].res,in[in.size()-1],aq[25].second,26);
+  UPDPSJQ3(slip.pipe[25].res,in[in.size()-1],aq[25].second,26);
   
 #undef UPDPSJQ3
 
-  assert(apb.size() == aq.size());
-  lastM = move(apb);
+  slip.M = move(apb);
   return aq[aq.size() - 1].second;
 }
 
