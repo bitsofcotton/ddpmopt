@@ -32,6 +32,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
+// XXX: should have backward compatible to CXX before C++11 especially
+//      compiler variant one of gcc2.95.3 as a C++ compiler to test in deep.
+// XXX: to do this, we must eliminate auto variable declarations from this file.
 #if !defined(_SIMPLELIN_)
 
 // N.B. external linkage.
@@ -45,7 +48,12 @@ using std::exp;
 using std::log;
 using std::isfinite;
 
+#if defined(_OLDCPP_)
+#define move 
+#define emplace_back push_back
+#else
 using std::move;
+#endif
 using std::swap;
 using std::pair;
 using std::make_pair;
@@ -60,7 +68,20 @@ using std::istream;
 using std::ostream;
 
 using std::string;
+#if defined(_OLDCPP_)
+static inline string to_string(const int& n) {
+  stringstream ss;
+  ss < n;
+  return ss.str();
+}
+static inline string to_string(const size_t& n) {
+  stringstream ss;
+  ss < n;
+  return ss.str();
+}
+#else
 using std::to_string;
+#endif
 using std::cerr;
 using std::endl;
 using std::flush;
@@ -93,7 +114,9 @@ public:
   }
   inline DUInt(const DUInt<T,bits>& src) { *this = src; }
   inline DUInt(const DUInt<DUInt<T,bits>,bits*2>& src) { *this = src; }
+#if !defined(_OLDCPP_)
   inline DUInt(DUInt<T,bits>&& src) { *this = src; }
+#endif
   inline ~DUInt() { ; }
   inline DUInt<T,bits>& operator ++ () {
     ++ e[0];
@@ -264,10 +287,12 @@ public:
   inline DUInt<T,bits>& operator =  (const DUInt<DUInt<T,bits>,bits*2>& src) {
     return *this = src.e[0];
   }
+#if !defined(_OLDCPP_)
   inline DUInt<T,bits>& operator =  (DUInt<T,bits>&& src) {
     e[0] = move(src.e[0]); e[1] = move(src.e[1]);
     return *this;
   }
+#endif
   inline bool           operator <  (const DUInt<T,bits>& src) const {
     if(e[1]) return e[1] != src.e[1] ? e[1] < src.e[1] : e[0] < src.e[0];
     return bool(src.e[1]) || e[0] < src.e[0];
@@ -412,7 +437,9 @@ public:
     ensureFlag();
   }
   inline SimpleFloat(const SimpleFloat<T,W,bits,U>& src) { *this = src; }
+#if !defined(_OLDCPP_)
   inline SimpleFloat(SimpleFloat<T,W,bits,U>&& src) { *this = src; }
+#endif
   inline ~SimpleFloat() { ; }
   inline SimpleFloat<T,W,bits,U>  operator -  () const {
     auto work(*this);
@@ -543,12 +570,14 @@ public:
     m = src.m;
     return *this;
   }
+#if !defined(_OLDCPP_)
   inline SimpleFloat<T,W,bits,U>& operator =  (SimpleFloat<T,W,bits,U>&& src) {
     s = move(src.s);
     e = move(src.e);
     m = move(src.m);
     return *this;
   }
+#endif
   inline bool             operator == (const SimpleFloat<T,W,bits,U>& src) const {
     return ! (*this != src);
   }
@@ -1176,6 +1205,7 @@ public:
     _real = real; _imag = imag;
   }
   inline Complex(const Complex<T>& s) { *this = s; }
+#if !defined(_OLDCPP_)
   inline Complex(Complex<T>&& s) { *this = s; }
   inline Complex(T&& real) {
     const static T zero(0);
@@ -1186,6 +1216,7 @@ public:
     _real = move(real);
     _imag = move(imag);
   }
+#endif
   inline ~Complex() { ; }
   inline Complex<T>  operator ~  ()                    const {
     return Complex<T>(  _real, - _imag);
@@ -1289,11 +1320,13 @@ public:
     _imag = s._imag;
     return *this;
   }
+#if !defined(_OLDCPP_)
   inline Complex<T>& operator =  (Complex<T>&& s) {
     _real = move(s._real);
     _imag = move(s._imag);
     return *this;
   }
+#endif
   inline T&          operator [] (const size_t& i) {
     assert(0 <= i && i < 2);
     if(i) return _imag;
@@ -1502,7 +1535,9 @@ public:
     this->entity.resize(size);
   }
   inline SimpleVector(const SimpleVector<T>& other) { *this = other; }
+#if !defined(_OLDCPP_)
   inline SimpleVector(SimpleVector<T>&& other) { *this = other; }
+#endif
   inline ~SimpleVector() { ; }
   inline       SimpleVector<T>  operator -  () const {
     SimpleVector<T> res(entity.size());
@@ -1561,10 +1596,12 @@ public:
     entity = other.entity;
     return *this;
   }
+#if !defined(_OLDCPP_)
   inline       SimpleVector<T>& operator =  (SimpleVector<T>&& other) {
     entity = move(other.entity);
     return *this;
   }
+#endif
   inline       bool             operator == (const SimpleVector<T>& other) const {
     return ! (*this != other);
   }
@@ -1758,7 +1795,9 @@ public:
     ecols = cols;
   }
   inline SimpleMatrix(const SimpleMatrix<T>& other) { *this = other; }
+#if !defined(_OLDCPP_)
   inline SimpleMatrix(SimpleMatrix<T>&& other) { *this = other; }
+#endif
   inline ~SimpleMatrix() { ; }
   inline       SimpleMatrix<T>  operator -  () const {
     SimpleMatrix<T> res(entity.size(), ecols);
@@ -1846,11 +1885,13 @@ public:
     entity = other.entity;
     return *this;
   }
+#if !defined(_OLDCPP_)
   inline       SimpleMatrix<T>& operator =  (SimpleMatrix<T>&& other) {
     ecols  = move(other.ecols);
     entity = move(other.entity);
     return *this;
   }
+#endif
   inline       bool             operator == (const SimpleMatrix<T>& other) const {
     return ! (*this != other);
   }
@@ -2790,7 +2831,9 @@ public:
   inline SimpleSparseVector() { ; }
   inline SimpleSparseVector(const int& sute) { assert(sute == 0); }
   inline SimpleSparseVector(const SimpleSparseVector<T>& other) { *this = other; }
+#if !defined(_OLDCPP_)
   inline SimpleSparseVector(SimpleSparseVector<T>&& other) { *this = other; }
+#endif
   inline ~SimpleSparseVector() { ; }
   inline SimpleSparseVector<T>  operator -  () const {
     auto res(*this);
@@ -2842,10 +2885,12 @@ public:
     entity = other.entity;
     return *this;
   }
+#if !defined(_OLDCPP_)
   inline       SimpleSparseVector<T>& operator =  (SimpleSparseVector<T>&& other) {
     entity = move(other.entity);
     return *this;
   }
+#endif
   inline       bool                   operator != (const SimpleSparseVector<T>& other) const {
     for(auto itr(entity.begin()); itr != entity.end(); ++ itr)
       if(itr->second != other[itr->first])
@@ -4589,7 +4634,7 @@ template <typename T, int nprogress = 20> static inline SimpleVector<T> predv0(c
       p01next<T>(seconds / nseconds) * nseconds) );
 }
 
-template <typename T, int nprogress = 20> static inline SimpleVector<T> predvp(const vector<SimpleVector<T> >& in) {
+template <typename T, int nprogress = 20> static inline SimpleVector<T> predvp(const vector<SimpleVector<T> >& in, const string& strloop) {
   SimpleVector<T> p(in[0].size());
   idFeeder<T> buf(in.size());
   for(int i = 0; i < in.size(); i ++)
@@ -4601,7 +4646,7 @@ template <typename T, int nprogress = 20> static inline SimpleVector<T> predvp(c
 #endif
   for(int j = 1; j < in[0].size(); j ++) {
     if(nprogress && ! (j % max(int(1), int(in[0].size() / nprogress))) )
-      cerr << j << " / " << in[0].size() << endl;
+      cerr << j << " / " << in[0].size() << strloop << endl;
     idFeeder<T> buf(in.size());
     for(int i = 0; i < in.size(); i ++)
       buf.next(in[i][j]);
@@ -4611,7 +4656,7 @@ template <typename T, int nprogress = 20> static inline SimpleVector<T> predvp(c
   return p;
 }
 
-template <typename T, int nprogress = 20> static inline SimpleVector<T> predv1(vector<SimpleVector<T> >& in) {
+template <typename T, int nprogress = 20> static inline SimpleVector<T> predvq(const vector<SimpleVector<T> >& in, const string& strloop) {
   static const auto step(1);
   assert(0 < step && 10 + step * 2 <= in.size() && 1 < in[0].size());
   // N.B. we use whole width to get better result in average.
@@ -4626,7 +4671,7 @@ template <typename T, int nprogress = 20> static inline SimpleVector<T> predv1(v
   for(int i = 1; i < start; i ++)
     p.entity.emplace_back(SimpleVector<T>(in[0].size()).O());
   for(int i = start; i <= in.size(); i ++)
-    p.entity.emplace_back(predv0<T, nprogress>(in, i, to_string(i) + string(" / ") + to_string(in.size())));
+    p.entity.emplace_back(predv0<T, nprogress>(in, i, to_string(i) + string(" / ") + to_string(in.size()) + strloop));
   SimpleMatrix<T> ip(res.size(), p.size());
   ip.O();
 #if defined(_OPENMP)
@@ -4649,7 +4694,6 @@ template <typename T, int nprogress = 20> static inline SimpleVector<T> predv1(v
     res[i] = offsetHalf<T>(p0maxNext<T>(ip.row(i)) *
       unOffsetHalf<T>(p[p.size() - 1][i]) );
   }
-  in.resize(0);
   return res;
 }
 
@@ -4668,8 +4712,8 @@ template <typename T, int nprogress = 20> static inline SimpleVector<T> predv1(v
 //      we suppose phase period doesn't connected to the original structures.
 // N.B. practically, nrecur == 0 works well with ddpmopt T cmd, we use this.
 //      we don't select better nrecur == 11 * 11 we need huge computation time.
-template <typename T, int nrecur = 0, int nprogress = 20> static inline SimpleVector<T> predv(vector<SimpleVector<T> >& in) {
-  if(! nrecur) return predv1<T, nprogress>(in);
+template <typename T, SimpleVector<T> (*p)(const vector<SimpleVector<T> >&, const string&), int nrecur = 121, int nprogress = 20> static inline SimpleVector<T> predv(const vector<SimpleVector<T> >& in) {
+  if(! nrecur) return p(in, string(", 0 / 1"));
   SimpleVector<T> res(in[0].size());
   res.O();
   for(int i = 0; i < nrecur; i ++) {
@@ -4682,7 +4726,7 @@ template <typename T, int nrecur = 0, int nprogress = 20> static inline SimpleVe
         rin[i][j] = (rin[i][j] + T(random() % 0x20000) / T(0x20000 - 1)) / T(int(2));
 #endif
     // N.B. PRNG parts going to gray + small noise with large enough nrecur.
-    res += predv1<T, nprogress>(rin);
+    res += p(rin, string(", ") + to_string(i) + string(" / ") + to_string(nrecur));
   }
   return res /= T(nrecur);
 }
@@ -4767,7 +4811,7 @@ template <typename T> vector<vector<SimpleVector<T> > > predVec(vector<vector<Si
   vector<vector<SimpleVector<T> > > res;
   res.resize(3);
   {
-    auto p(predvp<T>(in));
+    auto p(predv<T, predvp<T> >(in));
     res[0].resize(size0);
     for(int j = 0; j < res[0].size(); j ++)
       res[0][j] = offsetHalf<T>(- p.subVector(size1 * j, size1));
@@ -4775,12 +4819,12 @@ template <typename T> vector<vector<SimpleVector<T> > > predVec(vector<vector<Si
   for(int i = 0; i < in.size(); i ++)
     in[i] = - in[i];
   {
-    auto p(predvp<T>(in));
+    auto p(predv<T, predvp<T> >(in));
     res[1].resize(size0);
     for(int j = 0; j < res[1].size(); j ++)
       res[1][j] = offsetHalf<T>(p.subVector(size1 * j, size1));
   }
-  auto p(predv<T>(in = offsetHalf<T>(in)));
+  auto p(predv<T, predvq<T> >(in = offsetHalf<T>(in)));
   res[2].resize(size0);
   for(int j = 0; j < res[2].size(); j ++)
     res[2][j]  = p.subVector(size1 * j, size1);
@@ -4825,7 +4869,7 @@ template <typename T> vector<vector<SimpleMatrix<T> > > predMat(vector<vector<Si
   vector<vector<SimpleMatrix<T> > > res;
   res.resize(3);
   {
-    auto p(predvp<T>(in));
+    auto p(predv<T, predvp<T> >(in));
     res[0].resize(size);
     for(int j = 0; j < res[0].size(); j ++) {
       res[0][j].resize(rows, cols);
@@ -4836,7 +4880,7 @@ template <typename T> vector<vector<SimpleMatrix<T> > > predMat(vector<vector<Si
   for(int i = 0; i < in.size(); i ++)
     in[i] = - in[i];
   {
-    auto p(predvp<T>(in));
+    auto p(predv<T, predvp<T> >(in));
     res[1].resize(size);
     for(int j = 0; j < res[1].size(); j ++) {
       res[1][j].resize(rows, cols);
@@ -4844,7 +4888,7 @@ template <typename T> vector<vector<SimpleMatrix<T> > > predMat(vector<vector<Si
         res[1][j].row(k) = offsetHalf<T>(p.subVector(j * rows * cols + k * cols, cols));
     }
   }
-  auto p(predv<T>(in = offsetHalf<T>(in)));
+  auto p(predv<T, predvq<T> >(in = offsetHalf<T>(in)));
   res[2].resize(size);
   for(int j = 0; j < res[2].size(); j ++) {
     res[2][j].resize(rows, cols);
@@ -4895,7 +4939,7 @@ template <typename T> vector<SimpleSparseTensor<T> > predSTen(vector<SimpleSpars
   for(int i = 0; i < in.size(); i ++)
     in[i] = - in[i];
   {
-    auto p(predvp<T>(in));
+    auto p(predv<T, predvp<T> >(in));
     for(int j = 0, cnt = 0; j < idx.size(); j ++)
       for(int k = 0; k < idx.size(); k ++)
         for(int m = 0; m < idx.size(); m ++)
@@ -4906,7 +4950,7 @@ template <typename T> vector<SimpleSparseTensor<T> > predSTen(vector<SimpleSpars
   for(int i = 0; i < in.size(); i ++)
     in[i] = - in[i];
   {
-    auto p(predvp<T>(in));
+    auto p(predv<T, predvp<T> >(in));
     for(int j = 0, cnt = 0; j < idx.size(); j ++)
       for(int k = 0; k < idx.size(); k ++)
         for(int m = 0; m < idx.size(); m ++)
@@ -4914,7 +4958,7 @@ template <typename T> vector<SimpleSparseTensor<T> > predSTen(vector<SimpleSpars
                make_pair(j, make_pair(k, m))))
             res[1][idx[j]][idx[k]][idx[m]] = p[cnt ++];
   }
-  auto p(predv<T>(in = offsetHalf<T>(in)));
+  auto p(predv<T, predvq<T> >(in = offsetHalf<T>(in)));
   for(int j = 0, cnt = 0; j < idx.size(); j ++)
     for(int k = 0; k < idx.size(); k ++)
       for(int m = 0; m < idx.size(); m ++)
@@ -6749,7 +6793,9 @@ public:
   corpus(const U& input, const vector<U>& delimiter);
   inline corpus() { ; }
   inline corpus(const corpus<T, U>& other) { *this = other; }
+#if !defined(_OLDCPP_)
   inline corpus(corpus<T, U>&& other) { *this = other; }
+#endif
   inline ~corpus() { ; }
   inline U getAttributed(const vector<U>& highlight) const {
     U   result;
@@ -6822,11 +6868,13 @@ public:
     orig    = other.orig;
     return *this;
   }
+#if !defined(_OLDCPP_)
   inline corpus<T, U>& operator =  (corpus<T, U>&& other) {
     corpust = move(other.corpust);
     orig    = move(other.orig);
     return *this;
   }
+#endif
   inline bool          operator == (const corpus<T, U>& other) const {
     return ! (*this != other);
   }

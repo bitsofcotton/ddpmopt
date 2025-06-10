@@ -8,7 +8,6 @@
 #include <map>
 #include <algorithm>
 #include <cctype>
-#include <random>
 #include <assert.h>
 #include <stdlib.h>
 
@@ -152,6 +151,27 @@ int main(int argc, const char* argv[]) {
         (string("predg") + to_string(i) + string(".ppm")).c_str(),
         p[i].size() == 3 ? xyz2rgb<num_t>(p[i]) : move(p[i]) ))
           cerr << "failed to save." << endl;
+  } else if(m == 'P') {
+    vector<vector<SimpleMatrix<num_t> > > in;
+    in.reserve(argc - 1);
+    for(int i = 2; i < argc; i ++) {
+      vector<SimpleMatrix<num_t> > work;
+      if(! loadp2or3<num_t>(work, argv[i])) continue;
+      in.emplace_back(work.size() == 3 ? rgb2xyz<num_t>(work) : move(work));
+    }
+    // N.B. 10 + 1 * 2 < work.size() / step for predv[pq].
+    for(int j = 1; j < in.size() / 12; j ++) {
+      SimpleVector<vector<SimpleMatrix<num_t> > > work;
+      work.entity = skipX<vector<SimpleMatrix<num_t> > >(in, j);
+      auto p(predMat<num_t>(work.entity = normalize<num_t>(work.subVector(work.size() - 12, 12).entity)));
+      
+      for(int i = 0; i < p.size(); i ++)
+        if(! savep2or3<num_t>(
+          (string("predg") + to_string(j) + string("-") + to_string(i)
+            + string(".ppm")).c_str(), 
+          p[i].size() == 3 ? xyz2rgb<num_t>(p[i]) : move(p[i]) ))
+          cerr << "failed to save." << endl;
+    }
   } else if(m == 'w') {
     vector<vector<SimpleMatrix<num_t> > > in;
     in.reserve(argc - 2);
@@ -182,7 +202,7 @@ int main(int argc, const char* argv[]) {
     if(! savep2or3<num_t>("predgw.ppm",
       normalize<num_t>(p.size() == 3 ? xyz2rgb<num_t>(p) : move(p))) )
         cerr << "failed to save." << endl;
-  } else if(m == 'q') {
+  } else if(m == 'q' || m == 'Q') {
     for(int i0 = 2; i0 < argc; i0 ++) {
       vector<SimpleMatrix<num_t> > work;
       if(! loadp2or3<num_t>(work, argv[i0])) continue;
@@ -200,7 +220,9 @@ int main(int argc, const char* argv[]) {
       const int ext(work[0].rows() / 12);
       vector<vector<SimpleMatrix<num_t> > > wwork;
       for(int i = 0; i < ext; i ++) {
-        auto n(predVec<num_t>(skipX<vector<SimpleVector<num_t> > >(pwork, i + 1) ));
+        SimpleVector<vector<SimpleVector<num_t> > > w;
+        w.entity = skipX<vector<SimpleVector<num_t> > >(pwork, i + 1);
+        auto n(predVec<num_t>(m == 'q' ? w.entity : w.subVector(w.size() - 12, 12).entity));
         if(! i) {
           wwork.resize(n.size());
           for(int k = 0; k < n.size(); k ++) {
@@ -447,11 +469,11 @@ int main(int argc, const char* argv[]) {
   cerr << "# apply color structure" << endl;
   cerr << argv[0] << " - <in0.ppm> ... < cache.txt" << endl;
   cerr << "# predict following image (each bit input)" << endl;
-  cerr << argv[0] << " p <in0.ppm> ..." << endl;
+  cerr << argv[0] << " [pP] <in0.ppm> ..." << endl;
   cerr << "# predict with whole pixel context (each bit input)" << endl;
   cerr << argv[0] << " w <in0-4.ppm> <in0.ppm> ... <addition-4.ppm>" << endl;
   cerr << "# predict down scanlines. (each bit input)" << endl;
-  cerr << argv[0] << " q <in0out.ppm> ..." << endl;
+  cerr << argv[0] << " [qQ] <in0out.ppm> ..." << endl;
   cerr << "# show continuity" << endl;
   cerr << argv[0] << " [xyit] <in0.ppm> ..." << endl;
   cerr << "# some of the volume curvature like transform" << endl;

@@ -22,13 +22,14 @@ LDFLAGS+=	-lc++ -L/usr/local/lib
 
 # lieonn.hh compile options
 CXXFLAGS+=	-D_ARCFOUR_
+#CXXFLAGS+=	-D_OLDCPP_
 
-CLEANFILES= *.o ddpmopt ddpmopt32 ddpmopt64 ddpmoptp ddpmoptmp ddpmopt32mp ddpmopt64mp ddpmoptpmp
+CLEANFILES= *.o ddpmopt ddpmopt32 ddpmoptp ddpmoptmp ddpmopt32mp ddpmoptpmp
 
 clean:
 	@rm -rf ${CLEANFILES}
 
-all:	ddpmopt ddpmopt32 ddpmopt64 ddpmoptp ddpmoptmp ddpmopt32mp ddpmopt64mp ddpmoptpmp
+all:	ddpmopt ddpmopt32 ddpmoptp ddpmoptmp ddpmopt32mp ddpmoptpmp
 
 ddpmopt:
 	${CXX} ${CXXFLAGS} -static -o ddpmopt ddpmopt.cc
