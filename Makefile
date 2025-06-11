@@ -25,7 +25,9 @@ LDFLAGS+=	-lc++ -L/usr/local/lib
 
 # lieonn.hh compile options
 CXXFLAGS+=	-D_ARCFOUR_
-#CXXFLAGS+=	-D_OLDCPP_
+
+# N.B. sed -e s/static\ inline//g | sed -e s/inline//g
+#CXXFLAGS+=     -D_OLDCPP_ -ftemplate-depth-99
 
 CLEANFILES= *.o ddpmopt ddpmopt32 ddpmoptp ddpmoptmp ddpmopt32mp ddpmoptpmp
 

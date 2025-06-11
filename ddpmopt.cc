@@ -14,6 +14,7 @@
 
 #define int int32_t
 //#define int int64_t
+#define _COMPILE_PRED_
 #include "lieonn.hh"
 typedef myfloat num_t;
 
