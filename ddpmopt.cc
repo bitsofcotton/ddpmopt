@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <cmath>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -21,7 +22,6 @@ using std::cerr;
 using std::endl;
 using std::atoi;
 using std::string;
-using std::to_string;
 using std::vector;
 using std::sort;
 using std::binary_search;
@@ -34,8 +34,8 @@ using std::istringstream;
 int main(int argc, const char* argv[]) {
 #define int int32_t
 //#define int int64_t
-  const auto  sz(2);
-  const auto& m(argv[1][0]);
+  const int   sz(2);
+  const char& m(argv[1][0]);
   if(argc <= 1 || argv[1][1] != '\0') goto usage;
   cerr << "Coherent: sqrt(2): " << sqrt<num_t>(Complex<num_t>(num_t(2))) << endl;
   if(m == '-') {
@@ -69,7 +69,7 @@ int main(int argc, const char* argv[]) {
           for(int m = 0; m < in.size(); m ++)
             work[m] = in[m](i, j);
           work[3] = num_t(int(1)) / num_t(int(2));
-          auto work2(makeProgramInvariant<num_t>(work).first);
+          SimpleVector<num_t> work2(makeProgramInvariant<num_t>(work).first);
           assert(work2.size() == L[0].size());
           int idx(0);
           for(int m = 2; m < L.size(); m += 2) {
@@ -78,13 +78,13 @@ int main(int argc, const char* argv[]) {
             if(abs(L[idx].dot(work2)) <= abs(L[m].dot(work2)))
               idx = m;
           }
-          auto last(sqrt(work.dot(work)));
+          num_t last(sqrt(work.dot(work)));
           for(int ii = 0;
                   ii < 2 * int(- log(SimpleMatrix<num_t>().epsilon()) / log(num_t(int(2))) )
                   && sqrt(work.dot(work) * SimpleMatrix<num_t>().epsilon()) <
                        abs(work[3] - last); ii ++) {
             last = work[3];
-            const auto work2(makeProgramInvariant<num_t>(work));
+            const pair<SimpleVector<num_t>, num_t> work2(makeProgramInvariant<num_t>(work));
             work[3] = revertProgramInvariant<num_t>(make_pair(L[idx + 1].dot(work2.first) * sgn<num_t>(L[idx].dot(work2.first)), work2.second) );
           }
           out[0](i, j) = work[3];
@@ -125,10 +125,10 @@ int main(int argc, const char* argv[]) {
           work[3] = out[i](j, k);
           v.emplace_back(move(work));
         }
-    const auto c(crush<num_t>(v));
+    const vector<pair<vector<SimpleVector<num_t> >, vector<int> > > c(crush<num_t>(v));
     for(int i = 0; i < c.size(); i ++) {
       if(! c[i].first.size()) continue;
-      auto vv(makeProgramInvariant<num_t>(c[i].first[0]).first);
+      SimpleVector<num_t> vv(makeProgramInvariant<num_t>(c[i].first[0]).first);
       for(int j = 1; j < c[i].first.size(); j ++)
         vv += makeProgramInvariant<num_t>(c[i].first[j]).first;
       vv /= num_t(c[i].first.size());
@@ -145,7 +145,7 @@ int main(int argc, const char* argv[]) {
     }
     // N.B. with good spreaded input, we can suppose original as a 'T' command
     //      case.
-    auto p(predMat<num_t>(in = normalize<num_t>(in)));
+    vector<vector<SimpleMatrix<num_t> > > p(predMat<num_t>(in = normalize<num_t>(in)));
     for(int i = 0; i < p.size(); i ++)
       if(! savep2or3<num_t>(
         (string("predg") + to_string(i) + string(".ppm")).c_str(),
@@ -163,8 +163,8 @@ int main(int argc, const char* argv[]) {
     for(int j = 1; j < in.size() / 12; j ++) {
       SimpleVector<vector<SimpleMatrix<num_t> > > work;
       work.entity = skipX<vector<SimpleMatrix<num_t> > >(in, j);
-      auto p(predMat<num_t>(work.entity = normalize<num_t>(work.subVector(work.size() - 12, 12).entity)));
-      
+      vector<vector<SimpleMatrix<num_t> > > p(
+        predMat<num_t>(work.entity = normalize<num_t>(work.subVector(work.size() - 12, 12).entity)));
       for(int i = 0; i < p.size(); i ++)
         if(! savep2or3<num_t>(
           (string("predg") + to_string(j) + string("-") + to_string(i)
@@ -190,7 +190,7 @@ int main(int argc, const char* argv[]) {
           work[i].setVector(j * in[i][0].rows() * in[i][0].cols() +
             k * in[i][0].cols(), in[i][j].row(k));
     }
-    auto vp(predv4<num_t, true>(work));
+    SimpleVector<num_t> vp(predv4<num_t, 20>(work));
     vector<SimpleMatrix<num_t> > p;
     p.resize(in[1].size());
     for(int i = 0; i < p.size(); i ++) {
@@ -222,7 +222,8 @@ int main(int argc, const char* argv[]) {
       for(int i = 0; i < ext; i ++) {
         SimpleVector<vector<SimpleVector<num_t> > > w;
         w.entity = skipX<vector<SimpleVector<num_t> > >(pwork, i + 1);
-        auto n(predVec<num_t>(m == 'q' ? w.entity : w.subVector(w.size() - 12, 12).entity));
+        vector<vector<SimpleVector<num_t> > > n(
+          predVec<num_t>(m == 'q' ? w.entity : w.subVector(w.size() - 12, 12).entity));
         if(! i) {
           wwork.resize(n.size());
           for(int k = 0; k < n.size(); k ++) {
@@ -256,7 +257,7 @@ int main(int argc, const char* argv[]) {
             idFeeder<num_t> w(3);
             for(int jj = 0; jj < work[i].cols(); jj ++) {
               if(w.full) {
-                const auto pp(p0maxNext<num_t>(w.res));
+                const num_t pp(p0maxNext<num_t>(w.res));
                 score[i0] += (pp - work[i](ii, jj)) * (pp - work[i](ii, jj));
               } 
               w.next(work[i](ii, jj));
@@ -275,7 +276,7 @@ int main(int argc, const char* argv[]) {
             idFeeder<num_t> w(3);
             for(int ii = 0; ii < work[i].rows(); ii ++) {
               if(w.full) {
-                const auto pp(p0maxNext<num_t>(w.res));
+                const num_t pp(p0maxNext<num_t>(w.res));
                 score[i0] += (pp - work[i](ii, jj)) * (pp - work[i](ii, jj));
               } 
               w.next(work[i](ii, jj));
@@ -304,7 +305,7 @@ int main(int argc, const char* argv[]) {
               for(int ii = 2; ii < b.size(); ii ++, cnt ++) {
                 if(! b[ii].size()) continue;
                 if(w.full) {
-                  const auto pp(p0maxNext<num_t>(w.res));
+                  const num_t pp(p0maxNext<num_t>(w.res));
                   score[0] += (pp - b[ii][k](i, j)) * (pp - b[ii][k](i, j));
                 }
                 w.next(b[ii][k](i, j));
@@ -332,8 +333,8 @@ int main(int argc, const char* argv[]) {
              in[0][0].cols() == in[in.size() - 1][0].cols() );
     }
     cerr << "y" << flush;
-    auto jy(in);
-    auto left(diff<num_t>(jy[0][0].rows()));
+    vector<vector<SimpleMatrix<num_t> > > jy(in);
+    SimpleMatrix<num_t> left(diff<num_t>(jy[0][0].rows()));
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
@@ -343,8 +344,8 @@ int main(int argc, const char* argv[]) {
         jy[i][j] = left * in[i][j];
     }
     cerr << "x" << flush;
-    auto jx(in);
-    auto right(diff<num_t>(jy[0][0].cols()).transpose());
+    vector<vector<SimpleMatrix<num_t> > > jx(in);
+    SimpleMatrix<num_t> right(diff<num_t>(jy[0][0].cols()).transpose());
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
@@ -354,8 +355,8 @@ int main(int argc, const char* argv[]) {
         jx[i][j] = in[i][j] * right;
     }
     cerr << "z" << flush;
-    auto jz(in);
-    auto middle(diff<num_t>(jz.size()));
+    vector<vector<SimpleMatrix<num_t> > > jz(in);
+    SimpleMatrix<num_t> middle(diff<num_t>(jz.size()));
     for(int i = 0; i < in[0].size(); i ++) {
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
@@ -407,8 +408,8 @@ int main(int argc, const char* argv[]) {
         cout << " --- " << in.size() - 11 << " --- " << endl;
         for(int i = 0; i < pc.size(); i ++)
           for(int j = 0; j < p[0].size(); j ++) {
-            const auto rr(p[0][j].rows() / pc[i].first);
-            const auto cc(p[0][j].cols() / pc[i].second);
+            const int rr(p[0][j].rows() / pc[i].first);
+            const int cc(p[0][j].cols() / pc[i].second);
             for(int k = 0; k < pc[i].first; k ++)
               for(int n = 0; n < pc[i].second; n ++) {
                 vector<num_t> workr;
@@ -445,13 +446,13 @@ int main(int argc, const char* argv[]) {
       in.emplace_back(move(work));
       if(i0 == argc - 1) break;
       if(11 < in.size()) {
-        auto in2(in);
+        vector<vector<SimpleMatrix<num_t> > > in2(in);
         p = predMat<num_t>(in2 = normalize<num_t>(in2));
         if(! pc.size()) {
           pc.emplace_back(make_pair(p[0][0].rows(), p[0][0].cols() ));
           for(int i = 1;
             0 <= i && 1 < pc[i - 1].first && 1 < pc[i - 1].second; i ++) {
-            auto work(pc[i - 1]);
+            pair<int, int> work(pc[i - 1]);
             work.first  /= 2;
             work.second /= 2;
             pc.emplace_back(move(work));

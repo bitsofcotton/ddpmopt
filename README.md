@@ -279,4 +279,5 @@ Leave here but might return here after another implementations.
 2025/05/25 code cleaning, select FEED_MUCH as a single implementation default.
 2025/06/08 rework into possible thin layer but enough layers from p2 result.
 2025/06/10 persistent uint32_t use option with _PERSISTENT_ compile option but slightly use int32_t for index op and void* for pointer.
+2025/06/11 compat compile option to gcc4.2.1.
 
