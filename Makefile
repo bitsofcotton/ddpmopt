@@ -28,6 +28,7 @@ CXXFLAGS+=	-D_ARCFOUR_
 
 # N.B. sed -e s/static\ inline//g | sed -e s/inline//g
 #CXXFLAGS+=     -D_OLDCPP_ -ftemplate-depth-99
+#LDFLAGS+=	-lm
 
 CLEANFILES= *.o ddpmopt ddpmopt32 ddpmoptp ddpmoptmp ddpmopt32mp ddpmoptpmp
 

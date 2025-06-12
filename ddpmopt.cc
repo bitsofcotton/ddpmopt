@@ -12,9 +12,10 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#if !defined(_OLDCPP_)
 #define int int32_t
 //#define int int64_t
-#define _COMPILE_PRED_
+#endif
 #include "lieonn.hh"
 typedef myfloat num_t;
 
@@ -31,10 +32,14 @@ using std::istringstream;
 
 #include <stdlib.h>
 
+#if !defined(_OLDCPP_)
 #undef int
+#endif
 int main(int argc, const char* argv[]) {
+#if !defined(_OLDCPP_)
 #define int int32_t
 //#define int int64_t
+#endif
   const int   sz(2);
   const char& m(argv[1][0]);
   if(argc <= 1 || argv[1][1] != '\0') goto usage;
@@ -416,7 +421,7 @@ int main(int argc, const char* argv[]) {
                 vector<num_t> workr;
                 num_t orig(int(0));
                 int   cnt(0);
-                workr.resize(p.size(), int(0));
+                workr.resize(p.size(), num_t(int(0)));
                 for(int kk = k * rr; kk < min(p[0][j].rows(), (k + 1) * rr); kk ++)
                   for(int nn = n * cc; nn < min(p[0][j].cols(), (n + 1) * cc);
                     nn ++, cnt ++) {
