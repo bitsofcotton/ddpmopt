@@ -17,7 +17,7 @@ We use at least 2\*((whole input size))\*sizeof(num_t) in heap resource.
 # Tips around c++ compilers
 Some of the lieonn.hh operator \>\> class doesn't work as expected, might be compilers' bug.
 
-Either, we might be in invariant prediction catched as getting to be invariant result controlled condition.
+Either, we might be in invariant prediction is catched and is being controlled condition.
 
 # Tips on prediction on objected images on stieljes condition
 We suppose the input image series as some of the functions to effect to or data to be effected by paired images also the pixel contexts in F\_p.
@@ -29,6 +29,8 @@ The plain \[pq\]redg predictor uses first order shallow copying structures but i
 
 So n-predictor is useful when the problem needs some of the internal bit-wise structure is worse complex case they needs very large accuracy depends on input dimension number, stacking predictor reduces them.
 
+However, if there's some of the layered timing attacks on the stream, we need to dig deeper level of the multiple layer condition also this isn't limited layer depth in the condition stream is timing targetted as the same structure we predict. We use one to one entropy to the original input stream size as a possible deep layer we have on the prediction in this.
+
 # Tips on prediction base dimensions
 Something sparse with jammer input stream effects base dimension we select needs larger dimensions on the base, this condition is defined there's no unique pure functions on the stream the variables dimension they have.
 This condition can be eliminated with in/output (de)?compression this condition ask shirks the result of algorithms to some of the upper cardinals with compressing sparsity into dense ones on somewhere usually we should have to increase the base dimensions with or without bitsofcotton/masp from entropy reason.
@@ -38,21 +40,18 @@ However, we predict the stream with them and continuity after them in pqredg.
 So this effects if input stream is enough dense in another words stream is stable for input entropy one by one meaning, the result is reasonable in the continuity meaning.
 
 Some of the PRNG tests causes this valid but there's something new parameters on entropy feeding ratio, they fails with gulfs depends on the range we use in the range.
-In some auto tune entropy feeding, we can do goki_check_cc:test.py:qred command or predv nrecur template specification.
+In some auto tune entropy feeding, we can do goki_check_cc:test.py:qred command or can use predv nrecur template specification.
 
 # Tips on contexts
 We use whole image context to insert context then predict with such each pixel context. So each image consistency is used and applied for the output.
 
 We can use orthogonal context either DFT context insertion, however, this isn't matches our senses, such things are useful to get numerical stability context only and are viewed broken by our senses. This might be because of even 2/3 prediction we have condition, the noise the result have can causes whole graphics spreaded result.
 
-Either we're using goki_check_cc:test.py:qred... commands or monte-carlo methods in lieonn.hh:predv template parameter to complement entropy continuity, we don't need them with some of the slice we gain.
-
 We can use some feature quantity based transforms we can get them by machine learning converted into tan Ax form, masp2catg pseudolly doing this, test.py:[PQ]red command additionaly doing this.
 
 We want to decompose some of the meanings by bitsofcotton/specific and backport them into here, however, implementation of them isn't now.
 Also, these predictors doesn't handle what meaning to omit on next image, so is composition around collection of predictions.
-
-The goki_check_cc:test.py:\[pq\]red\+\+ command shrink image into reasonable parameters on surface condition they includes some omitting meanings.
+However, the goki_check_cc:test.py:\[pq\]red\+\+ command shrink image into reasonable parameters on surface condition they includes some omitting meanings.
 We looked some of the graphics set result, they might be what we wanted to get but not the actually one but ok for us, so we close this repository with this condition.
 
 We get pqred command to get 3 of the candidates from original stream or PRNG mixed stream to stand by each other when we're targetted which 2x force insert Riemann measureable condition and 1x insert Riemann-Stieljes measureable condition.
@@ -61,15 +60,7 @@ We get pqred command to get 3 of the candidates from original stream or PRNG mix
 We have T command for gokibin bit preprocessed graphics stream testing.
 If output is better than .5 probability and stable for some of the shrinked size, the gokibin bit reversed outputs' shrinked image can have some of the meanings for them.
 
-However, we're in prediction result controlled condition, so we don't get actual output images to confirm result, so we need to implement this repository only with the hypothesis we firstly have and their implementation is correct or not one.
-
-So \_PERSISTENT\_ compile option only uses uint32_t for float operation and int32_t for index operation and void\* for pointer operation internal of C language we estimate the conclusion for arithmatic operations. So float operations' arithmatic operation is first order arithmatic logic only with addition and bit operation other than initializing/output (for raw integer type outputs) them we should rely on them.
-
-# Tips on timing-related cultivated conditions
-We re-target cultivated conditions to do recursive on PP... predictors to shirked information amount copy to 1:1 reason.
-We're doing best on our meaning in such a condition but the jammer on them also exists so the stream not predictable nor invariant result forever exists.
-
-Usually, we only need 3 of the layers to fix 3^(3^3) for root information amount, however the tree can continue forever, so we bet the input stream is worse cultivated than we predict to get better result.
+However, we're in prediction result controlled condition, so we don't get actual output images to confirm/verify result, so we need to implement this repository only with the hypothesis we firstly have and their implementation is correct or not one as a result.
 
 # Usage:
     # copy color structure
@@ -281,4 +272,5 @@ Leave here but might return here after another implementations.
 2025/06/10 persistent uint32_t use option with _PERSISTENT_ compile option but slightly use int32_t for index op and void* for pointer.
 2025/06/11 compat compile option to gcc4.2.1.
 2025/06/12 compat compile option with one variant of gcc2.95.3.
+2025/06/17 fix deep template function reverse computation. update readme. close.
 
