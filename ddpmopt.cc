@@ -12,9 +12,12 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#if !defined(_OLDCPP_)
-#define int int32_t
-//#define int int64_t
+#if !defined(_OLDCPP_) && defined(_PERSISTENT_)
+# if _FLOAT_BITS_ == 64
+#  define int int32_t
+# elif _FLOAT_BITS_ == 128
+#  define int int64_t
+# endif
 #endif
 #include "lieonn.hh"
 typedef myfloat num_t;
@@ -32,13 +35,16 @@ using std::istringstream;
 
 #include <stdlib.h>
 
-#if !defined(_OLDCPP_)
+#if !defined(_OLDCPP_) && defined(_PERSISTENT_)
 #undef int
 #endif
 int main(int argc, const char* argv[]) {
-#if !defined(_OLDCPP_)
-#define int int32_t
-//#define int int64_t
+#if !defined(_OLDCPP_) && defined(_PERSISTENT_)
+# if _FLOAT_BITS_ == 64
+#  define int int32_t
+# elif _FLOAT_BITS_ == 128
+#  define int int64_t
+# endif
 #endif
   const int   sz(2);
   const char& m(argv[1][0]);

@@ -274,4 +274,5 @@ Leave here but might return here after another implementations.
 2025/06/12 compat compile option with one variant of gcc2.95.3.
 2025/06/17 fix deep template function reverse computation. update readme. close.
 2025/06/19 fix deep reverse computation with logical one, we don't trust numerical test on this machine. close.
+2025/06/20 merge latest p2 result includes operator >> on simple float accuracy fix around PERSISTENT option.
 

@@ -30,12 +30,12 @@ CXXFLAGS+=	-D_ARCFOUR_
 #CXXFLAGS+=     -D_OLDCPP_ -ftemplate-depth-99
 #LDFLAGS+=	-lm
 
-CLEANFILES= *.o ddpmopt ddpmopt32 ddpmoptp ddpmoptmp ddpmopt32mp ddpmoptpmp
+CLEANFILES= *.o ddpmopt ddpmopt32 ddpmoptp ddpmoptp64 ddpmoptmp ddpmopt32mp ddpmoptpmp ddpmoptp64mp
 
 clean:
 	@rm -rf ${CLEANFILES}
 
-all:	ddpmopt ddpmopt32 ddpmoptp ddpmoptmp ddpmopt32mp ddpmoptpmp
+all:	ddpmopt ddpmopt32 ddpmoptp ddpmoptp64 ddpmoptmp ddpmopt32mp ddpmoptpmp ddpmoptp64mp
 
 ddpmopt:
 	${CXX} ${CXXFLAGS} -static -o ddpmopt ddpmopt.cc
@@ -45,6 +45,8 @@ ddpmopt64:
 	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=64 -o ddpmopt64 ddpmopt.cc
 ddpmoptp:
 	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=64 -D_PERSISTENT_ -o ddpmoptp ddpmopt.cc
+ddpmoptp64:
+	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=128 -D_PERSISTENT_ -o ddpmoptp64 ddpmopt.cc
 ddpmoptmp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -o ddpmoptmp ddpmopt.cc
 ddpmopt32mp:
@@ -53,4 +55,6 @@ ddpmopt64mp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=64 -o ddpmopt64mp ddpmopt.cc
 ddpmoptpmp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=64 -D_PERSISTENT_ -o ddpmoptpmp ddpmopt.cc
+ddpmoptp64mp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=128 -D_PERSISTENT_ -o ddpmoptp64mp ddpmopt.cc
 

@@ -421,8 +421,18 @@ public:
     assert(0 < bits && ! (bits & 1));
     s |= (1 << NaN) | (1 << INF);
   }
+  inline SimpleFloat(const int& src) {
+    const static int zero(0);
+    s ^= s;
+    m  = T(int(src < zero ? - src : src));
+    e ^= e;
+    s |= safeAdd(e, normalize(m));
+    if(src < zero)
+      s |= 1 << SIGN;
+    ensureFlag();
+  }
   template <typename V> inline SimpleFloat(const V& src) {
-    const static V vzero(0);
+    const static V vzero(int(0));
     s ^= s;
     m  = T(int(src < vzero ? - src : src));
     e ^= e;
@@ -783,7 +793,7 @@ private:
   }
   friend istream& operator >> (istream& is, SimpleFloat<T,W,bits,U>& v) {
     const static SimpleFloat<T,W,bits,U> two(T(int(2)));
-                 SimpleFloat<T,W,bits,U> e(T(int(0)));
+                 T e(int(0));
     bool mode(false);
     bool sign(false);
     bool fsign(false);
@@ -829,20 +839,20 @@ private:
       case '0': case '1': case '2': case '3': case '4':
       case '5': case '6': case '7': case '8': case '9':
         if(mode) {
-          e <<= U(int(4));
-          e  += SimpleFloat<T,W,bits,U>(T(int(buf - '0')));
+          e <<= int(4);
+          e  += T(int(buf - '0'));
         } else {
-          v <<= U(int(4));
+          v <<= int(4);
           v  += SimpleFloat<T,W,bits,U>(T(int(buf - '0')));
         }
         fsign = true;
         break;
       case 'a': case'b': case 'c': case 'd': case 'e': case 'f':
         if(mode) {
-          e <<= U(int(4));
-          e  += SimpleFloat<T,W,bits,U>(T(int(buf - 'a' + 10)));
+          e <<= int(4);
+          e  += T(int(buf - 'a' + 10));
         } else {
-          v <<= U(int(4));
+          v <<= int(4);
           v  += SimpleFloat<T,W,bits,U>(T(int(buf - 'a' + 10)));
         }
         fsign = true;
@@ -854,11 +864,11 @@ private:
    ensure:
     if(sign) {
       if(mode)
-        e = - e;
+        v >>= U(e);
       else
         v = - v;
-    }
-    v *= pow(two, e);
+    } else if(mode)
+      v <<= U(e);
     return is;
   }
 };
@@ -1479,6 +1489,10 @@ template <typename T> static inline T ccot(const T& s) {
     typedef DUInt<uint32_t, 32> myuint;
     typedef Signed<myuint, 64> myint;
     typedef SimpleFloat<myuint, DUInt<myuint, 64>, 64, myint> myfloat;
+# elif _FLOAT_BITS_ == 128
+    typedef DUInt<uint64_t, 64> myuint;
+    typedef Signed<myuint, 128> myint;
+    typedef SimpleFloat<myuint, DUInt<myuint, 128>, 128, myint> myfloat;
 # else
 #   error cannot handle float
 # endif
