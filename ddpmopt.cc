@@ -437,7 +437,7 @@ int main(int argc, const char* argv[]) {
                   }
                 if(cnt) {
                   for(int m = 0; m < workr.size(); m ++) workr[m] /= num_t(cnt);
-                  orig  /= num_t(cnt);
+                  orig /= num_t(cnt);
                 }
                 // N.B. for stricter test but we don't need such a restriction:
                 // workr = (sgn<num_t>(workr - num_t(int(1)) / num_t(int(2)) )

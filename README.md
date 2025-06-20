@@ -62,6 +62,16 @@ If output is better than .5 probability and stable for some of the shrinked size
 
 However, we're in prediction result controlled condition, so we don't get actual output images to confirm/verify result, so we need to implement this repository only with the hypothesis we firstly have and their implementation is correct or not one as a result.
 
+# The target result
+We predict some of the boxels as a 1 bit value they have the origin value itself.
+This is because we target to predict {0,1} but via R then we get such a combination result.
+So we should use DDPM-like method to get better result with long range with some of the differences addition then boxel value into gokibin nbit command transfer.
+We should use odd integer number to blend PRNG bits into original ones not to vanish into 0 condition.
+
+We're now having prediction result \pm 1/2 range result in each bit on boxel averages however this normally makes bell curved in some of the graphics set/random number tests.
+
+Tune to auto doing this?
+
 # Usage:
     # copy color structure
     ./ddpmopt(32|64)?(mp)? + <in0out.pgm> <in0in.ppm> ... > cache.txt
@@ -275,4 +285,5 @@ Leave here but might return here after another implementations.
 2025/06/17 fix deep template function reverse computation. update readme. close.
 2025/06/19 fix deep reverse computation with logical one, we don't trust numerical test on this machine. close.
 2025/06/20 merge latest p2 result includes operator >> on simple float accuracy fix around PERSISTENT option.
+2025/06/21 add README.md target result section.
 

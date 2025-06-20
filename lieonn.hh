@@ -90,7 +90,6 @@ using std::lower_bound;
 using std::unique;
 
 // --- N.B. start approximate Lie algebra on F_2^k. ---
-#if defined(_FLOAT_BITS_)
 // N.B. start ifloat
 // Double int to new int class.
 template <typename T, int bits> class DUInt {
@@ -328,6 +327,9 @@ public:
   inline                operator T    () const {
     return e[0];
   }
+  inline                operator double () const {
+    return double(e[0]) + double(e[1]) * pow(double(2), double(bits));
+  }
   friend istream& operator >> (istream& is, DUInt<T,bits>& v) {
     v ^= v;
     // skip white spaces.
@@ -404,6 +406,14 @@ public:
   inline bool operator >= (const Signed<T,bits>& src) const {
     return ! (*this < src);
   }
+  inline      operator double () const {
+    if(*this < Signed<T,bits>(T(int(0))) ) {
+      Signed<T,bits> mthis(- *this);
+      T work(dynamic_cast<const T&>(mthis));
+      return - double(work);
+    }
+    return double(dynamic_cast<const T&>(*this));
+  }
   friend ostream& operator << (ostream& os, Signed<T,bits> v) {
     const static Signed<T,bits> zero(0);
     if(v < zero) {
@@ -420,16 +430,6 @@ public:
   inline SimpleFloat() {
     assert(0 < bits && ! (bits & 1));
     s |= (1 << NaN) | (1 << INF);
-  }
-  inline SimpleFloat(const int& src) {
-    const static int zero(0);
-    s ^= s;
-    m  = T(int(src < zero ? - src : src));
-    e ^= e;
-    s |= safeAdd(e, normalize(m));
-    if(src < zero)
-      s |= 1 << SIGN;
-    ensureFlag();
   }
   template <typename V> inline SimpleFloat(const V& src) {
     const static V vzero(int(0));
@@ -624,6 +624,10 @@ public:
   }
   inline                  operator int  () const {
     return int(this->operator T());
+  }
+  inline                  operator double () const {
+    return (s & (1 << SIGN) ? - double(m) * pow(double(2), double(e)) 
+                            :   double(m) * pow(double(2), double(e)) );
   }
   inline                  operator T    () const {
     SimpleFloat<T,W,bits,U> deci(*this);
@@ -1228,7 +1232,6 @@ template <typename T, typename W, int bits, typename U> static inline SimpleFloa
   }
   return exp(log(src) * dst);
 }
-#endif
 
 // N.B. start class complex part:
 template <typename T> class Complex {
