@@ -4,12 +4,12 @@ CXX=	clang++
 
 # compiler flags.
 ##CXXFLAGS+=	-O0 -mtune=generic -gfull
-CXXFLAGS+=	-Ofast -mtune=native -gfull
+#CXXFLAGS+=	-Ofast -mtune=native -gfull
 #CXXFLAGS+=	-O3 -mtune=native -g3
 # This doesn't work, we need operator >>, operator << with ongoing stdlibc++.
 #CXXFLAGS+=	-I/usr/local/include -mlong-double-128
 #CXXFLAGS+=	-Oz -mtune=native -gfull
-#CXXFLAGS+=	-O2 -mtune=native -gfull
+CXXFLAGS+=	-O2 -mtune=native -gfull
 #CXXFLAGS+=	-O0 -mtune=native -gfull
 #CXXFLAGS+=	-O2 -g3
 #CXXFLAGS+=	-pg
@@ -30,12 +30,12 @@ CXXFLAGS+=	-D_ARCFOUR_
 #CXXFLAGS+=     -D_OLDCPP_ -ftemplate-depth-99
 #LDFLAGS+=	-lm
 
-CLEANFILES= *.o ddpmopt ddpmopt32 ddpmoptp ddpmoptp64 ddpmoptmp ddpmopt32mp ddpmoptpmp ddpmoptp64mp
+CLEANFILES= *.o ddpmopt ddpmoptp ddpmoptmp ddpmoptpmp
 
 clean:
 	@rm -rf ${CLEANFILES}
 
-all:	ddpmopt ddpmopt32 ddpmoptp ddpmoptp64 ddpmoptmp ddpmopt32mp ddpmoptpmp ddpmoptp64mp
+all:	ddpmopt ddpmoptp ddpmoptmp ddpmoptpmp
 
 ddpmopt:
 	${CXX} ${CXXFLAGS} -static -o ddpmopt ddpmopt.cc
@@ -44,9 +44,7 @@ ddpmopt32:
 ddpmopt64:
 	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=64 -o ddpmopt64 ddpmopt.cc
 ddpmoptp:
-	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=64 -D_PERSISTENT_ -o ddpmoptp ddpmopt.cc
-ddpmoptp64:
-	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=128 -D_PERSISTENT_ -o ddpmoptp64 ddpmopt.cc
+	${CXX} ${CXXFLAGS} -static -D_PERSISTENT_ -o ddpmoptp ddpmopt.cc
 ddpmoptmp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -o ddpmoptmp ddpmopt.cc
 ddpmopt32mp:
@@ -54,7 +52,5 @@ ddpmopt32mp:
 ddpmopt64mp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=64 -o ddpmopt64mp ddpmopt.cc
 ddpmoptpmp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=64 -D_PERSISTENT_ -o ddpmoptpmp ddpmopt.cc
-ddpmoptp64mp:
-	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=128 -D_PERSISTENT_ -o ddpmoptp64mp ddpmopt.cc
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_PERSISTENT_ -o ddpmoptpmp ddpmopt.cc
 

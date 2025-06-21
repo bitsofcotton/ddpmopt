@@ -13,7 +13,9 @@
 #include <stdlib.h>
 
 #if !defined(_OLDCPP_) && defined(_PERSISTENT_)
-# if _FLOAT_BITS_ == 64
+# if ! defined(_FLOAT_BITS_)
+#  define int ssize_t
+# elif _FLOAT_BITS_ == 64
 #  define int int32_t
 # elif _FLOAT_BITS_ == 128
 #  define int int64_t
@@ -40,7 +42,9 @@ using std::istringstream;
 #endif
 int main(int argc, const char* argv[]) {
 #if !defined(_OLDCPP_) && defined(_PERSISTENT_)
-# if _FLOAT_BITS_ == 64
+# if ! defined(_FLOAT_BITS_)
+#  define int ssize_t
+# elif _FLOAT_BITS_ == 64
 #  define int int32_t
 # elif _FLOAT_BITS_ == 128
 #  define int int64_t
@@ -439,13 +443,13 @@ int main(int argc, const char* argv[]) {
                   for(int m = 0; m < workr.size(); m ++) workr[m] /= num_t(cnt);
                   orig /= num_t(cnt);
                 }
-                // N.B. for stricter test but we don't need such a restriction:
-                // workr = (sgn<num_t>(workr - num_t(int(1)) / num_t(int(2)) )
-                //   + num_t(int(1)) ) / num_t(int(2));
-                // also apply this on orig.
+                num_t div(unOffsetHalf<num_t>(orig));
+                if(div == num_t(int(0)))
+                  div == num_t(int(1)) / num_t(int(65536)) / num_t(cnt);
+                div = abs(div);
                 for(int m = 0; m < p.size() - 1; m ++)
-                  cout << abs(workr[m] - orig) * num_t(int(2)) << ", ";
-                cout << abs(workr[p.size() - 1] - orig) * num_t(int(2)) << endl;
+                  cout << (abs(workr[m] - orig) / div) << ", ";
+                cout << (abs(workr[p.size() - 1] - orig) / div) << endl;
               }
             cout << endl;
           }

@@ -286,4 +286,5 @@ Leave here but might return here after another implementations.
 2025/06/19 fix deep reverse computation with logical one, we don't trust numerical test on this machine. close.
 2025/06/20 merge latest p2 result includes operator >> on simple float accuracy fix around PERSISTENT option.
 2025/06/21 add README.md target result section.
+2025/06/22 change T command output to better reasonable one. output 2 of the image because we target binary valued result.
 
