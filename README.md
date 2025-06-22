@@ -54,23 +54,9 @@ Also, these predictors doesn't handle what meaning to omit on next image, so is 
 However, the goki_check_cc:test.py:\[pq\]red\+\+ command shrink image into reasonable parameters on surface condition they includes some omitting meanings.
 We looked some of the graphics set result, they might be what we wanted to get but not the actually one but ok for us, so we close this repository with this condition.
 
-We get pqred command to get 3 of the candidates from original stream or PRNG mixed stream to stand by each other when we're targetted which 2x force insert Riemann measureable condition and 1x insert Riemann-Stieljes measureable condition.
-
-# T command
-We have T command for gokibin bit preprocessed graphics stream testing.
-If output is better than .5 probability and stable for some of the shrinked size, the gokibin bit reversed outputs' shrinked image can have some of the meanings for them.
-
-However, we're in prediction result controlled condition, so we don't get actual output images to confirm/verify result, so we need to implement this repository only with the hypothesis we firstly have and their implementation is correct or not one as a result.
-
-# The target result
-We predict some of the boxels as a 1 bit value they have the origin value itself.
-This is because we target to predict {0,1} but via R then we get such a combination result.
-So we should use DDPM-like method to get better result with long range with some of the differences addition then boxel value into gokibin nbit command transfer.
-We should use odd integer number to blend PRNG bits into original ones not to vanish into 0 condition.
-
-We're now having prediction result \pm 1/2 range result in each bit on boxel averages however this normally makes bell curved in some of the graphics set/random number tests.
-
-Tune to auto doing this?
+We get pqred command to get 16 of the candidates in each bit from original stream or PRNG mixed stream to stand by each other when we're targetted which 1x force insert Riemann measureable condition and 1x insert Riemann-Stieljes measureable condition.
+We combine each bit into recursively pivotted prediction to correct each other then revert them.
+16 of candidates have 4 bit entropy so #f on root is saturated by the function number itself.
 
 # Usage:
     # copy color structure
@@ -90,8 +76,8 @@ Tune to auto doing this?
     # test input series of graphics predictable or not (each bit input)
     ./ddpmopt(32|64)?(mp)? T <in0.ppm> ...
 
-# Re7-Leave
-We might re7-leave this repository with this update except for lieonn.hh updates.
+# Re8-Leave
+We might re8-leave this repository with this update except for lieonn.hh updates.
 
 Leave here but might return here after another implementations.
 
@@ -287,4 +273,5 @@ Leave here but might return here after another implementations.
 2025/06/20 merge latest p2 result includes operator >> on simple float accuracy fix around PERSISTENT option.
 2025/06/21 add README.md target result section.
 2025/06/22 change T command output to better reasonable one. output 2 of the image because we target binary valued result.
+2025/06/22 merge concept ok. leave.
 

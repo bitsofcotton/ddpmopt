@@ -167,27 +167,6 @@ int main(int argc, const char* argv[]) {
         (string("predg") + to_string(i) + string(".ppm")).c_str(),
         p[i].size() == 3 ? xyz2rgb<num_t>(p[i]) : move(p[i]) ))
           cerr << "failed to save." << endl;
-  } else if(m == 'P') {
-    vector<vector<SimpleMatrix<num_t> > > in;
-    in.reserve(argc - 1);
-    for(int i = 2; i < argc; i ++) {
-      vector<SimpleMatrix<num_t> > work;
-      if(! loadp2or3<num_t>(work, argv[i])) continue;
-      in.emplace_back(work.size() == 3 ? rgb2xyz<num_t>(work) : move(work));
-    }
-    // N.B. 10 + 1 * 2 < work.size() / step for predv[pq].
-    for(int j = 1; j < in.size() / 12; j ++) {
-      SimpleVector<vector<SimpleMatrix<num_t> > > work;
-      work.entity = skipX<vector<SimpleMatrix<num_t> > >(in, j);
-      vector<vector<SimpleMatrix<num_t> > > p(
-        predMat<num_t>(work.entity = normalize<num_t>(work.subVector(work.size() - 12, 12).entity)));
-      for(int i = 0; i < p.size(); i ++)
-        if(! savep2or3<num_t>(
-          (string("predg") + to_string(j) + string("-") + to_string(i)
-            + string(".ppm")).c_str(), 
-          p[i].size() == 3 ? xyz2rgb<num_t>(p[i]) : move(p[i]) ))
-          cerr << "failed to save." << endl;
-    }
   } else if(m == 'w') {
     vector<vector<SimpleMatrix<num_t> > > in;
     in.reserve(argc - 2);
@@ -218,7 +197,7 @@ int main(int argc, const char* argv[]) {
     if(! savep2or3<num_t>("predgw.ppm",
       normalize<num_t>(p.size() == 3 ? xyz2rgb<num_t>(p) : move(p))) )
         cerr << "failed to save." << endl;
-  } else if(m == 'q' || m == 'Q') {
+  } else if(m == 'q') {
     for(int i0 = 2; i0 < argc; i0 ++) {
       vector<SimpleMatrix<num_t> > work;
       if(! loadp2or3<num_t>(work, argv[i0])) continue;
@@ -236,10 +215,8 @@ int main(int argc, const char* argv[]) {
       const int ext(work[0].rows() / 12);
       vector<vector<SimpleMatrix<num_t> > > wwork;
       for(int i = 0; i < ext; i ++) {
-        SimpleVector<vector<SimpleVector<num_t> > > w;
-        w.entity = skipX<vector<SimpleVector<num_t> > >(pwork, i + 1);
-        vector<vector<SimpleVector<num_t> > > n(
-          predVec<num_t>(m == 'q' ? w.entity : w.subVector(w.size() - 12, 12).entity));
+        vector<vector<SimpleVector<num_t> > > n(predVec<num_t>(
+          skipX<vector<SimpleVector<num_t> > >(pwork, i + 1) ));
         if(! i) {
           wwork.resize(n.size());
           for(int k = 0; k < n.size(); k ++) {
@@ -415,67 +392,58 @@ int main(int argc, const char* argv[]) {
   } else if(m == 'T') {
     vector<vector<SimpleMatrix<num_t> > > in;
     in.reserve(argc - 2 + 1);
-    vector<vector<SimpleMatrix<num_t> > > p;
-    vector<std::pair<int, int> > pc;
     for(int i0 = 2; i0 < argc; i0 ++) {
       vector<SimpleMatrix<num_t> > work;
       if(! loadp2or3<num_t>(work, argv[i0])) continue;
-      if(pc.size()) {
-        cout << " --- " << in.size() - 11 << " --- " << endl;
-        for(int i = 0; i < pc.size(); i ++)
-          for(int j = 0; j < p[0].size(); j ++) {
-            const int rr(p[0][j].rows() / pc[i].first);
-            const int cc(p[0][j].cols() / pc[i].second);
-            for(int k = 0; k < pc[i].first; k ++)
-              for(int n = 0; n < pc[i].second; n ++) {
-                vector<num_t> workr;
-                num_t orig(int(0));
-                int   cnt(0);
-                workr.resize(p.size(), num_t(int(0)));
-                for(int kk = k * rr; kk < min(p[0][j].rows(), (k + 1) * rr); kk ++)
-                  for(int nn = n * cc; nn < min(p[0][j].cols(), (n + 1) * cc);
-                    nn ++, cnt ++) {
-                    for(int m = 0; m < p.size(); m ++)
-                      workr[m] += p[m][j](kk, nn);
-                    orig += work[j](kk, nn);
-                  }
-                if(cnt) {
-                  for(int m = 0; m < workr.size(); m ++) workr[m] /= num_t(cnt);
-                  orig /= num_t(cnt);
-                }
-                num_t div(unOffsetHalf<num_t>(orig));
-                if(div == num_t(int(0)))
-                  div == num_t(int(1)) / num_t(int(65536)) / num_t(cnt);
-                div = abs(div);
-                for(int m = 0; m < p.size() - 1; m ++)
-                  cout << (abs(workr[m] - orig) / div) << ", ";
-                cout << (abs(workr[p.size() - 1] - orig) / div) << endl;
+      in.emplace_back(move(work));
+    }
+    vector<SimpleMatrix<num_t> > out(move(in[in.size() - 1]));
+    in.resize(in.size() - 1);
+    vector<vector<SimpleMatrix<num_t> > > p(predMat<num_t>(in = normalize<num_t>(in)));
+    vector<std::pair<int, int> > pc;
+    pc.emplace_back(make_pair(p[0][0].rows(), p[0][0].cols() ));
+    for(int i = 1;
+      0 <= i && 1 < pc[i - 1].first && 1 < pc[i - 1].second; i ++) {
+      pair<int, int> work(pc[i - 1]);
+      work.first  /= 2;
+      work.second /= 2;
+      pc.emplace_back(move(work));
+    }
+    vector<SimpleMatrix<num_t> >& work(out);
+    for(int i = 0; i < pc.size(); i ++)
+      for(int j = 0; j < p[0].size(); j ++) {
+        const int rr(p[0][j].rows() / pc[i].first);
+        const int cc(p[0][j].cols() / pc[i].second);
+        for(int k = 0; k < pc[i].first; k ++)
+          for(int n = 0; n < pc[i].second; n ++) {
+            vector<num_t> workr;
+            num_t orig(int(0));
+            int   cnt(0);
+            workr.resize(p.size(), num_t(int(0)));
+            for(int kk = k * rr; kk < min(p[0][j].rows(), (k + 1) * rr); kk ++)
+              for(int nn = n * cc; nn < min(p[0][j].cols(), (n + 1) * cc);
+                nn ++, cnt ++) {
+                for(int m = 0; m < p.size(); m ++)
+                  workr[m] += p[m][j](kk, nn);
+                orig += work[j](kk, nn);
               }
-            cout << endl;
+            if(cnt) {
+              for(int m = 0; m < workr.size(); m ++) workr[m] /= num_t(cnt);
+              orig /= num_t(cnt);
+            }
+            num_t div(abs(unOffsetHalf<num_t>(orig)) / num_t(int(2)));
+            if(div == num_t(int(0)))
+              div == num_t(int(1)) / num_t(int(65536)) / num_t(cnt);
+            for(int m = 0; m < p.size() - 1; m ++)
+              cout << (sgn<num_t>(unOffsetHalf<num_t>(workr[m]) * unOffsetHalf<num_t>(orig)) * abs(workr[m] - orig) / div) << ", ";
+            cout << (sgn<num_t>(unOffsetHalf<num_t>(workr[p.size() - 1]) * unOffsetHalf<num_t>(orig)) * abs(workr[p.size() - 1] - orig) / div) << endl;
           }
         cout << endl;
-        // N.B. output can be checked as:
-        //      tail -n ... < output | python3 p2/cr.py t 1 > outR
-        //      with R.app, myv <- read.csv("outR")
-        //                  hist(yv[,1],breaks=seq(0,...,length.out=...))
       }
-      in.emplace_back(move(work));
-      if(i0 == argc - 1) break;
-      if(11 < in.size()) {
-        vector<vector<SimpleMatrix<num_t> > > in2(in);
-        p = predMat<num_t>(in2 = normalize<num_t>(in2));
-        if(! pc.size()) {
-          pc.emplace_back(make_pair(p[0][0].rows(), p[0][0].cols() ));
-          for(int i = 1;
-            0 <= i && 1 < pc[i - 1].first && 1 < pc[i - 1].second; i ++) {
-            pair<int, int> work(pc[i - 1]);
-            work.first  /= 2;
-            work.second /= 2;
-            pc.emplace_back(move(work));
-          }
-        }
-      }
-    }
+    // N.B. output can be checked as:
+    //      tail -n ... < output | p2 o 1 | p2 t 1 > outR
+    //      with R.app, myv <- read.csv("outR")
+    //                  hist(yv[,1],breaks=seq(0,...,length.out=...))
   } else goto usage;
   cerr << "Done" << endl;
   return 0;
@@ -486,11 +454,11 @@ int main(int argc, const char* argv[]) {
   cerr << "# apply color structure" << endl;
   cerr << argv[0] << " - <in0.ppm> ... < cache.txt" << endl;
   cerr << "# predict following image (each bit input)" << endl;
-  cerr << argv[0] << " [pP] <in0.ppm> ..." << endl;
+  cerr << argv[0] << " p <in0.ppm> ..." << endl;
   cerr << "# predict with whole pixel context (each bit input)" << endl;
   cerr << argv[0] << " w <in0-4.ppm> <in0.ppm> ... <addition-4.ppm>" << endl;
   cerr << "# predict down scanlines. (each bit input)" << endl;
-  cerr << argv[0] << " [qQ] <in0out.ppm> ..." << endl;
+  cerr << argv[0] << " q <in0out.ppm> ..." << endl;
   cerr << "# show continuity" << endl;
   cerr << argv[0] << " [xyit] <in0.ppm> ..." << endl;
   cerr << "# some of the volume curvature like transform" << endl;
