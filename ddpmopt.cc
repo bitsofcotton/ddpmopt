@@ -434,6 +434,10 @@ int main(int argc, const char* argv[]) {
             num_t div(abs(unOffsetHalf<num_t>(orig)) / num_t(int(2)));
             if(div == num_t(int(0)))
               div == num_t(int(1)) / num_t(int(65536)) / num_t(cnt);
+            for(int m = 0; m < p.size(); m ++)
+              cout << (sgn<num_t>(unOffsetHalf<num_t>(workr[m]) * unOffsetHalf<num_t>(orig)) * abs(workr[m] - orig) / div) << ", ";
+            for(int m = 0; m < p.size(); m ++)
+              workr[m] = offsetHalf<num_t>(- unOffsetHalf<num_t>(workr[m]));
             for(int m = 0; m < p.size() - 1; m ++)
               cout << (sgn<num_t>(unOffsetHalf<num_t>(workr[m]) * unOffsetHalf<num_t>(orig)) * abs(workr[m] - orig) / div) << ", ";
             cout << (sgn<num_t>(unOffsetHalf<num_t>(workr[p.size() - 1]) * unOffsetHalf<num_t>(orig)) * abs(workr[p.size() - 1] - orig) / div) << endl;

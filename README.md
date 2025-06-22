@@ -14,11 +14,6 @@ Using this with mimalloc or so can increase memory usage with multi thread on so
 
 We use at least 2\*((whole input size))\*sizeof(num_t) in heap resource.
 
-# Tips around c++ compilers
-Some of the lieonn.hh operator \>\> class doesn't work as expected, might be compilers' bug.
-
-Either, we might be in invariant prediction is catched and is being controlled condition.
-
 # Tips on prediction on objected images on stieljes condition
 We suppose the input image series as some of the functions to effect to or data to be effected by paired images also the pixel contexts in F\_p.
 However, instead of using F_2, we need P01 base dimension larger than 4 in such case in fact.
@@ -54,9 +49,21 @@ Also, these predictors doesn't handle what meaning to omit on next image, so is 
 However, the goki_check_cc:test.py:\[pq\]red\+\+ command shrink image into reasonable parameters on surface condition they includes some omitting meanings.
 We looked some of the graphics set result, they might be what we wanted to get but not the actually one but ok for us, so we close this repository with this condition.
 
-We get pqred command to get 16 of the candidates in each bit from original stream or PRNG mixed stream to stand by each other when we're targetted which 1x force insert Riemann measureable condition and 1x insert Riemann-Stieljes measureable condition.
+We get pqred command to get 4 of the candidates in each bit from original stream or PRNG mixed stream to stand by each other when we're targetted which 1x force insert Riemann measureable condition and 1x insert Riemann-Stieljes measureable condition, we target binary in/output, so binary is enough on one of the each context meaning in another words, we treat each graphics as a binary so that adopted low of excluded middle one.
 We combine each bit into recursively pivotted prediction to correct each other then revert them.
-16 of candidates have 4 bit entropy so #f on root is saturated by the function number itself.
+4 of candidates have 2 bit entropy so #f on root is saturated by the function number itself except for something (might be indirectly caused) invariant ones.
+
+However, there's the chase predictor vs jammer even in the raw datastream form itself.
+So if our function is under jamming in another words, some measurable continuity is targetted in discrete condition, the best result we can get through this predictor is 2/3 probability.
+Otherwise, like 'T' command shows, some of the shrinked size can get better result as a.e. 1 ones.
+So this predictor's result depends on whether the stream targets such a continuity or not typically 2/3 to a.e. 1 or it's negate in whole graphics context in some of the shrinked size.
+
+After of all, the chase predictor vs jammer case, if predictor is better to fight the jammer, the predictors' entropy is often better amount than jammer have.
+So the jammer can add any of the entropy feed into the stream condition, the predictor is better to fight such a jammer in short range enough in general.
+The ongoing deep learnings increases such a internal states by feeding another space other than input stream, so they often better fight with the jammers.
+So we're treating them only input stream entropy and function entropy amount, since function entropy only depends on 2^X^2 instead of 2^2^X once code exists as coded for X bit entropy upper bound, the real predictor should access outside of the low of excluded middle in fact.
+Instead of the access, we use optimization result to get orthogonal to the input data stream either pivoting input to get high frequency data stream, however, this isn't enough for long enough input stream in general.
+This is because we only count up number up to input stream size, so external function is too small for feed.
 
 # Usage:
     # copy color structure
