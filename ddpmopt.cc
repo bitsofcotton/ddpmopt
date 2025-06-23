@@ -159,9 +159,7 @@ int main(int argc, const char* argv[]) {
       if(! loadp2or3<num_t>(work, argv[i])) continue;
       in.emplace_back(work.size() == 3 ? rgb2xyz<num_t>(work) : move(work));
     }
-    // N.B. with good spreaded input, we can suppose original as a 'T' command
-    //      case.
-    vector<vector<SimpleMatrix<num_t> > > p(predMat<num_t>(in = normalize<num_t>(in)));
+    vector<vector<SimpleMatrix<num_t> > > p(predMat<num_t, true>(in = normalize<num_t>(in)));
     for(int i = 0; i < p.size(); i ++)
       if(! savep2or3<num_t>(
         (string("predg") + to_string(i) + string(".ppm")).c_str(),
@@ -209,8 +207,6 @@ int main(int argc, const char* argv[]) {
         for(int j = 0; j < work.size(); j ++)
           pwork[i].emplace_back(work[j].row(i));
       }
-      // N.B. same as 'p' cmd, we can suppose original as 'T' command input
-      //      with long range but not in general.
       // N.B. 10 + 1 * 2 < work[0].rows() / step for PP0.
       const int ext(work[0].rows() / 12);
       vector<vector<SimpleMatrix<num_t> > > wwork;
@@ -397,9 +393,10 @@ int main(int argc, const char* argv[]) {
       if(! loadp2or3<num_t>(work, argv[i0])) continue;
       in.emplace_back(move(work));
     }
+    in = normalize<num_t>(in);
     vector<SimpleMatrix<num_t> > out(move(in[in.size() - 1]));
     in.resize(in.size() - 1);
-    vector<vector<SimpleMatrix<num_t> > > p(predMat<num_t>(in = normalize<num_t>(in)));
+    vector<vector<SimpleMatrix<num_t> > > p(predMat<num_t>(in));
     vector<std::pair<int, int> > pc;
     pc.emplace_back(make_pair(p[0][0].rows(), p[0][0].cols() ));
     for(int i = 1;
@@ -431,21 +428,22 @@ int main(int argc, const char* argv[]) {
               for(int m = 0; m < workr.size(); m ++) workr[m] /= num_t(cnt);
               orig /= num_t(cnt);
             }
-            num_t div(abs(unOffsetHalf<num_t>(orig)) / num_t(int(2)));
-            if(div == num_t(int(0)))
-              div == num_t(int(1)) / num_t(int(65536)) / num_t(cnt);
+#define eval(x,y) (sgn<num_t>(unOffsetHalf<num_t>(x) * \
+  unOffsetHalf<num_t>(y)) * abs((x) - (y)) * num_t(int(2)) / \
+  max(abs(unOffsetHalf<num_t>(x)), abs(unOffsetHalf<num_t>(y)) ) )
             for(int m = 0; m < p.size(); m ++)
-              cout << (sgn<num_t>(unOffsetHalf<num_t>(workr[m]) * unOffsetHalf<num_t>(orig)) * abs(workr[m] - orig) / div) << ", ";
+              cout << eval(workr[m],orig) << ", ";
             for(int m = 0; m < p.size(); m ++)
               workr[m] = offsetHalf<num_t>(- unOffsetHalf<num_t>(workr[m]));
             for(int m = 0; m < p.size() - 1; m ++)
-              cout << (sgn<num_t>(unOffsetHalf<num_t>(workr[m]) * unOffsetHalf<num_t>(orig)) * abs(workr[m] - orig) / div) << ", ";
-            cout << (sgn<num_t>(unOffsetHalf<num_t>(workr[p.size() - 1]) * unOffsetHalf<num_t>(orig)) * abs(workr[p.size() - 1] - orig) / div) << endl;
+              cout << eval(workr[m],orig) << ", ";
+            cout << eval(workr[workr.size() - 1],orig) << endl;
+#undef eval
           }
         cout << endl;
       }
     // N.B. output can be checked as:
-    //      tail -n ... < output | p2 o 1 | p2 t 1 > outR
+    //      tail -n ... < output | p2 o 1 | p2 t 1 | tee outR | p2 T+ <margin>
     //      with R.app, myv <- read.csv("outR")
     //                  hist(yv[,1],breaks=seq(0,...,length.out=...))
   } else goto usage;
