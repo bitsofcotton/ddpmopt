@@ -5079,9 +5079,13 @@ template <typename T, int nprogress> static inline SimpleVector<T> predv4(vector
 //      thin-layered and simple enough also measureable condition predictors.
 //      also this predictor appends average((11-9)/3,(16/2+5-9)/3) == 2/3
 //      of unobserved entropy on #f countup from boolean operation counting to
-//      hardly compressed streams. so in fact, we need to stack adding 1 layer
-//      after this to get better result, stacking more couldn't get better
-//      we bet. either we don't know what form such a 1 last layer have.
+//      hardly compressed streams.
+//      the last remaining 1/3 unobserved could be going to vanish if we shrink
+//      output data as a majority logic.
+//      stacking more couldn't get better we bet.
+// N.B. so we close all of the entropy is from input stream itself condition
+//      predictor with this but there might be many another concepts nor
+//      implementations. so we should fight with computation speed matter next.
 
 template <typename T, bool skipx = false> vector<vector<SimpleVector<T> > > predVec(vector<vector<SimpleVector<T> > >& in0) {
   assert(in0.size() && in0[0].size() && in0[0][0].size());

@@ -430,7 +430,8 @@ int main(int argc, const char* argv[]) {
             }
 #define eval(x,y) (sgn<num_t>(unOffsetHalf<num_t>(x) * \
   unOffsetHalf<num_t>(y)) * abs((x) - (y)) * num_t(int(2)) / \
-  max(abs(unOffsetHalf<num_t>(x)), abs(unOffsetHalf<num_t>(y)) ) )
+  max(abs(unOffsetHalf<num_t>(x)), abs(unOffsetHalf<num_t>(y)) ) + \
+  num_t(int(1)) / num_t(int(2)) )
             for(int m = 0; m < p.size(); m ++)
               cout << eval(workr[m],orig) << ", ";
             for(int m = 0; m < p.size(); m ++)
@@ -443,7 +444,7 @@ int main(int argc, const char* argv[]) {
         cout << endl;
       }
     // N.B. output can be checked as:
-    //      tail -n ... < output | p2 o 1 | p2 t 1 | tee outR | p2 T+ <margin>
+    //      tail -n ... < output | tee outR | p2 T+ <margin>
     //      with R.app, myv <- read.csv("outR")
     //                  hist(yv[,1],breaks=seq(0,...,length.out=...))
   } else goto usage;
