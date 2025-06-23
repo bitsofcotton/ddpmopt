@@ -65,6 +65,12 @@ So we're treating them only input stream entropy and function entropy amount, si
 Instead of the access, we use optimization result to get orthogonal to the input data stream either pivoting input to get high frequency data stream, however, this isn't enough for long enough input stream in general.
 This is because we only count up number up to input stream size, so external function is too small for feed.
 
+However, with the unique one function recursion hypothesis, we conclude the input stream size is the matter.
+If there's timing-related attacks, we intend to shuffle the structure by skipping p-steps to reorder some structures they might have the intension to attack us.
+So if the input number exceeds n-markov's size n times n, they can improve the result.
+So the exception is input number \<\< n-markov's size sqrt(n) case, they might not be able to predicted by this.
+cf. there exists Ito's equation.
+
 # Usage:
     # copy color structure
     ./ddpmopt(32|64)?(mp)? + <in0out.pgm> <in0in.ppm> ... > cache.txt
@@ -281,4 +287,5 @@ Leave here but might return here after another implementations.
 2025/06/21 add README.md target result section.
 2025/06/22 change T command output to better reasonable one. output 2 of the image because we target binary valued result.
 2025/06/22 merge concept ok. leave.
+2025/06/23 code clean, flush.
 
