@@ -396,7 +396,7 @@ int main(int argc, const char* argv[]) {
     in = normalize<num_t>(in);
     vector<SimpleMatrix<num_t> > out(move(in[in.size() - 1]));
     in.resize(in.size() - 1);
-    vector<vector<SimpleMatrix<num_t> > > p(predMat<num_t>(in));
+    vector<vector<SimpleMatrix<num_t> > > p(predMat<num_t, true>(in));
     vector<std::pair<int, int> > pc;
     pc.emplace_back(make_pair(p[0][0].rows(), p[0][0].cols() ));
     for(int i = 1;

@@ -58,17 +58,17 @@ So if our function is under jamming in another words, some measurable continuity
 Otherwise, like 'T' command shows, some of the shrinked size can get better result as a.e. 1 ones.
 So this predictor's result depends on whether the stream targets such a continuity or not typically 2/3 to a.e. 1 or it's negate in whole graphics context in some of the shrinked size.
 
-After of all, the chase predictor vs jammer case, if predictor is better to fight the jammer, the predictors' entropy is often better amount than jammer have.
-So the jammer can add any of the entropy feed into the stream condition, the predictor is better to fight such a jammer in short range enough in general.
+After of all, the chase predictor vs jammer case, if the predictor is better to fight the dyamic generating jammer, the predictors' entropy is often better amount than jammer have.
+So the dynamic jammer can add any of the entropy feed into the stream condition, the predictor is better to fight such a jammer in short range enough in general.
 The ongoing deep learnings increases such a internal states by feeding another space other than input stream, so they often better fight with the jammers.
 So we're treating them only input stream entropy and function entropy amount, since function entropy only depends on 2^X^2 instead of 2^2^X once code exists as coded for X bit entropy upper bound, the real predictor should access outside of the low of excluded middle in fact.
 Instead of the access, we use optimization result to get orthogonal to the input data stream either pivoting input to get high frequency data stream, however, this isn't enough for long enough input stream in general.
 This is because we only count up number up to input stream size, so external function is too small for feed.
 
-However, with the unique one function recursion hypothesis, we conclude the input stream size is the matter.
+However, for given static stream with the unique one function recursion hypothes, we conclude the input stream size is the matter.
 If there's timing-related attacks, we intend to shuffle the structure by skipping p-steps to reorder some structures they might have the intension to attack us.
 So if the input number exceeds n-markov's size n times n, they can improve the result.
-So the exception is input number \<\< n-markov's size sqrt(n) case, they might not be able to predicted by this.
+So the exception is input number \<\< n-markov's size n\*n case, they might not be able to predicted by this.
 cf. there exists Ito's equation.
 
 # Usage:
@@ -287,5 +287,5 @@ Leave here but might return here after another implementations.
 2025/06/21 add README.md target result section.
 2025/06/22 change T command output to better reasonable one. output 2 of the image because we target binary valued result.
 2025/06/22 merge concept ok. leave.
-2025/06/23 code clean, flush.
+2025/06/23 code clean, flush. update readme, comment, a little speed remedy.
 
