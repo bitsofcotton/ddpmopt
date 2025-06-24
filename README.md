@@ -2,7 +2,7 @@
 Apply some of the filter to input stream.
 We can use this for bitsofcotton/i2g filtered images.
 
-N.B. we use only input data streams, so this repository doesn't use external models.
+N.B. we use only input data streams, so this repository doesn't use external data sets.
 
 # Context
 There exists Denoising Diffusion Probabilistic Models (DDPM; Ho et al. 2020). So this is another try on them but different flavoured one, we only focus to apply each pixel context to color image into monochrome one, which have the structure completely depends on filters' multiple meaning or complexity.
@@ -12,64 +12,10 @@ We need to do ulimit or edit /etc/login.conf for large malloc use cases required
 
 Using this with mimalloc or so can increase memory usage with multi thread on some systems.
 
-We use at least 2\*((whole input size))\*sizeof(num_t) in heap resource.
+We use at least 3\*((whole input size))\*sizeof(num_t) in heap resource.
 
-# Tips on prediction on objected images on stieljes condition
-We suppose the input image series as some of the functions to effect to or data to be effected by paired images also the pixel contexts in F\_p.
-However, instead of using F_2, we need P01 base dimension larger than 4 in such case in fact.
-After then, we adjust omitted:in/output ratio on F_2 case. We might need this because only single layered learning needs some of the better reasons to calculate in such algorithms.
-
-# Tips on multiple layers prediction
-The plain \[pq\]redg predictor uses first order shallow copying structures but it's saturated by in/output, 3 predictor uses 2nd order enough bits for predictions, 6 predictor is enough for multiple layer algebraic copying structure, 9 predictor is enough for algorithm decomposition including inverse of them, usually they're equivalent to plain predictors from surface looking.
-
-So n-predictor is useful when the problem needs some of the internal bit-wise structure is worse complex case they needs very large accuracy depends on input dimension number, stacking predictor reduces them.
-
-However, if there's some of the layered timing attacks on the stream, we need to dig deeper level of the multiple layer condition also this isn't limited layer depth in the condition stream is timing targetted as the same structure we predict. We use one to one entropy to the original input stream size as a possible deep layer we have on the prediction in this.
-
-# Tips on prediction base dimensions
-Something sparse with jammer input stream effects base dimension we select needs larger dimensions on the base, this condition is defined there's no unique pure functions on the stream the variables dimension they have.
-This condition can be eliminated with in/output (de)?compression this condition ask shirks the result of algorithms to some of the upper cardinals with compressing sparsity into dense ones on somewhere usually we should have to increase the base dimensions with or without bitsofcotton/masp from entropy reason.
-
-Usually, the condition larger than 4 dimension is come from some of the jammer like inputs nor brand new data feed input by input stream.
-However, we predict the stream with them and continuity after them in pqredg.
-So this effects if input stream is enough dense in another words stream is stable for input entropy one by one meaning, the result is reasonable in the continuity meaning.
-
-Some of the PRNG tests causes this valid but there's something new parameters on entropy feeding ratio, they fails with gulfs depends on the range we use in the range.
-In some auto tune entropy feeding, we can do goki_check_cc:test.py:qred command or can use predv nrecur template specification.
-
-# Tips on contexts
-We use whole image context to insert context then predict with such each pixel context. So each image consistency is used and applied for the output.
-
-We can use orthogonal context either DFT context insertion, however, this isn't matches our senses, such things are useful to get numerical stability context only and are viewed broken by our senses. This might be because of even 2/3 prediction we have condition, the noise the result have can causes whole graphics spreaded result.
-
-We can use some feature quantity based transforms we can get them by machine learning converted into tan Ax form, masp2catg pseudolly doing this, test.py:[PQ]red command additionaly doing this.
-
-We want to decompose some of the meanings by bitsofcotton/specific and backport them into here, however, implementation of them isn't now.
-Also, these predictors doesn't handle what meaning to omit on next image, so is composition around collection of predictions.
-However, the goki_check_cc:test.py:\[pq\]red\+\+ command shrink image into reasonable parameters on surface condition they includes some omitting meanings.
-We looked some of the graphics set result, they might be what we wanted to get but not the actually one but ok for us, so we close this repository with this condition.
-
-We get pqred command to get 4 of the candidates in each bit from original stream or PRNG mixed stream to stand by each other when we're targetted which 1x force insert Riemann measureable condition and 1x insert Riemann-Stieljes measureable condition, we target binary in/output, so binary is enough on one of the each context meaning in another words, we treat each graphics as a binary so that adopted low of excluded middle one.
-We combine each bit into recursively pivotted prediction to correct each other then revert them.
-4 of candidates have 2 bit entropy so #f on root is saturated by the function number itself except for something (might be indirectly caused) invariant ones.
-
-However, there's the chase predictor vs jammer even in the raw datastream form itself.
-So if our function is under jamming in another words, some measurable continuity is targetted in discrete condition, the best result we can get through this predictor is 2/3 probability.
-Otherwise, like 'T' command shows, some of the shrinked size can get better result as a.e. 1 ones.
-So this predictor's result depends on whether the stream targets such a continuity or not typically 2/3 to a.e. 1 or it's negate in whole graphics context in some of the shrinked size.
-
-After of all, the chase predictor vs jammer case, if the predictor is better to fight the dyamic generating jammer, the predictors' entropy is often better amount than jammer have.
-So the dynamic jammer can add any of the entropy feed into the stream condition, the predictor is better to fight such a jammer in short range enough in general.
-The ongoing deep learnings increases such a internal states by feeding another space other than input stream, so they often better fight with the jammers.
-So we're treating them only input stream entropy and function entropy amount, since function entropy only depends on 2^X^2 instead of 2^2^X once code exists as coded for X bit entropy upper bound, the real predictor should access outside of the low of excluded middle in fact.
-Instead of the access, we use optimization result to get orthogonal to the input data stream either pivoting input to get high frequency data stream, however, this isn't enough for long enough input stream in general.
-This is because we only count up number up to input stream size, so external function is too small for feed.
-
-However, for given static stream with the unique one function recursion hypothes, we conclude the input stream size is the matter.
-If there's timing-related attacks, we intend to shuffle the structure by skipping p-steps to reorder some structures they might have the intension to attack us.
-So if the input number exceeds n-markov's size n times n, they can improve the result.
-So the exception is input number \<\< n-markov's size n\*n case, they might not be able to predicted by this.
-cf. there exists Ito's equation.
+# Tips on predictors
+Implanted comments into lieonn.hh .
 
 # Usage:
     # copy color structure
@@ -89,8 +35,8 @@ cf. there exists Ito's equation.
     # test input series of graphics predictable or not (each bit input)
     ./ddpmopt(32|64)?(mp)? T <in0.ppm> ...
 
-# Re8-Leave
-We might re8-leave this repository with this update except for lieonn.hh updates.
+# Re9-Leave
+We might re9-leave this repository with this update except for lieonn.hh updates.
 
 Leave here but might return here after another implementations.
 
@@ -288,4 +234,5 @@ Leave here but might return here after another implementations.
 2025/06/22 change T command output to better reasonable one. output 2 of the image because we target binary valued result.
 2025/06/22 merge concept ok. leave.
 2025/06/23 code clean, flush. update readme, comment, a little speed remedy.
+2025/06/25 readme.md move into lieonn.hh comment implanted. also implement some stopping layeres.
 

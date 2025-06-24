@@ -37,6 +37,13 @@ using std::istringstream;
 
 #include <stdlib.h>
 
+template <typename T> static inline T evalT(const T& x, const T& y, const int& cnt = - 1) {
+  const T ux(unOffsetHalf<T>(x));
+  const T uy(unOffsetHalf<T>(y));
+  return sgn<T>(ux * uy) * abs(abs(ux) - abs(uy)) / min(abs(ux),
+    abs(0 < cnt ? T(int(1)) / T(int(cnt * 2)) : uy) );
+}
+
 #if !defined(_OLDCPP_) && defined(_PERSISTENT_)
 #undef int
 #endif
@@ -428,17 +435,9 @@ int main(int argc, const char* argv[]) {
               for(int m = 0; m < workr.size(); m ++) workr[m] /= num_t(cnt);
               orig /= num_t(cnt);
             }
-#define eval(x,y) (sgn<num_t>(unOffsetHalf<num_t>(x) * \
-  unOffsetHalf<num_t>(y)) * abs((x) - (y)) * num_t(int(2)) / \
-  max(abs(unOffsetHalf<num_t>(x)), abs(unOffsetHalf<num_t>(y)) ) + \
-  num_t(int(1)) / num_t(int(2)) )
-            for(int m = 0; m < p.size(); m ++)
-              cout << eval(workr[m],orig) << ", ";
-            for(int m = 0; m < p.size(); m ++)
-              workr[m] = offsetHalf<num_t>(- unOffsetHalf<num_t>(workr[m]));
             for(int m = 0; m < p.size() - 1; m ++)
-              cout << eval(workr[m],orig) << ", ";
-            cout << eval(workr[workr.size() - 1],orig) << endl;
+              cout << evalT<num_t>(workr[m], orig, cnt) << ", ";
+            cout << evalT<num_t>(workr[p.size() - 1], orig, cnt) << endl;
 #undef eval
           }
         cout << endl;

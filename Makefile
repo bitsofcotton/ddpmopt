@@ -4,12 +4,12 @@ CXX=	clang++
 
 # compiler flags.
 ##CXXFLAGS+=	-O0 -mtune=generic -gfull
-#CXXFLAGS+=	-Ofast -mtune=native -gfull
+CXXFLAGS+=	-Ofast -mtune=native -gfull
 #CXXFLAGS+=	-O3 -mtune=native -g3
 # This doesn't work, we need operator >>, operator << with ongoing stdlibc++.
 #CXXFLAGS+=	-I/usr/local/include -mlong-double-128
 #CXXFLAGS+=	-Oz -mtune=native -gfull
-CXXFLAGS+=	-O2 -mtune=native -gfull
+#CXXFLAGS+=	-O2 -mtune=native -gfull
 #CXXFLAGS+=	-O0 -mtune=native -gfull
 #CXXFLAGS+=	-O2 -g3
 #CXXFLAGS+=	-pg
