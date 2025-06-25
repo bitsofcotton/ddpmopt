@@ -2,7 +2,8 @@
 Apply some of the filter to input stream.
 We can use this for bitsofcotton/i2g filtered images.
 
-N.B. we use only input data streams, so this repository doesn't use external data sets.
+We use only input data streams, so this repository doesn't use external data sets.
+Also this targets Riemann and Riemann-Stieljes measureable condition in discrete sampled ones.
 
 # Context
 There exists Denoising Diffusion Probabilistic Models (DDPM; Ho et al. 2020). So this is another try on them but different flavoured one, we only focus to apply each pixel context to color image into monochrome one, which have the structure completely depends on filters' multiple meaning or complexity.
@@ -19,26 +20,24 @@ Implanted comments into lieonn.hh .
 
 # Usage:
     # copy color structure
-    ./ddpmopt(32|64)?(mp)? + <in0out.pgm> <in0in.ppm> ... > cache.txt
+    ./ddpmoptp?(mp)? + <in0out.pgm> <in0in.ppm> ... > cache.txt
     # apply color structure
-    ./ddpmopt(32|64)?(mp)? - <in0.ppm> ... < cache.txt
+    ./ddpmoptp?(mp)? - <in0.ppm> ... < cache.txt
     # predict following image (each bit input)
-    ./ddpmopt(32|64)?(mp)? p <in0.ppm> ...
+    ./ddpmoptp?(mp)? p <in0.ppm> ...
     # reverse whole pixel context (each bit input)
-    ./ddpmopt(32|64)?(mp)? w <in0-4.ppm> <in0.ppm> ... <addition-4.ppm>
+    ./ddpmoptp?(mp)? w <in0-4.ppm> <in0.ppm> ... <addition-4.ppm>
     # predict down scanlines. (each bit input)
-    ./ddpmopt(32|64)?(mp)? q <in0out.ppm> ...
+    ./ddpmoptp?(mp)? q <in0out.ppm> ...
     # show continuity
-    ./ddpmopt(32|64)?(mp)? [xyit] <in0.ppm> ...
+    ./ddpmoptp?(mp)? [xyit] <in0.ppm> ...
     # some of the volume curvature like transform
-    ./ddpmopt(32|64)?(mp)? c <in0.ppm> ...
+    ./ddpmoptp?(mp)? c <in0.ppm> ...
     # test input series of graphics predictable or not (each bit input)
-    ./ddpmopt(32|64)?(mp)? T <in0.ppm> ...
+    ./ddpmoptp?(mp)? T <in0.ppm> ...
 
-# Re9-Leave
-We might re9-leave this repository with this update except for lieonn.hh updates.
-
-Leave here but might return here after another implementations.
+# LEAVE
+We might LEAVE this repository except for lieonn.hh updates because the 1/3 to 2/3 condition isn't avoidable in some of the case fighting with whole input.
 
 # Real close
 2023/03/01
