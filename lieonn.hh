@@ -2651,7 +2651,6 @@ template <typename T> static inline SimpleMatrix<T> log(const SimpleMatrix<T>& m
 }
 
 template <typename T> static inline SimpleMatrix<T> logSym(const SimpleMatrix<T>& x, const SimpleMatrix<T>& b) {
-  // XXX stub.
   assert(x.rows() == x.cols() && b.rows() == b.cols());
   assert(! (x.rows() % b.rows()) && ! (x.cols() % b.cols()));
   for(int i = 0; i < x.rows(); i ++)
@@ -2689,7 +2688,6 @@ template <typename T> static inline SimpleMatrix<T> logSym(const SimpleMatrix<T>
   Ux  = Ub.inverse()  * Ux;
   Uxt = Ubt.inverse() * Uxt;
   // N.B. Ux == Ua sqrt(diag(Lawork)) and same on right side.
-  // XXX stub:
     assert(0 && "log (symmetric matrix A, symmetric matrix B) : stub");
   return x;
 }
@@ -3931,7 +3929,7 @@ template <typename T> T p0maxNext(const SimpleVector<T>& in) {
 //      discrete, the description f(x):=<a,x> mod p has the hyperbolic
 //      triangular function complemented region.
 // N.B. this is the analogy to toeplitz matrix inveresion with singular one.
-// N.B. if the unction has internal states variable that to be projected into
+// N.B. if the function has internal states variable that to be projected into
 //      series, they're looked as <a,x>+<b,y>==<a,x>==0, y is internal states.
 //      so this causes A*x==B*y, so increasing dimension causes ok result.
 //      however, we're in invariant condition (de)?compression destroys,
@@ -5087,7 +5085,7 @@ template <typename T, vector<SimpleVector<T> > (*p)(const vector<SimpleVector<T>
 }
 
 // N.B. for given static input stream with the unique one function recursion
-//      hypothesis, also if there's timint-related attacks, we intend to shuffle
+//      hypothesis, also if there's timing-related attacks, we intend to shuffle
 //      the structure by skipping p-steps to reorder some structures they might
 //      have the intension to attack our predictor.
 // N.B. for n-markov generated input, n*n < in.size() works better with us.
@@ -7546,7 +7544,6 @@ template <typename T, typename U> corpus<T,U>::corpus(const U& input, const vect
       for(typename vector<int>::const_iterator itr2(itr1); itr2 != uptrs.end(); ++ itr2) {
         const int k(*itr2);
         if(!ptrs[k].size()) continue;
-        // XXX checkme:
         if(words[i] == U("$") || words[j] == U("$") || words[k] == U("$") ||
            words[i] == U("^") || words[j] == U("^") || words[k] == U("^"))
           continue;
@@ -8395,9 +8392,23 @@ template <typename T, typename U> static inline void makelword(vector<U>& words,
 //      have unique function generation, so this is analogy to the manually
 //      manipulate function switching.
 //
+// N.B. some of the ideal prediction candidates.
+//      so the ideal prediction without transforming input into meanings
+//      with the condition no initial or calculated internal states have
+//      the 4 of the candidates for f_k. either the attack to such of f_k,
+//      the payload range shift effectively causes better result
+//      (which move the gulf position before/after the first f_k met.)
+//      we face this condition surface with p2 j+ command, so we close them
+//      with this condition. so in another words, the pred(Vec|Mat|STen) needs
+//      one more layer they effects p2 j+ like effects also this doubles the
+//      output number, we can do this instead of skipX concerns they avoid
+//      the original predictors' jammer condition in some another way.
+//
 // N.B. another variants of the predictors fight with 2*3*2 pattern of #f
 //      fixation. (however, we don't use initial internal states, it's only 4).
 //      (00), (01), (02) is already implemented p01?2?next.
+//      either, pred(Vec|Mat|STen) prediction untangles twice by two candidates
+//      so we perhaps don't need them.
 // (10) with taking multiplication invariant on f,
 //      S f(x) dx = S det(J((1,g0,...)/(1,x0,...)) dx0 ...
 //      retaking their addition invariant as det(...) == 0, the given function

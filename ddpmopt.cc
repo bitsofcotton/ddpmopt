@@ -59,7 +59,7 @@ int main(int argc, const char* argv[]) {
 #endif
   const int   sz(2);
   const char& m(argv[1][0]);
-  if(argc <= 1 || argv[1][1] != '\0') goto usage;
+  if(argc <= 1) goto usage;
   cerr << "Coherent: sqrt(2): " << sqrt<num_t>(Complex<num_t>(num_t(2))) << endl;
   if(m == '-') {
     vector<SimpleVector<num_t> > L;
@@ -435,6 +435,7 @@ int main(int argc, const char* argv[]) {
               for(int m = 0; m < workr.size(); m ++) workr[m] /= num_t(cnt);
               orig /= num_t(cnt);
             }
+            if(argv[1][1] == '-') cnt = - 1;
             for(int m = 0; m < p.size() - 1; m ++)
               cout << evalT<num_t>(workr[m], orig, cnt) << ", ";
             cout << evalT<num_t>(workr[p.size() - 1], orig, cnt) << endl;
@@ -466,7 +467,7 @@ int main(int argc, const char* argv[]) {
   cerr << "# some of the volume curvature like transform" << endl;
   cerr << argv[0] << " c <in0.ppm> ..." << endl;
   cerr << "# test input series of graphics predictable or not (each bit input)" << endl;
-  cerr << argv[0] << " T <in0.ppm> ..." << endl;
+  cerr << argv[0] << " T-? <in0.ppm> ..." << endl;
   return - 1;
 }
 
