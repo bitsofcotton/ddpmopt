@@ -3766,7 +3766,7 @@ template <typename T> static inline T p012next(const SimpleVector<T>& d) {
   return sscore == zero ? sscore : res / sscore;
 }
 
-// N.B. f in C1 case, F(z,theta) := complex(f(z+~z),f(z-~z))*tan(theta) in C1,
+// N.B. f in C1 case, F(z,theta) := complex(f(z+~z),f(z-~z)*tan(theta)) in C1,
 //      z in C. For each theta, exists F: holomorphic function at some axis
 //      that real axis is same as f. so |theta-pi/4|<=epsilon case,
 //      we have a area, with guzmer's inequation and edit integrate path.
@@ -3778,8 +3778,8 @@ template <typename T> static inline T p012next(const SimpleVector<T>& d) {
 //      also we use weak differential taylor series on them.
 //
 // N.B. we can calculate real F as
-//   exp(Sum log(z-|z|cis(pi/4+t_k)))*
-//     (Sum((f(z+~z)+i*f(z-~z)*tan(pi/4+t_k))/(z-|z|cis(pi/4+t_k))
+//   exp(Sum log(z-|z|cis(pi/4+t_k)))
+//     Sum((f(z+~z)+i*f(z-~z)*tan(pi/4+t_k))/(z-|z|cis(pi/4+t_k)))
 //   =: f(z+~z)*g(z)+f(z-~z)*h(z)
 //   so replace on (1+i)t, F(x):=(f(x)*real(g(x))-f(x)*imag(h(x))) + imaginary
 //   F is holomorphic on some small range (f in C0) and
@@ -3789,7 +3789,7 @@ template <typename T> static inline T p012next(const SimpleVector<T>& d) {
 //   some small area.
 // N.B. we can add some of the conditions on x_next := integrate^x f(x_now)
 //   form with x'_next := integrate^x (f_x'now - alpha) + beta transforms.
-// N.B. also this is left differential one and periodical right differentia one
+// N.B. also this is left differential one and periodical right differential one
 //   average.
 // N.B. there can be 0 invariant chain, so they can be caused by move average
 //   they caused return to average works very well.
@@ -3891,24 +3891,20 @@ template <typename T> T p0maxNext(const SimpleVector<T>& in) {
   //      continuous structure causes dim K == 1,2,4,8 real closed field
   //      if they're semi-ordered one.
   return sumCNext<T, true, sumCNext<T, false, northPoleNext<T, p0max0next<T> > > >(in);
-  // N.B. plain complex form.
+  // N.B. plain complex form doesn't improve enough result.
   // return sumCNext<T, true, sumCNext<T, false, logCNext<T, logCNext<T, northPoleNext<T, p0max0next<T> > > > > >(in);
   // N.B. we need only once P0DFT in general because associative condition
   //      is necessary for input ordering even we work with sedenion.
-  // N.B. however, with linear prediction, P0DFT's moving coefficient prediction
-  //      is equivalent to original one.
-  // N.B. we eliminated them. we're better to handle their structures than here.
+  //      also this eliminates one dimension per each of complex-formed input
+  //      on f as a continuous thing.
   // N.B. on any R to R into reasonable C^omega.
   // N.B. we treat periodical part as non aligned complex arg part.
-  // N.B. we make the prediction on (delta) summation.
-  // N.B. we take average as origin of input.
-  // N.B. this needs huge memory to run.
+  // N.B. we make the prediction on (delta) summation also take average as
+  //      origin of input.
   // N.B. either there's plenty of a space to extend this with
   //      uparrow, downarrow operations they causes the result in H\C if second
-  //      operand is in C\R, also they causes 3-variable function causes
-  //      f(x,f(x),states) handled but states isn't continuous enough in general.
-  //      however, they can cause only symmetric matrices P0DFT prediction
-  //      variant.
+  //      operand is in C\R.
+  // N.B. this needs huge memory to run.
   // return sumCNext<T, true, sumCNext<T, false, logCNext<T, logCNext<T, P0DFT<T, p0max0next<T> > > > > >(in);
 }
 
@@ -3917,15 +3913,16 @@ template <typename T> T p0maxNext(const SimpleVector<T>& in) {
 // cf. bitsofcotton/randtools .
 // N.B. with cultivated == true condition, we feed root of the description
 //      we can use to id. data amount. we need at most 3 depth in normal.
-// N.B. we select deep enough one because of the timing related attack jammer
-//      exists they can select arbitrary timing also such of the stream exists.
-//      this isn't avoid completely the condition, so it's only to ease
-//      our mind with much of input stream size in probable.
+//      without timing attack things we sentry for the opposite side also
+//      have same structured one case. such of the attack isn't avoidable
+//      by this p01next. so we abandoned infinite cultivated loop.
+//      either we normally do p0next after this, so counting cardinal causes
+//      2 depth on whole.
 // N.B. if input stream is something sparse with jammer generated, the varlen
 //      we need is far larger than this. this condition can be eliminated with
 //      in/output (de)?compression ask shirks the result of algorithms to some
 //      of the upper cardinals.
-// N.B. if the original tream doesn't have Lebesgue measureable condition in
+// N.B. if the original stream doesn't have Lebesgue measureable condition in
 //      discrete, the description f(x):=<a,x> mod p has the hyperbolic
 //      triangular function complemented region.
 // N.B. this is the analogy to toeplitz matrix inveresion with singular one.
@@ -3941,7 +3938,7 @@ template <typename T> T p0maxNext(const SimpleVector<T>& in) {
 //      ||Ax-1*x'||<epsilon condition.
 // N.B. the worse structures are handled by skipX concerns or long enough p012
 //      preprocess.
-template <typename T, const bool cultivated, const bool nonlinear> T p01next(const SimpleVector<T>& in) {
+template <typename T, const bool nonlinear> T p01next(const SimpleVector<T>& in, const int& cultivated = 1) {
   static const int step(1);
   static const T zero(0);
   static const T one(1);
@@ -3972,7 +3969,7 @@ template <typename T, const bool cultivated, const bool nonlinear> T p01next(con
   else {
     invariant.O();
     for(int i = 0; i < invariants.cols(); i ++)
-      invariant[i] = p01next<T, cultivated, nonlinear>(invariants.col(i));
+      invariant[i] = p01next<T, nonlinear>(invariants.col(i), cultivated - 1);
   }
   if(invariant[varlen - 1] == zero)
     return in[in.size() - 1];
@@ -4856,12 +4853,12 @@ template <typename T, int nprogress> static inline SimpleVector<T> predv00(const
   for(int j = 0; j < intran.size(); j ++) {
     if(nprogress && ! (j % max(int(1), int(intran.size() / nprogress))) )
       cerr << j << " / " << intran.size() << ", " << strloop << endl;
-    p[j] = p01next<T, true, true>(intran[j].subVector(0, sz));
+    p[j] = p01next<T, true>(intran[j].subVector(0, sz));
   }
   const T nseconds(sqrt(seconds.dot(seconds)));
   return revertProgramInvariant<T>(make_pair(
     makeProgramInvariant<T>(normalize<T>(p)).first,
-      p01next<T, true, true>(seconds / nseconds) * nseconds) );
+      p01next<T, true>(seconds / nseconds) * nseconds) );
 }
 
 template <typename T, int nprogress> static inline SimpleVector<T> predv0(const vector<SimpleVector<T> >& in, const int& sz, const string& strloop = string("")) {
@@ -5155,7 +5152,7 @@ template <typename T, int nprogress> static inline SimpleVector<T> predv4(vector
   }
   return revertProgramInvariant<T>(make_pair(
     makeProgramInvariant<T>(normalize<T>(res)).first,
-      p01next<T, true, true>(nwork / nseconds) * nseconds));
+      p01next<T, true>(nwork / nseconds) * nseconds));
 }
 
 // N.B. *** layers ***
@@ -5213,9 +5210,10 @@ template <typename T, int nprogress> static inline SimpleVector<T> predv4(vector
 //      so our function in another words some measureable condition is targetted
 //      in discrete condition, the best result we can get through this predictor
 //      is 2/3 probability.
-// N.B. otherwise, the static input stream can have 1 a.e. output as some of the//      shrinked output theirselves.
+// N.B. otherwise, the static input stream can have 1 a.e. output as some of the
+//      shrinked output theirselves.
 // N.B. we need to shirk internal states upper bound size into graphics size
-//      before to compute. we're doing this with goki_check_cc:test.py pred+?+?
+//      before to compute. we're doing this with goki_check_cc:test.py pred
 //      command before to calculate. this is to omit what bitstream next in
 //      surface.
 // N.B. after of all, the dynamic jammer can be avoided if the predictor entropy
@@ -5236,20 +5234,19 @@ template <typename T, int nprogress> static inline SimpleVector<T> predv4(vector
 //      so jammers can attack our predictors' any of the layer, so we should
 //      output each layer apply/not apply cases but this causes combination
 //      explode.
-//      this is also be able to verified by x+ := A x mod 2, x in {0,1}^n,
-//      A in (2^p)^(n*n) operation runs any of the input causes sign bit result
-//      can be {1/3,1/3,1/3} in the best.
+//      this is also be able to verified by x+ := A x (first binary digit),
+//      x in {0,1}^n, A in (2^p)^(n*n) operation runs any of the input causes 
+//      sign bit result can be {1/3,1/3,1/3} in the best.
 // N.B. so the input stream has the meaning payload to the datastream.
 //      ongoing neural networks mimics them as plausible one formatter so they
 //      stands on the first intension as tunable ones.
 //      our predictor stands on measureable condition satisfied or not.
 // N.B. also we close all of the entropy is from input stream itself condition
 //      predictor with this but there might be many another concepts nor
-//      implementations. so we should fight with computation speed matter next.
+//      implementations.
 //      the masp2catg or goki_check_cc:test.py [PQ]redg doing one of this but
-//      not optimal ones.
-// N.B. we want to backport bitsofcotton/specific into here, but implementation
-//      isn't now.
+//      not optimal ones. also we want to backport bitsofcotton/specific into
+//      here, but implementation isn't now.
 
 template <typename T, bool skipx = false> vector<vector<SimpleVector<T> > > predVec(vector<vector<SimpleVector<T> > >& in0) {
   assert(in0.size() && in0[0].size() && in0[0][0].size());
@@ -8403,6 +8400,7 @@ template <typename T, typename U> static inline void makelword(vector<U>& words,
 //      one more layer they effects p2 j+ like effects also this doubles the
 //      output number, we can do this instead of skipX concerns they avoid
 //      the original predictors' jammer condition in some another way.
+//      we select deterministic one not with PRNG thing.
 //
 // N.B. another variants of the predictors fight with 2*3*2 pattern of #f
 //      fixation. (however, we don't use initial internal states, it's only 4).
