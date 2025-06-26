@@ -8402,6 +8402,15 @@ template <typename T, typename U> static inline void makelword(vector<U>& words,
 //      the original predictors' jammer condition in some another way.
 //      we select deterministic one not with PRNG thing.
 //
+// N.B. the saturated condition.
+//      we should increase the prediction dimension also remake worse large
+//      n for n-markov for input stream also we should decompose them as
+//      eigen decomposition. so the most of the first digit concerns concludes
+//      eigen vector matrix (usually m*n formed) fixation.
+//      this is also to make dynamic dictionary to the input stream on such
+//      of a layer. so ddpmopt [+-] also the masp + is intended to make this but
+//      this is obscure.
+//
 // N.B. another variants of the predictors fight with 2*3*2 pattern of #f
 //      fixation. (however, we don't use initial internal states, it's only 4).
 //      (00), (01), (02) is already implemented p01?2?next.
