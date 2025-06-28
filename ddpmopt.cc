@@ -436,9 +436,9 @@ int main(int argc, const char* argv[]) {
               orig /= num_t(cnt);
             }
             if(argv[1][1] == '-') cnt = - 1;
-            for(int m = 0; m < p.size() - 1; m ++)
+            for(int m = 0; m < workr.size() - 1; m ++)
               cout << evalT<num_t>(workr[m], orig, cnt) << ", ";
-            cout << evalT<num_t>(workr[p.size() - 1], orig, cnt) << endl;
+            cout << evalT<num_t>(workr[workr.size() - 1], orig, cnt) << endl;
 #undef eval
           }
         cout << endl;
