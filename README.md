@@ -235,4 +235,5 @@ We might LEAVE this repository except for lieonn.hh updates because the 1/3 to 2
 2025/06/23 code clean, flush. update readme, comment, a little speed remedy.
 2025/06/25 readme.md move into lieonn.hh comment implanted. also implement some stopping layeres.
 2025/06/26 add T- command, update lieonn.hh comment.
+2025/06/28 refactor/fix around lieonn. re-compat with gcc2953.
 

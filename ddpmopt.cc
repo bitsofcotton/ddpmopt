@@ -218,7 +218,7 @@ int main(int argc, const char* argv[]) {
       const int ext(work[0].rows() / 12);
       vector<vector<SimpleMatrix<num_t> > > wwork;
       for(int i = 0; i < ext; i ++) {
-        vector<vector<SimpleVector<num_t> > > n(predVec<num_t>(
+        vector<vector<SimpleVector<num_t> > > n(predVec<num_t, false>(
           skipX<vector<SimpleVector<num_t> > >(pwork, i + 1) ));
         if(! i) {
           wwork.resize(n.size());
