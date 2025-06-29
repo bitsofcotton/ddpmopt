@@ -34,7 +34,7 @@ Implanted comments into lieonn.hh .
     # some of the volume curvature like transform
     ./ddpmoptp?(mp)? c <in0.ppm> ...
     # test input series of graphics predictable or not (each bit input)
-    ./ddpmoptp?(mp)? T-? <in0.ppm> ...
+    ./ddpmoptp?(mp)? T <in0.ppm> ...
 
 # LEAVE
 We might LEAVE this repository except for lieonn.hh updates because the 1/3 to 2/3 condition isn't avoidable in some of the case fighting with whole input.
@@ -236,4 +236,5 @@ We might LEAVE this repository except for lieonn.hh updates because the 1/3 to 2
 2025/06/25 readme.md move into lieonn.hh comment implanted. also implement some stopping layeres.
 2025/06/26 add T- command, update lieonn.hh comment.
 2025/06/28 refactor/fix around lieonn. re-compat with gcc2953.
+2025/06/29-30 refactor/investigate/fix around lieonn. add pAbsentMajority. T,p,q command chg.
 

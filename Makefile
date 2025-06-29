@@ -26,13 +26,11 @@ LDFLAGS+=	-lc++ -L/usr/local/lib
 # lieonn.hh compile options
 CXXFLAGS+=	-D_ARCFOUR_
 #CXXFLAGS+=	-D_PINVARIANT_SYMMETRIC_LINEAR_
+#CXXFLAGS+=	-D_PRNG_RECUR_=11
 
 # N.B. sed -e s/static\ inline//g | sed -e s/inline//g
 #CXXFLAGS+=     -D_OLDCPP_ -ftemplate-depth-99
 #LDFLAGS+=	-lm
-
-# ddpmopt.cc compile options must be specified
-CXXFLAGS+=	-D_PRNG_RECUR_=11
 
 CLEANFILES= *.o ddpmopt ddpmoptp ddpmoptmp ddpmoptpmp
 

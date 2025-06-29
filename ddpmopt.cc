@@ -40,8 +40,8 @@ using std::istringstream;
 template <typename T> static inline T evalT(const T& x, const T& y, const int& cnt = - 1) {
   const T ux(unOffsetHalf<T>(x));
   const T uy(unOffsetHalf<T>(y));
-  return sgn<T>(ux * uy) * abs(abs(ux) - abs(uy)) / min(abs(ux),
-    abs(0 < cnt ? T(int(1)) / T(int(cnt * 2)) : uy) );
+  return sgn<T>(ux * uy) * abs(abs(ux) - abs(uy)) / min(min(abs(ux), abs(uy)),
+    abs(T(int(1)) / T(int(cnt * 2)) ) );
 }
 
 #if !defined(_OLDCPP_) && defined(_PERSISTENT_)
@@ -158,7 +158,7 @@ int main(int argc, const char* argv[]) {
       if(vv.dot(vv) != num_t(int(0))) cout << vv;
     }
     cout << endl;
-  } else if(m == 'p' || m == 'P') {
+  } else if(m == 'p') {
     vector<vector<SimpleMatrix<num_t> > > in;
     in.reserve(argc - 1);
     for(int i = 2; i < argc; i ++) {
@@ -166,9 +166,8 @@ int main(int argc, const char* argv[]) {
       if(! loadp2or3<num_t>(work, argv[i])) continue;
       in.emplace_back(work.size() == 3 ? rgb2xyz<num_t>(work) : move(work));
     }
-    vector<vector<SimpleMatrix<num_t> > > p(m == 'p' ?
-      predMat<num_t, 0>(in = normalize<num_t>(in)) :
-      predMat<num_t, _PRNG_RECUR_>(in = normalize<num_t>(in)) );
+    vector<vector<SimpleMatrix<num_t> > > p(
+      predMat<num_t>(in = normalize<num_t>(in)) );
     for(int i = 0; i < p.size(); i ++)
       if(! savep2or3<num_t>(
         (string("predg") + to_string(i) + string(".ppm")).c_str(),
@@ -204,7 +203,7 @@ int main(int argc, const char* argv[]) {
     if(! savep2or3<num_t>("predgw.ppm",
       normalize<num_t>(p.size() == 3 ? xyz2rgb<num_t>(p) : move(p))) )
         cerr << "failed to save." << endl;
-  } else if(m == 'q' || m == 'Q') {
+  } else if(m == 'q') {
     for(int i0 = 2; i0 < argc; i0 ++) {
       vector<SimpleMatrix<num_t> > work;
       if(! loadp2or3<num_t>(work, argv[i0])) continue;
@@ -220,9 +219,8 @@ int main(int argc, const char* argv[]) {
       const int ext(work[0].rows() / 12);
       vector<vector<SimpleMatrix<num_t> > > wwork;
       for(int i = 0; i < ext; i ++) {
-        vector<vector<SimpleVector<num_t> > > n(m == 'q' ?
-          predVec<num_t, 0>(skipX<vector<SimpleVector<num_t> > >(pwork, i + 1)) :
-          predVec<num_t, _PRNG_RECUR_>(skipX<vector<SimpleVector<num_t> > >(pwork, i + 1)) );
+        vector<vector<SimpleVector<num_t> > > n(
+          predVec<num_t>(skipX<vector<SimpleVector<num_t> > >(pwork, i + 1)) );
         if(! i) {
           wwork.resize(n.size());
           for(int k = 0; k < n.size(); k ++) {
@@ -406,15 +404,10 @@ int main(int argc, const char* argv[]) {
     in = normalize<num_t>(in);
     vector<SimpleMatrix<num_t> > out(move(in[in.size() - 1]));
     in.resize(in.size() - 1);
-    vector<vector<SimpleMatrix<num_t> > > inw(in);
-    vector<vector<SimpleMatrix<num_t> > > p(predMat<num_t, 0>(inw));
-    if(argv[1][1] == '+') {
-      vector<vector<SimpleMatrix<num_t> > > q(predMat<num_t, _PRNG_RECUR_>(in));
-      for(int i = 0; i < q.size(); i ++) p.emplace_back(move(q[i]));
-    } else in.resize(0);
+    vector<vector<SimpleMatrix<num_t> > > p(predMat<num_t>(in));
     vector<std::pair<int, int> > pc;
     pc.emplace_back(make_pair(p[0][0].rows(), p[0][0].cols() ));
-    if(argv[1][1] != '+' ) for(int i = 1;
+    for(int i = 1;
       0 <= i && 1 < pc[i - 1].first && 1 < pc[i - 1].second; i ++) {
       pair<int, int> work(pc[i - 1]);
       work.first  /= 2;
@@ -443,22 +436,9 @@ int main(int argc, const char* argv[]) {
               for(int m = 0; m < workr.size(); m ++) workr[m] /= num_t(cnt);
               orig /= num_t(cnt);
             }
-            if(argv[1][1] == '+') {
-              for(int m = 0; m < workr.size() / 2; m ++)
-                cout << max(evalT<num_t>(workr[m], orig, cnt),
-                  evalT<num_t>(workr[workr.size() / 2 + m], orig, cnt)) << ", ";
-              for(int m = 0; m < workr.size() / 2 - 1; m ++)
-                cout << sgn<num_t>(unOffsetHalf<num_t>(workr[m]) *
-                  unOffsetHalf<num_t>(workr[workr.size() / 2 + m])) << ", ";
-              cout << sgn<num_t>(unOffsetHalf<num_t>(workr[workr.size() / 2 - 1]) *
-                unOffsetHalf<num_t>(workr[workr.size() - 1])) << endl;
-            } else {
-              if(argv[1][1] == '-') cnt = - 1;
-              for(int m = 0; m < workr.size() - 1; m ++)
-                cout << evalT<num_t>(workr[m], orig, cnt) << ", ";
-              cout << evalT<num_t>(workr[workr.size() - 1], orig, cnt) << endl;
-            }
-#undef eval
+            for(int m = 0; m < workr.size() - 1; m ++)
+              cout << evalT<num_t>(workr[m], orig, cnt) << ", ";
+            cout << evalT<num_t>(workr[workr.size() - 1], orig, cnt) << endl;
           }
         cout << endl;
       }
@@ -476,17 +456,17 @@ int main(int argc, const char* argv[]) {
   cerr << "# apply color structure" << endl;
   cerr << argv[0] << " - <in0.ppm> ... < cache.txt" << endl;
   cerr << "# predict following image (each bit input)" << endl;
-  cerr << argv[0] << " [pP] <in0.ppm> ..." << endl;
+  cerr << argv[0] << " p <in0.ppm> ..." << endl;
   cerr << "# predict with whole pixel context (each bit input)" << endl;
   cerr << argv[0] << " w <in0-4.ppm> <in0.ppm> ... <addition-4.ppm>" << endl;
   cerr << "# predict down scanlines. (each bit input)" << endl;
-  cerr << argv[0] << " [qQ] <in0out.ppm> ..." << endl;
+  cerr << argv[0] << " q <in0out.ppm> ..." << endl;
   cerr << "# show continuity" << endl;
   cerr << argv[0] << " [xyit] <in0.ppm> ..." << endl;
   cerr << "# some of the volume curvature like transform" << endl;
   cerr << argv[0] << " c <in0.ppm> ..." << endl;
   cerr << "# test input series of graphics predictable or not (each bit input)" << endl;
-  cerr << argv[0] << " T[+-]? <in0.ppm> ..." << endl;
+  cerr << argv[0] << " T <in0.ppm> ..." << endl;
   return - 1;
 }
 
