@@ -37,11 +37,10 @@ using std::istringstream;
 
 #include <stdlib.h>
 
-template <typename T> static inline T evalT(const T& x, const T& y, const int& cnt = - 1) {
+template <typename T> static inline T evalT(const T& x, const T& y) {
   const T ux(unOffsetHalf<T>(x));
   const T uy(unOffsetHalf<T>(y));
-  return sgn<T>(ux * uy) * abs(abs(ux) - abs(uy)) / min(min(abs(ux), abs(uy)),
-    abs(T(int(1)) / T(int(cnt * 2)) ) );
+  return sgn<T>(ux * uy) * abs(ux - uy);
 }
 
 #if !defined(_OLDCPP_) && defined(_PERSISTENT_)
@@ -402,46 +401,17 @@ int main(int argc, const char* argv[]) {
       in.emplace_back(move(work));
     }
     in = normalize<num_t>(in);
-    vector<SimpleMatrix<num_t> > out(move(in[in.size() - 1]));
+    vector<SimpleMatrix<num_t> > work(move(in[in.size() - 1]));
     in.resize(in.size() - 1);
     vector<vector<SimpleMatrix<num_t> > > p(predMat<num_t>(in));
-    vector<std::pair<int, int> > pc;
-    pc.emplace_back(make_pair(p[0][0].rows(), p[0][0].cols() ));
-    for(int i = 1;
-      0 <= i && 1 < pc[i - 1].first && 1 < pc[i - 1].second; i ++) {
-      pair<int, int> work(pc[i - 1]);
-      work.first  /= 2;
-      work.second /= 2;
-      pc.emplace_back(move(work));
-    }
-    vector<SimpleMatrix<num_t> >& work(out);
-    for(int i = 0; i < pc.size(); i ++)
-      for(int j = 0; j < p[0].size(); j ++) {
-        const int rr(p[0][j].rows() / pc[i].first);
-        const int cc(p[0][j].cols() / pc[i].second);
-        for(int k = 0; k < pc[i].first; k ++)
-          for(int n = 0; n < pc[i].second; n ++) {
-            vector<num_t> workr;
-            num_t orig(int(0));
-            int   cnt(0);
-            workr.resize(p.size(), num_t(int(0)));
-            for(int kk = k * rr; kk < min(p[0][j].rows(), (k + 1) * rr); kk ++)
-              for(int nn = n * cc; nn < min(p[0][j].cols(), (n + 1) * cc);
-                nn ++, cnt ++) {
-                for(int m = 0; m < p.size(); m ++)
-                  workr[m] += p[m][j](kk, nn);
-                orig += work[j](kk, nn);
-              }
-            if(cnt) {
-              for(int m = 0; m < workr.size(); m ++) workr[m] /= num_t(cnt);
-              orig /= num_t(cnt);
-            }
-            for(int m = 0; m < workr.size() - 1; m ++)
-              cout << evalT<num_t>(workr[m], orig, cnt) << ", ";
-            cout << evalT<num_t>(workr[workr.size() - 1], orig, cnt) << endl;
-          }
-        cout << endl;
-      }
+    for(int i = 0; i < work.size(); i ++)
+      for(int j = 0; j < work[i].rows(); j ++)
+        for(int k = 0; k < work[i].cols(); k ++) {
+          for(int m = 0; m < p.size() - 1; m ++)
+            cout << evalT<num_t>(p[m][i](j, k), work[i](j, k)) << ", ";
+          const int m(p.size() - 1);
+          cout << evalT<num_t>(p[m][i](j, k), work[i](j, k)) << endl;
+        }
     // N.B. output can be checked as:
     //      tail -n ... < output | tee outR | p2 T+ <margin>
     //      with R.app, myv <- read.csv("outR")
