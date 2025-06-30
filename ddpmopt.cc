@@ -40,7 +40,7 @@ using std::istringstream;
 template <typename T> static inline T evalT(const T& x, const T& y) {
   const T ux(unOffsetHalf<T>(x));
   const T uy(unOffsetHalf<T>(y));
-  return sgn<T>(ux * uy) * abs(ux - uy);
+  return sgn<T>(ux * uy) * abs(abs(ux) - abs(uy));
 }
 
 #if !defined(_OLDCPP_) && defined(_PERSISTENT_)
@@ -170,8 +170,9 @@ int main(int argc, const char* argv[]) {
     for(int i = 0; i < p.size(); i ++)
       if(! savep2or3<num_t>(
         (string("predg") + to_string(i) + string(".ppm")).c_str(),
-        p[i].size() == 3 ? xyz2rgb<num_t>(p[i]) : move(p[i]) ))
-          cerr << "failed to save." << endl;
+          normalize<num_t>(p[i].size() == 3 ? xyz2rgb<num_t>(p[i]) :
+            move(p[i]) ) ))
+        cerr << "failed to save." << endl;
   } else if(m == 'w') {
     vector<vector<SimpleMatrix<num_t> > > in;
     in.reserve(argc - 2);
@@ -236,8 +237,9 @@ int main(int argc, const char* argv[]) {
       for(int i = 0; i < wwork.size(); i ++)
         if(! savep2or3<num_t>(
           (string(argv[i0]) + to_string(i) + string(".ppm")).c_str(),
-          wwork[i].size() == 3 ? xyz2rgb<num_t>(wwork[i]) : move(wwork[i]) ) )
-            cerr << "failed to save." << endl;
+            normalize<num_t>(wwork[i].size() == 3 ? xyz2rgb<num_t>(wwork[i]) :
+              move(wwork[i]) ) ) )
+          cerr << "failed to save." << endl;
     }
   } else if(m == 'x' || m == 'y' || m == 'i' || m == 't') {
     vector<num_t> score;
