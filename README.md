@@ -237,4 +237,5 @@ We might LEAVE this repository except for lieonn.hh updates because the 1/3 to 2
 2025/06/26 add T- command, update lieonn.hh comment.
 2025/06/28 refactor/fix around lieonn. re-compat with gcc2953.
 2025/06/29-30 refactor/investigate/fix around lieonn. add pAbsentMajority. T,p,q command chg.
+2025/07/01 various bug fixes, some speed remedy, p012next strategy change.
 
