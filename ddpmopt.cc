@@ -40,7 +40,8 @@ using std::istringstream;
 template <typename T> static inline T evalT(const T& x, const T& y) {
   const T ux(unOffsetHalf<T>(x));
   const T uy(unOffsetHalf<T>(y));
-  return sgn<T>(ux * uy) * abs(abs(ux) - abs(uy));
+  return ux * uy == T(int(0)) ? - abs(abs(ux) - abs(uy)) :
+    sgn<T>(ux * uy) * abs(abs(ux) - abs(uy));
 }
 
 #if !defined(_OLDCPP_) && defined(_PERSISTENT_)
