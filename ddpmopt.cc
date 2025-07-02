@@ -37,13 +37,6 @@ using std::istringstream;
 
 #include <stdlib.h>
 
-template <typename T> static inline T evalT(const T& x, const T& y) {
-  const T ux(unOffsetHalf<T>(x));
-  const T uy(unOffsetHalf<T>(y));
-  return ux * uy == T(int(0)) ? - abs(abs(ux) - abs(uy)) :
-    sgn<T>(ux * uy) * abs(abs(ux) - abs(uy));
-}
-
 #if !defined(_OLDCPP_) && defined(_PERSISTENT_)
 #undef int
 #endif
@@ -411,14 +404,10 @@ int main(int argc, const char* argv[]) {
       for(int j = 0; j < work[i].rows(); j ++)
         for(int k = 0; k < work[i].cols(); k ++) {
           for(int m = 0; m < p.size() - 1; m ++)
-            cout << evalT<num_t>(p[m][i](j, k), work[i](j, k)) << ", ";
+            cout << (p[m][i](j, k) - work[i](j, k)) * num_t(int(2)) << ", ";
           const int m(p.size() - 1);
-          cout << evalT<num_t>(p[m][i](j, k), work[i](j, k)) << endl;
+          cout << (p[m][i](j, k) - work[i](j, k)) * num_t(int(2)) << endl;
         }
-    // N.B. output can be checked as:
-    //      tail -n ... < output | tee outR | p2 T+ <margin>
-    //      with R.app, myv <- read.csv("outR")
-    //                  hist(yv[,1],breaks=seq(0,...,length.out=...))
   } else goto usage;
   cerr << "Done" << endl;
   return 0;

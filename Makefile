@@ -4,16 +4,17 @@ CXX=	clang++
 
 # compiler flags.
 ##CXXFLAGS+=	-O0 -mtune=generic -gfull
-CXXFLAGS+=	-Ofast -mtune=native -gfull
+#CXXFLAGS+=	-Ofast -mtune=native -gfull
 #CXXFLAGS+=	-O3 -mtune=native -g3
 # This doesn't work, we need operator >>, operator << with ongoing stdlibc++.
 #CXXFLAGS+=	-I/usr/local/include -mlong-double-128
-#CXXFLAGS+=	-Oz -mtune=native -gfull
+CXXFLAGS+=	-Oz -mtune=native -gfull
 #CXXFLAGS+=	-O2 -mtune=native -gfull
 #CXXFLAGS+=	-O0 -mtune=native -gfull
 #CXXFLAGS+=	-O2 -g3
 #CXXFLAGS+=	-pg
 #CXXFLAGS+=	--analyze
+CXXFLAGS+=      -D_LIBCPP_ENABLE_ASSERTIONS
 MPFLAGS=	-I/usr/local/include -L/usr/local/lib -lomp -fopenmp
 #MPFLAGS=	-I/usr/local/include -L/usr/local/lib -lgomp -fopenmp
 CXXFLAGS+=	-std=c++11
@@ -26,7 +27,8 @@ LDFLAGS+=	-lc++ -L/usr/local/lib
 # lieonn.hh compile options
 CXXFLAGS+=	-D_ARCFOUR_
 #CXXFLAGS+=	-D_PINVARIANT_SYMMETRIC_LINEAR_
-#CXXFLAGS+=	-D_PRNG_RECUR_=11
+#CXXFLAGS+=	-D_PRNG_RECUR_=5
+#CXXFLAGS+=	-D_P_RECUR_=-1
 
 # N.B. sed -e s/static\ inline//g | sed -e s/inline//g
 #CXXFLAGS+=     -D_OLDCPP_ -ftemplate-depth-99
