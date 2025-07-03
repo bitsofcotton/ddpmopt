@@ -239,4 +239,5 @@ We might LEAVE this repository except for lieonn.hh updates because the 1/3 to 2
 2025/06/29-30 refactor/investigate/fix around lieonn. add pAbsentMajority. T,p,q command chg.
 2025/07/01 various bug fixes, some speed remedy, p012next strategy change.
 2025/07/02 add upper counter measure for jammers however they're extremely heavy.
+2025/07/02-03 refresh vs. jammer conditions, we add new pFeedLebesgue function they caused us better structure. debug ok.
 
