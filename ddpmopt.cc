@@ -159,13 +159,9 @@ int main(int argc, const char* argv[]) {
       if(! loadp2or3<num_t>(work, argv[i])) continue;
       in.emplace_back(work.size() == 3 ? rgb2xyz<num_t>(work) : move(work));
     }
-    vector<vector<SimpleMatrix<num_t> > > p(
-      predMat<num_t>(in = normalize<num_t>(in)) );
-    for(int i = 0; i < p.size(); i ++)
-      if(! savep2or3<num_t>(
-        (string("predg") + to_string(i) + string(".ppm")).c_str(),
-          normalize<num_t>(p[i].size() == 3 ? xyz2rgb<num_t>(p[i]) :
-            move(p[i]) ) ))
+    vector<SimpleMatrix<num_t> > p(predMat<num_t>(in = normalize<num_t>(in)) );
+    if(! savep2or3<num_t>("predg.ppm",
+      normalize<num_t>(p.size() == 3 ? xyz2rgb<num_t>(p) : move(p) ) ))
         cerr << "failed to save." << endl;
   } else if(m == 'w') {
     vector<vector<SimpleMatrix<num_t> > > in;
@@ -211,29 +207,22 @@ int main(int argc, const char* argv[]) {
       }
       // N.B. 10 + 1 * 2 < work[0].rows() / step for PP0.
       const int ext(work[0].rows() / 12);
-      vector<vector<SimpleMatrix<num_t> > > wwork;
+      vector<SimpleMatrix<num_t> > wwork;
+      wwork.resize(work.size(),
+        SimpleMatrix<num_t>(work[0].rows() + ext, work[0].cols()).O());
+      for(int j = 0; j < work.size(); j ++)
+        wwork[j].setMatrix(0, 0, work[j]);
       for(int i = 0; i < ext; i ++) {
-        vector<vector<SimpleVector<num_t> > > n(
+        vector<SimpleVector<num_t> > n(
           predVec<num_t>(skipX<vector<SimpleVector<num_t> > >(pwork, i + 1)) );
-        if(! i) {
-          wwork.resize(n.size());
-          for(int k = 0; k < n.size(); k ++) {
-            wwork[k].resize(work.size(),
-              SimpleMatrix<num_t>(work[0].rows() + ext, work[0].cols()).O());
-            for(int j = 0; j < work.size(); j ++)
-              wwork[k][j].setMatrix(0, 0, work[j]);
-          }
-        }
-        for(int k = 0; k < n.size(); k ++)
-          for(int j = 0; j < wwork[k].size(); j ++)
-            wwork[k][j].row(work[0].rows() + i) = move(n[k][j]);
+        for(int j = 0; j < wwork.size(); j ++)
+          wwork[j].row(work[0].rows() + i) = move(n[j]);
       }
-      for(int i = 0; i < wwork.size(); i ++)
-        if(! savep2or3<num_t>(
-          (string(argv[i0]) + to_string(i) + string(".ppm")).c_str(),
-            normalize<num_t>(wwork[i].size() == 3 ? xyz2rgb<num_t>(wwork[i]) :
-              move(wwork[i]) ) ) )
-          cerr << "failed to save." << endl;
+      if(! savep2or3<num_t>(
+        (string(argv[i0]) + string("-qred.ppm")).c_str(),
+          normalize<num_t>(wwork.size() == 3 ? xyz2rgb<num_t>(wwork) :
+            move(wwork) ) ) )
+        cerr << "failed to save." << endl;
     }
   } else if(m == 'x' || m == 'y' || m == 'i' || m == 't') {
     vector<num_t> score;
@@ -399,15 +388,11 @@ int main(int argc, const char* argv[]) {
     in = normalize<num_t>(in);
     vector<SimpleMatrix<num_t> > work(move(in[in.size() - 1]));
     in.resize(in.size() - 1);
-    vector<vector<SimpleMatrix<num_t> > > p(predMat<num_t>(in));
+    vector<SimpleMatrix<num_t> > p(predMat<num_t>(in));
     for(int i = 0; i < work.size(); i ++)
       for(int j = 0; j < work[i].rows(); j ++)
-        for(int k = 0; k < work[i].cols(); k ++) {
-          for(int m = 0; m < p.size() - 1; m ++)
-            cout << (p[m][i](j, k) - work[i](j, k)) * num_t(int(2)) << ", ";
-          const int m(p.size() - 1);
-          cout << (p[m][i](j, k) - work[i](j, k)) * num_t(int(2)) << endl;
-        }
+        for(int k = 0; k < work[i].cols(); k ++)
+          cout << (p[i](j, k) - work[i](j, k)) * num_t(int(2)) << endl;
   } else goto usage;
   cerr << "Done" << endl;
   return 0;
