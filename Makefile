@@ -3,48 +3,56 @@ CXX=	clang++
 #CXX=	c++
 
 # compiler flags.
+##CXXFLAGS+=	-O0 -mtune=generic -gfull
+#CXXFLAGS+=	-Ofast -mtune=native -gfull
+#CXXFLAGS+=	-O3 -mtune=native -g3
+# This doesn't work, we need operator >>, operator << with ongoing stdlibc++.
+#CXXFLAGS+=	-I/usr/local/include -mlong-double-128
+CXXFLAGS+=	-Oz -mtune=native -gfull
+#CXXFLAGS+=	-O2 -mtune=native -gfull
+#CXXFLAGS+=	-O0 -mtune=native -gfull
+#CXXFLAGS+=	-O2 -g3
+#CXXFLAGS+=	-pg
+#CXXFLAGS+=	--analyze
+CXXFLAGS+=      -D_LIBCPP_ENABLE_ASSERTIONS
+MPFLAGS=	-I/usr/local/include -L/usr/local/lib -lomp -fopenmp
+#MPFLAGS=	-I/usr/local/include -L/usr/local/lib -lgomp -fopenmp
 CXXFLAGS+=	-std=c++11
 #CXXFLAGS+=	-std=gnu++98
-CXXFLAGS+=	-I..
-CXXFLAGS+=	-D_LIBCPP_ENABLE_ASSERTIONS
-#MPFLAGS=	-fopenmp -I/usr/local/include -L/usr/local/lib -lomp
-MPFLAGS=	-fopenmp -I/usr/local/include -L/usr/local/lib -lgomp
-#CXXFLAGS+=	-pg
-#CXXFLAGS+=	-O2 -g3
-CXXFLAGS+=	-O2 -mtune=native -gfull
-#CXXFLAGS+=	-Ofast -mtune=native -gfull
-#CXXFLAGS+=	-Oz -mtune=native -gfull
-#CXXFLAGS+=	-O0 -mtune=native -gfull
-#CXXFLAGS+=	-Ofast -mno-sse2 -mno-sse -mno-3dnow -mno-mmx -msoft-float -gfull -g0
-LDFLAGS+=	-lc++
-#LDFLAGS+=	-lestdc++
+LDFLAGS+=	-lc++ -L/usr/local/lib
+#LDFLAGS+=	-lestdc++ -L/usr/local/lib
+# Same as -mlong-double-128
+#LDFLAGS+=	-lquadmath -lm
 
-# lieonn.hh flags
+# lieonn.hh compile options
 CXXFLAGS+=	-D_ARCFOUR_
-#CXXFLAGS+=     -D_PINVARIANT_SYMMETRIC_LINEAR_
-
-# p2.cc flags
-CXXFLAGS+=	-D_GETENTROPY_
-CXXFLAGS+=	-D_FORK_
+#CXXFLAGS+=	-D_PINVARIANT_SYMMETRIC_LINEAR_
 
 # N.B. sed -e s/static\ inline//g | sed -e s/inline//g
-#CXXFLAGS+=	-D_OLDCPP_ -ftemplate-depth-99
+#CXXFLAGS+=     -D_OLDCPP_ -ftemplate-depth-99
+#LDFLAGS+=	-lm
+
+CLEANFILES= *.o ddpmopt ddpmoptp ddpmoptmp ddpmoptpmp
 
 clean:
-	@rm -rf p2 p2-32 p pp
-all:	p2 p2-32
-p2:
-	${CXX} ${CXXFLAGS} -static -o p2 p2.cc
-p2-32:
-	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=32 -o p2-32 p2.cc
-p:
-	${CXX} ${CXXFLAGS} -static -D_ONEBINARY_ -o p p2.cc
-p32:
-	${CXX} ${CXXFLAGS} -static -D_ONEBINARY_ -D_FLOAT_BITS_=32 -o p32 p2.cc
-pp:
-	${CXX} ${CXXFLAGS} -static -D_ONEBINARY_ -D_PERSISTENT_ -o pp p2.cc
-pp32:
-	${CXX} ${CXXFLAGS} -static -D_ONEBINARY_ -D_FLOAT_BITS_=64 -D_PERSISTENT_ -o pp32 p2.cc
-pp64:
-	${CXX} ${CXXFLAGS} -static -D_ONEBINARY_ -D_FLOAT_BITS_=128 -D_PERSISTENT_ -o pp64 p2.cc
+	@rm -rf ${CLEANFILES}
+
+all:	ddpmopt ddpmoptp ddpmoptmp ddpmoptpmp
+
+ddpmopt:
+	${CXX} ${CXXFLAGS} -static -o ddpmopt ddpmopt.cc
+ddpmopt32:
+	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=32 -o ddpmopt32 ddpmopt.cc
+ddpmopt64:
+	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=64 -o ddpmopt64 ddpmopt.cc
+ddpmoptp:
+	${CXX} ${CXXFLAGS} -static -D_PERSISTENT_ -o ddpmoptp ddpmopt.cc
+ddpmoptmp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -o ddpmoptmp ddpmopt.cc
+ddpmopt32mp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=32 -o ddpmopt32mp ddpmopt.cc
+ddpmopt64mp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_FLOAT_BITS_=64 -o ddpmopt64mp ddpmopt.cc
+ddpmoptpmp:
+	${CXX} ${CXXFLAGS} ${MPFLAGS} -D_PERSISTENT_ -o ddpmoptpmp ddpmopt.cc
 
