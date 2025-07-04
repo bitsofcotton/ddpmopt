@@ -206,7 +206,7 @@ int main(int argc, const char* argv[]) {
           pwork[i].emplace_back(work[j].row(i));
       }
       // N.B. 10 + 1 * 2 < work[0].rows() / step for PP0.
-      const int ext(work[0].rows() / 12);
+      const int ext(work[0].rows() / 29);
       vector<SimpleMatrix<num_t> > wwork;
       wwork.resize(work.size(),
         SimpleMatrix<num_t>(work[0].rows() + ext, work[0].cols()).O());
@@ -218,6 +218,13 @@ int main(int argc, const char* argv[]) {
         for(int j = 0; j < wwork.size(); j ++)
           wwork[j].row(work[0].rows() + i) = move(n[j]);
       }
+      vector<SimpleMatrix<num_t> > wnorm;
+      wnorm.reserve(wwork.size());
+      for(int j = 0; j < wwork.size(); j ++)
+        wnorm.emplace_back(wwork[j].subMatrix(work[0].rows(), 0, ext, work[0].cols()));
+      wnorm = normalize<num_t>(wnorm);
+      for(int j = 0; j < wwork.size(); j ++)
+        wwork[j].setMatrix(work[0].rows(), 0, wnorm[j]);
       if(! savep2or3<num_t>(
         (string(argv[i0]) + string("-qred.ppm")).c_str(),
           normalize<num_t>(wwork.size() == 3 ? xyz2rgb<num_t>(wwork) :
