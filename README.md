@@ -1,244 +1,248 @@
-# ddpmopt
-Apply some of the filter to input stream.
-We can use this for bitsofcotton/i2g filtered images.
+# p2
+A predictor formatter for p0, p1 either p0, p1 integrator compete with patternizable jammer.
 
-We use only input data streams, so this repository doesn't use external data sets.
-Also this targets Riemann and Riemann-Stieljes measureable condition in discrete sampled ones.
+# Usage
+    cr.py ([Rm]|[HD]?) ...
+    
+     *** reformation part ***
+    # take delta     on input stream
+    p d
+    # take summation on input stream
+    p s
+    # take skip      on input stream
+    p k <interval>
+    # take skip head on input stream
+    p S <margin>
+    # take reverse   on input stream
+    p v
+    # pick {0,1} str on input stream
+    p x
+    # take reform [-1,1] on input stream
+    p X
+    # take reform [-1,1] on input stream without offset
+    p Z
+    # take inverse   on input stream
+    p i
+    # take picked column      on input stream
+    p l <col0index> ...
+    # take duplicate toeplitz on input stream
+    p z <column number>
+    # take multiply each      on input stream
+    p t <ratio>
+    # take offset   each      on input stream
+    p o <offset>
+    # take absolute each      on input stream
+    p a
+    # take sign     each      on input stream
+    p b
+    # take sum columns each line on input stream
+    p G
+    # take walk condition each on input stream
+    p w <range>
+    # take column 0 horizontal cut output to each column
+    p E <number>
+    # take opposite type output string each on input stream
+    p F <bit number>
+    
+     *** PRNG part ***
+    # make [-1,1]   PRNG stream
+    p [rR]  <proto>
+    # make {-1,0,1} PRNG stream
+    p [rR]b <proto>
+    # make {-1,1}   PRNG stream
+    p [rR]B <proto>
+    # blend [-1,1]  PRNG stream
+    p m<proto> <number of output columns>
+    # flip or not   PRNG stream
+    p M<proto> <number of output columns>
+    
+     *** predictor part ***
+    # predict with Riemann measureable condition (c for difference output)
+    p 0c? <arg>
+    # predict with untangle combination condition (c for difference output)
+    p 1c? <arg>
+    # feed patternizable jammer input entropy (C for difference output)
+    p [cC] <arg>
+    # jammer to the jammer output (+ for short fixed range target)
+    p j+?
+    # jam out input column 0 by input column 1+
+    p Q
+    # trivial id. prediction (plain for flip last, + for return to average)
+    p I+
+    # ddpmopt compatible prediction
+    p Ac?
+    
+     *** vector operation part ***
+    # input serial stream to vector stream
+    p f <dimension>
+    # input vector stream to serial stream
+    p h
+    # input vector stream to pgm graphics output
+    p P
+    # input vector stream to harden PRNG part
+    p e
+    
+     *** multi process call part ***
+    # do double prediction on same input
+    p D <command set 0> <command set 1>
+    # do each of all column input prediction parallel, take output column 0 each.
+    p H <command>
+    # do each of all column input prediction parallel, take output column 0 as a prediction value, prediction average * input stream average output.
+    p @ <command>
+    
+     *** other part ***
+    # multiple file load into same line columns
+    p L <file0> ...
+    # show output statistics whether arg<|x - 1/2|*2<{1-arg,infty} (+ for infty)
+    p T+ <arg>
 
-# Context
-There exists Denoising Diffusion Probabilistic Models (DDPM; Ho et al. 2020). So this is another try on them but different flavoured one, we only focus to apply each pixel context to color image into monochrome one, which have the structure completely depends on filters' multiple meaning or complexity.
+    # N.B. there's many much of the combibnations, if we upload them on
+    #      this README.md they'd slip from somehow in our experience some years
+    #      ago. so we absent intentionally blank them.
 
-# Tips on malloc options
-We need to do ulimit or edit /etc/login.conf for large malloc use cases required by larger than medium sized input.
+# Description:
+Predictor formatter and some of the toolset fighting with jammers for non usual input streams however, even this predictor can have the jammer to us.
 
-Using this with mimalloc or so can increase memory usage with multi thread on some systems.
-
-We use at least 3\*((whole input size))\*sizeof(num_t) in heap resource.
-
-# Tips on predictors
-Implanted comments into lieonn.hh .
-
-# Usage:
-    # copy color structure
-    ./ddpmoptp?(mp)? + <in0out.pgm> <in0in.ppm> ... > cache.txt
-    # apply color structure
-    ./ddpmoptp?(mp)? - <in0.ppm> ... < cache.txt
-    # predict following image (each bit input)
-    ./ddpmoptp?(mp)? p <in0.ppm> ...
-    # reverse whole pixel context (each bit input)
-    ./ddpmoptp?(mp)? w <in0-4.ppm> <in0.ppm> ... <addition-4.ppm>
-    # predict down scanlines. (each bit input)
-    ./ddpmoptp?(mp)? q <in0out.ppm> ...
-    # show continuity
-    ./ddpmoptp?(mp)? [xyit] <in0.ppm> ...
-    # some of the volume curvature like transform
-    ./ddpmoptp?(mp)? c <in0.ppm> ...
-    # test input series of graphics predictable or not (each bit input)
-    ./ddpmoptp?(mp)? T <in0.ppm> ...
-
-# LEAVE
-We might LEAVE this repository except for lieonn.hh updates because the 1/3 to 2/3 condition isn't avoidable in some of the case fighting with whole input.
+# Another Download Sites (Leave)
+* https://drive.google.com/drive/folders/1B71X1BMttL6yyi76REeOTNRrpopO8EAR?usp=sharing
+* https://1drv.ms/u/s!AnqkwcwMjB_PaDIfXya_M3-aLXw?e=qzfKcU
+* https://ja.osdn.net/users/bitsofcotton/
 
 # Real close
-2023/03/01
+2023/02/28
 2023/03/09 bug fix after close #1.
-2023/03/13 bug fix after close #2.
+2023/03/13 valid only short range bug fix after close #2.
 2023/03/13 integrate all files into lieonn.hh after close #3.
 2023/03/18 merge latest p0, after close #4.
-2023/03/20 qred makes only row-direction prediction, after close #5.
-2023/03/24 ddpmopt.cc +0 00 -0 command fix, code clean, after close #6.
-2023/03/29 merge p0 pnext, after close #7.
-2023/03/31 persistent prediction to get average 1/2 * 2/3 pixels.
-2023/04/02 merge p2 result.
-2023/04/03 better simple predv.
-2023/04/04 update readme.
-2023/04/05 fix makeProgramInvariant scale accuracy stability.
-2023/04/19 add topt.cc.
-2023/04/21 shape up around makeProgramInvariant/revertProgramInvariant, algorithm changed.
-2023/04/23 qredg.cc prediction/original norm fix.
-2023/05/18 predv function change to better analytical, update README.md.
-2023/06/08 predv normalization fix.
-2023/06/11 topt.cc output normalization fix. update readme.
-2023/06/13 update readme. ddpmopt.cc large change.
-2023/06/14 ddpmopt.cc fix now works, update readme.
-2023/06/15 update readme, some fixes around predg, qredg, ddpmopt.
-2023/06/24 fix qredg.cc autoLevel in lieonn.
-2023/06/27 ddpmopt.cc sz 3 to 2 change, update readme.
-2023/07/07 [pq]redg predict along with middle image/line.
-2023/07/08 invariant causes +1. qredg.cc fix crash.
-2023/07/12 update readme.
-2023/08/02 update topt, lieonn as crush to the last.
-2023/08/03 topt, ddpmopt fix on apply. update readme.
-2023/08/04 update readme. fix predv result norm.
-2023/08/26 ddpmopt - option calculation change, update readme. update [pq]redg for recursive ones to beat with geometric average limit.
-2023/09/04 auto configure predg/qredg param, conservative.
-2023/09/11 auto configure predg/qredg size, aggressive ga param.
-2023/09/12 fix last broken predv func and qredg.cc.
-2023/09/13 change ddpmopt retry and retry on geometric average.
-2023/09/19 autogamma after doing predg. update readme.
-2023/09/19 predvResizeMat resize size fix to most reasonable one.
-2023/09/22 ddpmopt change not to use crush but with linearInvariant.
-2023/09/24 fix last up, don't know why they worked well without crash on last debug.
-2023/09/25 change output size strategy, not using resize, preferring complement to predict.
-2023/10/03 update readme.
-2023/10/05 update readme, should close except for some of the ddpmopt for pairs of the images.
-2023/10/18 update readme.
-2023/10/19 mipmap impl, update readme.
-2023/10/20 revert, mipmap doesn't work well.
-2023/10/22 instead of complement trace of input, we should do shrink after output is done. This is from some of the numerical tests, so whole image orthogonality isn't matter even when input data is small enough, instead of them, we try to vanish some prediction errors with geometric mean.
-2023/10/23 ddpmopt strategy algorithm in/output large change.
-2023/10/26 update readme.
-2023/10/27 update readme. close.
+2023/03/22 update README from osdn.net, after close #5.
+2023/03/24 code clean, after close #6.
+2023/03/31 persistent resistance to integer calculation jamming, after close #7.
+2023/04/01 source code comment remedy from osdn.jp generic-p2 summary, after close #8.
+2023/04/02 balance between jammer and predictor.
+2023/04/03 merge.
+2023/04/05 update readme.
+2023/04/14 additional closed .cc files.
+2023/04/21 make/revert ProgramInvariant algorithm change.
+2023/05/18 single multiple single fix, so input y-axis ratio is the matter. also fix rand.cc for MAX_RAND range for knuth_b.
+2023/05/18 cr.py rewrote to per single command.
+2023/06/07 delete pfork.py, add pchain.sh, update readme.
+2023/06/18 update readme, p.cc comment (no logic change), cr.py p command.
+2023/06/24 fix to avoid observation matters.
+2023/07/01 op2.py m command relative change, fix indent on p.cc.
+2023/07/07 update readme.md, update comment in .cc files.
+2023/07/08 delete rand.cc, cr.py r is enough to use. invariant causes +1. update readme, eliminate rand.cc, p.cc, comments are moved into readme. op2.py integrated into cr.py.
+2023/08/02 update cr.py, readme, lieonn.hh P012L::next.
+2023/09/20 update cr.py e command.
+2023/09/25 some prng improvement test and update readme.
+2023/10/26 update cr.py v command use with m command.
 2023/10/30 copy structure reliably with randtools meaning.
-2023/11/13 update readme.
-2023/11/19 revert each line complement condition, force to use complement.
-2023/11/20 only complement with 2, they smoothes output enough with our measure (&gt; 2/3).
-2023/11/21 update readme.
-2023/11/23 fix known tips, there was at most double error.
-2023/11/25 implement and revert the test to complement before to revertProgramInvariant, they doesn't improve well differed to shrinking.
-2023/12/06 fix ddpmopt.cc as makeProgramInvariant, revertProgramInvariant to better compatible with [0,1].
-2023/12/07 fix ddpmopt.cc makeProgramInvariant double apply serious bug in crush. Also, update readme as compatible with in/output. realclose.
-2023/12/15 use the tactics not to apply twice make/revertProgramInvariant on prediction, the invariant is already taken, however, this can causes P^t 1 == 0 condition on linearInvariant, we don't fix them.
-2024/03/19 half p8 compatible change on prediction P1I to P01 with predg... qredg... binary.
-2024/04/02 fix P01, vanish predvc.
-2024/04/04 only use large accuracy on calculating pnextcache, but this is broken with cache naming.
-2024/04/07 rgb2xyz, xyz2rgb on first/last of predg/qredg if color is 3ch.
-2024/04/09 fix maeProgramInvariant x_k==0 to wrap into x_k:=1, refix pnext with lower digits.
-2024/04/10 we count the function entropy enough beat with in/output on [pq]redg.
-2024/04/12 update readme.
-2024/04/14 take a median after predv before revertProgramInvariant.
-2024/04/15 update readme, it is the specification of this some output to be broken.
-2024/04/17 update readme.
-2024/04/18 add tcont.cc, real close with omake.
-2024/04/18 won't update without lieonn.hh change.
-2024/04/29 update readme.
-2024/05/05 p01 class fix step-step to 1-step correction.
-2024/05/07 correct output depth limit to have a meaning. update readme.
-2024/06/01 add predg0... qredg0... compile option, these using latest results on \{p0,p1,p2\}.
-2024/06/02 revert. it's nonsense.
-2024/06/05 fix p01 crash in rare cases.
-2024/06/07 fix number of predictions to reasonable one. add another implementation on python predg.cc, only QR decomposition is differ but this has a better results?? update readme.
-2024/06/09 factorize into each bit and predict with them. leave with this but this have color intensity == {0,1} confusion bug.
-2024/06/09 fix last bug. average step skips. add readme.
-2024/06/11 update readme.
-2024/06/12 update readme.
-2024/06/13 update readme.
-2024/06/14 update readme.
-2024/06/15 conclude 2024/06/11-2024/06/14 conditions readme.
-2024/06/16 revert P210 to original, then, P01, P0 pred temporarily, update readme.
-2024/06/17 merge p2 logic with p10 class.
-2024/06/18 code cleaning, update readme.
-2024/06/18 speed remedy.
-2024/06/19 add restriction for getting average on PprogressionOnce010n.
-2024/06/20 our machine is infected, take a most logically valid in our program predictions.
-2024/06/21 fix fatal error on PprogressionOnce::next, they doesn't use predictors.
-2024/06/21 revert and brush up, add fiocursed.cc series, brush readme.
-2024/06/22 update readme, updates around pprogression causes only 1 step after/before prediction.
-2024/06/22 p01 fatal fix. make/revert program invariant change friendly to predictions.
+2024/04/25 add tips on simple controller.
+2024/04/29 add pr4.cc .
+2024/04/30 add tips on bothside controller condition. brush up readme.md.
+2024/05/05 add pr4c.cc update readme, pr4.cc .
+2024/05/06 add tips on jammer, fix some of the readme. eliminate unused commands in cr.py. fix pr4.cc, integrate pr4c.cc into pr4.cc with definition. add tips when being targetted. BRUSH UP README.MD, so some of the description had be DELETED.
+2024/05/07 fix XXX, add tips on PRNGs. really close.
+2024/05/31 compile jammer.
+2024/06/01 fix JAM, also our system is infected because of the test.
+2024/06/02 fix readme, it's from p0.cc:_JAM mis spell.
+2024/06/02 add cr.py j command, elim _JAM.
+2024/06/14 fix cr.py l command, add cr.py 0, - command.
+2024/06/15 add progression and readme.
+2024/06/16 add progression \<0 argv.
+2024/06/17 add readme, something goes well with some of the PRNGs with static, absent repository with this. also fix progression.
+2024/06/19 merge latest lieonn.
+2024/06/21 merge latest lieonn.
+2024/06/21 add p2prng.cc, update readme, merge latest lieonn. INCLUDES command line argument change.
+2024/06/22 update readme, p01 fatal fix. make/revert program invariants change friendly to predictors.
 2024/06/23 large change around class instance initializer, also have progression short range fix.
 2024/06/23 fatal fix around last update.
-2024/06/24 fatal fix around last update, rotate predMat sloppy case.
-2024/06/26 some of the assertion fix, update readme.
-2024/06/26 update readme, fix around Ppersistent buf.full condition.
-2024/06/27 fix predv last norm condition calculations. predMat bugs might be fixed.
-2024/06/29 update readme and comments.
-2024/06/30 re-insert periods with better stable method. update readme.
-2024/07/06 Ppersistent now use maximum length for predictions. Also readme update.
-2024/07/07 code cleaning. merge Pprogression improve but no affects.
-2024/07/08 internal state range strategy change, use all of the input to reduce. update readme.
-2024/07/09 revert bitwise prediction causes whole image invariant works same as theoretical ones, however, each pixel context isn't enough on prediction but is enough on whole image condition information amount as better weighted. update readme.
-2024/07/10 revert [pq]redg.cc as no each bit condition, instead of this, use goki_check_cc:test.py:bit command.
-2024/07/20 update readme, might our system is infected.
-2024/08/18 update -\[369\] predictors for recursive but equivalent.
-2024/09/03 update \[pq\]redg...p.. for auto tuned recursive but for tiny images.
-2024/09/04 update last up with proper recursive value.
-2024/09/05 omit error output in zeroFix.
-2024/09/06 update and fix readme.
-2024/09/09 merge p1/pp3.cc result, change only output forward pred ones.
-2024/09/10 merge p1/pp3.cc result, re-re-leave.
-2024/09/10 fix pnoise meaning. update readme, re-re-re-leave.
-2024/09/12 update readme. leave.
-2024/09/22 append dft hack, add readme, releave.
-2024/09/23 fix _PREDV_==3 _PREDV_DFT_ case unit value. Changed preddg... to predfg... to make some readability. Fix around comments and readme.md.
-2024/09/24 brush up, eliminate exhaust of the resource to get tiny output improve in finite and up to aleph_0 condition.
-2024/09/25 elim dead code, update readme. leave.
-2024/09/26 improve heap resource efficiency.
-2024/09/27 refactoring predv, predvp0. the target stream we predict is now concrete, so PP0 type changed.
-2024/09/28 add step after predictions.
-2024/09/29 update readme. leave the repository really.
-2024/10/05 add predga.cc and compile option.
-2024/10/26 fix predvall meaning after p2/README.md:Tips on reseed.
-2024/10/31 add predgs.cc.
-2024/11/01 fix last predgs.cc index map, update readme, accuracy is not enough for SVD.
-2024/11/02 update readme. elim predgs.cc, predga.cc.
-2024/11/03 update readme. rerere-leave here. predg.cc a cmd list up fix.
-2024/11/12 delete tips on reseeding, reseeding is not so harder. replaced flip, flop template function in lieonn suitable with gcc however 128bit long double isn't compile on our main pc environment.
-2024/11/14 integreate all commands on this repository into ddpmopt.cc but the binary is very fat.
-2024/11/17 add w command.
-2024/11/19 improved lieonn.hh:taylor command speed and accuracy this causes q command better works. update readme. something error occured first upload of this change on github.com. this change leads us to pnext r variable doubles.
-2024/11/20 update readme for recent knowns.
-2024/11/20 update readme.
-2024/11/30 add c command. update readme.
-2024/12/02 taylor improvement, taylor function reclose with this.
-2024/12/03 w command fix also readme.md update.
-2024/12/04 fix w command output, backward had a glitch, so eliminated. update readme.
-2024/12/05 backport p1 | p0 results, brush up code, replace [0a] command to p command, update readme.
-2024/12/07 c command fix.
-2024/12/09 changed to output only a single prediction. w command crash fix, memory efficiency improve. q command crash fix.
-2024/12/11 fix readme w command usage.
-2024/12/13 leave here, might return here.
-2024/12/26 use montecarlo method instead of doing each step average on prediction.
-2024/12/28 fix 'q', 'w' commands with last change.
-2024/12/29 update 'w' commands suitable with predv1 method impementation is predv4.
-2024/12/30 update readme.
-2025/01/06 eliminate condorcet's jury method, they've no effects.
-2025/01/06 update readme for compatible with latest goki_check_cc.
-2025/01/27 improve pred... memory usage without predv4.
-2025/02/01 fix readme memory usage notation.
-2025/02/05 predv function to get better prediction - real value distribution by PRNG tests.
-2025/02/15 add PP0 as PSVD ... as a dead code, they doesn't improve output enough on our machines with small number of inputs.
-2025/02/16 fix predv4 alignments affects all of outputs w command.
-2025/02/18 revert using predvp0 to using predv, they might come from infection.
-2025/02/20 move include comments into lieonn.hh . update reamde.md fix meaning on predictions we will re freeze with this.
-2025/02/22 not optimal but better looking q command output size with specifying step to predictor.
-2025/02/23 add readme.md notes.
-2025/03/01 add readme.md note around DFT.
-2025/03/03 add T command for test. revert subtraction to multiplication and sgn method to have gokibin bit preprocessed inputs.
-2025/03/04 apply T command tests into original p, w, q command. either revert to original p, w, q commands with renewing T command test.
-2025/03/05 our invariant condition is being attacked, we use 2 of dimension output but in fact we need at least 4 dimension output for all.
-2025/03/06 yellow output is lead by small input number, also some readme fix we often don't need entropy feeding control.
-2025/03/09 brush up lieonn.hh phase periodical jamming matters. we only make hypothesis PRNG we use isn't match the predictor/original stream phase period they have.
-2025/03/11 add and fix readme. close.
-2025/03/12 brush up readme, freeze.
-2025/03/13 add PQ command, update readme around 4 of candidate results.
-2025/03/22 close with this Readme.md.
-2025/04/01 add readme.md because we're in infected condition, also close because of the condition.
-2025/04/17 auto tune dimension in F_2 case other than 4 dimension to target.
-2025/04/18 qQ command strategy change.
-2025/04/19 rebrush up lieonn.hh easy to read whole, fix ind2vd lt, gt mis exchange.
-2025/05/16 backport p2 result causes single output per each.
-2025/05/20 we eliminate PQ command delta in/output because of backporting p0/p0p.cc result.
-2025/05/21 T command extend, update readme, reclose.
-2025/05/21 slim down, w command out change.
-2025/05/23 retarget cultivated input stream but will close soon.
-2025/05/25 code cleaning, select FEED_MUCH as a single implementation default.
-2025/06/08 rework into possible thin layer but enough layers from p2 result.
-2025/06/10 persistent uint32_t use option with _PERSISTENT_ compile option but slightly use int32_t for index op and void* for pointer.
+2024/06/24 fix addp == true progression case.
+2024/06/26 cr.py o command and so on.
+2024/06/26 fix Ppersistent.
+2024/07/07 Pprogression uses shorter range but enough internal states.
+2024/09/09 add z cmd, change s cmd.
+2024/09/22 add pp3dft.cc, elim p210.cc . update readme.
+2024/09/22 integrate pp3dft.cc into p1/pp3.cc so elim them, releave.
+2024/09/27 add usual prediction section readme.
+2024/09/28 eliminate Pprogression, it's a waste of the accuracy.
+2024/09/29 update readme. fix P012L::next avg.O().
+2024/10/26 update readme.
+2024/11/01 update readme, add N command to cr.py.
+2024/11/14 add cr.py p command to continue whole input p0 with fft without accuracy.
+2024/11/16 fix readme.
+2024/12/05 fix readme. exchanged argv[1] and argv[2] meaning.
+2024/12/08 update readme compat with latest p0, p1.
+2024/12/13 should really leave, close readme.md.
+2024/12/14 update readme.md, might still have some glitches on readme.md after update.
+2024/01/27 update readme.md.
+2025/02/05 add f command to cr.py.
+2025/02/07 add persistent.cc .
+2025/02/10 fix and refactor persistent.cc to pp8q.cc (pp8 - .25).
+2025/02/11 add readme.md persistent.cc concerns.
+2025/02/13 a little fix around Persistent.
+2025/02/27 append readme.md, eliminate variable step length.
+2025/03/01 update readme eliminate last section, append second last section.
+2025/03/04 add _CHAIN_ compile option to catgp.cc, merge latest lieonn.
+2025/03/08 add B command for cr.py they returns predicted result and original input pair slided causes some of the controlled condition original stream dump.
+2025/03/09 merge latest lieonn.
+2025/03/17 revert step param.
+2025/03/19 add g, G commands to cr.py.
+2025/03/22 close with this README.md.
+2025/03/28 after burn README.md.
+2025/03/30 adding test result glance around xeb scored ones.
+2025/04/01 append p, q command to cr.py, add readme.md, real close.
+2025/04/02 append 2 command and readme.md notation, real close.
+2025/04/03 compat with simplefloat p, 2 commands also fixed fatal error on them.
+2025/04/04 add y command for condorcet jury with original stream intensity. also simplify separate readme.md on same file.
+2025/04/04 fix y command, add l command option, readme update, real close.
+2025/04/05 fix y command median condition, update readme, really close.
+2025/04/06 fix readme.md usage. ok really close.
+2025/04/16 fix p2prng.cc GETENTROPY pointer and value mis interpretation, I don't know why compiler doesn't mattered this on our environment even the running result was so.
+2025/04/17 merge latest dimension auto tuner from ddpmopt. fixed step argv works well.
+2025/04/18 eliminate step parameter, they doesn't improve results.
+2025/04/19 merge latest lieonn.
+2025/05/02 add p2.cc predictor for catgp p1 p0 chain with different x-asis scaling twice with different step.
+2025/05/03 Select the strategy to separate binary x-axis linear and nonlinear case. update readme close condition. code clean.
+2025/05/04 fix last up arctanFeeder initial scaling.
+2025/05/05 pseudo-harden prng command. close.
+2025/05/10 add cr.py H cmd, change cr.py B cmd. update readme.
+2025/05/11 change cr.py E cmd, elim M cmd, add actual sectional measurement. update readme.
+2025/05/14 fix last of usage, add readme.md close section.
+2025/05/15 change cr.py M cmd meaning, add usage.
+2025/05/16 change cr.py M cmd meaning, add X, Y command, freeze close because we cannot find our targetted data stream isn't affected by the universal one. What we need is graphics predictor, we move to ddpmopt impl.
+2025/05/17 fix typo on readme.md, we don't know why this mixed into readme.md.
+2025/05/17 elim Y dependant commands.
+2025/05/19 applying p0p can have slim cr.py result.
+2025/05/27 update cr.py locking, D cmd output +1 original col, readme.md.
+2025/05/31 cr.py Q command match the double of input stream. update readme.
+2025/06/03 fix crash on p2... around zero division on _FLOAT_BITS_ specified case, not with cpu float they can crash in some condition. cr.py Q cmd comment change, G command chg.
+2025/06/04 import Q command chain try into lieonn.
+2025/06/05 fix p2qt as reasonable one but not with real pred-value. add B cmd to cr.py.
+2025/06/06 ok p2qt for our machine which original stream seems better continuous on ours.
+2025/06/06 exclude p0maxRank(idFeeder(3)) prediction from p2qt into p0.
+2025/06/06 add p2qt argv causes ok result for us test stream on our machine. update readme.
+2025/06/07 update readme. change reasonable implementation p2qt.cc and around them. elim p2.cc and concerns, it's not used deeply in any of the predictors.
+2025/06/07 revert, Q command result sign doesn't depend on the place sign, so fixed.
+2025/06/08 fix p2qt.cc param != 0 case but our machine is infected from the conclusion, either needs {-1, 1}-input stream.
+2025/06/08 we're in infected condition, so we rework possible thin layered condition.
+2025/06/08 we move p2qt.cc into p2sg.cc correct meaning from test result also update readme. also the concerned functions refactoring. fix catgp 0 crash.
+2025/06/09 move into p2cr from p2prng.cc and cr.py concerned parts this makes python to exclude from prediction chain however this once improves enough but will slips. also fix p2cr Q cmd align. fix p2sg as invertible.
+2025/06/09 merge catgp.cc, p2sg,cc, p2cr.cc into p2.cc one binaried. (should we integrate p0, p1, p2 into p as one binaried?). refactor readme.md.
+2025/06/10 persistent uint32_t use in calculation option but they also use int32_t, also void*.
 2025/06/11 compat compile option to gcc4.2.1.
 2025/06/12 compat compile option with one variant of gcc2.95.3.
-2025/06/17 fix deep template function reverse computation. update readme. close.
-2025/06/19 fix deep reverse computation with logical one, we don't trust numerical test on this machine. close.
-2025/06/20 merge latest p2 result includes operator >> on simple float accuracy fix around PERSISTENT option.
-2025/06/21 add README.md target result section.
-2025/06/22 change T command output to better reasonable one. output 2 of the image because we target binary valued result.
-2025/06/22 merge concept ok. leave.
-2025/06/23 code clean, flush. update readme, comment, a little speed remedy.
-2025/06/25 readme.md move into lieonn.hh comment implanted. also implement some stopping layeres.
-2025/06/26 add T- command, update lieonn.hh comment.
-2025/06/28 refactor/fix around lieonn. re-compat with gcc2953.
-2025/06/29-30 refactor/investigate/fix around lieonn. add pAbsentMajority. T,p,q command chg.
-2025/07/01 various bug fixes, some speed remedy, p012next strategy change.
-2025/07/02 add upper counter measure for jammers however they're extremely heavy.
-2025/07/02-03 refresh vs. jammer conditions, we add new pFeedLebesgue function they caused us better structure. debug ok.
-2025/07/04 speed remedy, debug ok, comment diet.
+2025/06/17 merge latest ddpmopt fix.
+2025/06/19 merge latest ddpmopt fix. add M command on p2.cc. add cr.py H[+-] command.
+2025/06/20 cleanup some commands and source code. fix around persistent especially operator >> accuracy on simplefloat. Intentionally absent documentation but on the source codes.
+2025/06/20 code cleaning, cr.py to p2.cc implement.
+2025/06/22 change T command output to better reasonable one, PERSISTENT improve.
+2025/06/23 code clean, flush.
+2025/06/25 merge latest ddpmopt result. also need to implant readme.md into lieonn.hh.
+2025/06/25 readme.md moved into implant lieonn.hh as a comment. add usage into p2.cc.
+2025/06/25 fix usage also 'e' command crash, update lieonn.hh comment.
+2025/06/28 refactor and fix around lieonn, re-compat with gcc2953.
+2025/06/29-30 merge latest ddpmopt change, also add Ac? command also T command IMPORTANT change.
+2025/07/01 merge latest ddpmopt change causes various bug fixes.
+2025/07/02-03 merge latest ddpmopt causes new prediction algorithm debug ok.
+2025/07/04 merge latest ddpmopt debug ok.
 
