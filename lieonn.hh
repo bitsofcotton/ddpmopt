@@ -3073,7 +3073,7 @@ template <typename T> static inline T binMargin(const T& in) {
 template <typename T> static inline SimpleVector<T> binMargin(const SimpleVector<T>& in) {
   SimpleVector<T> res(in);
   for(int i = 0; i < res.size(); i ++) res[i] = binMargin<T>(res[i]);
-  return binMargin<T>(res);
+  return res;
 }
 
 template <typename T> static inline T offsetHalf(const T& in) {
@@ -3688,6 +3688,14 @@ template <typename T> static inline T p012next(const SimpleVector<T>& d, const i
     work[i - 1] = d[i - work.size() + d.size()];
   work[work.size() - 1] = zero;
   const T nwork(sqrt(work.dot(work)));
+  if(nwork <= T(int(0))) {
+    static bool shown(false);
+    if(! shown) {
+      shown = true;
+      cerr << "p012next: cannot get last part information: 0 vector." << endl;
+    }
+    return T(int(1)) / T(int(2));
+  }
   T res(zero);
   T sscore(zero);
   for(int i = 0; i < cat.size(); i ++) {
@@ -3704,7 +3712,6 @@ template <typename T> static inline T p012next(const SimpleVector<T>& d, const i
         revertByProgramInvariant<T, true>(work, invariant /= sqrt(ninvariant));
       const T score(unOffsetHalf<T>(invariant.dot(makeProgramInvariant<T>(work,
         T(int(1))).first) ) * T(cat[i].first.size()));
-      // if(! isfinite(score) || isinf(score) || isnan(score)) continue;
       res    += score * work[work.size() - 1] / nwork;
       sscore += abs(score);
     } else for(int k = 0; k < cat[i].first.size(); k ++) {
@@ -4903,7 +4910,7 @@ template <typename T, int nprogress> vector<SimpleVector<T> > pCbrtMarkov(const 
           max(int(1), int((intrans[0].size() - 1 - slen) * intrans.size() / nprogress))) )
             cerr << ((i - slen) * intrans.size() + j) << " / "
               << ((intrans[0].size() - 1 - slen) * intrans.size())
-                << " cuttingDown: " << strloop << endl;
+                << " cuttingDown " << strloop << endl;
         pass_next[j][i - slen] = p012next<T>(intrans[j].subVector(0, i + 1),
             int(exp(log(T(i + 1)) / T(int(3)) )) );
       }
@@ -5002,7 +5009,7 @@ template <typename T, int nprogress> SimpleVector<T> pLebesgue(const vector<Simp
 #else
     vector<SimpleVector<T> > p(pCbrtMarkov<T, nprogress>(
 #endif
-      reform[i], string("LebesgueP(") + to_string(i) + string("/") +
+      reform[i], string("L(") + to_string(i) + string("/") +
         to_string(reform.size()) + strloop) );
     assert(p[0].size() == in[0].size());
     for(int i = 1; i < p.size(); i ++) p[0] += p[i];
@@ -8246,6 +8253,13 @@ template <typename T, typename U> static inline void makelword(vector<U>& words,
 //      cases.
 // (14) pgoshigoshi persistent corrector.
 //      it's near the result same algorithm twice condition.
+// (15) pAbsentMajority, pMajority to choice majority logics with persistent.
+//      it's verbose either doesn't improve output enough.
+// (16) predv pSubesube slip gulf jammer to jammer.
+//      we excluded them into compile option, so integrating them doesn't
+//      improves the result also it's harmfull to the result. however, we need
+//      them in the case original stream seems not to have some of the
+//      continuity condition around last of input stream.
 //
 // N.B. something XXX result descripton
 // (00) there might exist non Lebesgue measureable condition discrete stream.
@@ -8338,7 +8352,7 @@ template <typename T, typename U> static inline void makelword(vector<U>& words,
 //      stream size, the invariant is come from another pre-trained inputs.
 //      mimicing ongoing machine learnings doing them.
 //      this might have dimension upper bound as 19,683 if they shirks
-//      generic i/o/(de)compression into externals but his can soon get
+//      generic i/o/(de)compression into externals but this can soon get
 //      saturated.
 
 #define _SIMPLELIN_
