@@ -3703,18 +3703,17 @@ template <typename T> static inline T p012next(const SimpleVector<T>& d, const i
       work[work.size() - 1] =
         revertByProgramInvariant<T, true>(work, invariant /= sqrt(ninvariant));
       const T score(unOffsetHalf<T>(invariant.dot(makeProgramInvariant<T>(work,
-        T(int(1))).first) / nwork) * T(cat[i].first.size()));
-      // XXX:
-      if(! isfinite(score) || isinf(score) || isnan(score)) continue;
+        T(int(1))).first) ) * T(cat[i].first.size()));
+      // if(! isfinite(score) || isinf(score) || isnan(score)) continue;
       res    += score * work[work.size() - 1] / nwork;
       sscore += abs(score);
     } else for(int k = 0; k < cat[i].first.size(); k ++) {
       if(! cat[i].first[k].size()) continue;
       work[work.size() - 1] = revertByProgramInvariant<T, false>(work,
         cat[i].first[k]);
-      const T score(unOffsetHalf<T>(cat[i].first[k].dot(work) / nwork));
-      // XXX:
-      if(! isfinite(score) || isinf(score) || isnan(score)) continue;
+      const T ncat(sqrt(cat[i].first[k].dot(cat[i].first[k])));
+      if(! isfinite(ncat) || ncat <= T(int(0))) continue;
+      const T score(unOffsetHalf<T>(cat[i].first[k].dot(work) / nwork / ncat));
       res    += score * work[work.size() - 1] / nwork;
       sscore += abs(score);
     }
@@ -4885,7 +4884,7 @@ template <typename T, int nprogress> SimpleVector<T> predvq(const vector<SimpleV
 //      we get 2 of the candidates in each bit from p and q normally as
 //      1x force insert Riemann measurable condition and 1x insert
 //      possible Riemann-Stieljes measureable condition.
-template <typename T, int nprogress> vector<SimpleVector<T> > pFeedLargeMarkov(const vector<SimpleVector<T> >& intrans0, const string& strloop) {
+template <typename T, int nprogress> vector<SimpleVector<T> > pCbrtMarkov(const vector<SimpleVector<T> >& intrans0, const string& strloop) {
   const int slen(max(int(4), int(exp(log(T(int(intrans0[0].size()))) / T(int(3)) )) ) );
   vector<SimpleVector<T> > intrans(intrans0);
   vector<SimpleVector<T> > pass_next;
@@ -4927,10 +4926,9 @@ template <typename T, int nprogress> vector<SimpleVector<T> > pFeedLargeMarkov(c
   return res;
 }
 
-// N.B. we intend to shift gulf with jam == true, otherwise transparent result.
-template <typename T, vector<SimpleVector<T> > (*p)(const vector<SimpleVector<T> >&, const string&), int jam> vector<SimpleVector<T> > predv(const vector<SimpleVector<T> >& intrans, const string& strloop) {
-  assert(0 == jam || 1 == jam);
-  if(! jam) return p(intrans, strloop);
+// N.B. we intend to shift gulf, however blending this to the rsult only
+//      causes noised one. so we should separate them with -D_P_SHIFT_ .
+template <typename T, vector<SimpleVector<T> > (*p)(const vector<SimpleVector<T> >&, const string&)> vector<SimpleVector<T> > predv(const vector<SimpleVector<T> >& intrans, const string& strloop) {
   vector<SimpleVector<T> > rintrans;
   vector<T> sign;
   rintrans.resize(intrans.size());
@@ -4957,93 +4955,17 @@ template <typename T, vector<SimpleVector<T> > (*p)(const vector<SimpleVector<T>
   return res;
 }
 
-static inline int countMSB(const int& x) {
-  int res(0);
-  // can be O(lg(sizeof(x)*8)) loop but none for here.
-  for(int i = 0; i < sizeof(int) * 8; i ++) if((i ? x >> i : x) & 1) res = i;
-  return res;
-}
-
-// N.B. we bet 1/4 of the pair of the prediction matches.
-template <typename T, int nprogress> SimpleVector<T> pAbsentMajority(const vector<SimpleVector<T> >& in, const string& strloop) {
-  static const int persistent(1);
-  if(in.size() < 4) {
-    SimpleVector<T> res(in[0].size());
-    res.O(T(int(1)) / T(int(2)));
-    for(int i = 0; i < res.size(); i ++) {
-      idFeeder<T> f(in.size());
-      for(int j = 0; j < in.size(); j ++) f.next(in[j][i]);
-      assert(f.full);
-      res[i] = p0maxNext<T>(f.res);
-    }
-    return res;
-  }
-  vector<SimpleVector<T> > work(in);
-  vector<SimpleVector<T> > res;
-  vector<int> midx;
-  midx.reserve(in[0].size());
-  for(int i = 0; i < in[0].size(); i ++) midx.emplace_back(i);
-  const int nloop(countMSB(in.size()) * 2 * abs(persistent));
-  for(int i = 0; i < nloop || persistent < 0; i ++) {
-    int cnt;
-    vector<int> mmidx;
-    vector<int> nmidx;
-    vector<SimpleVector<T> > pres;
-    vector<SimpleVector<T> > qres;
-    {
-      vector<SimpleVector<T> > worktrans(pFeedTranspose<T>(work));
-      pres = predv<T, pFeedLargeMarkov<T, nprogress>, 0>(worktrans, string("p(") + to_string(i) + string("/") + to_string(nloop) + string(")") + strloop);
-      qres = predv<T, pFeedLargeMarkov<T, nprogress>, 1>(worktrans, string("q(") + to_string(i) + string("/") + to_string(nloop) + string(")") + strloop);
-    }
-    assert(pres.size() == qres.size() && midx.size() == pres[0].size());
-    if(! i) {
-      res.resize(pres.size());
-      for(int j = 0; j < pres.size(); j ++)
-        res[j] = (pres[j] + qres[j]) / T(int(2));
-    } else if(0 < persistent && i == nloop - 1) goto fixnext;
-    work.resize(0);
-    mmidx.resize(midx.size(), - 1);
-    for(int j = 0; j < pres.size(); j ++) {
-      assert(pres[j].size() == qres[j].size());
-      int cnt(0);
-      for(int k = 0; k < midx.size(); k ++)
-        if(T(int(0)) < pres[j][k] * qres[j][k] &&
-           T(int(0)) != abs(pres[j][k] + qres[j][k]))
-          res[j][midx[k]] = (pres[j][k] + qres[j][k]) / T(int(2));
-        else mmidx[k] = 1;
-    }
-    cnt = 0;
-    for(int k = 0; k < mmidx.size(); k ++) if(0 <= mmidx[k]) cnt ++;
-    if(cnt < 2 || midx.size() <= cnt) goto fixnext;
-    nmidx.reserve(cnt);
-    for(int k = 0; k < mmidx.size(); k ++)
-      if(0 <= mmidx[k]) nmidx.emplace_back(midx[k]);
-    midx = move(nmidx);
-    work.resize(in.size());
-    for(int j = 0; j < work.size(); j ++) {
-      work[j].resize(midx.size());
-      work[j].O();
-      for(int k = 0; k < midx.size(); k ++) work[j][k] = in[j][midx[k]];
-    }
-    continue;
-   fixnext:
-    for(int j = 0; j < pres.size(); j ++)
-      for(int k = 0; k < pres[j].size(); k ++)
-        res[j][midx[k]] = (pres[j][k] + qres[j][k]) / T(int(2));
-    break;
-  }
-  for(int i = 1; i < res.size(); i ++) res[0] += res[i];
-  return res[0] /= T(res.size());
-}
-
 // N.B. we add some Lebesgue part by cutting input horizontal.
-template <typename T, int nprogress> SimpleVector<T> pFeedLebesgue(const vector<SimpleVector<T> >& in, const int& horizontal, const string& strloop) {
-  if(in.size() <= 21 + horizontal * horizontal)
-    return pAbsentMajority<T, nprogress>(in, string("id.") + strloop);
+template <typename T, int nprogress> SimpleVector<T> pLebesgue(const vector<SimpleVector<T> >& in, const int& horizontal, const string& strloop) {
+  if(in.size() <= horizontal * horizontal)
+    return SimpleVector<T>(in[0].size()).O(T(int(1)) / T(int(2)) );
   vector<vector<SimpleVector<T> > > reform;
   reform.resize(horizontal);
-  for(int i = 0; i < reform.size(); i ++)
-    reform[i].reserve(in.size() - horizontal * horizontal + 1);
+  for(int i = 0; i < reform.size(); i ++) {
+    reform[i].resize(in[0].size());
+    for(int j = 0; j < reform[i].size(); j ++)
+      reform[i][j].entity.reserve(in.size() - horizontal * horizontal + 1);
+  }
   for(int i = 0; i <= in.size() - horizontal * horizontal; i ++) {
     vector<vector<vector<T> > > les;
     les.resize(in[0].size());
@@ -5061,14 +4983,12 @@ template <typename T, int nprogress> SimpleVector<T> pFeedLebesgue(const vector<
     for(int k = 0; k < in[0].size(); k ++)
       for(int j = 0; j < horizontal; j ++)
         Mtot[k] = max(Mtot[k], int(les[k][j].size()));
-    for(int j = 0; j < horizontal; j ++) {
-      reform[j].emplace_back(SimpleVector<T>(in[0].size()).O());
+    for(int j = 0; j < horizontal; j ++)
       for(int k = 0; k < in[0].size(); k ++) {
         T sum(int(0));
         for(int n = 0; n < les[k][j].size(); n ++) sum += les[k][j][n];
-        reform[j][i][k] = sum / T(Mtot[k]);;
+        reform[j][k].entity.emplace_back(sum / T(Mtot[k]));
       }
-    }
   }
   SimpleVector<T> res(in[0].size());
   res.O();
@@ -5077,9 +4997,16 @@ template <typename T, int nprogress> SimpleVector<T> pFeedLebesgue(const vector<
     for(int j = 0; j < reform[i].size(); j ++)
       n2 += reform[i][j].dot(reform[i][j]);
     if(n2 == T(int(0))) continue;
-    res += pAbsentMajority<T, nprogress>(reform[i],
-      string(" Lebesgue(") + to_string(i) + string("/") +
-        to_string(reform.size()) + strloop);
+#if defined(_P_SHIFT_)
+    vector<SimpleVector<T> > p(predv<T, pCbrtMarkov<T, nprogress> >(
+#else
+    vector<SimpleVector<T> > p(pCbrtMarkov<T, nprogress>(
+#endif
+      reform[i], string("LebesgueP(") + to_string(i) + string("/") +
+        to_string(reform.size()) + strloop) );
+    assert(p[0].size() == in[0].size());
+    for(int i = 1; i < p.size(); i ++) p[0] += p[i];
+    res += (p[0] /= T(int(p.size())));
   }
   return res /= T(int(reform.size()));
 }
@@ -5088,24 +5015,23 @@ template <typename T, int nprogress> SimpleVector<T> pFeedLebesgue(const vector<
 template <typename T, int nprogress> SimpleVector<T> pSectional(const vector<SimpleVector<T> >& in, const int& range, const string& strloop) {
   const int sectional(range * range);
   if(! in.size()) return SimpleVector<T>();
-  if(in.size() <= 21 + sectional * 2 - 1)
-    return pFeedLebesgue<T, nprogress>(in, range, strloop);
-  SimpleVector<T> res(pFeedLebesgue<T, nprogress>(in, range, strloop) *
+  if(in.size() <= sectional * 2)
+    return pLebesgue<T, nprogress>(in, range, strloop);
+  SimpleVector<T> res(pLebesgue<T, nprogress>(in, range, strloop) *
     T(sectional));
   for(int i = 1; i < sectional; i ++) res -= in[in.size() - i];
-  return unOffsetHalf<T>(cutBin<T>(offsetHalf<T>(res)));
+  return res;
 }
 
 // N.B. we average all of the candidates on possible much many ranges.
 //      we suppose at least cbrt(size / 2)-markov-made for input stream.
 template <typename T, int nprogress> SimpleVector<T> pMeasureable(const vector<SimpleVector<T> >& in, const string& strloop) {
-  if(in.size() <= 21) 
-    return SimpleVector<T>(in[0].size()).O(T(int(1)) / T(int(2)));
+  if(in.size() < 1) return SimpleVector<T>(); 
 #if defined(_PERSISTENT_) || defined(_FLOAT_BITS_)
-  const int m(in.size() / 2 < 21 ? T(int(0)) : absfloor(sqrt(T(int((in.size() / 2 - 21) / 2)))));
+  const int m(in.size() / 2 < 1 ? T(int(0)) : absfloor(sqrt(T(int((in.size() / 2 - 1) / 2)))));
   const int n(max(int(2), m));
 #else
-  const int m(in.size() / 2 < 21 ? T(int(0)) : floor(sqrt(T(int((in.size() / 2 - 21) / 2)))));
+  const int m(in.size() / 2 < 1 ? T(int(0)) : floor(sqrt(T(int((in.size() / 2 - 1) / 2)))));
   const int n(max(int(2), m));
 #endif
   {
@@ -5177,27 +5103,23 @@ template <typename T, int nprogress> SimpleVector<T> predv4(vector<SimpleVector<
 // (01) first condition is always satisfied by axiom of choice one but
 //      we shall need to increase n-markov's n (base dimension, varlen) as
 //      to guarantee we're in the condition with input stream is not saturated.
-// (02) we feed pseudo continuous condition by pFeedLebesgue they feeds
+// (02) we feed pseudo continuous condition by pLebesgue they feeds
 //      statistics-like inputs. this is to avoid 2nd condition.
 // (03) 3rd condition might be avoidable with predv appendant.
+//      to use this, we should compile this with -D_P_SHIFT_ .
 // (04) so if input stream's next one step is input-stream half-cbrt-markov
 //      generated one also the function is defined from the input stream
 //      condition, they might converges to the result we bet.
-// (05) however, we are in sticky condition, the difference between
-//      prediction and real value are almost constant but not vanished.
 // (06) layers:
 //       | function           | layer# | [wsp1] | data amount r   | time(***)  |
 //       +--------------------+--------+--------+------------------+----------+
 //       | pMeasureable       | 0      | w      | in * sqrt(in)   | O(L^1/6)   |
 //       | pSectional         | 0      | w      | in * range      | O(1)       |
-//       | pFeedLebesgue      | 0      | w      | in * range^2    | O(range)   |
-//       | pAbsentMajority    | *      | w      | in * 2 * lg(in) | O(lg(G))   |
-//       | predv              | 1      | w      | in * 2          | 2          |
-//       | pFeedLargeMarkov   | 1      | w      | in * cbrt(in)   | O(L^(5/3)  |
-//       | *(0) + *(1)        | 2      | w      | (0) + (1)       | O(G*L^2) + |
-//                                                                |   O(L^3)   |
+//       | pLebesgue          | 0      | w      | in * range^2    | O(range)   |
+//       | pCbrtMarkov        | 1      | w      | in * cbrt(in)   | +O(GL^(5/3)|
+//       | *(0) + *(1)        | 2      | w      | (0) + (1)       | O(GL^2+L^3)|
 //                                                                +------------+
-//                                 | O(G*lg(G)*L^(23/6)) <~ O(mem * sqrt(mem)) |
+//                                        | O(G*L^2+L^3) <~ O(mem * sqrt(mem)) |
 // *(0)  | deep               | 3      | s      | ~ in * 3        |
 //       | sumCNext           | 4      | s      | in              |
 //       | sumCNext           | 5      | s      | in              |
