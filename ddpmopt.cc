@@ -63,7 +63,7 @@ int main(int argc, const char* argv[]) {
       ins >> l;
       if(l.size() != sz * sz + 1) break;
       L.emplace_back(l / sqrt(l.dot(l)));
-      l /= - num_t(l[3]);
+      l /= - l[3];
       l[3] = num_t(int(0));
       L.emplace_back(l);
     }
