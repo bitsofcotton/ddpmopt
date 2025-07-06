@@ -2,8 +2,7 @@
 Apply some of the filter to input stream.
 We can use this for bitsofcotton/i2g filtered images.
 
-We use only input data streams, so this repository doesn't use external data sets.
-Also this targets Riemann and Riemann-Stieljes measureable condition in discrete sampled ones.
+We use only input data streams they targets 4 of a measureable condition in discrete sampled ones.
 
 # Context
 There exists Denoising Diffusion Probabilistic Models (DDPM; Ho et al. 2020). So this is another try on them but different flavoured one, we only focus to apply each pixel context to color image into monochrome one, which have the structure completely depends on filters' multiple meaning or complexity.
@@ -13,10 +12,10 @@ We need to do ulimit or edit /etc/login.conf for large malloc use cases required
 
 Using this with mimalloc or so can increase memory usage with multi thread on some systems.
 
-We use at least 3\*((whole input size))\*sizeof(num_t) in heap resource.
+We use at least 4\*((whole input size))\*sizeof(num_t) in heap resource.
 
 # Calculation time order.
-We need at least O((graphics size) * lg(graphics size) * (input length)^(23/6)).
+We need at Omega((graphics size) * (input length)^3) can be written into down ast least Omega((graphics size) * (input length)^2).
 
 # Tips on predictors
 Implanted comments into lieonn.hh .
@@ -39,10 +38,7 @@ Implanted comments into lieonn.hh .
     # test input series of graphics predictable or not (each bit input)
     ./ddpmoptp?(mp)? T <in0.ppm> ...
 
-# LEAVE
-We might LEAVE this repository except for lieonn.hh updates because the 1/3 to 2/3 condition isn't avoidable in some of the case fighting with whole input.
-
-# Real close
+# Leave
 2023/03/01
 2023/03/09 bug fix after close #1.
 2023/03/13 bug fix after close #2.
