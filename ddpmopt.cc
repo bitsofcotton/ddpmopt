@@ -41,6 +41,18 @@ using std::istringstream;
 
 #include <stdlib.h>
 
+template <typename T> SimpleMatrix<T> unOffsetHalf(const SimpleMatrix<T>& m) {
+  SimpleMatrix<T> res(m);
+  res.entity = unOffsetHalf<T>(res.entity);
+  return res;
+}
+
+template <typename T> vector<SimpleMatrix<T> > unOffsetHalf(const vector<SimpleMatrix<T> >& m) {
+  vector<SimpleMatrix<T> > res(m);
+  for(int i = 0; i < res.size(); i ++) res[i] = unOffsetHalf<T>(res[i]);
+  return res;
+}
+
 #if !defined(_OLDCPP_) && defined(_PERSISTENT_)
 #undef int
 #endif
@@ -389,6 +401,7 @@ int main(int argc, const char* argv[]) {
       if(! savep2or3<num_t>((string(argv[i + 2]) + string("-c3.ppm")).c_str(), in[i]) )
         cerr << "failed to save." << endl;
   } else if(m == 'T') {
+    const int shrink(argv[1][1] == '\0' ? 1 : std::atoi(&argv[1][1]));
     vector<vector<SimpleMatrix<num_t> > > in;
     in.reserve(argc - 2 + 1);
     for(int i0 = 2; i0 < argc; i0 ++) {
@@ -397,13 +410,22 @@ int main(int argc, const char* argv[]) {
       in.emplace_back(move(work));
     }
     in = normalize<num_t>(in);
-    vector<SimpleMatrix<num_t> > work(move(in[in.size() - 1]));
+    vector<SimpleMatrix<num_t> > work(unOffsetHalf<num_t>(in[in.size() - 1]));
     in.resize(in.size() - 1);
-    vector<SimpleMatrix<num_t> > p(predMat<num_t>(in));
+    vector<SimpleMatrix<num_t> > p(unOffsetHalf<num_t>(predMat<num_t>(in)));
     for(int i = 0; i < work.size(); i ++)
-      for(int j = 0; j < work[i].rows(); j ++)
-        for(int k = 0; k < work[i].cols(); k ++)
-          cout << (p[i](j, k) - work[i](j, k)) * num_t(int(2)) << endl;
+      for(int j = 0; j <= work[i].rows() / shrink; j ++)
+        for(int k = 0; k <= work[i].cols() / shrink; k ++) {
+          int cnt(0);
+          num_t sum(int(0));
+          for(int jj = shrink * j; jj < min(shrink * (j + 1),
+              int(work[i].rows()) ); jj ++)
+            for(int kk = shrink * k; kk < min(shrink * (k + 1),
+                int(work[i].cols()) ); kk ++, cnt ++)
+              if(num_t(int(0)) < abs(p[i](j, k)))
+                sum += sgn<num_t>(work[i](j, k)) * (work[i](j, k) - p[i](j, k));
+          std::cout << (cnt ? sum /= num_t(cnt) : - num_t(int(1)) ) << std::endl;
+        }
   } else goto usage;
   cerr << "Done" << endl;
   return 0;
@@ -424,7 +446,7 @@ int main(int argc, const char* argv[]) {
   cerr << "# some of the volume curvature like transform" << endl;
   cerr << argv[0] << " c <in0.ppm> ..." << endl;
   cerr << "# test input series of graphics predictable or not (each bit input)" << endl;
-  cerr << argv[0] << " T <in0.ppm> ..." << endl;
+  cerr << argv[0] << " T<param>? <in0.ppm> ..." << endl;
   return - 1;
 }
 
