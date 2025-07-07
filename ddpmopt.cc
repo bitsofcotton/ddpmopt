@@ -12,6 +12,10 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#if defined(_OPENMP)
+#include <omp.h>
+#endif
+
 #if !defined(_OLDCPP_) && defined(_PERSISTENT_)
 # if ! defined(_FLOAT_BITS_)
 #  define int ssize_t
