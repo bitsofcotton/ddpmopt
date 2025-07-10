@@ -167,7 +167,7 @@ int main(int argc, const char* argv[]) {
       if(vv.dot(vv) != num_t(int(0))) cout << vv;
     }
     cout << endl;
-  } else if(m == 'p' || m == 'P') {
+  } else if(m == 'p') {
     vector<vector<SimpleMatrix<num_t> > > in;
     in.reserve(argc - 1);
     for(int i = 2; i < argc; i ++) {
@@ -175,9 +175,8 @@ int main(int argc, const char* argv[]) {
       if(! loadp2or3<num_t>(work, argv[i])) continue;
       in.emplace_back(work.size() == 3 ? rgb2xyz<num_t>(work) : move(work));
     }
-    vector<SimpleMatrix<num_t> > p(m == 'p' ?
-      predMat<num_t, false>(in = normalize<num_t>(in)) :
-      predMat<num_t, true >(in = normalize<num_t>(in)) );
+    vector<SimpleMatrix<num_t> > p(
+      predMat<num_t>(in = normalize<num_t>(in)) );
     if(! savep2or3<num_t>("predg.ppm",
       normalize<num_t>(p.size() == 3 ? xyz2rgb<num_t>(p) : move(p) ) ))
         cerr << "failed to save." << endl;
@@ -211,7 +210,7 @@ int main(int argc, const char* argv[]) {
     if(! savep2or3<num_t>("predgw.ppm",
       normalize<num_t>(p.size() == 3 ? xyz2rgb<num_t>(p) : move(p))) )
         cerr << "failed to save." << endl;
-  } else if(m == 'q' || m == 'Q') {
+  } else if(m == 'q') {
     for(int i0 = 2; i0 < argc; i0 ++) {
       vector<SimpleMatrix<num_t> > work;
       if(! loadp2or3<num_t>(work, argv[i0])) continue;
@@ -231,11 +230,8 @@ int main(int argc, const char* argv[]) {
       for(int j = 0; j < work.size(); j ++)
         wwork[j].setMatrix(0, 0, work[j]);
       for(int i = 0; i < ext; i ++) {
-        vector<SimpleVector<num_t> > n(m == 'q' ?
-          predVec<num_t, false>(skipX<vector<SimpleVector<num_t> > >(pwork,
-            i + 1)) :
-          predVec<num_t, true >(skipX<vector<SimpleVector<num_t> > >(pwork,
-            i + 1)) );
+        vector<SimpleVector<num_t> > n(
+          predVec<num_t>(skipX<vector<SimpleVector<num_t> > >(pwork, i + 1)) );
         for(int j = 0; j < wwork.size(); j ++)
           wwork[j].row(work[0].rows() + i) = move(n[j]);
       }
@@ -405,7 +401,7 @@ int main(int argc, const char* argv[]) {
     for(int i = 0; i < in.size(); i ++)
       if(! savep2or3<num_t>((string(argv[i + 2]) + string("-c3.ppm")).c_str(), in[i]) )
         cerr << "failed to save." << endl;
-  } else if(m == 'T' || m == 'S') {
+  } else if(m == 'T') {
     const int shrink(argv[1][1] == '\0' ? 1 : std::atoi(&argv[1][1]));
     vector<vector<SimpleMatrix<num_t> > > in;
     in.reserve(argc - 2 + 1);
@@ -417,8 +413,7 @@ int main(int argc, const char* argv[]) {
     in = normalize<num_t>(in);
     vector<SimpleMatrix<num_t> > work(unOffsetHalf<num_t>(in[in.size() - 1]));
     in.resize(in.size() - 1);
-    vector<SimpleMatrix<num_t> > p(unOffsetHalf<num_t>(m == 'T' ?
-      predMat<num_t, false>(in) : predMat<num_t, true>(in) ));
+    vector<SimpleMatrix<num_t> > p(unOffsetHalf<num_t>(predMat<num_t>(in) ));
     for(int i = 0; i < work.size(); i ++)
       for(int j = 0; j <= work[i].rows() / shrink; j ++)
         for(int k = 0; k <= work[i].cols() / shrink; k ++) {
@@ -442,11 +437,11 @@ int main(int argc, const char* argv[]) {
   cerr << "# apply color structure" << endl;
   cerr << argv[0] << " - <in0.ppm> ... < cache.txt" << endl;
   cerr << "# predict following image (each bit input)" << endl;
-  cerr << argv[0] << " [pP] <in0.ppm> ..." << endl;
+  cerr << argv[0] << " p <in0.ppm> ..." << endl;
   cerr << "# predict with whole pixel context (each bit input)" << endl;
   cerr << argv[0] << " w <in0-4.ppm> <in0.ppm> ... <addition-4.ppm>" << endl;
   cerr << "# predict down scanlines. (each bit input)" << endl;
-  cerr << argv[0] << " [qQ] <in0out.ppm> ..." << endl;
+  cerr << argv[0] << " q <in0out.ppm> ..." << endl;
   cerr << "# show continuity" << endl;
   cerr << argv[0] << " [xyit] <in0.ppm> ..." << endl;
   cerr << "# some of the volume curvature like transform" << endl;
