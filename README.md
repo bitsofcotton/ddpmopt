@@ -15,7 +15,7 @@ Using this with mimalloc or so can increase memory usage with multi thread on so
 We use at least 4\*((whole input size))\*sizeof(num_t) in heap resource.
 
 # Calculation time order.
-We need at Omega((graphics size) * (input length)^3) can be written into down ast least Omega((graphics size) * (input length)^2).
+We need at least Omega((graphics size) * (input length)^3) can be written down into at least Omega((graphics size) * (input length)^2).
 
 # Tips on predictors
 Implanted comments into lieonn.hh .
@@ -26,17 +26,17 @@ Implanted comments into lieonn.hh .
     # apply color structure
     ./ddpmoptp?(mp)? - <in0.ppm> ... < cache.txt
     # predict following image (each bit input)
-    ./ddpmoptp?(mp)? p <in0.ppm> ...
+    ./ddpmoptp?(mp)? [pP] <in0.ppm> ...
     # reverse whole pixel context (each bit input)
     ./ddpmoptp?(mp)? w <in0-4.ppm> <in0.ppm> ... <addition-4.ppm>
     # predict down scanlines. (each bit input)
-    ./ddpmoptp?(mp)? q <in0out.ppm> ...
+    ./ddpmoptp?(mp)? [qQ] <in0out.ppm> ...
     # show continuity
     ./ddpmoptp?(mp)? [xyit] <in0.ppm> ...
     # some of the volume curvature like transform
     ./ddpmoptp?(mp)? c <in0.ppm> ...
     # test input series of graphics predictable or not (each bit input)
-    ./ddpmoptp?(mp)? T <in0.ppm> ...
+    ./ddpmoptp?(mp)? T<param> <in0.ppm> ...
 
 # Leave
 2023/03/01
@@ -241,4 +241,5 @@ Implanted comments into lieonn.hh .
 2025/07/02-03 refresh vs. jammer conditions, we add new pFeedLebesgue function they caused us better structure. debug ok.
 2025/07/04 speed remedy, debug ok, comment diet.
 2025/07/06 brush up lieonn. bug fixes. revertByProgramInvariant important fix.
+2025/07/10 add pPersistentQ to shift gulfs. code cleaning.
 
