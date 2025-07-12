@@ -2,7 +2,7 @@
 Apply some of the filter to input stream.
 We can use this for bitsofcotton/i2g filtered images.
 
-We use only input data streams they targets 4 of a measureable condition in discrete sampled ones.
+We use only input data streams they targets 4 of a measureable condition in discrete sampled ones. We can add 1 more measureable condition when we attach original input stream, no the bit-wise input stream.
 
 # Context
 There exists Denoising Diffusion Probabilistic Models (DDPM; Ho et al. 2020). So this is another try on them but different flavoured one, we only focus to apply each pixel context to color image into monochrome one, which have the structure completely depends on filters' multiple meaning or complexity.
@@ -242,4 +242,5 @@ Implanted comments into lieonn.hh .
 2025/07/04 speed remedy, debug ok, comment diet.
 2025/07/06 brush up lieonn. bug fixes. revertByProgramInvariant important fix.
 2025/07/10 add pPersistentQ to shift gulfs. code cleaning.
+2025/07/12-13 persistent debug, normalize pCbrtMarkov input, lieonn.hh refactoring.
 
