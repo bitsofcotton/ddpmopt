@@ -427,6 +427,23 @@ int main(int argc, const char* argv[]) {
                 sum += sgn<num_t>(work[i](j, k)) * (work[i](j, k) - p[i](j, k));
           std::cout << (cnt ? sum /= num_t(cnt) : - num_t(int(1)) ) << std::endl;
         }
+  } else if(m == 'd') {
+    vector<SimpleMatrix<num_t> > back;
+    for(int i0 = 2; i0 < argc; i0 ++) {
+      vector<SimpleMatrix<num_t> > work;
+      if(! loadp2or3<num_t>(work, argv[i0])) continue;
+      if(back.size()) {
+        vector<SimpleMatrix<num_t> > ww(work);
+        for(int j = 0; j < ww.size(); j ++) {
+          (ww[j] -= back[j]) *= num_t(int(2));
+          for(int k = 0; k < ww[j].rows(); k ++)
+            ww[j].row(k) = offsetHalf<num_t>(ww[j].row(k));
+        }
+        if(! savep2or3<num_t>((string("diff-") + to_string(i0 - 2) + string(".ppm")).c_str(), ww) )
+          cerr << "failed to save." << endl;
+      }
+      back = move(work);
+    }
   } else goto usage;
   cerr << "Done" << endl;
   return 0;

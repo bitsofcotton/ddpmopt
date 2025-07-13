@@ -2,7 +2,7 @@
 Apply some of the filter to input stream.
 We can use this for bitsofcotton/i2g filtered images.
 
-We use only input data streams they targets 4 of a measureable condition in discrete sampled ones. We can add 1 more measureable condition when we attach original input stream, no the bit-wise input stream.
+We use only input data streams they targets 4 of a measureable condition in discrete sampled ones. We can add 1 more measureable condition when we attach original input stream, not the bit-wise input stream.
 
 # Context
 There exists Denoising Diffusion Probabilistic Models (DDPM; Ho et al. 2020). So this is another try on them but different flavoured one, we only focus to apply each pixel context to color image into monochrome one, which have the structure completely depends on filters' multiple meaning or complexity.
@@ -12,10 +12,8 @@ We need to do ulimit or edit /etc/login.conf for large malloc use cases required
 
 Using this with mimalloc or so can increase memory usage with multi thread on some systems.
 
-We use at least 4\*((whole input size))\*sizeof(num_t) in heap resource.
-
 # Calculation time order.
-We need at least Omega((graphics size) * (input length)^3) can be written down into at least Omega((graphics size) * (input length)^2).
+We need at least Omega((graphics size) * (input length)^2 + (input length)^3) on first run.
 
 # Tips on predictors
 Implanted comments into lieonn.hh .
