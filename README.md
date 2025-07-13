@@ -2,7 +2,7 @@
 Apply some of the filter to input stream.
 We can use this for bitsofcotton/i2g filtered images.
 
-We use only input data streams they targets 4 of a measureable condition in discrete sampled ones. We can add 1 more measureable condition when we attach original input stream, not the bit-wise input stream.
+We use only input data streams they targets 5 of a measureable condition in discrete sampled ones.
 
 # Context
 There exists Denoising Diffusion Probabilistic Models (DDPM; Ho et al. 2020). So this is another try on them but different flavoured one, we only focus to apply each pixel context to color image into monochrome one, which have the structure completely depends on filters' multiple meaning or complexity.
@@ -23,18 +23,18 @@ Implanted comments into lieonn.hh .
     ./ddpmoptp?(mp)? + <in0out.pgm> <in0in.ppm> ... > cache.txt
     # apply color structure
     ./ddpmoptp?(mp)? - <in0.ppm> ... < cache.txt
-    # predict following image (each bit input)
-    ./ddpmoptp?(mp)? p <in0.ppm> ...
+    # predict following image
+    ./ddpmoptp?(mp)? p <markov> <bits> <loop> <in0.ppm> ...
     # reverse whole pixel context (each bit input)
     ./ddpmoptp?(mp)? w <in0-4.ppm> <in0.ppm> ... <addition-4.ppm>
-    # predict down scanlines. (each bit input)
-    ./ddpmoptp?(mp)? q <in0out.ppm> ...
+    # predict down scanlines
+    ./ddpmoptp?(mp)? q <markov> <bits> <loop> <in0out.ppm> ...
     # show continuity
     ./ddpmoptp?(mp)? [xyit] <in0.ppm> ...
     # some of the volume curvature like transform
     ./ddpmoptp?(mp)? c <in0.ppm> ...
-    # test input series of graphics predictable or not (each bit input)
-    ./ddpmoptp?(mp)? T<param> <in0.ppm> ...
+    # test input series of graphics predictable or not
+    ./ddpmoptp?(mp)? T<param> <markov> <bits> <loop> <in0.ppm> ...
 
 # Leave
 2023/03/01
