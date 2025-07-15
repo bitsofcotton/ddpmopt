@@ -225,27 +225,16 @@ int main(int argc, const char* argv[]) {
         for(int j = 0; j < work.size(); j ++)
           pwork[i].emplace_back(work[j].row(i));
       }
-      // N.B. 10 + 1 * 2 < work[0].rows() / step for PP0.
-      const int ext(work[0].rows() / 29);
+      vector<vector<SimpleVector<num_t> > > q(predVec<num_t>(pwork,
+        std::atoi(argv[2]), std::atoi(argv[3]), std::atoi(argv[4]) ) );
       vector<SimpleMatrix<num_t> > wwork;
       wwork.resize(work.size(),
-        SimpleMatrix<num_t>(work[0].rows() + ext, work[0].cols()).O());
-      for(int j = 0; j < work.size(); j ++)
+        SimpleMatrix<num_t>(work[0].rows() + q.size(), work[0].cols()).O());
+      for(int j = 0; j < work.size(); j ++) {
         wwork[j].setMatrix(0, 0, work[j]);
-      for(int i = 0; i < ext; i ++) {
-        vector<SimpleVector<num_t> > n(
-          predVec<num_t>(skipX<vector<SimpleVector<num_t> > >(pwork, i + 1),
-            std::atoi(argv[2]), std::atoi(argv[3]), std::atoi(argv[4]) ) );
-        for(int j = 0; j < wwork.size(); j ++)
-          wwork[j].row(work[0].rows() + i) = move(n[j]);
+        for(int n = 0; n < q.size(); n ++)
+          wwork[j].row(work[0].rows() + n) = move(q[n][j]);
       }
-      vector<SimpleMatrix<num_t> > wnorm;
-      wnorm.reserve(wwork.size());
-      for(int j = 0; j < wwork.size(); j ++)
-        wnorm.emplace_back(wwork[j].subMatrix(work[0].rows(), 0, ext, work[0].cols()));
-      wnorm = normalize<num_t>(wnorm);
-      for(int j = 0; j < wwork.size(); j ++)
-        wwork[j].setMatrix(work[0].rows(), 0, wnorm[j]);
       if(! savep2or3<num_t>(
         (string(argv[i0]) + string("-qred.ppm")).c_str(),
           normalize<num_t>(wwork.size() == 3 ? xyz2rgb<num_t>(wwork) :
