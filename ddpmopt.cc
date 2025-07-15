@@ -413,12 +413,14 @@ int main(int argc, const char* argv[]) {
         for(int k = 0; k <= work[i].cols() / shrink; k ++) {
           int cnt(0);
           num_t sum(int(0));
-          for(int jj = shrink * j; jj < min(shrink * (j + 1),
-              int(work[i].rows()) ); jj ++)
-            for(int kk = shrink * k; kk < min(shrink * (k + 1),
-                int(work[i].cols()) ); kk ++, cnt ++)
-              if(num_t(int(0)) < abs(p[i](j, k)))
-                sum += sgn<num_t>(work[i](j, k)) * (work[i](j, k) - p[i](j, k));
+          for(int jj = j * shrink; jj < min((j + 1) * shrink, work[i].rows());
+            jj ++)
+            for(int kk = 0; kk < min((k + 1) * shrink, work[i].cols()); kk ++)
+              if(num_t(int(0)) < abs(p[i](jj, kk))) {
+                sum += sgn<num_t>(work[i](jj, kk)) *
+                  (work[i](jj, kk) - p[i](jj, kk));
+                cnt ++;
+              }
           std::cout << (cnt ? sum /= num_t(cnt) : - num_t(int(1)) ) << std::endl;
         }
   } else if(m == 'd') {

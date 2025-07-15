@@ -241,4 +241,5 @@ Implanted comments into lieonn.hh .
 2025/07/06 brush up lieonn. bug fixes. revertByProgramInvariant important fix.
 2025/07/10 add pPersistentQ to shift gulfs. code cleaning.
 2025/07/12-13 persistent debug, normalize pCbrtMarkov input, lieonn.hh refactoring.
+2025/07/14-16 some addition to measureament condition, debug and slim up comments in lieonn.
 
