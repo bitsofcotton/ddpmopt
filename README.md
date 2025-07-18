@@ -2,7 +2,7 @@
 Apply some of the filter to input stream.
 We can use this for bitsofcotton/i2g filtered images.
 
-We use only input data streams they targets 5 of a measureable condition in discrete sampled ones.
+We use only input data streams they targets 6 of a measureable condition in discrete sampled ones.
 
 # Context
 There exists Denoising Diffusion Probabilistic Models (DDPM; Ho et al. 2020). So this is another try on them but different flavoured one, we only focus to apply each pixel context to color image into monochrome one, which have the structure completely depends on filters' multiple meaning or complexity.
