@@ -395,7 +395,6 @@ int main(int argc, const char* argv[]) {
       if(! savep2or3<num_t>((string(argv[i + 2]) + string("-c3.ppm")).c_str(), in[i]) )
         cerr << "failed to save." << endl;
   } else if(m == 'T') {
-    const int shrink(argv[1][1] == '\0' ? 1 : std::atoi(&argv[1][1]));
     vector<vector<SimpleMatrix<num_t> > > in;
     in.reserve(argc - 2 + 1);
     for(int i0 = 5; i0 < argc; i0 ++) {
@@ -409,20 +408,11 @@ int main(int argc, const char* argv[]) {
     vector<SimpleMatrix<num_t> > p(unOffsetHalf<num_t>(predMat<num_t>(in,
       std::atoi(argv[2]), std::atoi(argv[3]), std::atoi(argv[4]) )[0] ));
     for(int i = 0; i < work.size(); i ++)
-      for(int j = 0; j <= work[i].rows() / shrink; j ++)
-        for(int k = 0; k <= work[i].cols() / shrink; k ++) {
-          int cnt(0);
-          num_t sum(int(0));
-          for(int jj = j * shrink; jj < min((j + 1) * shrink, work[i].rows());
-            jj ++)
-            for(int kk = 0; kk < min((k + 1) * shrink, work[i].cols()); kk ++)
-              if(num_t(int(0)) < abs(p[i](jj, kk))) {
-                sum += sgn<num_t>(work[i](jj, kk)) *
-                  (work[i](jj, kk) - p[i](jj, kk));
-                cnt ++;
-              }
-          std::cout << (cnt ? sum /= num_t(cnt) : - num_t(int(1)) ) << std::endl;
-        }
+      for(int j = 0; j < work[i].rows(); j ++)
+        for(int k = 0; k < work[i].cols(); k ++)
+          std::cout << (num_t(int(0)) < abs(p[i](j, k)) ?
+            sgn<num_t>(work[i](j, k)) * (work[i](j, k) - p[i](j, k)) :
+              - num_t(int(1)) ) << std::endl;
   } else if(m == 'd') {
     vector<SimpleMatrix<num_t> > back;
     for(int i0 = 2; i0 < argc; i0 ++) {
@@ -460,7 +450,7 @@ int main(int argc, const char* argv[]) {
   cerr << "# some of the volume curvature like transform" << endl;
   cerr << argv[0] << " c <in0.ppm> ..." << endl;
   cerr << "# test input series of graphics predictable or not" << endl;
-  cerr << argv[0] << " T<param>? <markov> <bits> <loop> <in0.ppm> ..." << endl;
+  cerr << argv[0] << " T <markov> <bits> <loop> <in0.ppm> ..." << endl;
   return - 1;
 }
 

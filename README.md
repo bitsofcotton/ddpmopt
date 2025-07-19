@@ -34,7 +34,7 @@ Implanted comments into lieonn.hh .
     # some of the volume curvature like transform
     ./ddpmoptp?(mp)? c <in0.ppm> ...
     # test input series of graphics predictable or not
-    ./ddpmoptp?(mp)? T<param> <markov> <bits> <loop> <in0.ppm> ...
+    ./ddpmoptp?(mp)? T <markov> <bits> <loop> <in0.ppm> ...
 
 # Leave
 2023/03/01
@@ -242,4 +242,5 @@ Implanted comments into lieonn.hh .
 2025/07/10 add pPersistentQ to shift gulfs. code cleaning.
 2025/07/12-13 persistent debug, normalize pCbrtMarkov input, lieonn.hh refactoring.
 2025/07/14-16 some addition to measureament condition, debug and slim up comments in lieonn.
+2025/07/17-19 blending PRNG, param meaning change, T command shrink down.
 
