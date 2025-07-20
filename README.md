@@ -1,8 +1,6 @@
 # ddpmopt
-Apply some of the filter to input stream.
+Apply some of the filter or predict input stream.
 We can use this for bitsofcotton/i2g filtered images.
-
-We use only input data streams they targets 6 of a measureable condition in discrete sampled ones.
 
 # Context
 There exists Denoising Diffusion Probabilistic Models (DDPM; Ho et al. 2020). So this is another try on them but different flavoured one, we only focus to apply each pixel context to color image into monochrome one, which have the structure completely depends on filters' multiple meaning or complexity.
@@ -13,7 +11,11 @@ We need to do ulimit or edit /etc/login.conf for large malloc use cases required
 Using this with mimalloc or so can increase memory usage with multi thread on some systems.
 
 # Calculation time order.
-We need at least Omega((graphics size) * (input length)^2 + (input length)^3) on first run.
+We need at least Omega((mem region)^2 * (input length)^1/6 + (input length)^3) on first run on prediction.
+
+# Parameter we need
+bits needs half of input graphics bit accuracy number, bits &lt; 0 for plain prediction, otherwise we blend PRNG to add +1d measureable condition.
+markov needs to specify input states length we need on the context, markov &lt; 0 for persistent retry on unpredicted region.
 
 # Tips on predictors
 Implanted comments into lieonn.hh .
@@ -243,4 +245,5 @@ Implanted comments into lieonn.hh .
 2025/07/12-13 persistent debug, normalize pCbrtMarkov input, lieonn.hh refactoring.
 2025/07/14-16 some addition to measureament condition, debug and slim up comments in lieonn.
 2025/07/17-19 blending PRNG, param meaning change, T command shrink down.
+2025/07/20 brush up, debug, also comment on lieonn.hh. update readme.
 
