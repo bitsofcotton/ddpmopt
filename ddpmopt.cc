@@ -180,9 +180,8 @@ int main(int argc, const char* argv[]) {
         std::atoi(argv[3]) ));
     for(int i = 0; i < p.size(); i ++)
       if(! savep2or3<num_t>((string("predg-") + to_string(i) +
-        string(".ppm")).c_str(), normalize<num_t>(p[i].size() == 3 ?
-          xyz2rgb<num_t>(p[i]) : move(p[i]) ) ))
-            cerr << "failed to save." << endl;
+        string(".ppm")).c_str(), p[i].size() == 3 ? xyz2rgb<num_t>(p[i]) :
+          move(p[i]) )) cerr << "failed to save." << endl;
   } else if(m == 'w') {
     vector<vector<SimpleMatrix<num_t> > > in;
     in.reserve(argc - 2);
@@ -211,7 +210,7 @@ int main(int argc, const char* argv[]) {
           j * p[0].cols(), p[0].cols());
     }
     if(! savep2or3<num_t>("predgw.ppm",
-      normalize<num_t>(p.size() == 3 ? xyz2rgb<num_t>(p) : move(p))) )
+      p.size() == 3 ? xyz2rgb<num_t>(p) : move(p)) )
         cerr << "failed to save." << endl;
   } else if(m == 'q') {
     for(int i0 = 4; i0 < argc; i0 ++) {
@@ -237,8 +236,7 @@ int main(int argc, const char* argv[]) {
       }
       if(! savep2or3<num_t>(
         (string(argv[i0]) + string("-qred.ppm")).c_str(),
-          normalize<num_t>(wwork.size() == 3 ? xyz2rgb<num_t>(wwork) :
-            move(wwork) ) ) )
+          wwork.size() == 3 ? xyz2rgb<num_t>(wwork) : move(wwork) ) )
         cerr << "failed to save." << endl;
     }
   } else if(m == 'x' || m == 'y' || m == 'i' || m == 't') {
@@ -410,9 +408,9 @@ int main(int argc, const char* argv[]) {
     for(int i = 0; i < work.size(); i ++)
       for(int j = 0; j < work[i].rows(); j ++)
         for(int k = 0; k < work[i].cols(); k ++)
-          std::cout << (num_t(int(0)) < abs(p[i](j, k)) ?
-            sgn<num_t>(work[i](j, k)) * (work[i](j, k) - p[i](j, k)) :
-              num_t(int(1)) ) << std::endl;
+          std::cout << sgn<num_t>(work[i](j, k)) * p[i](j, k) << ", " <<
+            (sgn<num_t>(work[i](j, k)) * p[i](j, k) + pow(num_t(int(2)),
+              - num_t(abs(std::atoi(argv[2]))) / num_t(int(2)) ) ) << std::endl;
   } else goto usage;
   cerr << "Done" << endl;
   return 0;
