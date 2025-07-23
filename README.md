@@ -26,17 +26,17 @@ Implanted comments into lieonn.hh .
     # apply color structure
     ./ddpmoptp?(mp)? - <in0.ppm> ... < cache.txt
     # predict following image
-    ./ddpmoptp?(mp)? p <bits> <markov> <in0.ppm> ...
+    ./ddpmoptp?(mp)? p <in0.ppm> ...
     # reverse whole pixel context (each bit input)
     ./ddpmoptp?(mp)? w <in0-4.ppm> <in0.ppm> ... <addition-4.ppm>
     # predict down scanlines
-    ./ddpmoptp?(mp)? q <bits> <markov> <in0out.ppm> ...
+    ./ddpmoptp?(mp)? q <in0out.ppm> ...
     # show continuity
     ./ddpmoptp?(mp)? [xyit] <in0.ppm> ...
     # some of the volume curvature like transform
     ./ddpmoptp?(mp)? c <in0.ppm> ...
     # test input series of graphics predictable or not
-    ./ddpmoptp?(mp)? T <bits> <markov> <in0.ppm> ...
+    ./ddpmoptp?(mp)? T <in0.ppm> ...
 
 # Leave
 2023/03/01
@@ -246,4 +246,5 @@ Implanted comments into lieonn.hh .
 2025/07/14-16 some addition to measureament condition, debug and slim up comments in lieonn.
 2025/07/17-19 blending PRNG, param meaning change, T command shrink down.
 2025/07/20 brush up, debug, also comment on lieonn.hh. update readme.
+2025/07/24 stacking bricks causes this result, parameter auto configure, brush up.
 
