@@ -405,8 +405,7 @@ int main(int argc, const char* argv[]) {
     for(int i = 0; i < work.size(); i ++)
       for(int j = 0; j < work[i].rows(); j ++)
         for(int k = 0; k < work[i].cols(); k ++)
-          std::cout << work[i](j, k) << ", " << (p[i](j, k) - work[i](j, k))
-            << std::endl;
+          std::cout << p[i](j, k) * work[i](j, k) << std::endl;
   } else goto usage;
   cerr << "Done" << endl;
   return 0;

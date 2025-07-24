@@ -25,12 +25,11 @@ LDFLAGS+=	-lc++ -L/usr/local/lib
 #LDFLAGS+=	-lquadmath -lm
 
 # lieonn.hh compile options
-CXXFLAGS+=	-D_ARCFOUR_
-#CXXFLAGS+=	-D_PINVARIANT_SYMMETRIC_LINEAR_
+#CXXFLAGS+=	-D_P_BIT_=-3
+#CXXFLAGS+=	-D_P_JAM_
 
 # N.B. sed -e s/static\ inline//g | sed -e s/inline//g
 #CXXFLAGS+=     -D_OLDCPP_ -ftemplate-depth-99
-#LDFLAGS+=	-lm
 
 CLEANFILES= *.o ddpmopt ddpmoptp ddpmoptmp ddpmoptpmp
 

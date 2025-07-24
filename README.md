@@ -11,11 +11,7 @@ We need to do ulimit or edit /etc/login.conf for large malloc use cases required
 Using this with mimalloc or so can increase memory usage with multi thread on some systems.
 
 # Calculation time order.
-We need at least Omega((mem region)^2 * (input length)^1/6 + (input length)^3) on first run on prediction.
-
-# Parameter we need
-bits needs half of input graphics bit accuracy number, bits &lt; 0 for plain prediction, otherwise we blend PRNG to add +1d measureable condition.
-markov needs to specify input states length we need on the context, markov &lt; 0 for persistent retry on unpredicted region.
+We need at least Omega((mem region)^2) calculation time, we need extra +O((input length)^3) without cache or first run.
 
 # Tips on predictors
 Implanted comments into lieonn.hh .
@@ -247,4 +243,5 @@ Implanted comments into lieonn.hh .
 2025/07/17-19 blending PRNG, param meaning change, T command shrink down.
 2025/07/20 brush up, debug, also comment on lieonn.hh. update readme.
 2025/07/24 stacking bricks causes this result, parameter auto configure, brush up.
+2025/07/25 measureable condition ok. exclude _P_JAM_ things to compile option.
 
