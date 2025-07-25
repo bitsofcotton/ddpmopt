@@ -179,8 +179,9 @@ int main(int argc, const char* argv[]) {
       predMat<num_t>(in = normalize<num_t>(in)) );
     for(int i = 0; i < p.size(); i ++)
       if(! savep2or3<num_t>((string("predg-") + to_string(i) +
-        string(".ppm")).c_str(), p[i].size() == 3 ? xyz2rgb<num_t>(p[i]) :
-          move(p[i]) )) cerr << "failed to save." << endl;
+        string(".ppm")).c_str(), normalize<num_t>(p[i].size() == 3 ?
+          xyz2rgb<num_t>(p[i]) : move(p[i]) ) ))
+            cerr << "failed to save." << endl;
   } else if(m == 'w') {
     vector<vector<SimpleMatrix<num_t> > > in;
     in.reserve(argc - 2);
@@ -209,7 +210,7 @@ int main(int argc, const char* argv[]) {
           j * p[0].cols(), p[0].cols());
     }
     if(! savep2or3<num_t>("predgw.ppm",
-      p.size() == 3 ? xyz2rgb<num_t>(p) : move(p)) )
+      normalize<num_t>(p.size() == 3 ? xyz2rgb<num_t>(p) : move(p)) ) )
         cerr << "failed to save." << endl;
   } else if(m == 'q') {
     for(int i0 = 2; i0 < argc; i0 ++) {
