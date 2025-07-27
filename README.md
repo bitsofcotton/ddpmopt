@@ -244,4 +244,5 @@ Implanted comments into lieonn.hh .
 2025/07/20 brush up, debug, also comment on lieonn.hh. update readme.
 2025/07/24 stacking bricks causes this result, parameter auto configure, brush up.
 2025/07/25 measureable condition ok. exclude _P_JAM_ things to compile option.
+2025/07/26-27 levi stream condition for abstract on lieonn.hh. we should have embryonic condition close later on here.
 
