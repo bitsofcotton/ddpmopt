@@ -22,17 +22,17 @@ Implanted comments into lieonn.hh .
     # apply color structure
     ./ddpmoptp?(mp)? - <in0.ppm> ... < cache.txt
     # predict following image
-    ./ddpmoptp?(mp)? p <in0.ppm> ...
+    ./ddpmoptp?(mp)? [pP] <in0.ppm> ...
     # reverse whole pixel context (each bit input)
     ./ddpmoptp?(mp)? w <in0-4.ppm> <in0.ppm> ... <addition-4.ppm>
     # predict down scanlines
-    ./ddpmoptp?(mp)? q <in0out.ppm> ...
+    ./ddpmoptp?(mp)? [qQ] <in0out.ppm> ...
     # show continuity
     ./ddpmoptp?(mp)? [xyit] <in0.ppm> ...
     # some of the volume curvature like transform
     ./ddpmoptp?(mp)? c <in0.ppm> ...
     # test input series of graphics predictable or not
-    ./ddpmoptp?(mp)? T <in0.ppm> ...
+    ./ddpmoptp?(mp)? TL? <in0.ppm> ...
 
 # Leave
 2023/03/01
@@ -245,4 +245,5 @@ Implanted comments into lieonn.hh .
 2025/07/24 stacking bricks causes this result, parameter auto configure, brush up.
 2025/07/25 measureable condition ok. exclude _P_JAM_ things to compile option.
 2025/07/26-27 levi stream condition for abstract on lieonn.hh. we should have embryonic condition close later on here.
+2025/07/28 update readme, pPolish now don't eliminates unstable region.
 
