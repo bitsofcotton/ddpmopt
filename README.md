@@ -246,4 +246,5 @@ Implanted comments into lieonn.hh .
 2025/07/25 measureable condition ok. exclude _P_JAM_ things to compile option.
 2025/07/26-27 levi stream condition for abstract on lieonn.hh. we should have embryonic condition close later on here.
 2025/07/28 update readme, pPolish now don't eliminates unstable region.
+2025/08/01 add upper layers works might be well.
 
