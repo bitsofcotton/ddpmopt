@@ -248,4 +248,5 @@ Implanted comments into lieonn.hh .
 2025/07/28 update readme, pPolish now don't eliminates unstable region.
 2025/08/01 add upper layers works might be well.
 2025/08/02-03 sectional improvement.
+2025/08/04-07 merge latest p2 result.
 
