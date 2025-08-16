@@ -176,7 +176,7 @@ int main(int argc, const char* argv[]) {
       in.emplace_back(work.size() == 3 ? rgb2xyz<num_t>(work) : move(work));
     }
     vector<vector<SimpleMatrix<num_t> > > p(
-      predMat<num_t, 2>(in = normalize<num_t>(in)) );
+      predMat<num_t, 200>(in = normalize<num_t>(in)) );
     for(int i = 0; i < p.size(); i ++)
       if(! savep2or3<num_t>((string("predg-") + to_string(i) +
         string(".ppm")).c_str(), normalize<num_t>(p[i].size() == 3 ?
@@ -225,7 +225,7 @@ int main(int argc, const char* argv[]) {
           pwork[i].emplace_back(work[j].row(i));
       }
       vector<vector<SimpleVector<num_t> > > q(
-        predVec<num_t, 2>(pwork) );
+        predVec<num_t, 200>(pwork) );
       vector<SimpleMatrix<num_t> > wwork;
       wwork.resize(work.size(),
         SimpleMatrix<num_t>(work[0].rows() + q.size(), work[0].cols()).O());
@@ -404,7 +404,7 @@ int main(int argc, const char* argv[]) {
     vector<SimpleMatrix<num_t> > work(unOffsetHalf<num_t>(in[in.size() - 1]));
     in.resize(in.size() - 1);
     vector<SimpleMatrix<num_t> > p(unOffsetHalf<num_t>(
-      predMat<num_t, 2>(in)[0] ));
+      predMat<num_t, 200>(in)[0] ));
     for(int i = 0; i < work.size(); i ++)
       for(int j = 0; j < work[i].rows(); j ++)
         for(int k = 0; k < work[i].cols(); k ++)
