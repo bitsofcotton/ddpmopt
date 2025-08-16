@@ -10,9 +10,6 @@ We need to do ulimit or edit /etc/login.conf for large malloc use cases required
 
 Using this with mimalloc or so can increase memory usage with multi thread on some systems.
 
-# Calculation time order.
-We need at least Omega((mem region)^2) calculation time, we need extra +O((input length)^3) without cache or first run.
-
 # Tips on predictors
 Implanted comments into lieonn.hh .
 
@@ -251,4 +248,5 @@ Implanted comments into lieonn.hh .
 2025/08/04-07 merge latest p2 result.
 2025/08/11 merge latest p2 result.
 2025/08/12-15 merge latest p2 result.
+2025/08/16 merge latest p2 result.
 
