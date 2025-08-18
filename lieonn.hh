@@ -4847,7 +4847,7 @@ template <typename T, int nprogress, vector<SimpleVector<T> > (*p)(const SimpleV
 
 // N.B. repeat possible output whole range. also offset before/after predict.
 template <typename T, int nprogress, vector<SimpleVector<T> > (*p)(const SimpleVector<SimpleVector<T> >&, const string&) > vector<SimpleVector<T> > pRepeat(const vector<SimpleVector<T> >& in, const string& strloop) {
-  const int cand(max(int(1), int(in.size() / 4) ));
+  const int cand(max(int(1), int(in.size() / 12) ));
   vector<SimpleVector<T> > res;
   res.reserve(cand);
   for(int i = 1; i <= cand; i ++)
