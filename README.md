@@ -19,17 +19,17 @@ Implanted comments into lieonn.hh .
     # apply color structure
     ./ddpmoptp?(mp)? - <in0.ppm> ... < cache.txt
     # predict following image
-    ./ddpmoptp?(mp)? [pP]0? <in0.ppm> ...
+    ./ddpmoptp?(mp)? p <in0.ppm> ...
     # reverse whole pixel context (each bit input)
     ./ddpmoptp?(mp)? w <in0-4.ppm> <in0.ppm> ... <addition-4.ppm>
     # predict down scanlines
-    ./ddpmoptp?(mp)? [qQ]0? <in0out.ppm> ...
+    ./ddpmoptp?(mp)? q <in0out.ppm> ...
     # show continuity
     ./ddpmoptp?(mp)? [xyit] <in0.ppm> ...
     # some of the volume curvature like transform
     ./ddpmoptp?(mp)? c <in0.ppm> ...
     # test input series of graphics predictable or not
-    ./ddpmoptp?(mp)? [TS] <in0.ppm> ...
+    ./ddpmoptp?(mp)? T <in0.ppm> ...
 
 # closing prediction condition
 If we have 3-way predictors with each 1/3 prediction probability, we cannot improve them when the target is the generic one.
@@ -255,4 +255,5 @@ However, if we stack the layers, the tested combination layers cannot be used be
 2025/08/16 merge latest p2 result.
 2025/08/16 merge latest p2 result.
 2025/08/17-23 merge latest p2 result either our computer is infected (but this is high probability).
+2025/08/25 merge latest p2 result as combine candidates.
 
