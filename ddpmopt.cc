@@ -175,8 +175,7 @@ int main(int argc, const char* argv[]) {
       if(! loadp2or3<num_t>(work, argv[i])) continue;
       in.emplace_back(work.size() == 3 ? rgb2xyz<num_t>(work) : move(work));
     }
-    vector<vector<SimpleMatrix<num_t> > > p(
-      predMat<num_t, 99>(in = normalize<num_t>(in)) );
+    vector<vector<SimpleMatrix<num_t> > > p(predMat<num_t, 99>(in = normalize<num_t>(in)) );
     for(int i = 0; i < p.size(); i ++)
       if(! savep2or3<num_t>((string("predg-") + to_string(i) +
         string(".ppm")).c_str(), normalize<num_t>(p[i].size() == 3 ?

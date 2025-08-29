@@ -31,10 +31,6 @@ Implanted comments into lieonn.hh .
     # test input series of graphics predictable or not
     ./ddpmoptp?(mp)? T <in0.ppm> ...
 
-# closing prediction condition
-If we have 3-way predictors with each 1/3 prediction probability, we cannot improve them when the target is the generic one.
-However, if we stack the layers, the tested combination layers cannot be used because it's broken condition from generic tests force into 1 a.e. result made break them.
-
 # Leave
 2023/03/01
 2023/03/09 bug fix after close #1.
@@ -256,4 +252,5 @@ However, if we stack the layers, the tested combination layers cannot be used be
 2025/08/16 merge latest p2 result.
 2025/08/17-23 merge latest p2 result either our computer is infected (but this is high probability).
 2025/08/25 merge latest p2 result as combine candidates.
+2025/08/30 merge latest p2 result as separating again but append measureable cond.
 
