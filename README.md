@@ -253,4 +253,5 @@ Implanted comments into lieonn.hh .
 2025/08/17-23 merge latest p2 result either our computer is infected (but this is high probability).
 2025/08/25 merge latest p2 result as combine candidates.
 2025/08/30 merge latest p2 result as separating again but append measureable cond.
+2025/09/01 offset bug fix on pAppendMeasure.
 
