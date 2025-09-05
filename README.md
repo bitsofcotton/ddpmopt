@@ -1,4 +1,4 @@
-# ddpmopt
+# ddpmopt (closed)
 Apply some of the filter or predict input stream.
 We can use this for bitsofcotton/i2g filtered images.
 
@@ -254,4 +254,5 @@ Implanted comments into lieonn.hh .
 2025/08/25 merge latest p2 result as combine candidates.
 2025/08/30 merge latest p2 result as separating again but append measureable cond.
 2025/09/01 offset bug fix on pAppendMeasure.
+2025/09/05 fix to compile with latest g++, pAppendMeasure fix (should be done).
 
