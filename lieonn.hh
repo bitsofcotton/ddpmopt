@@ -673,7 +673,7 @@ public:
          SimpleFloat<T,W,bits,U>  atan() const;
   inline SimpleFloat<T,W,bits,U>  sqrt() const;
   
-  unsigned char s;
+  uint64_t s;
   typedef enum {
     INF = 0,
     NaN = 1,
@@ -772,7 +772,7 @@ private:
     }
     return * this;
   }
-  inline unsigned char safeAdd(U& dst, const U& src) {
+  inline uint64_t safeAdd(U& dst, const U& src) {
     const U dst0(dst);
     dst += src;
     if((dst0 > uzero() && src > uzero() && dst <= uzero()) ||
@@ -780,10 +780,10 @@ private:
       return 1 << (dst0 < uzero() ? DWRK : INF);
     return 0;
   }
-  inline char residue2() const {
+  inline int64_t residue2() const {
     if(uzero() < e || U(bits) <= - e) return 0;
-    if(! e) return char(int(m) & 1);
-    return char(int(m >> - int(e)) & 1);
+    if(! e) return int64_t(int(m) & 1);
+    return int64_t(int(m >> - int(e)) & 1);
   }
 
   // XXX: these are NOT threadsafe on first call.
@@ -4786,13 +4786,52 @@ template <typename T, int nprogress> SimpleVector<T> pAppendMeasure(const vector
 */
 }
 
+#if !defined(_P_PRNG_)
+#define _P_PRNG_ 11
+#endif
+template <typename T, int nprogress> SimpleVector<T> pEachPRNG(const vector<SimpleVector<T> >& in0, const string& strloop) {
+  vector<SimpleVector<T> > in(bitsG<T, false>(in0, abs(_P_BIT_)) );
+  for(int i = 0; i < in.size(); i ++) in[i] = normalize<T>(in[i]);
+  SimpleVector<T> out;
+  out.resize(in[0].size());
+  out.O();
+  for(int i = 0; i < in[0].size(); i ++) {
+    vector<SimpleVector<T> > work(in.size());
+    for(int j = 0; j < in.size(); j ++) {
+      work[j].resize(_P_PRNG_);
+      for(int k = 0; k < work[j].size(); k ++) work[j][k] = offsetHalf<T>(
+#if defined(_ARCFOUR_)
+        arc4random() & 1 ?
+#else
+        random() & 1 ?
+#endif
+        - unOffsetHalf<T>(in[j][i]) : unOffsetHalf<T>(in[j][i]) );
+    }
+    cerr << i << "/" << in[0].size() << strloop << endl;
+    SimpleVector<T> w(pAppendMeasure<T, 0>(work, string(" ") +
+      to_string(i) + string("/") + to_string(in[0].size()) + strloop) );
+    for(int j = 0; j < w.size(); j ++) out[i] += w[j];
+    int sign(0);
+    for(int j = 0; j < work[0].size(); j ++) sign += 
+#if defined(_ARCFOUR_)
+        arc4random() & 1;
+#else
+        random() & 1;
+#endif
+    if(sign - work[0].size() / 2 < 0)
+      out[i] = offsetHalf<T>(- unOffsetHalf<T>(out[i]));
+  }
+  return bitsG<T, true>(normalize<T>(out), - abs(_P_BIT_) );
+}
+
 // N.B. repeat possible output whole range. also offset before/after predict.
 template <typename T, int nprogress> vector<SimpleVector<T> > pRepeat(const vector<SimpleVector<T> >& in, const string& strloop) {
   const int cand(max(int(1), int(in.size() / 12)));
   vector<SimpleVector<T> > res;
   res.reserve(cand);
   for(int i = 1; i <= cand; i ++)
-    res.emplace_back(pAppendMeasure<T, nprogress>(skipX<SimpleVector<T> >(
+    //res.emplace_back(pAppendMeasure<T, nprogress>(skipX<SimpleVector<T> >(
+    res.emplace_back(pEachPRNG<T, nprogress>(skipX<SimpleVector<T> >(
       in, i), string(" ") + to_string(i - 1) + string("/") + to_string(cand) +
         strloop));
   return offsetHalf<T>(res);
@@ -7807,7 +7846,6 @@ template <typename T, typename U> ostream& predTOC(ostream& os, const U& input, 
     in.emplace_back(move(stats[i].corpust));
   }
   os << input;
-  vector<SimpleSparseTensor(T) > bin(in);
   corpus<T, U> pstats;
   vector<SimpleSparseTensor(T)> p(predSTen<T, 99>(in, idx));
   for(int i = 0; i < p.size(); i ++) {
