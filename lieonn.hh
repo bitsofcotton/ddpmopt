@@ -3328,6 +3328,11 @@ template <typename T, bool nonlinear> static inline T revertByProgramInvariant(S
           complexctor(T)(one) );
     work[idx] = (t.real() /= vdp.second);
   } else work[idx] = - invariant.dot(work) / invariant[idx];
+  static bool shown(false);
+  if(absfloor(work[idx]) == work[idx] && ! shown) {
+    shown = true;
+    cerr << "revertByInvariant: accuracy regression." << endl;
+  }
   work[idx] = cutBin<T>(work[idx]);
   return isfinite(work[idx]) ? work[idx] : T(int(0));
 }
@@ -4691,9 +4696,7 @@ template <typename T, int nprogress> vector<SimpleVector<T> > pGuaranteeM(const 
   vector<SimpleVector<T> > res(pPolish<T, nprogress>(
     bitsG<T, true>(in.entity, abs(_P_BIT_)), strloop) );
   for(int i = 0; i < res.size(); i ++)
-    // XXX:
-    // res[i] = bitsG<T, true>(offsetHalf<T>(res[i]), - abs(_P_BIT_) );
-    res[i] = bitsG<T, true>(normalize<T>(res[i]), - abs(_P_BIT_) );
+    res[i] = bitsG<T, true>(offsetHalf<T>(res[i]), - abs(_P_BIT_) );
   return res;
 }
 
@@ -4772,23 +4775,24 @@ template <typename T, int nprogress> SimpleVector<T> pAppendMeasure(const vector
 #if defined(_OPENMP)
   }
 #endif
-  for(int i = 1; i < pp.size(); i ++) pp[0] += pp[i];
-  for(int i = 1; i < pm.size(); i ++) pm[0] += pm[i];
-  // XXX: something goes wrong with some step length.
-  return (pp[0] + pm[0]) / T(int(2));
-/*
   for(int i = 1; i < pp.size() - 2; i ++) pp[0] += pp[i];
   for(int i = 1; i < pm.size() - 2; i ++) pm[0] += pm[i];
+#if defined(_P_DEBUG_)
   // N.B. some test goes well on some step length.
   for(int i = 0; i < pp[0].size(); i ++)
     std::cout << (pp[0][i] + pm[0][i]) * unOffsetHalf<T>(in[in.size() - 1][i]) << std::endl;
-  return pp[0].O();
-*/
+#endif
+  pp[0] += pp[pp.size() - 2];
+  pm[0] += pp[pm.size() - 2];
+  pp[0] += pp[pp.size() - 1];
+  pm[0] += pp[pm.size() - 1];
+  // XXX: something goes wrong with some step length.
+  return (pp[0] + pm[0]) / T(int(2));
 }
 
-#if !defined(_P_PRNG_)
-#define _P_PRNG_ 11
-#endif
+// N.B. each pixel each bit prediction with PRNG blended stream.
+//      however, this gets broken result. so this is dead code.
+#if defined(_P_PRNG_)
 template <typename T, int nprogress> SimpleVector<T> pEachPRNG(const vector<SimpleVector<T> >& in0, const string& strloop) {
   vector<SimpleVector<T> > in(bitsG<T, false>(in0, abs(_P_BIT_)) );
   for(int i = 0; i < in.size(); i ++) in[i] = normalize<T>(in[i]);
@@ -4818,20 +4822,28 @@ template <typename T, int nprogress> SimpleVector<T> pEachPRNG(const vector<Simp
 #else
         random() & 1;
 #endif
-    if(sign - work[0].size() / 2 < 0)
+    if(sign < work[0].size() / 2)
       out[i] = offsetHalf<T>(- unOffsetHalf<T>(out[i]));
   }
   return bitsG<T, true>(normalize<T>(out), - abs(_P_BIT_) );
 }
+#endif
 
 // N.B. repeat possible output whole range. also offset before/after predict.
 template <typename T, int nprogress> vector<SimpleVector<T> > pRepeat(const vector<SimpleVector<T> >& in, const string& strloop) {
+#if _P_MLEN_ == 0
+  const int cand(1);
+#else
   const int cand(max(int(1), int(in.size() / 12)));
+#endif
   vector<SimpleVector<T> > res;
   res.reserve(cand);
   for(int i = 1; i <= cand; i ++)
-    //res.emplace_back(pAppendMeasure<T, nprogress>(skipX<SimpleVector<T> >(
+#if defined(_P_PRNG_)
     res.emplace_back(pEachPRNG<T, nprogress>(skipX<SimpleVector<T> >(
+#else
+    res.emplace_back(pAppendMeasure<T, nprogress>(skipX<SimpleVector<T> >(
+#endif
       in, i), string(" ") + to_string(i - 1) + string("/") + to_string(cand) +
         strloop));
   return offsetHalf<T>(res);
