@@ -215,7 +215,7 @@ int main(int argc, const char* argv[]) {
     for(int i0 = 2; i0 < argc; i0 ++) {
       vector<SimpleMatrix<num_t> > work;
       if(! loadp2or3<num_t>(work, argv[i0])) continue;
-      work = normalize<num_t>(work.size() == 3 ? rgb2xyz<num_t>(work) : work);
+      work = normalize<num_t>(work.size() == 3 ? rgb2xyz<num_t>(work) : move(work));
       vector<vector<SimpleVector<num_t> > > pwork;
       pwork.resize(work[0].rows());
       for(int i = 0; i < pwork.size(); i ++) {
@@ -234,7 +234,7 @@ int main(int argc, const char* argv[]) {
       }
       if(! savep2or3<num_t>(
         (string(argv[i0]) + string("-qred.ppm")).c_str(),
-          wwork.size() == 3 ? xyz2rgb<num_t>(wwork) : move(wwork) ) )
+          wwork.size() == 3 ? xyz2rgb<num_t>(wwork) : wwork) )
         cerr << "failed to save." << endl;
     }
   } else if(m == 'x' || m == 'y' || m == 'i' || m == 't') {

@@ -4385,6 +4385,13 @@ template <typename T> static inline vector<vector<SimpleVector<T> > > normalize(
   return v;
 }
 
+template <typename T> static inline vector<SimpleVector<T> > normalize(const vector<SimpleVector<T> >& in, const T& upper = T(1)) {
+  SimpleMatrix<T> w;
+  w.resize(in.size(), in[0].size());
+  w.entity = in;
+  return normalize<T>(w, upper).entity;
+}
+
 template <typename T> static inline SimpleVector<T> normalize(const SimpleVector<T>& in, const T& upper = T(1)) {
   SimpleMatrix<T> w;
   w.resize(1, in.size());
@@ -4775,17 +4782,16 @@ template <typename T, int nprogress> SimpleVector<T> pAppendMeasure(const vector
 #if defined(_OPENMP)
   }
 #endif
-  for(int i = 1; i < pp.size() - 2; i ++) pp[0] += pp[i];
-  for(int i = 1; i < pm.size() - 2; i ++) pm[0] += pm[i];
+  assert(pp.size() == pm.size());
+  for(int i = 1; i < pp.size(); i ++) {
+    pp[0] += pp[i];
+    pm[0] += pm[i];
 #if defined(_P_DEBUG_)
-  // N.B. some test goes well on some step length.
-  for(int i = 0; i < pp[0].size(); i ++)
-    std::cout << (pp[0][i] + pm[0][i]) * unOffsetHalf<T>(in[in.size() - 1][i]) << std::endl;
+    // N.B. some test goes well on some step length.
+    if(i & 1) for(int j = 0; j < pp[0].size(); j ++)
+      std::cout << (pp[0][i] + pm[0][i]) * unOffsetHalf<T>(in[(i / 2) - pp.size() / 2 + in.size()][j]) << std::endl;
 #endif
-  pp[0] += pp[pp.size() - 2];
-  pm[0] += pp[pm.size() - 2];
-  pp[0] += pp[pp.size() - 1];
-  pm[0] += pp[pm.size() - 1];
+  }
   // XXX: something goes wrong with some step length.
   return (pp[0] + pm[0]) / T(int(2));
 }
@@ -4953,7 +4959,7 @@ template <typename T, int nprogress> vector<vector<SimpleVector<T> > > predVec(c
       in[i].setVector(j * in0[i][0].size(), in0[i][j]);
     }
   }
-  vector<SimpleVector<T> > pres(pRepeat<T, nprogress>(in, string(" predVec")) );
+  vector<SimpleVector<T> > pres(normalize<T>(pRepeat<T, nprogress>(in, string(" predVec")) ));
   vector<vector<SimpleVector<T> > > res;
   res.resize(pres.size());
   for(int i = 0; i < pres.size(); i ++) {
@@ -4979,7 +4985,7 @@ template <typename T, int nprogress> vector<vector<SimpleMatrix<T> > > predMat(c
                          k * in0[i][0].cols(), in0[i][j].row(k));
     }
   }
-  vector<SimpleVector<T> > pres(pRepeat<T, nprogress>(in, string(" predMat")) );
+  vector<SimpleVector<T> > pres(normalize<T>(pRepeat<T, nprogress>(in, string(" predMat")) ));
   vector<vector<SimpleMatrix<T> > > res;
   res.resize(pres.size());
   for(int i = 0; i < pres.size(); i ++) {
@@ -5021,7 +5027,7 @@ template <typename T, int nprogress> vector<SimpleSparseTensor(T)> predSTen(cons
               make_pair(j, make_pair(k, m))))
             in[i][cnt ++] = offsetHalf<T>(in0[i][idx[j]][idx[k]][idx[m]]);
   }
-  vector<SimpleVector<T> > pres(pRepeat<T, nprogress>(in, string(" predSTen")) );
+  vector<SimpleVector<T> > pres(normalize<T>(pRepeat<T, nprogress>(in, string(" predSTen")) ));
   vector<SimpleSparseTensor(T) > res;
   res.resize(pres.size());
   for(int i = 0; i < pres.size(); i ++)

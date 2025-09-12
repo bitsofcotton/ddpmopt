@@ -26,7 +26,7 @@ LDFLAGS+=	-lc++ -L/usr/local/lib
 
 # lieonn.hh compile options
 #CXXFLAGS+=	-D_P_BIT_=3
-CXXFLAGS+=	-D_P_MLEN_=0
+#CXXFLAGS+=	-D_P_MLEN_=0
 #CXXFLAGS+=	-D_P_PRNG_=11
 CXXFLAGS+=	-D_P_DEBUG_
 #CXXFLAGS+=	-D_ARCFOUR_
