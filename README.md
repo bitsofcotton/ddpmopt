@@ -21,7 +21,7 @@ Implanted comments into lieonn.hh .
     # predict following image
     ./ddpmoptp?(mp)? p <in0.ppm> ...
     # reverse whole pixel context (each bit input)
-    ./ddpmoptp?(mp)? w <in0-4.ppm> <in0.ppm> ... <addition-4.ppm>
+    ./ddpmoptp?(mp)? w <in0.ppm> <in0.ppm-4.ppm> ... <addition-4.ppm>
     # predict down scanlines
     ./ddpmoptp?(mp)? q <in0out.ppm> ...
     # show continuity
@@ -255,4 +255,5 @@ Implanted comments into lieonn.hh .
 2025/08/30 merge latest p2 result as separating again but append measureable cond.
 2025/09/01 offset bug fix on pAppendMeasure.
 2025/09/05 fix to compile with latest g++, pAppendMeasure fix (should be done).
+2025/09/16 w cmd order change.
 

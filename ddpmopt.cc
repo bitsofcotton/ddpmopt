@@ -201,9 +201,9 @@ int main(int argc, const char* argv[]) {
     }
     SimpleVector<num_t> vp(predv4<num_t, 20>(work));
     vector<SimpleMatrix<num_t> > p;
-    p.resize(in[1].size());
+    p.resize(in[0].size());
     for(int i = 0; i < p.size(); i ++) {
-      p[i].resize(in[1][0].rows(), in[1][0].cols());
+      p[i].resize(in[0][0].rows(), in[0][0].cols());
       for(int j = 0; j < p[i].rows(); j ++)
         p[i].row(j) = vp.subVector(i * p[0].rows() * p[0].cols() +
           j * p[0].cols(), p[0].cols());
@@ -418,7 +418,7 @@ int main(int argc, const char* argv[]) {
   cerr << "# predict following image" << endl;
   cerr << argv[0] << " p <in0.ppm> ..." << endl;
   cerr << "# predict with whole pixel context (each bit input)" << endl;
-  cerr << argv[0] << " w <in0-4.ppm> <in0.ppm> ... <addition-4.ppm>" << endl;
+  cerr << argv[0] << " w <in0.ppm> <in0.ppm-4.ppm> ... <addition-4.ppm>" << endl;
   cerr << "# predict down scanlines" << endl;
   cerr << argv[0] << " q <in0out.ppm> ..." << endl;
   cerr << "# show continuity" << endl;
