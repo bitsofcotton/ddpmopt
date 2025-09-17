@@ -4788,8 +4788,11 @@ template <typename T, int nprogress> SimpleVector<T> pAppendMeasure(const vector
     pm[0] += pm[i];
 #if defined(_P_DEBUG_)
     // N.B. some test goes well on some step length.
-    if(i & 1) for(int j = 0; j < pp[0].size(); j ++)
-      std::cout << (pp[0][i] + pm[0][i]) * unOffsetHalf<T>(in[(i / 2) - pp.size() / 2 + in.size()][j]) << std::endl;
+    if(i & 1 && (i / 2 < pp.size() / 2 - 1))
+      for(int j = 0; j < pp[0].size(); j ++)
+        std::cout << (pp[0][j] + pm[0][j]) * unOffsetHalf<T>(in[(i / 2) - pp.size() / 2 + in.size() + 1][j]) << std::endl;
+    else if(i == pp.size() - 1) for(int j = 0; j < pp[0].size(); j ++)
+      std::cout << pp[0][j] + pm[0][j] << std::endl;
 #endif
   }
   // XXX: something goes wrong with some step length.
