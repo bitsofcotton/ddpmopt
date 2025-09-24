@@ -256,4 +256,5 @@ Implanted comments into lieonn.hh .
 2025/09/01 offset bug fix on pAppendMeasure.
 2025/09/05 fix to compile with latest g++, pAppendMeasure fix (should be done).
 2025/09/16 w cmd order change.
+2025/09/25 fix p01next, pRS bugs, don't know why they worked well.
 
