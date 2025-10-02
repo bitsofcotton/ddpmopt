@@ -398,14 +398,24 @@ int main(int argc, const char* argv[]) {
       if(! loadp2or3<num_t>(work, argv[i0])) continue;
       in.emplace_back(move(work));
     }
-    in = normalize<num_t>(in);
+    // in = normalize<num_t>(in);
     vector<SimpleMatrix<num_t> > work(unOffsetHalf<num_t>(in[in.size() - 1]));
     in.resize(in.size() - 1);
     vector<SimpleMatrix<num_t> > p(unOffsetHalf<num_t>(predMat<num_t, 99>(in)[0]));
+    num_t M(int(0));
+    num_t m(int(0));
+    for(int i = 0; i < work.size(); i ++)
+      for(int j = 0; j < work[i].rows(); j ++)
+        for(int k = 0; k < work[i].cols(); k ++) {
+          p[i](j, k) *= work[i](j, k);
+          M = max(M, p[i](j, k));
+          m = min(m, p[i](j, k));
+        }
     for(int i = 0; i < work.size(); i ++)
       for(int j = 0; j < work[i].rows(); j ++)
         for(int k = 0; k < work[i].cols(); k ++)
-          std::cout << p[i](j, k) * work[i](j, k) << std::endl;
+          p[i](j, k) = offsetHalf<num_t>(p[i](j, k) / max(abs(M), abs(m)));
+    if(! savep2or3<num_t>("test.ppm", p)) cerr << "failed to save test ppm";
   } else goto usage;
   cerr << "Done" << endl;
   return 0;
@@ -425,7 +435,7 @@ int main(int argc, const char* argv[]) {
   cerr << argv[0] << " [xyit] <in0.ppm> ..." << endl;
   cerr << "# some of the volume curvature like transform" << endl;
   cerr << argv[0] << " c <in0.ppm> ..." << endl;
-  cerr << "# test input series of graphics predictable or not" << endl;
+  cerr << "# test input series of graphics predictable or not into test.ppm" << endl;
   cerr << argv[0] << " T <in0.ppm> ..." << endl;
   return - 1;
 }

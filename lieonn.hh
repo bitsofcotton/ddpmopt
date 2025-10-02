@@ -4717,7 +4717,7 @@ template <typename T, int nprogress> static inline SimpleVector<T> pGuarantee(co
 #if ! defined(_P_MLEN_)
 // N.B. avoiding exhaust of the time usage but cut off the prediction
 //      internal states length.
-#define _P_MLEN_ 21
+#define _P_MLEN_ 12
 #endif
 
 // N.B. append pseudo-measureable condition into original input
@@ -4732,32 +4732,34 @@ template <typename T, int nprogress> SimpleVector<T> pAppendMeasure(const vector
 #endif
   SimpleVector<SimpleVector<T> > workp;
   SimpleVector<SimpleVector<T> > workm;
-  workp.entity.reserve(in.size() * 2 + 1);
-  workm.entity.reserve(in.size() * 2 + 1);
+  const int realin(in.size() < _P_MLEN_ || !_P_MLEN_ ? in.size() : _P_MLEN_);
+  workp.entity.reserve(realin * 2 + 1);
+  workm.entity.reserve(realin * 2 + 1);
   SimpleVector<T> b(in[0].size());
   b.O();
-  for(int i = 0; i < in.size(); i ++) {
+  for(int i = 0; i < realin; i ++) {
     workp.entity.emplace_back(  b);
     workm.entity.emplace_back(- b);
-    workp.entity.emplace_back(unOffsetHalf<T>(in[i]));
-    workm.entity.emplace_back(unOffsetHalf<T>(in[i]));
-    b = unOffsetHalf<T>(in[i]) * T(int(2)) - b;
+    workp.entity.emplace_back(unOffsetHalf<T>(in[i - realin + in.size()]));
+    workm.entity.emplace_back(unOffsetHalf<T>(in[i - realin + in.size()]));
+    b = unOffsetHalf<T>(in[i - realin + in.size()]) * T(int(2)) - b;
   }
   workp.entity.emplace_back(  b);
   workm.entity.emplace_back(- b);
+  workp.entity = delta<SimpleVector<T> >(workp.entity);
+  workm.entity = delta<SimpleVector<T> >(workm.entity);
+  // XXX: needs twice lines, do *NOT* replace this with one lined.
+  workp.entity = delta<SimpleVector<T> >(workp.entity);
+  workm.entity = delta<SimpleVector<T> >(workm.entity);
   T M(abs(workp[0][0]));
   for(int i = 0; i < workp.size(); i ++)
-    for(int j = 0; j < workp[i].size(); j ++)
+    for(int j = 0; j < workp[i].size(); j ++) {
       M = max(M, abs(workp[i][j]));
+      M = max(M, abs(workm[i][j]));
+    }
   for(int i = 0; i < workp.size(); i ++) {
     workp[i] /= M;
     workm[i] /= M;
-  }
-  workp.entity = delta<SimpleVector<T> >(delta<SimpleVector<T> >(workp.entity));
-  workm.entity = delta<SimpleVector<T> >(delta<SimpleVector<T> >(workm.entity));
-  for(int i = 0; i < workp.size(); i ++) {
-    workp[i] = offsetHalf<T>(workp[i] /= T(int(4)) );
-    workm[i] = offsetHalf<T>(workm[i] /= T(int(4)) );
   }
   vector<SimpleVector<T> > pp;
   vector<SimpleVector<T> > pm;
@@ -4767,19 +4769,13 @@ template <typename T, int nprogress> SimpleVector<T> pAppendMeasure(const vector
 #pragma omp section
 #endif
     {
-      pp = unOffsetHalf<T>(pGuaranteeM<T, nprogress>(
-        workp.size() <= _P_MLEN_ || !_P_MLEN_ ? workp :
-          workp.subVector(workp.size() - _P_MLEN_, _P_MLEN_),
-            string("+") + strloop));
+      pp = unOffsetHalf<T>(pGuaranteeM<T, nprogress>(offsetHalf<T>(workp), string("+") + strloop));
     }
 #if defined(_OPENMP)
 #pragma omp section
 #endif
     {
-      pm = unOffsetHalf<T>(pGuaranteeM<T, nprogress>(
-        workm.size() <= _P_MLEN_ || ! _P_MLEN_ ? workm :
-          workm.subVector(workm.size() - _P_MLEN_, _P_MLEN_),
-            string("-") + strloop));
+      pm = unOffsetHalf<T>(pGuaranteeM<T, nprogress>(offsetHalf<T>(workm), string("-") + strloop));
     }
 #if defined(_OPENMP)
   }
@@ -4790,11 +4786,9 @@ template <typename T, int nprogress> SimpleVector<T> pAppendMeasure(const vector
     pm[0] += pm[i];
 #if defined(_P_DEBUG_)
     // N.B. some test goes well on some step length.
-    if(i & 1 && (i / 2 < pp.size() / 2 - 1))
+    if((! (i & 1)) && (i / 2 < pp.size() / 2 - 1))
       for(int j = 0; j < pp[0].size(); j ++)
         std::cout << (pp[0][j] + pm[0][j]) * unOffsetHalf<T>(in[(i / 2) - pp.size() / 2 + in.size() + 1][j]) << std::endl;
-    else if(i == pp.size() - 1) for(int j = 0; j < pp[0].size(); j ++)
-      std::cout << pp[0][j] + pm[0][j] << std::endl;
 #endif
   }
   // XXX: something goes wrong with some step length.
@@ -4845,7 +4839,7 @@ template <typename T, int nprogress> vector<SimpleVector<T> > pRepeat(const vect
 #if _P_MLEN_ == 0
   const int cand(1);
 #else
-  const int cand(max(int(1), int(in.size() / 12)));
+  const int cand(max(int(1), int(in.size() / _P_MLEN_)));
 #endif
   vector<SimpleVector<T> > res;
   res.reserve(cand);
@@ -4990,7 +4984,8 @@ template <typename T, int nprogress> vector<vector<SimpleMatrix<T> > > predMat(c
                          k * in0[i][0].cols(), in0[i][j].row(k));
     }
   }
-  vector<SimpleVector<T> > pres(normalize<T>(pRepeat<T, nprogress>(in, string(" predMat")) ));
+  // N.B. don't normalize here because of ddpmopt T option.
+  vector<SimpleVector<T> > pres(pRepeat<T, nprogress>(in, string(" predMat")) );
   vector<vector<SimpleMatrix<T> > > res;
   res.resize(pres.size());
   for(int i = 0; i < pres.size(); i ++) {
