@@ -28,7 +28,6 @@ LDFLAGS+=	-lc++ -L/usr/local/lib
 #CXXFLAGS+=	-D_P_BIT_=3
 #CXXFLAGS+=	-D_P_MLEN_=0
 #CXXFLAGS+=	-D_P_PRNG_=11
-#CXXFLAGS+=	-D_P_DEBUG_
 #CXXFLAGS+=	-D_ARCFOUR_
 
 # N.B. sed -e s/static\ inline//g | sed -e s/inline//g

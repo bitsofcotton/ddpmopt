@@ -4734,15 +4734,16 @@ template <typename T, int nprogress> SimpleVector<T> pAppendMeasure(const vector
   SimpleVector<SimpleVector<T> > workp;
   SimpleVector<SimpleVector<T> > workm;
   const int realin(in.size() < _P_MLEN_ || !_P_MLEN_ ? in.size() : _P_MLEN_);
-  workp.entity.reserve(realin * 2 + 1);
-  workm.entity.reserve(realin * 2 + 1);
-  // XXX: following doesn't fixes:
-  //   workp.entity.resize(realin * 2 + 1);
-  //   workm.entity.resize(realin * 2 + 1);
+  workp.entity.reserve(realin * 2 + 3);
+  workm.entity.reserve(realin * 2 + 3);
   SimpleVector<T> b(in[0].size());
   b.O();
+  // N.B. we need two first padding.
+  workp.entity.emplace_back(b);
+  workp.entity.emplace_back(b);
+  workm.entity.emplace_back(b);
+  workm.entity.emplace_back(b);
   for(int i = 0; i < realin; i ++) {
-    // XXX: this doesn't fixes.
     SimpleVector<T> uohi(in[i - realin + in.size()]);
     for(int j = 0; j < uohi.size(); j ++) uohi[j] = unOffsetHalf<T>(uohi[j]);
     workp.entity.emplace_back(  b);
@@ -4751,13 +4752,14 @@ template <typename T, int nprogress> SimpleVector<T> pAppendMeasure(const vector
     workm.entity.emplace_back(uohi);
     b = uohi * T(int(2)) - b;
   }
-  // XXX: crash with here even _FLOAT_BITS_ option, compiler error.
-  // assert(unOffsetHalf<T>(in[0][0]) == workp[1][0]);
-  // std::cout << unOffsetHalf<T>(in[0][0]) << ", " << workp[1][0] << std::endl;
   workp.entity.emplace_back(  b);
   workm.entity.emplace_back(- b);
   workp.entity = delta<SimpleVector<T> >(delta<SimpleVector<T> >(workp.entity));
   workm.entity = delta<SimpleVector<T> >(delta<SimpleVector<T> >(workm.entity));
+  // N.B. for here matches
+  //   ... | p y | p d | p d == workp, ... | p y- | p d | p d == workm.
+  // N.B. below line is different from p Ac command for each normalize vs.
+  //      for whole normalize once.
   T M0(abs(workp[0][0]));
   T M1(abs(workm[0][0]));
   for(int i = 0; i < workp.size(); i ++)
@@ -4777,30 +4779,23 @@ template <typename T, int nprogress> SimpleVector<T> pAppendMeasure(const vector
 #pragma omp section
 #endif
     {
-      pp = unOffsetHalf<T>(pGuaranteeM<T, nprogress>(offsetHalf<T>(workp), string("+") + strloop));
+      pp = unOffsetHalf<T>(pGuaranteeM<T, nprogress>(offsetHalf<T>(workp), string("+") + strloop) );
     }
 #if defined(_OPENMP)
 #pragma omp section
 #endif
     {
-      pm = unOffsetHalf<T>(pGuaranteeM<T, nprogress>(offsetHalf<T>(workm), string("-") + strloop));
+      pm = unOffsetHalf<T>(pGuaranteeM<T, nprogress>(offsetHalf<T>(workm), string("-") + strloop) );
     }
 #if defined(_OPENMP)
   }
 #endif
   assert(pp.size() == pm.size());
-  pp[0] *= M0;
-  pm[0] *= M1;
   for(int i = 1; i < pp.size(); i ++) {
-    pp[0] += pp[i] * M0;
-    pm[0] += pm[i] * M1;
-#if defined(_P_DEBUG_)
-    if((! (i & 1)) && (i / 2 < pp.size() / 2 - 1))
-      for(int j = 0; j < pp[0].size(); j ++)
-        std::cout << (pp[0][j] + pm[0][j]) * unOffsetHalf<T>(in[(i / 2) - pp.size() / 2 + in.size() + 1][j]) << std::endl;
-#endif
+    pp[0] += pp[i];
+    pm[0] += pm[i];
   }
-  return (pp[0] + pm[0]) / T(int(2));
+  return (pp[0] * M0 + pm[0] * M1) / T(int(2));
 }
 
 // N.B. each pixel each bit prediction with PRNG blended stream.
