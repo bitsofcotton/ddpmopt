@@ -3067,23 +3067,24 @@ template <typename T> static inline SimpleVector<SimpleVector<T> > offsetHalf(co
   return res;
 }
 
-template <typename T> static inline T unOffsetHalf(const T& in, const T& o = T(int(1)) ) {
+// XXX: strict type check is needed, but too slow.
+template <typename T> static inline T unOffsetHalf(const T in, const T& o = T(int(1)) ) {
   return in * (T(int(1)) + o) - o;
 }
 
-template <typename T> static inline SimpleVector<T> unOffsetHalf(const SimpleVector<T>& in, const T& o = T(int(1)) ) {
+template <typename T> static inline SimpleVector<T> unOffsetHalf(const SimpleVector<T> in, const T& o = T(int(1)) ) {
   SimpleVector<T> res(in);
   for(int i = 0; i < res.size(); i ++) res[i] = unOffsetHalf<T>(res[i], o);
   return res;
 }
 
-template <typename T> static inline vector<SimpleVector<T> > unOffsetHalf(const vector<SimpleVector<T> >& in, const T& o = T(int(1)) ) {
+template <typename T> static inline vector<SimpleVector<T> > unOffsetHalf(const vector<SimpleVector<T> > in, const T& o = T(int(1)) ) {
   vector<SimpleVector<T> > res(in);
   for(int i = 0; i < res.size(); i ++) res[i] = unOffsetHalf<T>(res[i], o);
   return res;
 }
 
-template <typename T> static inline SimpleVector<SimpleVector<T> > unOffsetHalf(const SimpleVector<SimpleVector<T> >& in, const T& o = T(int(1)) ) {
+template <typename T> static inline SimpleVector<SimpleVector<T> > unOffsetHalf(const SimpleVector<SimpleVector<T> > in, const T& o = T(int(1)) ) {
   SimpleVector<SimpleVector<T> > res;
   res.entity = unOffsetHalf<T>(in.entity, o);
   return res;
@@ -4735,31 +4736,38 @@ template <typename T, int nprogress> SimpleVector<T> pAppendMeasure(const vector
   const int realin(in.size() < _P_MLEN_ || !_P_MLEN_ ? in.size() : _P_MLEN_);
   workp.entity.reserve(realin * 2 + 1);
   workm.entity.reserve(realin * 2 + 1);
+  // XXX: following doesn't fixes:
+  //   workp.entity.resize(realin * 2 + 1);
+  //   workm.entity.resize(realin * 2 + 1);
   SimpleVector<T> b(in[0].size());
   b.O();
   for(int i = 0; i < realin; i ++) {
+    // XXX: this doesn't fixes.
+    SimpleVector<T> uohi(in[i - realin + in.size()]);
+    for(int j = 0; j < uohi.size(); j ++) uohi[j] = unOffsetHalf<T>(uohi[j]);
     workp.entity.emplace_back(  b);
     workm.entity.emplace_back(- b);
-    workp.entity.emplace_back(unOffsetHalf<T>(in[i - realin + in.size()]));
-    workm.entity.emplace_back(unOffsetHalf<T>(in[i - realin + in.size()]));
-    b = unOffsetHalf<T>(in[i - realin + in.size()]) * T(int(2)) - b;
+    workp.entity.emplace_back(uohi);
+    workm.entity.emplace_back(uohi);
+    b = uohi * T(int(2)) - b;
   }
+  // XXX: crash with here even _FLOAT_BITS_ option, compiler error.
+  // assert(unOffsetHalf<T>(in[0][0]) == workp[1][0]);
+  // std::cout << unOffsetHalf<T>(in[0][0]) << ", " << workp[1][0] << std::endl;
   workp.entity.emplace_back(  b);
   workm.entity.emplace_back(- b);
-  workp.entity = delta<SimpleVector<T> >(workp.entity);
-  workm.entity = delta<SimpleVector<T> >(workm.entity);
-  // XXX: needs twice lines, do *NOT* replace this with one lined.
-  workp.entity = delta<SimpleVector<T> >(workp.entity);
-  workm.entity = delta<SimpleVector<T> >(workm.entity);
-  T M(abs(workp[0][0]));
+  workp.entity = delta<SimpleVector<T> >(delta<SimpleVector<T> >(workp.entity));
+  workm.entity = delta<SimpleVector<T> >(delta<SimpleVector<T> >(workm.entity));
+  T M0(abs(workp[0][0]));
+  T M1(abs(workm[0][0]));
   for(int i = 0; i < workp.size(); i ++)
     for(int j = 0; j < workp[i].size(); j ++) {
-      M = max(M, abs(workp[i][j]));
-      M = max(M, abs(workm[i][j]));
+      M0 = max(M0, abs(workp[i][j]));
+      M1 = max(M1, abs(workm[i][j]));
     }
   for(int i = 0; i < workp.size(); i ++) {
-    workp[i] /= M;
-    workm[i] /= M;
+    workp[i] /= M0;
+    workm[i] /= M1;
   }
   vector<SimpleVector<T> > pp;
   vector<SimpleVector<T> > pm;
@@ -4781,17 +4789,17 @@ template <typename T, int nprogress> SimpleVector<T> pAppendMeasure(const vector
   }
 #endif
   assert(pp.size() == pm.size());
+  pp[0] *= M0;
+  pm[0] *= M1;
   for(int i = 1; i < pp.size(); i ++) {
-    pp[0] += pp[i];
-    pm[0] += pm[i];
+    pp[0] += pp[i] * M0;
+    pm[0] += pm[i] * M1;
 #if defined(_P_DEBUG_)
-    // N.B. some test goes well on some step length.
     if((! (i & 1)) && (i / 2 < pp.size() / 2 - 1))
       for(int j = 0; j < pp[0].size(); j ++)
         std::cout << (pp[0][j] + pm[0][j]) * unOffsetHalf<T>(in[(i / 2) - pp.size() / 2 + in.size() + 1][j]) << std::endl;
 #endif
   }
-  // XXX: something goes wrong with some step length.
   return (pp[0] + pm[0]) / T(int(2));
 }
 
@@ -4981,7 +4989,7 @@ template <typename T, int nprogress> vector<vector<SimpleMatrix<T> > > predMat(c
              in0[i][j].cols() == in0[0][0].cols());
       for(int k = 0; k < in0[i][j].rows(); k ++)
         in[i].setVector(j * in0[i][0].rows() * in0[i][0].cols() +
-                         k * in0[i][0].cols(), in0[i][j].row(k));
+                        k * in0[i][0].cols(),  in0[i][j].row(k));
     }
   }
   // N.B. don't normalize here because of ddpmopt T option.

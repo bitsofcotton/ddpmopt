@@ -398,7 +398,6 @@ int main(int argc, const char* argv[]) {
       if(! loadp2or3<num_t>(work, argv[i0])) continue;
       in.emplace_back(move(work));
     }
-    // in = normalize<num_t>(in);
     vector<SimpleMatrix<num_t> > work(unOffsetHalf<num_t>(in[in.size() - 1]));
     in.resize(in.size() - 1);
     vector<SimpleMatrix<num_t> > p(unOffsetHalf<num_t>(predMat<num_t, 99>(in)[0]));
