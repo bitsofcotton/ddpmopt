@@ -3067,24 +3067,23 @@ template <typename T> static inline SimpleVector<SimpleVector<T> > offsetHalf(co
   return res;
 }
 
-// XXX: strict type check is needed, but too slow.
-template <typename T> static inline T unOffsetHalf(const T in, const T& o = T(int(1)) ) {
+template <typename T> static inline T unOffsetHalf(const T& in, const T& o = T(int(1)) ) {
   return in * (T(int(1)) + o) - o;
 }
 
-template <typename T> static inline SimpleVector<T> unOffsetHalf(const SimpleVector<T> in, const T& o = T(int(1)) ) {
+template <typename T> static inline SimpleVector<T> unOffsetHalf(const SimpleVector<T>& in, const T& o = T(int(1)) ) {
   SimpleVector<T> res(in);
   for(int i = 0; i < res.size(); i ++) res[i] = unOffsetHalf<T>(res[i], o);
   return res;
 }
 
-template <typename T> static inline vector<SimpleVector<T> > unOffsetHalf(const vector<SimpleVector<T> > in, const T& o = T(int(1)) ) {
+template <typename T> static inline vector<SimpleVector<T> > unOffsetHalf(const vector<SimpleVector<T> >& in, const T& o = T(int(1)) ) {
   vector<SimpleVector<T> > res(in);
   for(int i = 0; i < res.size(); i ++) res[i] = unOffsetHalf<T>(res[i], o);
   return res;
 }
 
-template <typename T> static inline SimpleVector<SimpleVector<T> > unOffsetHalf(const SimpleVector<SimpleVector<T> > in, const T& o = T(int(1)) ) {
+template <typename T> static inline SimpleVector<SimpleVector<T> > unOffsetHalf(const SimpleVector<SimpleVector<T> >& in, const T& o = T(int(1)) ) {
   SimpleVector<SimpleVector<T> > res;
   res.entity = unOffsetHalf<T>(in.entity, o);
   return res;
@@ -4301,6 +4300,19 @@ template <typename T> static inline bool savep2or3(const char* filename, const v
   return true;
 }
 
+template <typename T> static inline pair<SimpleVector<SimpleVector<T> >, T> normalizeS(const SimpleVector<SimpleVector<T> >& in) {
+  pair<SimpleVector<SimpleVector<T> >, T> res;
+  res.second = T(int(0));
+  for(int i = 0; i < in.size(); i ++) for(int j = 0; j < in[i].size(); j ++)
+    res.second = max(res.second, abs(in[i][j]));
+  res.first = in;
+  if(T(int(0)) < res.second)
+    for(int i = 0; i < in.size(); i ++)
+      for(int j = 0; j < in[i].size(); j ++)
+        res.first[i][j] /= res.second;
+  return res;
+}
+
 template <typename T> static inline vector<vector<SimpleMatrix<T> > > normalize(const vector<vector<SimpleMatrix<T> > >& data, const T& upper = T(1)) {
   T MM(0), mm(0);
   bool fixed(false);
@@ -4733,7 +4745,11 @@ template <typename T, int nprogress> SimpleVector<T> pAppendMeasure(const vector
 #endif
   SimpleVector<SimpleVector<T> > workp;
   SimpleVector<SimpleVector<T> > workm;
+#if defined(_P_DEBUG_)
+  const int realin(in.size());
+#else
   const int realin(in.size() < _P_MLEN_ || !_P_MLEN_ ? in.size() : _P_MLEN_);
+#endif
   workp.entity.reserve(realin * 2 + 3);
   workm.entity.reserve(realin * 2 + 3);
   SimpleVector<T> b(in[0].size());
@@ -4779,13 +4795,33 @@ template <typename T, int nprogress> SimpleVector<T> pAppendMeasure(const vector
 #pragma omp section
 #endif
     {
-      pp = unOffsetHalf<T>(pGuaranteeM<T, nprogress>(offsetHalf<T>(workp), string("+") + strloop) );
+#if defined(_P_DEBUG_)
+      for(int i = 0; i < workp.size() - _P_DEBUG_ + 1; i ++) {
+        pair<SimpleVector<SimpleVector<T> >, T> wp(normalizeS<T>(
+          workp.subVector(i, _P_DEBUG_) ));
+        pp.emplace_back(unOffsetHalf<T>(pGuarantee<T, nprogress>(offsetHalf<T>(wp.first), string("+") + strloop) * wp.second));
+      }
+#else
+      pair<SimpleVector<SimpleVector<T> >, T> wp(normalizeS<T>(workp));
+      pp = unOffsetHalf<T>(pGuaranteeM<T, nprogress>(offsetHalf<T>(wp.first), string("+") + strloop) );
+      for(int i = 0; i < pp.size(); i ++) pp[i] *= wp.second;
+#endif
     }
 #if defined(_OPENMP)
 #pragma omp section
 #endif
     {
-      pm = unOffsetHalf<T>(pGuaranteeM<T, nprogress>(offsetHalf<T>(workm), string("-") + strloop) );
+#if defined(_P_DEBUG_)
+      for(int i = 0; i < workp.size() - _P_DEBUG_ + 1; i ++) {
+        pair<SimpleVector<SimpleVector<T> >, T> wm(normalizeS<T>(
+          workm.subVector(i, _P_DEBUG_) ));
+        pm.emplace_back(unOffsetHalf<T>(pGuarantee<T, nprogress>(offsetHalf<T>(wm.first), string("-") + strloop) * wm.second));
+      }
+#else
+      pair<SimpleVector<SimpleVector<T> >, T> wm(normalizeS<T>(workm));
+      pm = unOffsetHalf<T>(pGuaranteeM<T, nprogress>(offsetHalf<T>(wm.first), string("+") + strloop) );
+      for(int i = 0; i < pm.size(); i ++) pm[i] *= wm.second;
+#endif
     }
 #if defined(_OPENMP)
   }
@@ -4794,8 +4830,16 @@ template <typename T, int nprogress> SimpleVector<T> pAppendMeasure(const vector
   for(int i = 1; i < pp.size(); i ++) {
     pp[0] += pp[i];
     pm[0] += pm[i];
+#if defined(_P_DEBUG_)
+    if(! (i & 1) && i < pp.size() - 1) {
+      T sum(int(0));
+      for(int j = 0; j < pp[0].size(); j ++)
+        sum += (pp[0][j] + pm[0][j]) * in[i / 2 - pp.size() / 2 + 1 + in.size()][j];
+      std::cout << sum << endl;
+    }
+#endif
   }
-  return (pp[0] * M0 + pm[0] * M1) / T(int(2));
+  return (pp[0] + pm[0]) / T(int(2));
 }
 
 // N.B. each pixel each bit prediction with PRNG blended stream.
