@@ -27,9 +27,10 @@ LDFLAGS+=	-lc++ -L/usr/local/lib
 # lieonn.hh compile options
 #CXXFLAGS+=	-D_P_BIT_=3
 #CXXFLAGS+=	-D_P_MLEN_=21
+#CXXFLAGS+=	-D_P_EXHAUST_=0
 #CXXFLAGS+=	-D_P_PRNG_=11
-CXXFLAGS+=	-D_P_DEBUG_
 #CXXFLAGS+=	-D_ARCFOUR_
+#CXXFLAGS+=	-D_P_DEBUG_
 
 # N.B. sed -e s/static\ inline//g | sed -e s/inline//g
 #CXXFLAGS+=     -D_OLDCPP_ -ftemplate-depth-99
