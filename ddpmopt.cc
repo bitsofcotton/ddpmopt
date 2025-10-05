@@ -28,6 +28,14 @@
 #include "lieonn.hh"
 typedef myfloat num_t;
 
+#if defined(_SIMPLEALLOC_)
+size_t base;
+size_t last;
+size_t lastptr;
+vector<size_t> alloc;
+vector<bool>   in_use;
+#endif
+
 using std::cout;
 using std::cerr;
 using std::endl;
@@ -65,6 +73,14 @@ int main(int argc, const char* argv[]) {
 # elif _FLOAT_BITS_ == 128
 #  define int int64_t
 # endif
+#endif
+#if defined(_SIMPLEALLOC_)
+  base = reinterpret_cast<size_t>(malloc(SimpleAllocator<num_t>().vmlieonn()));
+  assert(base);
+  last = base;
+  lastptr ^= lastptr;
+  alloc.resize(800, 0);
+  in_use.resize(800, false);
 #endif
   const int   sz(2);
   const char& m(argv[1][0]);
@@ -417,6 +433,9 @@ int main(int argc, const char* argv[]) {
     if(! savep2or3<num_t>("test.ppm", p)) cerr << "failed to save test ppm";
   } else goto usage;
   cerr << "Done" << endl;
+#if defined(_SIMPLEALLOC_)
+  if(base) free(reinterpret_cast<void*>(base));
+#endif
   return 0;
  usage:
   cerr << "Usage:" << endl;

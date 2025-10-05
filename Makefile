@@ -4,11 +4,11 @@ CXX=	clang++
 
 # compiler flags.
 #CXXFLAGS+=	-O0 -mtune=generic -gfull
-CXXFLAGS+=	-Ofast -mtune=native -gfull
+#CXXFLAGS+=	-Ofast -mtune=native -gfull
 #CXXFLAGS+=	-O3 -mtune=native -g3
 # This doesn't work, we need operator >>, operator << with ongoing stdlibc++.
 #CXXFLAGS+=	-I/usr/local/include -mlong-double-128
-#CXXFLAGS+=	-Oz -mtune=native -gfull
+CXXFLAGS+=	-Oz -mtune=native -gfull
 #CXXFLAGS+=	-O2 -mtune=native -gfull
 #CXXFLAGS+=	-O0 -mtune=native -gfull
 #CXXFLAGS+=	-O2 -g3
@@ -33,15 +33,19 @@ LDFLAGS+=	-lc++ -L/usr/local/lib
 # N.B. sed -e s/static\ inline//g | sed -e s/inline//g
 #CXXFLAGS+=     -D_OLDCPP_ -ftemplate-depth-99
 
-CLEANFILES= *.o ddpmopt ddpmoptp ddpmoptmp ddpmoptpmp
+# N.B. ddpmopta needs env VM_LIEONN=... (MB).
+
+CLEANFILES= *.o ddpmopta ddpmoptp ddpmoptmp ddpmoptpmp
 
 clean:
 	@rm -rf ${CLEANFILES}
 
-all:	ddpmopt ddpmoptp ddpmoptmp ddpmoptpmp
+all:	ddpmopta ddpmoptp ddpmoptmp ddpmoptpmp
 
 ddpmopt:
 	${CXX} ${CXXFLAGS} -static -o ddpmopt ddpmopt.cc
+ddpmopta:
+	${CXX} ${CXXFLAGS} -static -D_SIMPLEALLOC_ -o ddpmopta ddpmopt.cc
 ddpmopt32:
 	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=32 -o ddpmopt32 ddpmopt.cc
 ddpmopt64:
