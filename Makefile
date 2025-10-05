@@ -33,25 +33,29 @@ LDFLAGS+=	-lc++ -L/usr/local/lib
 # N.B. sed -e s/static\ inline//g | sed -e s/inline//g
 #CXXFLAGS+=     -D_OLDCPP_ -ftemplate-depth-99
 
-# N.B. ddpmopta needs env VM_LIEONN=... (MB).
+# N.B. _SIMPLEALLOC_=align needs env VM_LIEONN=(mem usage MB).
 
-CLEANFILES= *.o ddpmopta ddpmoptp ddpmoptmp ddpmoptpmp
+CLEANFILES= *.o ddpmopta ddpmoptpa ddpmoptmp ddpmoptpmp
 
 clean:
 	@rm -rf ${CLEANFILES}
 
-all:	ddpmopta ddpmoptp ddpmoptmp ddpmoptpmp
+all:	ddpmopta ddpmoptpa ddpmoptmp ddpmoptpmp
 
 ddpmopt:
 	${CXX} ${CXXFLAGS} -static -o ddpmopt ddpmopt.cc
-ddpmopta:
-	${CXX} ${CXXFLAGS} -static -D_SIMPLEALLOC_ -o ddpmopta ddpmopt.cc
 ddpmopt32:
 	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=32 -o ddpmopt32 ddpmopt.cc
 ddpmopt64:
 	${CXX} ${CXXFLAGS} -static -D_FLOAT_BITS_=64 -o ddpmopt64 ddpmopt.cc
 ddpmoptp:
 	${CXX} ${CXXFLAGS} -static -D_PERSISTENT_ -o ddpmoptp ddpmopt.cc
+ddpmopta:
+	${CXX} ${CXXFLAGS} -static -D_SIMPLEALLOC_=64 -o ddpmopta ddpmopt.cc
+ddpmopt32a:
+	${CXX} ${CXXFLAGS} -static -D_SIMPLEALLOC_=64 -D_FLOAT_BITS_=32 -o ddpmopt32a ddpmopt.cc
+ddpmoptpa:
+	${CXX} ${CXXFLAGS} -static -D_SIMPLEALLOC_=64 -D_PERSISTENT_ -o ddpmoptpa ddpmopt.cc
 ddpmoptmp:
 	${CXX} ${CXXFLAGS} ${MPFLAGS} -o ddpmoptmp ddpmopt.cc
 ddpmopt32mp:

@@ -1647,6 +1647,7 @@ public:
   inline ~SimpleAllocator() { }
   inline T* allocate(size_t n) {
     n *= sizeof(T);
+    n  = (n + _SIMPLEALLOC_ - 1) / _SIMPLEALLOC_ * _SIMPLEALLOC_;
     if(alloc.size() <= lastptr) {
       alloc.resize(alloc.size() * 2, 0);
       in_use.resize(in_use.size() * 2, false);
@@ -1666,13 +1667,11 @@ public:
       if((work -= alloc[i]) == pp) break;
       flag = flag || in_use[i];
     }
-    assert(0 <= i && pp == work && alloc[i] == n * sizeof(T));
-    if(flag) in_use[i] = false;
-    else for(int j = lastptr - 1; i <= j; j --) {
-      last     -= alloc[j];
-      lastptr --;
-      alloc[j]  = 0;
-      in_use[j] = false;
+    assert(0 <= i && pp == work);
+    in_use[i] = false;
+    if(! flag) {
+      last = pp;
+      lastptr = i;
     }
   }
   inline T* address(T& x) const { return reinterpret_cast<T*>(&x); }
