@@ -754,8 +754,8 @@ private:
     bt = ~ bt;
     int doff(sizeof(V) * 4);
     int b(0);
-    for( ; bt && doff; doff >>= 1) {
-      bt   = (~ V(int(0))) >> (sizeof(V) * 8 - doff);
+    for( ; bool(bt) && bool(doff); doff /= 2) {
+      bt   = (~ V(int(0))) >> int(sizeof(V) * 8 - doff);
       bt <<= b + doff;
       if(bool(src & bt)) b += doff;
     }
@@ -3104,10 +3104,12 @@ template <typename T> using SimpleSparseTensorC = SimpleSparseVector<SimpleSpars
 // --- N.B. start small only to enname functions ---
 // N.B. functions between R and [0,1], ]0,1[.
 template <typename T> static inline T binMargin(const T& in) {
+  static const T sqe(sqrt(SimpleMatrix<T>().epsilon()));
+  static const T denom(T(int(1)) + sqrt(sqe));
   // N.B. better 0 handling, {0, 1} vanished before.
-  T res(in + sqrt(SimpleMatrix<T>().epsilon()));
+  T res(in + sqe);
   // N.B. CPU float glitch.
-  res /= T(int(1)) + sqrt(sqrt(SimpleMatrix<T>().epsilon()));
+  res /= denom;
   assert(T(int(0)) < res && res <= T(int(1)));
   return res;
 }
