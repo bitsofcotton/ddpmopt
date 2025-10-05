@@ -750,14 +750,16 @@ public:
 #endif
 private:
   template <typename V> inline U normalize(V& src) const {
-    V   bt(int(1));
+    V   bt(int(0));
+    bt = ~ bt;
+    int doff(sizeof(V) * 4);
     int b(0);
-    int tb(0);
-    for( ; bt; tb ++) {
-      if(src & bt) b = tb;
-      bt <<= 1;
+    for( ; bt && doff; doff >>= 1) {
+      bt   = (~ V(int(0))) >> (sizeof(V) * 8 - doff);
+      bt <<= b + doff;
+      if(bool(src & bt)) b += doff;
     }
-    const U shift(tb - b - 1);
+    const U shift(sizeof(V) * 8 - b - 1);
     assert(U(int(0)) <= shift);
     if(shift) src <<= shift;
     return - U(shift);
