@@ -5004,20 +5004,21 @@ template <typename T, int nprogress> SimpleVector<T> pAppendMeasure(const vector
     p.emplace_back((pp[i] + pm[i]) / T(int(2)));
     q.emplace_back((i ^ pp.size()) & 1 ?
       SimpleVector<T>(p[i].size()).O() :
-      unOffsetHalf<T>(in[(i - pp.size()) / 2 + in.size()]) );
+      unOffsetHalf<T>(in[(i - int(pp.size())) / 2 + in.size()]) );
   }
   r.reserve(p.size() - 2);
-  for(int i = 2; i < p.size(); i ++) {
-    r.emplace_back(SimpleVector<T>(p[i]).O());
-    for(int j = 0; j < p[i].size(); j ++) {
+  for(int i = 3; i <= p.size(); i ++) {
+    r.emplace_back(SimpleVector<T>(p[i - 1]).O());
+    for(int j = 0; j < p[i - 1].size(); j ++) {
       idFeeder<T> buf0(3);
       idFeeder<T> buf1(3);
       for(int k = 0; k < 3; k ++) buf0.next(q[k - 3 + i][j] - p[k - 3 + i][j]);
       for(int k = 0; k < 3; k ++) buf1.next(p[k - 3 + i][j]);
       assert(buf0.full && buf1.full);
-      r[i - 2][j] = p0maxNext<T>(buf0.res) + p0maxNext<T>(buf1.res);
+      r[i - 3][j] = p0maxNext<T>(buf0.res) + p0maxNext<T>(buf1.res);
     }
   }
+  for(int i = 1; i < r.size(); i ++) r[i] += r[i - 1];
   for(int i = 1; i < r.size(); i ++) {
     r[0] += r[i];
     if(((i ^ r.size()) & 1) && i < r.size() - 1) {
