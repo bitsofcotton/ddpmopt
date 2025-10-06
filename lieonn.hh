@@ -4934,19 +4934,21 @@ template <typename T, int nprogress> SimpleVector<T> pAppendMeasure(const vector
   for(int i = 1; i < _P_MLEN_; i ++) pnextcacher<T>(i, 1);
   // N.B. comment out and use env OMP_MAX_ACTIVE_LEVELS=... to reduce
   //      memory usage.
-  omp_set_max_active_levels(2);
+  omp_set_max_active_levels(3);
 #endif
   const int realin(_P_MLEN_ ? min(int(in.size()), int(_P_MLEN_)) : int(in.size()) );
 #if defined(_SIMPLEALLOC_)
   vector<SimpleVector<T>, SimpleAllocator<SimpleVector<T> > > pp;
   vector<SimpleVector<T>, SimpleAllocator<SimpleVector<T> > > pm;
-  vector<SimpleVector<T>, SimpleAllocator<SimpleVector<T> > > mp;
-  vector<SimpleVector<T>, SimpleAllocator<SimpleVector<T> > > mm;
+  vector<SimpleVector<T>, SimpleAllocator<SimpleVector<T> > > p;
+  vector<SimpleVector<T>, SimpleAllocator<SimpleVector<T> > > q;
+  vector<SimpleVector<T>, SimpleAllocator<SimpleVector<T> > > r;
 #else
   vector<SimpleVector<T> > pp;
   vector<SimpleVector<T> > pm;
-  vector<SimpleVector<T> > mp;
-  vector<SimpleVector<T> > mm;
+  vector<SimpleVector<T> > p;
+  vector<SimpleVector<T> > q;
+  vector<SimpleVector<T> > r;
 #endif
 #if defined(_OPENMP)
 #pragma omp parallel sections
@@ -4968,7 +4970,7 @@ template <typename T, int nprogress> SimpleVector<T> pAppendMeasure(const vector
       workp.entity = delta<SimpleVector<T> >(workp.entity);
       pair<SimpleVector<SimpleVector<T> >, T> wp(normalizeS<T>(workp));
       pp = unOffsetHalf<T>(pGuaranteeM<T, nprogress>(offsetHalf<T>(
-        wp.first), string("++)") + strloop));
+        wp.first), string("+)") + strloop));
       for(int i = 0; i < pp.size(); i ++) pp[i] *= wp.second;
     }
 #if defined(_OPENMP)
@@ -4989,71 +4991,45 @@ template <typename T, int nprogress> SimpleVector<T> pAppendMeasure(const vector
       workm.entity = delta<SimpleVector<T> >(workm.entity);
       pair<SimpleVector<SimpleVector<T> >, T> wm(normalizeS<T>(workm));
       pm = unOffsetHalf<T>(pGuaranteeM<T, nprogress>(offsetHalf<T>(
-        wm.first), string("+-)") + strloop));
+        wm.first), string("-)") + strloop));
       for(int i = 0; i < pm.size(); i ++) pm[i] *= wm.second;
     }
 #if defined(_OPENMP)
-#pragma omp section
-#endif
-    {
-      SimpleVector<SimpleVector<T> > workp;
-      workp.entity.reserve(realin * 2 + 1);
-      SimpleVector<T> b(in[0].size());
-      b.O();
-      for(int i = 0; i < realin; i ++) {
-        SimpleVector<T> uo(- unOffsetHalf<T>(in[i - realin + in.size()]));
-        workp.entity.emplace_back(b);
-        workp.entity.emplace_back(uo);
-        b = uo * T(int(2)) - b;
-      }
-      workp.entity.emplace_back(b);
-      workp.entity = delta<SimpleVector<T> >(workp.entity);
-      pair<SimpleVector<SimpleVector<T> >, T> wp(normalizeS<T>(workp));
-      mp = unOffsetHalf<T>(pGuaranteeM<T, nprogress>(offsetHalf<T>(
-        wp.first), string("-+)") + strloop));
-      wp.second = - wp.second;
-      for(int i = 0; i < mp.size(); i ++) mp[i] *= wp.second;
-    }
-#if defined(_OPENMP)
-#pragma omp section
-#endif
-    {
-      SimpleVector<SimpleVector<T> > workm;
-      workm.entity.reserve(realin * 2 + 1);
-      SimpleVector<T> b(in[0].size());
-      b.O();
-      for(int i = 0; i < realin; i ++) {
-        SimpleVector<T> uo(- unOffsetHalf<T>(in[i - realin + in.size()]));
-        workm.entity.emplace_back(- b);
-        workm.entity.emplace_back(uo);
-        b = uo * T(int(2)) - b;
-      }
-      workm.entity.emplace_back(- b);
-      workm.entity = delta<SimpleVector<T> >(workm.entity);
-      pair<SimpleVector<SimpleVector<T> >, T> wm(normalizeS<T>(workm));
-      mm = unOffsetHalf<T>(pGuaranteeM<T, nprogress>(offsetHalf<T>(
-        wm.first), string("--)") + strloop));
-      wm.second = - wm.second;
-      for(int i = 0; i < mm.size(); i ++) mm[i] *= wm.second;
-    }
-#if defined(_OPENMP)
   }
 #endif
-  assert(pp.size() == pm.size() && mp.size() == mm.size() &&
-    pp.size() == mp.size());
-  pp[0] += pm[0] + mp[0] + mm[0];
-  for(int i = 1; i < pp.size(); i ++) {
-    pp[0] += pp[i] + pm[i] + mp[i] + mm[i];
-    if(((i ^ pp.size()) & 1) && i < pp.size() - 1) {
-      assert(in[0].size() == pp[0].size());
+  assert(pp.size() == pm.size());
+  p.reserve(pp.size());
+  q.reserve(pp.size());
+  for(int i = 0; i < pp.size(); i ++) {
+    p.emplace_back((pp[i] + pm[i]) / T(int(2)));
+    q.emplace_back((i ^ pp.size()) & 1 ?
+      SimpleVector<T>(p[i].size()).O() :
+      unOffsetHalf<T>(in[(i - pp.size()) / 2 + in.size()]) );
+  }
+  r.reserve(p.size() - 2);
+  for(int i = 2; i < p.size(); i ++) {
+    r.emplace_back(SimpleVector<T>(p[i]).O());
+    for(int j = 0; j < p[i].size(); j ++) {
+      idFeeder<T> buf0(3);
+      idFeeder<T> buf1(3);
+      for(int k = 0; k < 3; k ++) buf0.next(q[k - 3 + i][j] - p[k - 3 + i][j]);
+      for(int k = 0; k < 3; k ++) buf1.next(p[k - 3 + i][j]);
+      assert(buf0.full && buf1.full);
+      r[i - 2][j] = p0maxNext<T>(buf0.res) + p0maxNext<T>(buf1.res);
+    }
+  }
+  for(int i = 1; i < r.size(); i ++) {
+    r[0] += r[i];
+    if(((i ^ r.size()) & 1) && i < r.size() - 1) {
+      assert(in[0].size() == r[0].size());
       int sum(int(0));
-      for(int j = 0; j < pp[0].size(); j ++)
-        sum += int(sgn<T>(pp[0][j] *
-          unOffsetHalf<T>(in[(i - int(pp.size())) / 2 + in.size()][j]) ));
-      std::cerr << T(sum) / T(pp[0].size()) * T(int(100)) << "%" << endl;
+      for(int j = 0; j < r[0].size(); j ++)
+        sum += int(sgn<T>(r[0][j] *
+          unOffsetHalf<T>(in[(i - int(r.size())) / 2 + in.size()][j]) ));
+      std::cerr << T(sum) / T(r[0].size()) * T(int(100)) << "%" << endl;
     }
   }
-  return pp[0] /= T(int(4));
+  return r[0];
 }
 
 // N.B. each pixel each bit prediction with PRNG blended stream.

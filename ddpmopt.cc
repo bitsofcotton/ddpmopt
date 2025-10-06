@@ -74,7 +74,13 @@ int main(int argc, const char* argv[]) {
 #  define int int64_t
 # endif
 #endif
+  const int   sz(2);
+  const char& m(argv[1][0]);
 #if defined(_SIMPLEALLOC_)
+  if(! getenv("VM_LIEONN")) {
+    cerr << "SHOULD SET VM_LIEONN=(memory usage in MB)" << endl;
+    goto usage;
+  }
   base = reinterpret_cast<size_t>(malloc(SimpleAllocator<num_t>().vmlieonn()));
   assert(base);
   last = base;
@@ -82,8 +88,6 @@ int main(int argc, const char* argv[]) {
   alloc.resize(800, 0);
   in_use.resize(800, false);
 #endif
-  const int   sz(2);
-  const char& m(argv[1][0]);
   if(argc <= 1) goto usage;
   cerr << "Coherent: sqrt(2): " << sqrt<num_t>(Complex<num_t>(num_t(2))) << endl;
   if(m == '-') {
