@@ -1682,7 +1682,7 @@ public:
   inline T* allocate(size_t n, const void*) { return allocate(n); }
   inline size_t max_size() const { return vmlieonn() / sizeof(T); }
   template <typename U, class ... _Args> inline void construct(U* p, _Args&& ... __args) {
-    ::new ((void*)p) U(_VSTD::forward<_Args>(__args)...);
+    ::new ((void*)p) U(std::forward<_Args>(__args)...);
   }
   inline void destroy(T* p) { p->~T(); }
   inline bool operator == (const SimpleAllocator<T>& x) { return true; }
@@ -4954,6 +4954,11 @@ template <typename T, int nprogress> SimpleVector<T> pAppendMeasure(const vector
       SimpleVector<T>(p[i].size()).O() :
       unOffsetHalf<T>(in[(i - int(pp.size())) / 2 + in.size()]) );
   }
+  // N.B. a-p p
+  //      a-p-q p-pp q pp
+  //      (a-p)q p*pp
+  // XXX: we select p + pp. in the raw chain test, p*pp*q with p := p0 / thresh
+  //      is better one. don't know why but numerical test says so.
   r.reserve(p.size() - 2);
   for(int i = 3; i <= p.size(); i ++) {
     r.emplace_back(SimpleVector<T>(p[i - 1]).O());
@@ -5154,11 +5159,10 @@ template <typename T, int nprogress> vector<vector<SimpleVector<T> > > predVec(c
       in[i].setVector(j * in0[i][0].size(), in0[i][j]);
     }
   }
-  // N.B. don't normalize here because of puts/txtpgm.py
 #if defined(_SIMPLEALLOC_)
-  vector<SimpleVector<T>, SimpleAllocator<SimpleVector<T> > > pres(pRepeat<T, nprogress>(in, string(" predVec")) );
+  vector<SimpleVector<T>, SimpleAllocator<SimpleVector<T> > > pres(normalize<T>(pRepeat<T, nprogress>(in, string(" predVec")) ));
 #else
-  vector<SimpleVector<T> > pres(pRepeat<T, nprogress>(in, string(" predVec")) );
+  vector<SimpleVector<T> > pres(normalize<T>(pRepeat<T, nprogress>(in, string(" predVec")) ));
 #endif
   vector<vector<SimpleVector<T> > > res;
   res.resize(pres.size());
@@ -5189,11 +5193,10 @@ template <typename T, int nprogress> vector<vector<SimpleMatrix<T> > > predMat(c
                         k * in0[i][0].cols(),  in0[i][j].row(k));
     }
   }
-  // N.B. don't normalize here because of ddpmopt T option.
 #if defined(_SIMPLEALLOC_)
-  vector<SimpleVector<T>, SimpleAllocator<SimpleVector<T> > > pres(pRepeat<T, nprogress>(in, string(" predMat")) );
+  vector<SimpleVector<T>, SimpleAllocator<SimpleVector<T> > > pres(normalize<T>(pRepeat<T, nprogress>(in, string(" predMat")) ));
 #else
-  vector<SimpleVector<T> > pres(pRepeat<T, nprogress>(in, string(" predMat")) );
+  vector<SimpleVector<T> > pres(normalize<T>(pRepeat<T, nprogress>(in, string(" predMat")) ));
 #endif
   vector<vector<SimpleMatrix<T> > > res;
   res.resize(pres.size());

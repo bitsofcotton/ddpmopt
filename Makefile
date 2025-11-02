@@ -12,9 +12,10 @@ CXXFLAGS+=	-Oz -mtune=native -gfull
 #CXXFLAGS+=	-O2 -mtune=native -gfull
 #CXXFLAGS+=	-O0 -mtune=native -gfull
 #CXXFLAGS+=	-O2 -g3
+#CXXFLAGS+=	-mno-sse2 -mno-sse -mno-3dnow -mno-mmx -msoft-float -fno-omit-frame-pointer
 #CXXFLAGS+=	-pg
 #CXXFLAGS+=	--analyze
-CXXFLAGS+=      -D_LIBCPP_ENABLE_ASSERTIONS
+#CXXFLAGS+=      -D_LIBCPP_HARDENING_MODE_DEBUG
 MPFLAGS=	-I/usr/local/include -L/usr/local/lib -lomp -fopenmp
 #MPFLAGS=	-I/usr/local/include -L/usr/local/lib -lgomp -fopenmp
 CXXFLAGS+=	-std=c++11
