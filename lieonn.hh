@@ -4901,13 +4901,11 @@ template <typename T, int nprogress> SimpleVector<T> pAppendMeasure(const vector
   vector<SimpleVector<T>, SimpleAllocator<SimpleVector<T> > > pm;
   vector<SimpleVector<T>, SimpleAllocator<SimpleVector<T> > > p;
   vector<SimpleVector<T>, SimpleAllocator<SimpleVector<T> > > q;
-  vector<SimpleVector<T>, SimpleAllocator<SimpleVector<T> > > r;
 #else
   vector<SimpleVector<T> > pp;
   vector<SimpleVector<T> > pm;
   vector<SimpleVector<T> > p;
   vector<SimpleVector<T> > q;
-  vector<SimpleVector<T> > r;
 #endif
   {
     SimpleVector<SimpleVector<T> > workp;
@@ -4946,6 +4944,8 @@ template <typename T, int nprogress> SimpleVector<T> pAppendMeasure(const vector
     for(int i = 0; i < pm.size(); i ++) pm[i] *= wm.second;
   }
   assert(pp.size() == pm.size());
+  // N.B. (a-p, p) -> (a-p-q, p-r, q, r) -> (aq - pq + pr) * pr
+  //      |p| << |a|, a * pqr == const. sign.
   p.reserve(pp.size());
   q.reserve(pp.size());
   for(int i = 0; i < pp.size(); i ++) {
@@ -4954,36 +4954,22 @@ template <typename T, int nprogress> SimpleVector<T> pAppendMeasure(const vector
       SimpleVector<T>(p[i].size()).O() :
       unOffsetHalf<T>(in[(i - int(pp.size())) / 2 + in.size()]) );
   }
-  // N.B. a-p p
-  //      a-p-q p-pp q pp
-  //      (a-p)q p*pp
-  // XXX: we select p + pp. in the raw chain test, p*pp*q with p := p0 / thresh
-  //      is better one. don't know why but numerical test says so.
-  r.reserve(p.size() - 2);
-  for(int i = 3; i <= p.size(); i ++) {
-    r.emplace_back(SimpleVector<T>(p[i - 1]).O());
-    for(int j = 0; j < p[i - 1].size(); j ++) {
-      idFeeder<T> buf0(3);
-      idFeeder<T> buf1(3);
-      for(int k = 0; k < 3; k ++) buf0.next(q[k - 3 + i][j] - p[k - 3 + i][j]);
-      for(int k = 0; k < 3; k ++) buf1.next(p[k - 3 + i][j]);
-      assert(buf0.full && buf1.full);
-      r[i - 3][j] = p0maxNext<T>(buf0.res) + p0maxNext<T>(buf1.res);
-    }
+  for(int i = 1; i < p.size(); i ++) p[i] += p[i - 1];
+  for(int i = 1; i < p.size(); i ++) p[i] += p[i - 1];
+  for(int i = 1; i < q.size(); i ++) q[i] += q[i - 1];
+  for(int i = 1; i < q.size(); i ++) q[i] += q[i - 1];
+  SimpleVector<T> r(p[0].size());
+  r.O();
+  for(int j = 0; j < r.size(); j ++) {
+    idFeeder<T> buf0(3);
+    idFeeder<T> buf1(3);
+    for(int k = 0; k < 3; k ++) buf0.next(q[k - 3 + q.size()][j] -
+      p[k - 3 + p.size()][j] / T(int(2) << abs(_P_BIT_ * 2)) );
+    for(int k = 0; k < 3; k ++) buf1.next(p[k - 3 + p.size()][j] / T(int(1) << abs(_P_BIT_ * 2)) );
+    assert(buf0.full && buf1.full);
+    r[j] = p0maxNext<T>(buf0.res) * p0maxNext<T>(buf1.res) * buf1.res[buf1.res.size() - 1];
   }
-  for(int i = 1; i < r.size(); i ++) r[i] += r[i - 1];
-  for(int i = 1; i < r.size(); i ++) {
-    r[0] += r[i];
-    if(((i ^ r.size()) & 1) && i < r.size() - 1) {
-      assert(in[0].size() == r[0].size());
-      int sum(int(0));
-      for(int j = 0; j < r[0].size(); j ++)
-        sum += int(sgn<T>(r[0][j] *
-          unOffsetHalf<T>(in[(i - int(r.size())) / 2 + in.size()][j]) ));
-      std::cerr << T(sum) / T(r[0].size()) * T(int(100)) << "%" << endl;
-    }
-  }
-  return r[0];
+  return r;
 }
 
 // N.B. each pixel each bit prediction with PRNG blended stream.
