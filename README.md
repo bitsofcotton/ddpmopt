@@ -260,4 +260,5 @@ Implanted comments into lieonn.hh .
 2025/10/03 should be compiler's bug. -&gt; something index matter, ok.
 2025/10/04 merge latest p2 result causes ok result.
 2025/11/03 check point.
+2025/11/12 fix last up by p2 logic.
 
