@@ -249,10 +249,9 @@ int main(int argc, const char* argv[]) {
         wwork[j].setMatrix(0, 0, work[j]);
         wwork[j].row(work[0].rows()) = move(q[j]);
       }
-      if(! savep2or3<num_t>(
-        (string(argv[i0]) + string("-qred.ppm")).c_str(),
-          wwork.size() == 3 ? xyz2rgb<num_t>(wwork) : wwork) )
-        cerr << "failed to save." << endl;
+      if(! savep2or3<num_t>(argv[i0], wwork.size() == 3 ?
+        xyz2rgb<num_t>(wwork) : wwork) )
+          cerr << "failed to save." << endl;
     }
   } else if(m == 'x' || m == 'y' || m == 'i' || m == 't') {
     vector<num_t> score;
