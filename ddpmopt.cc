@@ -195,12 +195,10 @@ int main(int argc, const char* argv[]) {
       if(! loadp2or3<num_t>(work, argv[i])) continue;
       in.emplace_back(work.size() == 3 ? rgb2xyz<num_t>(work) : move(work));
     }
-    vector<vector<SimpleMatrix<num_t> > > p(predMat<num_t, 20>(in = normalize<num_t>(in)) );
-    for(int i = 0; i < p.size(); i ++)
-      if(! savep2or3<num_t>((string("predg-") + to_string(i) +
-        string(".ppm")).c_str(), normalize<num_t>(p[i].size() == 3 ?
-          xyz2rgb<num_t>(p[i]) : move(p[i]) ) ))
-            cerr << "failed to save." << endl;
+    vector<SimpleMatrix<num_t> > p(predMat<num_t, 20>(in = normalize<num_t>(in)) );
+    if(! savep2or3<num_t>("predg.ppm", normalize<num_t>(p.size() == 3 ?
+      xyz2rgb<num_t>(p) : move(p) ) ))
+        cerr << "failed to save." << endl;
   } else if(m == 'w') {
     vector<vector<SimpleMatrix<num_t> > > in;
     in.reserve(argc - 2);
@@ -243,14 +241,13 @@ int main(int argc, const char* argv[]) {
         for(int j = 0; j < work.size(); j ++)
           pwork[i].emplace_back(work[j].row(i));
       }
-      vector<vector<SimpleVector<num_t> > > q(predVec<num_t, 20>(pwork));
+      vector<SimpleVector<num_t> > q(predVec<num_t, 20>(pwork));
       vector<SimpleMatrix<num_t> > wwork;
       wwork.resize(work.size(),
-        SimpleMatrix<num_t>(work[0].rows() + q.size(), work[0].cols()).O());
+        SimpleMatrix<num_t>(work[0].rows() + 1, work[0].cols()).O());
       for(int j = 0; j < work.size(); j ++) {
         wwork[j].setMatrix(0, 0, work[j]);
-        for(int n = 0; n < q.size(); n ++)
-          wwork[j].row(work[0].rows() + n) = move(q[n][j]);
+        wwork[j].row(work[0].rows()) = move(q[j]);
       }
       if(! savep2or3<num_t>(
         (string(argv[i0]) + string("-qred.ppm")).c_str(),
@@ -420,7 +417,7 @@ int main(int argc, const char* argv[]) {
     }
     vector<SimpleMatrix<num_t> > work(unOffsetHalf<num_t>(in[in.size() - 1]));
     in.resize(in.size() - 1);
-    vector<SimpleMatrix<num_t> > p(unOffsetHalf<num_t>(predMat<num_t, 20>(in)[0]));
+    vector<SimpleMatrix<num_t> > p(unOffsetHalf<num_t>(predMat<num_t, 20>(in)));
     num_t M(int(0));
     num_t m(int(0));
     for(int i = 0; i < work.size(); i ++)
