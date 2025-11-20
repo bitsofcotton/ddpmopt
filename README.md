@@ -264,4 +264,5 @@ Implanted comments into lieonn.hh .
 2025/11/12 better result reducing harmful layers.
 2025/11/15 better thin calculation layers. code clean.
 2025/11/17 merge latest p2 result.
+2025/11/21 merge latest p2 result.
 
