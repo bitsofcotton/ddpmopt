@@ -431,6 +431,28 @@ int main(int argc, const char* argv[]) {
         for(int k = 0; k < work[i].cols(); k ++)
           p[i](j, k) = offsetHalf<num_t>(p[i](j, k) / max(abs(M), abs(m)));
     if(! savep2or3<num_t>("test.ppm", p)) cerr << "failed to save test ppm";
+  } else if(m == 'h') {
+    bool met(false);
+    for(int i0 = 2; i0 < argc; i0 ++) {
+      vector<SimpleMatrix<num_t> > work;
+      if(! loadp2or3<num_t>(work, argv[i0])) continue;
+      if(work.size() != 1) work[0] = rgb2d<num_t>(work);
+      work.resize(1);
+      work = normalize<num_t>(work);
+      if(! met) {
+        std::cout << "const int cg_width = " << work[0].cols() << ";" << std::endl;
+        std::cout << "const int cg_height = " << work[0].rows() << ";" << std::endl;
+        std::cout << "const int cg_n = " << argc - 2 << ";" << std::endl;
+        std::cout << "const char cg[" << argc - 2 << "][" << work[0].rows() * work[0].cols() << "] = {" << std::endl;
+        std::cout << "{";
+      } else std::cout << endl << "{";
+      for(int i = 0; i < work[0].rows(); i ++)
+        for(int j = 0; j < work[0].cols(); j ++)
+          std::cout << int(work[0](i, j) * num_t(int(255))) << ",";
+      std::cout << "},";
+      met = true;
+    }
+    std::cout << "};" << endl;
   } else goto usage;
   cerr << "Done" << endl;
 #if defined(_SIMPLEALLOC_)
