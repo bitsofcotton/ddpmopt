@@ -1,4 +1,4 @@
-# ddpmopt (closed)
+# ddpmopt (embryonic closed)
 Apply some of the filter or predict input stream.
 We can use this for bitsofcotton/i2g filtered images.
 
