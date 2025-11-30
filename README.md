@@ -265,4 +265,5 @@ Implanted comments into lieonn.hh .
 2025/11/15 better thin calculation layers. code clean.
 2025/11/17 merge latest p2 result.
 2025/11/21 merge latest p2 result.
+2025/11/30 test the universal invariant breaks or not by public upload.
 
