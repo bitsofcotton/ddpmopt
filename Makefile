@@ -26,7 +26,7 @@ LDFLAGS+=	-lc++ -L/usr/local/lib
 #LDFLAGS+=	-lquadmath -lm
 
 # lieonn.hh compile options
-#CXXFLAGS+=	-D_P_PRNG_=11
+#CXXFLAGS+=	-D_P_PRNG_=5
 # N.B. sed -e s/static\ inline//g | sed -e s/inline//g
 #CXXFLAGS+=     -D_OLDCPP_ -ftemplate-depth-99
 # N.B. _SIMPLEALLOC_=align needs env VM_LIEONN=(mem usage MB).
