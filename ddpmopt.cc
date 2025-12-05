@@ -234,20 +234,23 @@ int main(int argc, const char* argv[]) {
       vector<SimpleMatrix<num_t> > work;
       if(! loadp2or3<num_t>(work, argv[i0])) continue;
       work = normalize<num_t>(work.size() == 3 ? rgb2xyz<num_t>(work) : move(work));
-      vector<vector<SimpleVector<num_t> > > pwork;
-      pwork.resize(work[0].rows());
+      SimpleVector<vector<SimpleVector<num_t> > > pwork(work[0].rows());
       for(int i = 0; i < pwork.size(); i ++) {
         pwork[i].reserve(work.size());
         for(int j = 0; j < work.size(); j ++)
           pwork[i].emplace_back(work[j].row(i));
       }
-      vector<SimpleVector<num_t> > q(predVec<num_t, 20>(pwork));
       vector<SimpleMatrix<num_t> > wwork;
       wwork.resize(work.size(),
-        SimpleMatrix<num_t>(work[0].rows() + 1, work[0].cols()).O());
-      for(int j = 0; j < work.size(); j ++) {
+        SimpleMatrix<num_t>(work[0].rows() + work[0].rows() / 22, work[0].cols()).O());
+      for(int j = 0; j < work.size(); j ++)
         wwork[j].setMatrix(0, 0, work[j]);
-        wwork[j].row(work[0].rows()) = move(q[j]);
+      for(int j = 0; j < work[0].rows() / 22; j ++) {
+        vector<SimpleVector<num_t> > q(predVec<num_t, 20>(
+          skipX<vector<SimpleVector<num_t> > >(pwork, j + 1)));
+        assert(q.size() == wwork.size());
+        for(int i = 0; i < wwork.size(); i ++)
+          wwork[i].row(j + work[0].rows()) = move(q[i]);
       }
       if(! savep2or3<num_t>(argv[i0], wwork.size() == 3 ?
         xyz2rgb<num_t>(wwork) : wwork) )
