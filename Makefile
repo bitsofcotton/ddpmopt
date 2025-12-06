@@ -27,7 +27,7 @@ LDFLAGS+=	-lc++ -L/usr/local/lib
 
 # lieonn.hh compile options
 # N.B. this breaks original input stream measureability nor add variety on noise
-#CXXFLAGS+=	-D_P_PRNG_=5
+#CXXFLAGS+=	-D_BURN_=3
 #CXXFLAGS+=	-D_ARCFOUR_
 # N.B. sed -e s/static\ inline//g | sed -e s/inline//g
 #CXXFLAGS+=     -D_OLDCPP_ -ftemplate-depth-99
