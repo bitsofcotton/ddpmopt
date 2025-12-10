@@ -1,4 +1,4 @@
-# ddpmopt (embryonic closed)
+# ddpmopt (def. closed)
 Apply some of the filter or predict input stream.
 We can use this for bitsofcotton/i2g filtered images.
 
@@ -267,4 +267,5 @@ Implanted comments into lieonn.hh .
 2025/11/21 merge latest p2 result.
 2025/11/30 test the universal invariant breaks or not by public upload.
 2025/12/04 some code fixes since before it was mis-coded.
+2025/12/10 update lieonn comments, concludes with this form.
 
