@@ -15,21 +15,21 @@ Implanted comments into lieonn.hh .
 
 # Usage:
     # copy color structure
-    ./ddpmoptp?(mp)? + <in0out.pgm> <in0in.ppm> ... > cache.txt
+    ./ddpmopt(mp)? + <in0out.pgm> <in0in.ppm> ... > cache.txt
     # apply color structure
-    ./ddpmoptp?(mp)? - <in0.ppm> ... < cache.txt
+    ./ddpmopt(mp)? - <in0.ppm> ... < cache.txt
     # predict following image
-    ./ddpmoptp?(mp)? p <in0.ppm> ...
-    # reverse whole pixel context (each bit input)
-    ./ddpmoptp?(mp)? w <in0.ppm> <in0.ppm-4.ppm> ... <addition-4.ppm>
+    ./ddpmopt(mp)? p <in0.ppm> ...
     # predict down scanlines
-    ./ddpmoptp?(mp)? q <in0out.ppm> ...
+    ./ddpmopt(mp)? q <in0out.ppm> ...
+    # reverse with flavoured
+    ./ddpmopt(mp)? w <in0.ppm> <in0.ppm-4.ppm> ... <addition-4.ppm>
     # show continuity
-    ./ddpmoptp?(mp)? [xyit] <in0.ppm> ...
+    ./ddpmopt(mp)? [xyit] <in0.ppm> ...
     # some of the volume curvature like transform
-    ./ddpmoptp?(mp)? c <in0.ppm> ...
+    ./ddpmopt(mp)? c <in0.ppm> ...
     # test input series of graphics predictable or not into test.ppm
-    ./ddpmoptp?(mp)? T <in0.ppm> ...
+    ./ddpmopt(mp)? T <in0.ppm> ...
 
 # Leave
 2023/03/01
@@ -268,4 +268,7 @@ Implanted comments into lieonn.hh .
 2025/11/30 test the universal invariant breaks or not by public upload.
 2025/12/04 some code fixes since before it was mis-coded.
 2025/12/10 update lieonn comments, concludes with this form.
+2026/01/06 add [PQ] as to calculate geo context enabled one.
+2026/01/15 reenable [PQ] command for PRNG blend case.
+2026/08/29 close.
 

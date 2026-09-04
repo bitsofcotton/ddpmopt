@@ -8,12 +8,24 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <limits>
 #include <cctype>
 #include <assert.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 #if defined(_OPENMP)
 #include <omp.h>
+#endif
+
+#if defined(_P_VULKAN_)
+#include <vulkan/vulkan.h>
+#endif
+
+#if defined(_MIMALLOC_)
+#define MIMALLOC_OVERRIDE_H
+#define MIMALLOC_NEW_DELETE_H
+#include <mimalloc.h>
 #endif
 
 #if !defined(_OLDCPP_) && defined(_PERSISTENT_)
@@ -24,17 +36,12 @@
 # elif _FLOAT_BITS_ == 128
 #  define int int64_t
 # endif
+#else
+# define int int64_t
 #endif
 #include "lieonn.hh"
 typedef myfloat num_t;
-
-#if defined(_SIMPLEALLOC_)
-size_t base;
-size_t last;
-size_t lastptr;
-vector<size_t> alloc;
-vector<bool>   in_use;
-#endif
+lieonn_t lieonn;
 
 using std::cout;
 using std::cerr;
@@ -61,9 +68,7 @@ template <typename T> vector<SimpleMatrix<T> > unOffsetHalf(const vector<SimpleM
   return res;
 }
 
-#if !defined(_OLDCPP_) && defined(_PERSISTENT_)
 #undef int
-#endif
 int main(int argc, const char* argv[]) {
 #if !defined(_OLDCPP_) && defined(_PERSISTENT_)
 # if ! defined(_FLOAT_BITS_)
@@ -73,21 +78,12 @@ int main(int argc, const char* argv[]) {
 # elif _FLOAT_BITS_ == 128
 #  define int int64_t
 # endif
+#else
+# define int int64_t
 #endif
   const int   sz(2);
   const char& m(argv[1][0]);
-#if defined(_SIMPLEALLOC_)
-  if(! getenv("VM_LIEONN")) {
-    cerr << "SHOULD SET VM_LIEONN=(memory usage in MB)" << endl;
-    goto usage;
-  }
-  base = reinterpret_cast<size_t>(malloc(SimpleAllocator<num_t>().vmlieonn()));
-  assert(base);
-  last = base;
-  lastptr ^= lastptr;
-  alloc.resize(800, 0);
-  in_use.resize(800, false);
-#endif
+  lieonnStaticInit();
   if(argc <= 1) goto usage;
   cerr << "Coherent: sqrt(2): " << sqrt<num_t>(Complex<num_t>(num_t(2))) << endl;
   if(m == '-') {
@@ -177,7 +173,8 @@ int main(int argc, const char* argv[]) {
           work[3] = out[i](j, k);
           v.emplace_back(move(work));
         }
-    const vector<pair<vector<SimpleVector<num_t> >, vector<int> > > c(crush<num_t>(v));
+    const vector<pair<vector<SimpleVector<num_t> >, vector<int> > > c(
+      crush<num_t, true>(v));
     for(int i = 0; i < c.size(); i ++) {
       if(! c[i].first.size()) continue;
       SimpleVector<num_t> vv(makeProgramInvariant<num_t>(c[i].first[0]).first);
@@ -187,74 +184,45 @@ int main(int argc, const char* argv[]) {
       if(vv.dot(vv) != num_t(int(0))) cout << vv;
     }
     cout << endl;
-  } else if(m == 'p') {
+  } else if(m == 'p' || m == 'T') {
     vector<vector<SimpleMatrix<num_t> > > in;
     in.reserve(argc - 1);
     for(int i = 2; i < argc; i ++) {
       vector<SimpleMatrix<num_t> > work;
       if(! loadp2or3<num_t>(work, argv[i])) continue;
-      in.emplace_back(work.size() == 3 ? rgb2xyz<num_t>(work) : move(work));
+      in.emplace_back(move(work));
     }
-    vector<SimpleMatrix<num_t> > p(predMat<num_t, 20>(in = normalize<num_t>(in)) );
-    if(! savep2or3<num_t>("predg.ppm", normalize<num_t>(p.size() == 3 ?
-      xyz2rgb<num_t>(p) : move(p) ) ))
-        cerr << "failed to save." << endl;
-  } else if(m == 'w') {
-    vector<vector<SimpleMatrix<num_t> > > in;
-    in.reserve(argc - 2);
-    for(int i = 2; i < argc; i ++) {
-      vector<SimpleMatrix<num_t> > work;
-      if(! loadp2or3<num_t>(work, argv[i])) continue;
-      in.emplace_back(work.size() == 3 ? rgb2xyz<num_t>(work) : move(work));
-    }
-    in = normalize<num_t>(in);
-    vector<SimpleVector<num_t> > work;
-    work.resize(in.size());
-    for(int i = 0; i < in.size(); i ++) {
-      work[i].resize(in[i].size() * in[i][0].rows() * in[i][0].cols());
-      for(int j = 0; j < in[i].size(); j ++)
-        for(int k = 0; k < in[i][j].rows(); k ++)
-          work[i].setVector(j * in[i][0].rows() * in[i][0].cols() +
-            k * in[i][0].cols(), in[i][j].row(k));
-    }
-    SimpleVector<num_t> vp(predv4<num_t, 20>(work));
-    vector<SimpleMatrix<num_t> > p;
-    p.resize(in[0].size());
-    for(int i = 0; i < p.size(); i ++) {
-      p[i].resize(in[0][0].rows(), in[0][0].cols());
-      for(int j = 0; j < p[i].rows(); j ++)
-        p[i].row(j) = vp.subVector(i * p[0].rows() * p[0].cols() +
-          j * p[0].cols(), p[0].cols());
-    }
-    if(! savep2or3<num_t>("predgw.ppm",
-      normalize<num_t>(p.size() == 3 ? xyz2rgb<num_t>(p) : move(p)) ) )
-        cerr << "failed to save." << endl;
+    vector<SimpleMatrix<num_t> > p(predMat<num_t, 20>(move(in), 3,
+      string(" ") + string(argv[0]) + string(" ") + string(argv[1]),
+        m == 'T') );
+    if(! savep2or3<num_t>(m == 'T' ? "test.ppm" : "predg.ppm", m == 'T' ?
+      p : normalize<num_t>(p) ) ) cerr << "failed to save." << endl;
   } else if(m == 'q') {
     for(int i0 = 2; i0 < argc; i0 ++) {
       vector<SimpleMatrix<num_t> > work;
       if(! loadp2or3<num_t>(work, argv[i0])) continue;
-      work = normalize<num_t>(work.size() == 3 ? rgb2xyz<num_t>(work) : move(work));
+      work = normalize<num_t>(work);
       SimpleVector<vector<SimpleVector<num_t> > > pwork(work[0].rows());
       for(int i = 0; i < pwork.size(); i ++) {
         pwork[i].reserve(work.size());
         for(int j = 0; j < work.size(); j ++)
           pwork[i].emplace_back(work[j].row(i));
       }
+      const int step(work[0].rows() / (loop22<num_t>() + infBase() + 1) );
       vector<SimpleMatrix<num_t> > wwork;
       wwork.resize(work.size(),
-        SimpleMatrix<num_t>(work[0].rows() + work[0].rows() / 22, work[0].cols()).O());
-      for(int j = 0; j < work.size(); j ++)
+        SimpleMatrix<num_t>(work[0].rows() + step, work[0].cols()).O());
+      for(int j = 0; j < wwork.size(); j ++)
         wwork[j].setMatrix(0, 0, work[j]);
-      for(int j = 0; j < work[0].rows() / 22; j ++) {
-        vector<SimpleVector<num_t> > q(predVec<num_t, 20>(
-          skipX<vector<SimpleVector<num_t> > >(pwork, j + 1)));
-        assert(q.size() == wwork.size());
+      for(int j = 0; j < wwork[0].rows() - work[0].rows(); j ++) {
+        SimpleVector<SimpleVector<num_t> > q(predVec<num_t, 20, true>(
+          skipX<vector<SimpleVector<num_t> > >(pwork, j + 1), 2, to_string(j) +
+            string("/") + to_string(wwork[0].rows() - work[0].rows()) )  );
         for(int i = 0; i < wwork.size(); i ++)
-          wwork[i].row(j + work[0].rows()) = move(q[i]);
+          wwork[i].row(work[0].rows() + j) = move(q[i]);
       }
-      if(! savep2or3<num_t>(argv[i0], wwork.size() == 3 ?
-        xyz2rgb<num_t>(wwork) : wwork) )
-          cerr << "failed to save." << endl;
+      if(! savep2or3<num_t>(argv[i0], move(wwork)) )
+        cerr << "failed to save." << endl;
     }
   } else if(m == 'x' || m == 'y' || m == 'i' || m == 't') {
     vector<num_t> score;
@@ -345,95 +313,10 @@ int main(int argc, const char* argv[]) {
              in[0][0].rows() == in[in.size() - 1][0].rows() &&
              in[0][0].cols() == in[in.size() - 1][0].cols() );
     }
-    cerr << "y" << flush;
-    vector<vector<SimpleMatrix<num_t> > > jy(in);
-    SimpleMatrix<num_t> left(diff<num_t>(jy[0][0].rows()));
-#if defined(_OPENMP)
-#pragma omp parallel for schedule(static, 1)
-#endif
-    for(int i = 0; i < in.size(); i ++) {
-      cerr << "." << flush;
-      for(int j = 0; j < in[i].size(); j ++)
-        jy[i][j] = left * in[i][j];
-    }
-    cerr << "x" << flush;
-    vector<vector<SimpleMatrix<num_t> > > jx(in);
-    SimpleMatrix<num_t> right(diff<num_t>(jy[0][0].cols()).transpose());
-#if defined(_OPENMP)
-#pragma omp parallel for schedule(static, 1)
-#endif
-    for(int i = 0; i < in.size(); i ++) {
-      cerr << "." << flush;
-      for(int j = 0; j < in[i].size(); j ++)
-        jx[i][j] = in[i][j] * right;
-    }
-    cerr << "z" << flush;
-    vector<vector<SimpleMatrix<num_t> > > jz(in);
-    SimpleMatrix<num_t> middle(diff<num_t>(jz.size()));
-    for(int i = 0; i < in[0].size(); i ++) {
-#if defined(_OPENMP)
-#pragma omp parallel for schedule(static, 1)
-#endif
-      for(int j = 0; j < in[0][0].rows(); j ++) {
-        cerr << "." << flush;
-        for(int k = 0; k < in[0][0].cols(); k ++) {
-          SimpleVector<num_t> work(in.size());
-          for(int m = 0; m < work.size(); m ++)
-            work[m] = in[m][i](j, k);
-          work = middle * work;
-          for(int m = 0; m < work.size(); m ++)
-            jz[m][i](j, k) = work[m];
-        }
-      }
-    }
-    cerr << endl << "eigen: " << flush;
-    // [[1, 0, 0, jx], [0, 1, 0, jy], [0, 0, 1, jz], [jx, jy, jz, z]]
-#if defined(_OPENMP)
-#pragma omp parallel for schedule(static, 1)
-#endif
-    for(int i = 0; i < in.size(); i ++) {
-      cerr << "." << flush;
-      for(int j = 0; j < in[i].size(); j ++)
-        for(int k = 0; k < in[i][j].rows(); k ++)
-          for(int m = 0; m < in[i][j].cols(); m ++) {
-            SimpleMatrix<num_t> work(4, 4);
-            work.I();
-            work(3, 0) = work(0, 3) = jx[i][j](k, m);
-            work(3, 1) = work(1, 3) = jy[i][j](k, m);
-            work(3, 2) = work(2, 3) = jz[i][j](k, m);
-            work(3, 3) = work(3, 3) = in[i][j](k, m);
-            in[i][j](k, m) = work.determinant();
-          }
-    }
-    in = normalize<num_t>(in);
+    in = normalize<num_t>(zcollect<num_t>(in));
     for(int i = 0; i < in.size(); i ++)
       if(! savep2or3<num_t>((string(argv[i + 2]) + string("-c3.ppm")).c_str(), in[i]) )
         cerr << "failed to save." << endl;
-  } else if(m == 'T') {
-    vector<vector<SimpleMatrix<num_t> > > in;
-    in.reserve(argc - 2 + 1);
-    for(int i0 = 2; i0 < argc; i0 ++) {
-      vector<SimpleMatrix<num_t> > work;
-      if(! loadp2or3<num_t>(work, argv[i0])) continue;
-      in.emplace_back(move(work));
-    }
-    vector<SimpleMatrix<num_t> > work(unOffsetHalf<num_t>(in[in.size() - 1]));
-    in.resize(in.size() - 1);
-    vector<SimpleMatrix<num_t> > p(unOffsetHalf<num_t>(predMat<num_t, 20>(in)));
-    num_t M(int(0));
-    num_t m(int(0));
-    for(int i = 0; i < work.size(); i ++)
-      for(int j = 0; j < work[i].rows(); j ++)
-        for(int k = 0; k < work[i].cols(); k ++) {
-          p[i](j, k) *= work[i](j, k);
-          M = max(M, p[i](j, k));
-          m = min(m, p[i](j, k));
-        }
-    for(int i = 0; i < work.size(); i ++)
-      for(int j = 0; j < work[i].rows(); j ++)
-        for(int k = 0; k < work[i].cols(); k ++)
-          p[i](j, k) = offsetHalf<num_t>(p[i](j, k) / max(abs(M), abs(m)));
-    if(! savep2or3<num_t>("test.ppm", p)) cerr << "failed to save test ppm";
   } else if(m == 'h') {
     bool met(false);
     for(int i0 = 2; i0 < argc; i0 ++) {
@@ -456,13 +339,115 @@ int main(int argc, const char* argv[]) {
       met = true;
     }
     std::cout << "};" << endl;
+  } else if(m == 'H') {
+    // cf. sox in.mp3 -c 1 -b 16 -e signed -r 65536 a.raw
+    //     ./ddpmopt H ... < a.raw > b.raw
+    //     sox -M -b 16 -e signed -r 65536 a.raw -b 16 -e signed -r 65536
+    //       b.raw out.wav
+    // cf. "hemi-sync" on some surface search.
+    // XXX: political or patent matter on publish?
+    const int blocks(65536);
+    int shift(std::atoi(argv[2]));
+    SimpleVector<int16_t> v(blocks);
+    SimpleVector<complex(num_t)> f;
+    while(! std::cin.eof() && ! std::cin.bad()) {
+      std::cin.read(reinterpret_cast<char*>(&v[0]), sizeof(int16_t) * blocks);
+      f = fft<num_t>(v.template cast<num_t>().template cast<complex(num_t)>());
+      for(int i = 0; i < f.size() - shift; i ++)
+        f[f.size() - 1 - i] = f[f.size() - shift - i - 1];
+      v = ifft<num_t>(f).template real<num_t>().template cast<int>().template cast<int16_t>();
+      std::cout.write(reinterpret_cast<char*>(&v[0]), sizeof(int16_t) * blocks);
+    }
+  } else if(m == 'G') {
+    // cf. sox in.mp3 -c 1 -b 16 -e signed -r 65536 a.raw
+    //     ./ddpmopt G < a.raw > b.raw
+    //     sox -b 16 -e signed -r 65536 b.raw out.wav
+    // cf. 440 Hz : 432 Hz
+    // XXX: political or patent matter on publish?
+    const int blocks(65536);
+    SimpleVector<int16_t> v(blocks);
+    SimpleVector<complex(num_t)> f;
+    while(! std::cin.eof() && ! std::cin.bad()) {
+      std::cin.read(reinterpret_cast<char*>(&v[0]), sizeof(int16_t) * blocks);
+      f = fft<num_t>(v.template cast<num_t>().template cast<complex(num_t)>());
+      const SimpleVector<complex(num_t)> f0(f);
+      int i;
+      for(i = 0; i < f.size(); i ++) {
+        const int idx(exp(log(num_t(i + 1)) * log(num_t(55)) / log(num_t(54)) ));
+        if(f.size() <= idx) break;
+        f[i] = f0[idx];
+      }
+      for( ; i < f.size(); i ++)
+        f[i] = complexctor(num_t)(num_t(int(0)));
+      v = ifft<num_t>(f).template real<num_t>().template cast<int>().template cast<int16_t>();
+      std::cout.write(reinterpret_cast<char*>(&v[0]), sizeof(int16_t) * blocks);
+    }
+  } else if(m == 'C') {
+    const int len(std::atoi(argv[2]));
+    if(!len) {
+      std::cout << "const float sqe = " << sqrt(SimpleMatrix<num_t>().epsilon() ) << ";" << endl;
+      std::cout << "const float denom = " << (num_t(int(1)) + sqrt(sqrt(SimpleMatrix<num_t>().epsilon() )) ) << ";" << endl;
+    } else {
+      std::cout << "float[" << len << "][" << len << "](" << endl;
+      for(int i = 0; i < len; i ++) {
+        const SimpleVector<num_t>& pn(pnextcacher<num_t>(i + 1, 1));
+        int j;
+        std::cout << "float[" << len << "](";
+        for(j = 0; j < pn.size() - 1; j ++) std::cout << pn[j] << ", ";
+        std::cout << pn[j ++];
+        if(pn.size() != len) {
+          std::cout << ", ";
+          for( ; j < len - 1; j ++) std::cout << num_t(int(0)) << ", ";
+          std::cout << num_t(int(0));
+        }
+        std::cout << ")," << endl;
+      }
+      std::cout << ");" << endl << flush;
+    }
+  } else if(m == '?' || m == '!') {
+    for(int i0 = 2; i0 < argc; i0 ++) {
+      std::vector<SimpleMatrix<num_t> > work;
+      if(! loadp2or3<num_t>(work, argv[i0])) continue;
+      num_t wavg(int(0));
+      num_t wavgn0(int(0));
+      num_t wavgn1(int(0));
+      for(int i = 0; i < work.size(); i ++) {
+        SimpleMatrix<complex(num_t) > lwork(dft<num_t>(work[i].rows()) *
+          work[i].template cast<complex(num_t) >() *
+            dft<num_t>(work[i].cols()).transpose() );
+        work[i].resize(work[i].rows(), work[i].cols() * 2);
+        for(int j = 0; j < work[i].rows(); j ++)
+          for(int k = 0; k < lwork.cols(); k ++) {
+            work[i](j, k) = abs(lwork(j, k));
+            work[i](j, k + lwork.cols()) = arg(lwork(j, k));
+          }
+        SimpleMatrix<num_t> llwork(work[i].subMatrix(0, 0, work[i].rows(), lwork.cols() ));
+        llwork.entity = normalizeS<num_t>(llwork.entity).first;
+        work[i].setMatrix(0, 0, llwork);
+        llwork = work[i].subMatrix(0, lwork.cols(), work[i].rows(), lwork.cols());
+        llwork.entity = normalizeS<num_t>(llwork.entity).first;
+        work[i].setMatrix(0, lwork.cols(), llwork);
+        for(int j = 0; j < work[i].rows(); j ++)
+          for(int k = 0; k < work[i].cols() / 2; k ++) {
+            const num_t weight(sqrt(num_t(abs(j - work[i].rows() / 2) *
+              abs(k - work[i].cols() / 4) ) /
+                num_t(work[i].rows() / 2 * work[i].cols() / 4) ));
+            wavg   += work[i](j, k) * weight;
+            wavgn0 += work[i](j, k) * work[i](j, k);
+            wavgn1 += weight * weight;
+          }
+        work[i].entity = offsetHalf<num_t>(work[i].entity);
+      }
+      std::cout << wavg / sqrt(wavgn0 * wavgn1) << std::endl;
+      if(! savep2or3<num_t>((string(argv[i0]) + string("-ex.ppm")).c_str(),
+        work) )  cerr << "failed to save." << endl;
+    }
   } else goto usage;
   cerr << "Done" << endl;
-#if defined(_SIMPLEALLOC_)
-  if(base) free(reinterpret_cast<void*>(base));
-#endif
+  lieonnStaticDestroy();
   return 0;
  usage:
+  lieonnStaticDestroy();
   cerr << "Usage:" << endl;
   cerr << "# copy color structure" << endl;
   cerr << argv[0] << " + <in0out.pgm> <in0in.ppm> ... > cache.txt" << endl;
@@ -470,16 +455,12 @@ int main(int argc, const char* argv[]) {
   cerr << argv[0] << " - <in0.ppm> ... < cache.txt" << endl;
   cerr << "# predict following image" << endl;
   cerr << argv[0] << " p <in0.ppm> ..." << endl;
-  cerr << "# predict with whole pixel context (each bit input)" << endl;
-  cerr << argv[0] << " w <in0.ppm> <in0.ppm-4.ppm> ... <addition-4.ppm>" << endl;
   cerr << "# predict down scanlines" << endl;
   cerr << argv[0] << " q <in0out.ppm> ..." << endl;
   cerr << "# show continuity" << endl;
   cerr << argv[0] << " [xyit] <in0.ppm> ..." << endl;
   cerr << "# some of the volume curvature like transform" << endl;
   cerr << argv[0] << " c <in0.ppm> ..." << endl;
-  cerr << "# test input series of graphics predictable or not into test.ppm" << endl;
-  cerr << argv[0] << " T <in0.ppm> ..." << endl;
   return - 1;
 }
 
