@@ -192,11 +192,12 @@ int main(int argc, const char* argv[]) {
       if(! loadp2or3<num_t>(work, argv[i])) continue;
       in.emplace_back(move(work));
     }
-    vector<SimpleMatrix<num_t> > p(predMat<num_t, 20>(move(in), 3,
-      string(" ") + string(argv[0]) + string(" ") + string(argv[1]),
-        m == 'T') );
-    if(! savep2or3<num_t>(m == 'T' ? "test.ppm" : "predg.ppm", m == 'T' ?
-      p : normalize<num_t>(p) ) ) cerr << "failed to save." << endl;
+    vector<SimpleMatrix<num_t> > p(m == 'T' ? predMatTangleLast<num_t, 20>(
+      move(in), 3, string(" ") + string(argv[0]) + string(" ") +
+        string(argv[1]) ) : predMat<num_t, 20>(move(in), 3, string(" ") +
+          string(argv[0]) + string(" ") + string(argv[1]) ) );
+    if(! savep2or3<num_t>("predg.ppm", m == 'T' ? p : normalize<num_t>(p) ) )
+      cerr << "failed to save." << endl;
   } else if(m == 'q') {
     for(int i0 = 2; i0 < argc; i0 ++) {
       vector<SimpleMatrix<num_t> > work;
@@ -442,6 +443,21 @@ int main(int argc, const char* argv[]) {
       if(! savep2or3<num_t>((string(argv[i0]) + string("-ex.ppm")).c_str(),
         work) )  cerr << "failed to save." << endl;
     }
+  } else if(m == 'L') {
+    vector<SimpleMatrix<num_t> > in, inc;
+    if(! loadp2or3<num_t>(in, argv[2])) return - 1;
+    if(! loadp2or3<num_t>(inc, argv[3])) return - 1;
+    assert(in.size() == 1 && inc.size() == 3);
+    vector<SimpleMatrix<num_t> > out(inc);
+    for(int i = 0; i < out[0].rows(); i ++)
+      for(int j = 0; j < out[0].cols(); j ++) {
+        num_t cavg(int(0));
+        for(int k = 0; k < inc.size(); k ++) cavg += inc[k](i, j);
+        cavg /= num_t(int(3));
+        for(int k = 0; k < inc.size(); k ++) inc[k](i, j) *= in[0](i, j) / cavg;
+      }
+    if(! savep2or3<num_t>((std::string(argv[2]) + std::string("-color.ppm")
+      ).c_str(), normalize<num_t>(out)) ) cerr << "failed to save." << endl;
   } else goto usage;
   cerr << "Done" << endl;
   lieonnStaticDestroy();
