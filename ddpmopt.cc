@@ -111,7 +111,7 @@ int main(int argc, const char* argv[]) {
         continue;
       }
       vector<SimpleMatrix<num_t> > out;
-      if(argv[1][1] == '\0') {
+      if(argv[1][1] == '\0' || !std::atoi(&argv[1][1])) {
         out.emplace_back(in[0]);
         out[0].O();
       } else out.resize(in.size());
@@ -131,22 +131,23 @@ int main(int argc, const char* argv[]) {
             ].dot(vdp.first));
           out[0](i, j) = revertProgramInvariant(make_pair(vdp.first[0],
             vdp.second));
-        } else if(argv[1][1] == '4') {
+        } else {
+          const int ratio(std::atoi(&argv[1][1]));
           int sq(sqrt(num_t(L.size() )));
           if((sq + 1) * (sq + 1) == L.size()) sq ++;
           for(int i = 0; i < in.size(); i ++) {
-            out[i].resize(in[i].rows() * 4, in[i].cols() * 4);
+            out[i].resize(in[i].rows() * ratio, in[i].cols() * ratio);
             out[i].O();
             SimpleMatrix<int> cnt(out[i].rows(), out[i].cols());
             cnt.O();
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
-            for(int i1 = 0; i1 < in[i].rows(); i1 += sq / 4)
-              for(int j1 = 0; j1 < in[i].cols(); j1 += sq / 4) {
-                i1 = min(i1, int(in[i].rows() - sq / 4));
-                j1 = min(j1, int(in[i].cols() - sq / 4));
-                SimpleMatrix<num_t> w(in[i].subMatrix(i1, j1, sq / 4, sq / 4));
+            for(int i1 = 0; i1 < in[i].rows(); i1 += sq / ratio)
+              for(int j1 = 0; j1 < in[i].cols(); j1 += sq / ratio) {
+                i1 = min(i1, int(in[i].rows() - sq / ratio));
+                j1 = min(j1, int(in[i].cols() - sq / ratio));
+                SimpleMatrix<num_t> w(in[i].subMatrix(i1, j1, sq / ratio, sq / ratio));
                 SimpleMatrix<num_t> Q(w.QR());
                 SimpleMatrix<num_t> R(Q * w);
                 num_t MM(int(0));
@@ -168,7 +169,7 @@ int main(int argc, const char* argv[]) {
                 pair<SimpleVector<num_t>, num_t> vdp(makeProgramInvariant<
                   num_t>(wv) );
                 for(int k1 = 0; k1 < L.size(); k1 ++) {
-                  if(cnt(i1 * 4 + k1 / sq, j1 * 4 + k1 % sq)) continue;
+                  if(cnt(i1 * ratio + k1 / sq, j1 * ratio + k1 % sq)) continue;
                   int idx(0);
                   for(int m = 2; m < L[k1].size(); m += 2)
                     if(abs(L[k1][idx].dot(vdp.first)) <=
@@ -176,20 +177,20 @@ int main(int argc, const char* argv[]) {
                   SimpleVector<num_t> wwv(vdp.first);
                   wwv[0] = - L[k1][idx + 1].dot(vdp.first) * sgn<num_t>(
                     L[k1][idx].dot(vdp.first));
-                  out[i](i1 * 4 + k1 / sq, j1 * 4 + k1 % sq) +=
+                  out[i](i1 * ratio + k1 / sq, j1 * ratio + k1 % sq) +=
                     revertProgramInvariant(make_pair(wwv, vdp.second))[0];
-                  cnt(i1 * 4 + k1 / sq, j1 * 4 + k1 % sq) ++;
+                  cnt(i1 * ratio + k1 / sq, j1 * ratio + k1 % sq) ++;
                 }
               }
           }
           out = normalize<num_t>(out);
-        } else goto usage;
+        }
       if(! savep2or3<num_t>((std::string(argv[i0]) + std::string(".pgm")).c_str(), out) )
         cerr << "failed to save." << endl;
     }
   } else if(m == '+') {
     vector<vector<SimpleVector<num_t> > > v;
-    if(argv[1][1] == '\0') {
+    if(argv[1][1] == '\0' || !std::atoi(&argv[1][1])) {
       vector<vector<SimpleMatrix<num_t> > > in;
       vector<SimpleMatrix<num_t> > out;
       assert(! ((argc - 2) & 1));
@@ -221,23 +222,28 @@ int main(int argc, const char* argv[]) {
             work[0] = out[i](j, k);
             v[0].emplace_back(move(work));
           }
-    } else if(argv[1][1] == '4') {
+    } else {
+      const int ratio(std::atoi(&argv[1][1]));
       v.resize(std::atoi(argv[2]) * std::atoi(argv[2]));
       for(int i = 3; i < argc; i ++) {
         vector<SimpleMatrix<num_t> > work;
         if(! loadp2or3<num_t>(work, argv[i])) continue;
+        // N.B. we bet shrinked image is near distance when pixel offset
+        //      changed. however this isn't suppose clustering counts.
         for(int j = 0; j < work.size(); j ++)
+         while(std::atoi(argv[2]) <= work[j].rows() &&
+           std::atoi(argv[2]) <= work[j].cols()) {
           for(int i1 = 0; i1 <= work[j].rows() - std::atoi(argv[2]); i1 ++)
             for(int j1 = 0; j1 <= work[j].cols() - std::atoi(argv[2]); j1 ++) {
               SimpleMatrix<num_t> ww(work[j].subMatrix(i1, j1,
                 std::atoi(argv[2]), std::atoi(argv[2]) ));
-              SimpleMatrix<num_t> sw(ww.rows() / 4, ww.cols() / 4);
+              SimpleMatrix<num_t> sw(ww.rows() / ratio, ww.cols() / ratio);
               sw.O();
               for(int k1 = 0; k1 < sw.rows(); k1 ++)
                 for(int m1 = 0; m1 < sw.cols(); m1 ++)
-                  for(int k2 = 0; k2 < 4; k2 ++) for(int m2 = 0; m2 < 4; m2 ++)
-                    sw(k1, m1) += ww(k1 * 4 + k2, m1 * 4 + m2);
-              sw /= num_t(4 * 4);
+                  for(int k2 = 0; k2 < ratio; k2 ++) for(int m2 = 0; m2 < ratio; m2 ++)
+                    sw(k1, m1) += ww(k1 * ratio + k2, m1 * ratio + m2);
+              sw /= num_t(ratio * ratio);
               SimpleMatrix<num_t> Q(sw.QR());
               SimpleMatrix<num_t> R(Q * sw);
               SimpleVector<num_t> wv(Q.rows() * Q.cols() +
@@ -261,8 +267,17 @@ int main(int argc, const char* argv[]) {
                   v[k1 * ww.cols() + m1].emplace_back(offsetHalf<num_t>(wv));
                 }
             }
+          SimpleMatrix<num_t> w2(work[j].rows() / 2, work[j].cols() / 2);
+          w2.O();
+          for(int i0 = 0; i0 < w2.rows(); i0 ++)
+            for(int j0 = 0; j0 < w2.cols(); j0 ++)
+              for(int i1 = 0; i1 < 2; i1 ++) for(int j1 = 0; j1 < 2; j1 ++)
+                w2(i0, j0) += work[j](min(i0 * 2 + i1, int(work[j].rows() - 1)),
+                  min(j0 + j1, int(work[j].cols() - 1) ));
+          work[j] = move(w2 /= num_t(int(4)));
+         }
       }
-    } else goto usage;
+    }
     for(int i0 = 0; i0 < v.size(); i0 ++) {
       vector<pair<vector<SimpleVector<num_t> >, vector<int> > > c(
         crush<num_t, true>(v[i0]));
@@ -562,6 +577,10 @@ int main(int argc, const char* argv[]) {
   cerr << argv[0] << " + <in0out.pgm> <in0in.ppm> ... > cache.txt" << endl;
   cerr << "# apply color structure" << endl;
   cerr << argv[0] << " - <in0.ppm> ... < cache.txt" << endl;
+  cerr << "# copy enlarge structure" << endl;
+  cerr << argv[0] << " +<ratio> <pixels> <in0.ppm> ... > cache.txt" << endl;
+  cerr << "# apply enlarge structure" << endl;
+  cerr << argv[0] << " -<ratio> <in0.ppm> ... < cache.txt" << endl;
   cerr << "# predict following image" << endl;
   cerr << argv[0] << " p <in0.ppm> ..." << endl;
   cerr << "# predict down scanlines" << endl;
