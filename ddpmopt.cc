@@ -137,60 +137,50 @@ int main(int argc, const char* argv[]) {
           for(int i = 0; i < in.size(); i ++) {
             out[i].resize(in[i].rows() * 4, in[i].cols() * 4);
             out[i].O();
-            SimpleMatrix<num_t> cnt(out[i]);
-            for(int ff = 0; ff < 2; ff ++) {
-              SimpleMatrix<num_t> iii(ff ? flip<num_t>(flop<num_t>(in[i])) :
-                in[i]);
-              SimpleMatrix<num_t> ooo(out[i]);
-              ooo.O();
-              SimpleMatrix<num_t> ccc(ooo);
-              for(int i1 = 0; i1 <= in[i].rows() - sq / 4; i1 ++)
-                for(int j1 = 0; j1 <= in[i].cols() - sq / 4; j1 ++) {
-                  SimpleMatrix<num_t> w(iii.subMatrix(i1, j1, sq / 4, sq / 4));
-                  SimpleMatrix<num_t> Q(w.QR());
-                  SimpleMatrix<num_t> R(Q * w);
-                  num_t MM(int(0));
-                  for(int k1 = 0; k1 < R.rows(); k1 ++)
-                    for(int m1 = 0; m1 < R.cols(); m1 ++)
-                      MM = max(MM, abs(R(k1, m1)));
-                  R /= MM;
-                  SimpleVector<num_t> wv(Q.rows() * Q.cols() +
-                    (R.rows() + 1) * (R.cols() + 2) / 2 + 1);
-                  wv.O();
-                  for(int k1 = 0; k1 < Q.rows(); k1 ++)
-                    wv.setVector(1 + k1 * Q.cols(), Q.row(k1));
-                  for(int k1 = 0, m1 = 0; k1 < R.rows(); k1 ++) {
-                    wv.setVector(1 + Q.rows() * Q.cols() + m1, R.row(k1
-                      ).subVector(k1, R.cols() - k1) );
-                    m1 += R.cols() - k1;
-                  }
-                  wv = offsetHalf<num_t>(wv);
-                  pair<SimpleVector<num_t>, num_t> vdp(makeProgramInvariant<
-                    num_t>(wv) );
-                  for(int k1 = 0; k1 < L.size(); k1 ++) {
-                    int idx(0);
-                    for(int m = 2; m < L[k1].size(); m += 2)
-                      if(abs(L[k1][idx].dot(vdp.first)) <=
-                        abs(L[k1][m].dot(vdp.first))) idx = m;
-                    SimpleVector<num_t> wwv(vdp.first);
-                    wwv[0] = - L[k1][idx + 1].dot(vdp.first) * sgn<num_t>(
-                      L[k1][idx].dot(vdp.first));
-                    ooo(i1 * 4 + k1 / sq, j1 * 4 + k1 % sq) +=
-                      revertProgramInvariant(make_pair(wwv, vdp.second))[0];
-                    ccc(i1 * 4 + k1 / sq, j1 * 4 + k1 % sq) += num_t(int(1));
-                  }
+            SimpleMatrix<int> cnt(out[i].rows(), out[i].cols());
+            cnt.O();
+#if defined(_OPENMP)
+#pragma omp parallel for schedule(static, 1)
+#endif
+            for(int i1 = 0; i1 < in[i].rows(); i1 += sq / 4)
+              for(int j1 = 0; j1 < in[i].cols(); j1 += sq / 4) {
+                i1 = min(i1, int(in[i].rows() - sq / 4));
+                j1 = min(j1, int(in[i].cols() - sq / 4));
+                SimpleMatrix<num_t> w(in[i].subMatrix(i1, j1, sq / 4, sq / 4));
+                SimpleMatrix<num_t> Q(w.QR());
+                SimpleMatrix<num_t> R(Q * w);
+                num_t MM(int(0));
+                for(int k1 = 0; k1 < R.rows(); k1 ++)
+                  for(int m1 = 0; m1 < R.cols(); m1 ++)
+                    MM = max(MM, abs(R(k1, m1)));
+                R /= MM;
+                SimpleVector<num_t> wv(Q.rows() * Q.cols() +
+                  (R.rows() + 1) * (R.cols() + 2) / 2 + 1);
+                wv.O();
+                for(int k1 = 0; k1 < Q.rows(); k1 ++)
+                  wv.setVector(1 + k1 * Q.cols(), Q.row(k1));
+                for(int k1 = 0, m1 = 0; k1 < R.rows(); k1 ++) {
+                  wv.setVector(1 + Q.rows() * Q.cols() + m1, R.row(k1
+                    ).subVector(k1, R.cols() - k1) );
+                  m1 += R.cols() - k1;
                 }
-              if(ff) {
-                out[i] += flip<num_t>(flop<num_t>(ooo));
-                cnt    += flip<num_t>(flop<num_t>(ccc));
-              } else {
-                out[i] += ooo;
-                cnt    += ccc;
+                wv = offsetHalf<num_t>(wv);
+                pair<SimpleVector<num_t>, num_t> vdp(makeProgramInvariant<
+                  num_t>(wv) );
+                for(int k1 = 0; k1 < L.size(); k1 ++) {
+                  if(cnt(i1 * 4 + k1 / sq, j1 * 4 + k1 % sq)) continue;
+                  int idx(0);
+                  for(int m = 2; m < L[k1].size(); m += 2)
+                    if(abs(L[k1][idx].dot(vdp.first)) <=
+                      abs(L[k1][m].dot(vdp.first))) idx = m;
+                  SimpleVector<num_t> wwv(vdp.first);
+                  wwv[0] = - L[k1][idx + 1].dot(vdp.first) * sgn<num_t>(
+                    L[k1][idx].dot(vdp.first));
+                  out[i](i1 * 4 + k1 / sq, j1 * 4 + k1 % sq) +=
+                    revertProgramInvariant(make_pair(wwv, vdp.second))[0];
+                  cnt(i1 * 4 + k1 / sq, j1 * 4 + k1 % sq) ++;
+                }
               }
-            }
-            for(int i1 = 0; i1 < out[i].rows(); i1 ++)
-              for(int j1 = 0; j1 < out[i].cols(); j1 ++)
-                out[i](i1, j1) /= cnt(i1, j1);
           }
           out = normalize<num_t>(out);
         } else goto usage;
@@ -236,18 +226,17 @@ int main(int argc, const char* argv[]) {
       for(int i = 3; i < argc; i ++) {
         vector<SimpleMatrix<num_t> > work;
         if(! loadp2or3<num_t>(work, argv[i])) continue;
-        for(int j = 0; j < work.size(); j ++) for(int k = 0; k < 2; k ++) {
-          SimpleMatrix<num_t> w(k ? flip<num_t>(flop<num_t>(work[j])) : work[j]);
-          for(int i1 = 0; i1 <= w.rows() - std::atoi(argv[2]); i1 ++)
-            for(int j1 = 0; j1 <= w.cols() - std::atoi(argv[2]); j1 ++) {
-              SimpleMatrix<num_t> ww(w.subMatrix(i1, j1, std::atoi(argv[2]),
-                std::atoi(argv[2]) ));
+        for(int j = 0; j < work.size(); j ++)
+          for(int i1 = 0; i1 <= work[j].rows() - std::atoi(argv[2]); i1 ++)
+            for(int j1 = 0; j1 <= work[j].cols() - std::atoi(argv[2]); j1 ++) {
+              SimpleMatrix<num_t> ww(work[j].subMatrix(i1, j1,
+                std::atoi(argv[2]), std::atoi(argv[2]) ));
               SimpleMatrix<num_t> sw(ww.rows() / 4, ww.cols() / 4);
               sw.O();
               for(int k1 = 0; k1 < sw.rows(); k1 ++)
                 for(int m1 = 0; m1 < sw.cols(); m1 ++)
                   for(int k2 = 0; k2 < 4; k2 ++) for(int m2 = 0; m2 < 4; m2 ++)
-                    sw(k1, m1) += ww(k1 * 2 + k2, m1 * 2 + m2);
+                    sw(k1, m1) += ww(k1 * 4 + k2, m1 * 4 + m2);
               sw /= num_t(4 * 4);
               SimpleMatrix<num_t> Q(sw.QR());
               SimpleMatrix<num_t> R(Q * sw);
@@ -272,7 +261,6 @@ int main(int argc, const char* argv[]) {
                   v[k1 * ww.cols() + m1].emplace_back(offsetHalf<num_t>(wv));
                 }
             }
-        }
       }
     } else goto usage;
     for(int i0 = 0; i0 < v.size(); i0 ++) {
