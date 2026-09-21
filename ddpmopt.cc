@@ -121,16 +121,11 @@ int main(int argc, const char* argv[]) {
           for(int m = 0; m < in.size(); m ++)
             work[m + 1] = in[m](i, j);
           work[0] = num_t(int(1)) / num_t(int(2));
-          SimpleVector<num_t> work2(makeProgramInvariant<num_t>(work).first);
           int idx(0);
           for(int m = 2; m < L[0].size(); m += 2)
-            if(abs(L[0][idx].dot(work2)) <= abs(L[0][m].dot(work2))) idx = m;
-          pair<SimpleVector<num_t>, num_t> vdp(makeProgramInvariant<num_t>(
-            work, num_t(int(1)) ));
-          vdp.first[0] = - L[0][idx + 1].dot(vdp.first) * sgn<num_t>(L[0][idx
-            ].dot(vdp.first));
-          out[0](i, j) = revertProgramInvariant(make_pair(vdp.first[0],
-            vdp.second));
+            if(abs(L[0][idx].dot(work)) <= abs(L[0][m].dot(work))) idx = m;
+          out[0](i, j) = - L[0][idx + 1].dot(work) * sgn<num_t>(L[0][idx
+            ].dot(work));
         } else {
           const int ratio(std::atoi(&argv[1][1]));
           int sq(sqrt(num_t(L.size() )));
@@ -143,18 +138,17 @@ int main(int argc, const char* argv[]) {
 #if defined(_OPENMP)
 #pragma omp parallel for schedule(static, 1)
 #endif
-            for(int i1 = 0; i1 < in[i].rows(); i1 += sq / ratio)
-              for(int j1 = 0; j1 < in[i].cols(); j1 += sq / ratio) {
-                i1 = min(i1, int(in[i].rows() - sq / ratio));
-                j1 = min(j1, int(in[i].cols() - sq / ratio));
-                SimpleMatrix<num_t> w(in[i].subMatrix(i1, j1, sq / ratio, sq / ratio));
+            for(int i1 = 0; i1 <= in[i].rows() - sq / ratio; i1 ++)
+              for(int j1 = 0; j1 <= in[i].cols() - sq / ratio; j1 ++) {
+                SimpleMatrix<num_t> w(in[i].subMatrix(i1, j1,
+                  sq / ratio, sq / ratio));
                 SimpleMatrix<num_t> Q(w.QR());
                 SimpleMatrix<num_t> R(Q * w);
                 num_t MM(int(0));
                 for(int k1 = 0; k1 < R.rows(); k1 ++)
                   for(int m1 = 0; m1 < R.cols(); m1 ++)
                     MM = max(MM, abs(R(k1, m1)));
-                R /= MM;
+                if(SimpleMatrix<num_t>().epsilon() < abs(MM)) R /= MM;
                 SimpleVector<num_t> wv(Q.rows() * Q.cols() +
                   (R.rows() + 1) * (R.cols() + 2) / 2 + 1);
                 wv.O();
@@ -166,22 +160,22 @@ int main(int argc, const char* argv[]) {
                   m1 += R.cols() - k1;
                 }
                 wv = offsetHalf<num_t>(wv);
-                pair<SimpleVector<num_t>, num_t> vdp(makeProgramInvariant<
-                  num_t>(wv) );
                 for(int k1 = 0; k1 < L.size(); k1 ++) {
-                  if(cnt(i1 * ratio + k1 / sq, j1 * ratio + k1 % sq)) continue;
+                  if(out[i].rows() <= i1 * ratio + k1 / sq ||
+                    out[i].cols() <= j1 * ratio + k1 % sq) continue;
                   int idx(0);
                   for(int m = 2; m < L[k1].size(); m += 2)
-                    if(abs(L[k1][idx].dot(vdp.first)) <=
-                      abs(L[k1][m].dot(vdp.first))) idx = m;
-                  SimpleVector<num_t> wwv(vdp.first);
-                  wwv[0] = - L[k1][idx + 1].dot(vdp.first) * sgn<num_t>(
-                    L[k1][idx].dot(vdp.first));
+                    if(abs(L[k1][idx].dot(wv)) <=
+                      abs(L[k1][m].dot(wv))) idx = m;
                   out[i](i1 * ratio + k1 / sq, j1 * ratio + k1 % sq) +=
-                    revertProgramInvariant(make_pair(wwv, vdp.second))[0];
+                    - L[k1][idx + 1].dot(wv) *
+                      sgn<num_t>(L[k1][idx].dot(wv)) * MM;
                   cnt(i1 * ratio + k1 / sq, j1 * ratio + k1 % sq) ++;
                 }
               }
+            for(int i1 = 0; i1 < cnt.rows(); i1 ++)
+              for(int j1 = 0; j1 < cnt.cols(); j1 ++)
+                out[i](i1, j1) /= num_t(cnt(i1, j1));
           }
           out = normalize<num_t>(out);
         }
@@ -252,7 +246,7 @@ int main(int argc, const char* argv[]) {
               for(int k1 = 0; k1 < R.rows(); k1 ++)
                 for(int m1 = 0; m1 < R.cols(); m1 ++)
                   MM = max(MM, abs(R(k1, m1)));
-              R /= MM;
+              if(SimpleMatrix<num_t>().epsilon() < abs(MM)) R /= MM;
               wv.O();
               for(int k1 = 0; k1 < Q.rows(); k1 ++)
                 wv.setVector(1 + k1 * Q.cols(), Q.row(k1));
@@ -280,13 +274,12 @@ int main(int argc, const char* argv[]) {
     }
     for(int i0 = 0; i0 < v.size(); i0 ++) {
       vector<pair<vector<SimpleVector<num_t> >, vector<int> > > c(
-        crush<num_t, true>(v[i0]));
+        crush<num_t>(v[i0]) );
       cout << "*" << endl;
       for(int i = 0; i < c.size(); i ++) {
         if(! c[i].first.size()) continue;
-        SimpleVector<num_t> vv(makeProgramInvariant<num_t>(c[i].first[0]).first);
-        for(int j = 1; j < c[i].first.size(); j ++)
-          vv += makeProgramInvariant<num_t>(c[i].first[j]).first;
+        SimpleVector<num_t> vv(c[i].first[0]);
+        for(int j = 1; j < c[i].first.size(); j ++) vv += c[i].first[j];
         vv /= num_t(c[i].first.size());
         if(vv.dot(vv) != num_t(int(0))) cout << vv;
       }
