@@ -43,16 +43,11 @@
 typedef myfloat num_t;
 lieonn_t lieonn;
 
-using std::cout;
 using std::cerr;
 using std::endl;
 using std::atoi;
 using std::string;
 using std::vector;
-using std::sort;
-using std::binary_search;
-using std::make_pair;
-using std::istringstream;
 
 #include <stdlib.h>
 
@@ -87,7 +82,7 @@ int main(int argc, const char* argv[]) {
   cerr << "Coherent: sqrt(2): " << sqrt<num_t>(Complex<num_t>(num_t(2))) << endl;
   if(m == '-') {
     vector<vector<SimpleVector<num_t> > > L;
-    std::string s;
+    string s;
     for(int len = 0; 0 <= len && std::getline(std::cin, s, '\n'); ) {
       if(s[0] == '*') {
         L.emplace_back(vector<SimpleVector<num_t> >());
@@ -95,7 +90,7 @@ int main(int argc, const char* argv[]) {
         continue;
       } else if(! s.size()) continue;
       SimpleVector<num_t> l;
-      std::stringstream ins(s);
+      stringstream ins(s);
       ins >> l;
       L[len - 1].emplace_back(l / sqrt(l.dot(l)));
       l /= - l[0];
@@ -107,11 +102,11 @@ int main(int argc, const char* argv[]) {
       vector<SimpleMatrix<num_t> > in;
       if(! loadp2or3<num_t>(in, argv[i0])) return - 1;
       if(argv[1][1] == '\0' && in.size() != 3) {
-        std::cerr << argv[i0] << " doesn't include 3 colors" << std::endl;
+        cerr << argv[i0] << " doesn't include 3 colors" << endl;
         continue;
       }
       vector<SimpleMatrix<num_t> > out;
-      if(argv[1][1] == '\0' || !std::atoi(&argv[1][1])) {
+      if(argv[1][1] == '\0' || !atoi(&argv[1][1])) {
         out.emplace_back(in[0]);
         out[0].O();
       } else out.resize(in.size());
@@ -127,9 +122,10 @@ int main(int argc, const char* argv[]) {
           out[0](i, j) = - L[0][idx + 1].dot(work) * sgn<num_t>(L[0][idx
             ].dot(work));
         } else {
-          const int ratio(std::atoi(&argv[1][1]));
+          const int ratio(atoi(&argv[1][1]));
           int sq(sqrt(num_t(L.size() )));
           if((sq + 1) * (sq + 1) == L.size()) sq ++;
+          assert(0 < ratio);
           for(int i = 0; i < in.size(); i ++) {
             out[i].resize(in[i].rows() * ratio, in[i].cols() * ratio);
             out[i].O();
@@ -175,16 +171,16 @@ int main(int argc, const char* argv[]) {
               }
             for(int i1 = 0; i1 < cnt.rows(); i1 ++)
               for(int j1 = 0; j1 < cnt.cols(); j1 ++)
-                out[i](i1, j1) /= num_t(cnt(i1, j1));
+                if(cnt(i1, j1)) out[i](i1, j1) /= num_t(cnt(i1, j1));
           }
           out = normalize<num_t>(out);
         }
-      if(! savep2or3<num_t>((std::string(argv[i0]) + std::string(".pgm")).c_str(), out) )
+      if(! savep2or3<num_t>((string(argv[i0]) + string(".pgm")).c_str(), out) )
         cerr << "failed to save." << endl;
     }
   } else if(m == '+') {
     vector<vector<SimpleVector<num_t> > > v;
-    if(argv[1][1] == '\0' || !std::atoi(&argv[1][1])) {
+    if(argv[1][1] == '\0' || !atoi(&argv[1][1])) {
       vector<vector<SimpleMatrix<num_t> > > in;
       vector<SimpleMatrix<num_t> > out;
       assert(! ((argc - 2) & 1));
@@ -217,20 +213,23 @@ int main(int argc, const char* argv[]) {
             v[0].emplace_back(move(work));
           }
     } else {
-      const int ratio(std::atoi(&argv[1][1]));
-      v.resize(std::atoi(argv[2]) * std::atoi(argv[2]));
+      const int ratio(atoi(&argv[1][1]));
+      assert(0 < ratio && 0 < atoi(argv[2]) );
+      v.resize(atoi(argv[2]) * atoi(argv[2]));
       for(int i = 3; i < argc; i ++) {
         vector<SimpleMatrix<num_t> > work;
         if(! loadp2or3<num_t>(work, argv[i])) continue;
         // N.B. we bet shrinked image is near distance when pixel offset
-        //      changed. however this isn't suppose clustering counts.
+        //      changed to increase vasty memory usage.
         for(int j = 0; j < work.size(); j ++)
-         while(std::atoi(argv[2]) <= work[j].rows() &&
-           std::atoi(argv[2]) <= work[j].cols()) {
-          for(int i1 = 0; i1 <= work[j].rows() - std::atoi(argv[2]); i1 ++)
-            for(int j1 = 0; j1 <= work[j].cols() - std::atoi(argv[2]); j1 ++) {
+         while(abs(atoi(argv[2])) <= work[j].rows() &&
+           abs(atoi(argv[2])) <= work[j].cols()) {
+          for(int i1 = 0; i1 <= work[j].rows() - abs(atoi(argv[2]));
+              i1 += ratio)
+            for(int j1 = 0; j1 <= work[j].cols() - abs(atoi(argv[2]));
+                j1 += ratio) {
               SimpleMatrix<num_t> ww(work[j].subMatrix(i1, j1,
-                std::atoi(argv[2]), std::atoi(argv[2]) ));
+                abs(atoi(argv[2])), abs(atoi(argv[2])) ));
               SimpleMatrix<num_t> sw(ww.rows() / ratio, ww.cols() / ratio);
               sw.O();
               for(int k1 = 0; k1 < sw.rows(); k1 ++)
@@ -275,15 +274,15 @@ int main(int argc, const char* argv[]) {
     for(int i0 = 0; i0 < v.size(); i0 ++) {
       vector<pair<vector<SimpleVector<num_t> >, vector<int> > > c(
         crush<num_t>(v[i0]) );
-      cout << "*" << endl;
+      std::cout << "*" << endl;
       for(int i = 0; i < c.size(); i ++) {
         if(! c[i].first.size()) continue;
         SimpleVector<num_t> vv(c[i].first[0]);
         for(int j = 1; j < c[i].first.size(); j ++) vv += c[i].first[j];
         vv /= num_t(c[i].first.size());
-        if(vv.dot(vv) != num_t(int(0))) cout << vv;
+        if(vv.dot(vv) != num_t(int(0))) std::cout << vv;
       }
-      cout << endl;
+      std::cout << endl;
     }
   } else if(m == 'p' || m == 'T') {
     vector<vector<SimpleMatrix<num_t> > > in;
@@ -400,9 +399,9 @@ int main(int argc, const char* argv[]) {
     }
     if(argv[1][0] == 'x' || argv[1][0] == 'y' || argv[1][0] == 'i')
       for(int i = 2; i < argc; i ++)
-        cout << sqrt(score[i]) << ", " << argv[i] << endl;
+        std::cout << sqrt(score[i]) << ", " << argv[i] << endl;
     else
-      cout << sqrt(score[0]) << ", whole image index" << endl;
+      std::cout << sqrt(score[0]) << ", whole image index" << endl;
     return 0;
   } else if(m == 'c') {
     vector<vector<SimpleMatrix<num_t> > > in;
@@ -428,10 +427,10 @@ int main(int argc, const char* argv[]) {
       work.resize(1);
       work = normalize<num_t>(work);
       if(! met) {
-        std::cout << "const int cg_width = " << work[0].cols() << ";" << std::endl;
-        std::cout << "const int cg_height = " << work[0].rows() << ";" << std::endl;
-        std::cout << "const int cg_n = " << argc - 2 << ";" << std::endl;
-        std::cout << "const char cg[" << argc - 2 << "][" << work[0].rows() * work[0].cols() << "] = {" << std::endl;
+        std::cout << "const int cg_width = " << work[0].cols() << ";" << endl;
+        std::cout << "const int cg_height = " << work[0].rows() << ";" << endl;
+        std::cout << "const int cg_n = " << argc - 2 << ";" << endl;
+        std::cout << "const char cg[" << argc - 2 << "][" << work[0].rows() * work[0].cols() << "] = {" << endl;
         std::cout << "{";
       } else std::cout << endl << "{";
       for(int i = 0; i < work[0].rows(); i ++)
@@ -449,7 +448,7 @@ int main(int argc, const char* argv[]) {
     // cf. "hemi-sync" on some surface search.
     // XXX: political or patent matter on publish?
     const int blocks(65536);
-    int shift(std::atoi(argv[2]));
+    int shift(atoi(argv[2]));
     SimpleVector<int16_t> v(blocks);
     SimpleVector<complex(num_t)> f;
     while(! std::cin.eof() && ! std::cin.bad()) {
@@ -485,7 +484,7 @@ int main(int argc, const char* argv[]) {
       std::cout.write(reinterpret_cast<char*>(&v[0]), sizeof(int16_t) * blocks);
     }
   } else if(m == 'C') {
-    const int len(std::atoi(argv[2]));
+    const int len(atoi(argv[2]));
     if(!len) {
       std::cout << "const float sqe = " << sqrt(SimpleMatrix<num_t>().epsilon() ) << ";" << endl;
       std::cout << "const float denom = " << (num_t(int(1)) + sqrt(sqrt(SimpleMatrix<num_t>().epsilon() )) ) << ";" << endl;
@@ -508,7 +507,7 @@ int main(int argc, const char* argv[]) {
     }
   } else if(m == '?' || m == '!') {
     for(int i0 = 2; i0 < argc; i0 ++) {
-      std::vector<SimpleMatrix<num_t> > work;
+      vector<SimpleMatrix<num_t> > work;
       if(! loadp2or3<num_t>(work, argv[i0])) continue;
       num_t wavg(int(0));
       num_t wavgn0(int(0));
@@ -540,7 +539,7 @@ int main(int argc, const char* argv[]) {
           }
         work[i].entity = offsetHalf<num_t>(work[i].entity);
       }
-      std::cout << wavg / sqrt(wavgn0 * wavgn1) << std::endl;
+      std::cout << wavg / sqrt(wavgn0 * wavgn1) << endl;
       if(! savep2or3<num_t>((string(argv[i0]) + string("-ex.ppm")).c_str(),
         work) )  cerr << "failed to save." << endl;
     }
@@ -557,7 +556,7 @@ int main(int argc, const char* argv[]) {
         cavg /= num_t(int(3));
         for(int k = 0; k < inc.size(); k ++) inc[k](i, j) *= in[0](i, j) / cavg;
       }
-    if(! savep2or3<num_t>((std::string(argv[2]) + std::string("-color.ppm")
+    if(! savep2or3<num_t>((string(argv[2]) + string("-color.ppm")
       ).c_str(), normalize<num_t>(out)) ) cerr << "failed to save." << endl;
   } else goto usage;
   cerr << "Done" << endl;
