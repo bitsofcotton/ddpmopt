@@ -92,11 +92,9 @@ int main(int argc, const char* argv[]) {
       SimpleVector<num_t> l;
       stringstream ins(s);
       ins >> l;
-      L[len - 1].emplace_back(l / sqrt(l.dot(l)));
-      l /= - l[0];
-      l[0] = num_t(int(0));
-      L[len - 1].emplace_back(l);
+      L[len - 1].emplace_back(move(l));
     }
+    L = enlargeApply0<num_t>(move(L));
     for(int i0 = 2; i0 < argc; i0 ++) {
       cerr << i0 - 2 << " / " << argc - 2 << endl;
       vector<SimpleMatrix<num_t> > in;
@@ -105,199 +103,91 @@ int main(int argc, const char* argv[]) {
         cerr << argv[i0] << " doesn't include 3 colors" << endl;
         continue;
       }
-      vector<SimpleMatrix<num_t> > out;
-      if(argv[1][1] == '\0' || !atoi(&argv[1][1])) {
-        out.emplace_back(in[0]);
-        out[0].O();
-      } else out.resize(in.size());
-      for(int i = 0; i < in[0].rows(); i ++)
-        for(int j = 0; j < in[0].cols(); j ++) if(argv[1][1] == '\0') {
-          SimpleVector<num_t> work(4);
-          for(int m = 0; m < in.size(); m ++)
-            work[m + 1] = in[m](i, j);
-          work[0] = num_t(int(1)) / num_t(int(2));
-          int idx(0);
-          for(int m = 2; m < L[0].size(); m += 2)
-            if(abs(L[0][idx].dot(work)) <= abs(L[0][m].dot(work))) idx = m;
-          out[0](i, j) = - L[0][idx + 1].dot(work) * sgn<num_t>(L[0][idx
-            ].dot(work));
-        } else {
-          const int ratio(atoi(&argv[1][1]));
-          int sq(sqrt(num_t(L.size() )));
-          if((sq + 1) * (sq + 1) == L.size()) sq ++;
-          assert(0 < ratio);
-          for(int i = 0; i < in.size(); i ++) {
-            out[i].resize(in[i].rows() * ratio, in[i].cols() * ratio);
-            out[i].O();
-            SimpleMatrix<int> cnt(out[i].rows(), out[i].cols());
-            cnt.O();
-#if defined(_OPENMP)
-#pragma omp parallel for schedule(static, 1)
-#endif
-            for(int i1 = 0; i1 <= in[i].rows() - sq / ratio; i1 ++)
-              for(int j1 = 0; j1 <= in[i].cols() - sq / ratio; j1 ++) {
-                SimpleMatrix<num_t> w(in[i].subMatrix(i1, j1,
-                  sq / ratio, sq / ratio));
-                SimpleMatrix<num_t> Q(w.QR());
-                SimpleMatrix<num_t> R(Q * w);
-                num_t MM(int(0));
-                for(int k1 = 0; k1 < R.rows(); k1 ++)
-                  for(int m1 = 0; m1 < R.cols(); m1 ++)
-                    MM = max(MM, abs(R(k1, m1)));
-                if(SimpleMatrix<num_t>().epsilon() < abs(MM)) R /= MM;
-                SimpleVector<num_t> wv(Q.rows() * Q.cols() +
-                  (R.rows() + 1) * (R.cols() + 2) / 2 + 1);
-                wv.O();
-                for(int k1 = 0; k1 < Q.rows(); k1 ++)
-                  wv.setVector(1 + k1 * Q.cols(), Q.row(k1));
-                for(int k1 = 0, m1 = 0; k1 < R.rows(); k1 ++) {
-                  wv.setVector(1 + Q.rows() * Q.cols() + m1, R.row(k1
-                    ).subVector(k1, R.cols() - k1) );
-                  m1 += R.cols() - k1;
-                }
-                wv = offsetHalf<num_t>(wv);
-                for(int k1 = 0; k1 < L.size(); k1 ++) {
-                  if(out[i].rows() <= i1 * ratio + k1 / sq ||
-                    out[i].cols() <= j1 * ratio + k1 % sq) continue;
-                  int idx(0);
-                  for(int m = 2; m < L[k1].size(); m += 2)
-                    if(abs(L[k1][idx].dot(wv)) <=
-                      abs(L[k1][m].dot(wv))) idx = m;
-                  out[i](i1 * ratio + k1 / sq, j1 * ratio + k1 % sq) +=
-                    - L[k1][idx + 1].dot(wv) *
-                      sgn<num_t>(L[k1][idx].dot(wv)) * MM;
-                  cnt(i1 * ratio + k1 / sq, j1 * ratio + k1 % sq) ++;
-                }
-              }
-            for(int i1 = 0; i1 < cnt.rows(); i1 ++)
-              for(int j1 = 0; j1 < cnt.cols(); j1 ++)
-                if(cnt(i1, j1)) out[i](i1, j1) /= num_t(cnt(i1, j1));
-          }
-          out = normalize<num_t>(out);
-        }
+      int sq(sqrt(num_t(L.size() / in.size())));
+      if((sq + 1) * (sq + 1) == L.size()) sq ++;
+      vector<SimpleMatrix<num_t> > out(enlargeApply(atoi(&argv[1][1]),
+        atoi(&argv[1][1]), sq / atoi(&argv[1][1]), sq / atoi(&argv[1][1]),
+          in, L));
       if(! savep2or3<num_t>((string(argv[i0]) + string(".pgm")).c_str(), out) )
         cerr << "failed to save." << endl;
     }
   } else if(m == '+') {
-    vector<vector<SimpleVector<num_t> > > v;
-    if(argv[1][1] == '\0' || !atoi(&argv[1][1])) {
-      vector<vector<SimpleMatrix<num_t> > > in;
-      vector<SimpleMatrix<num_t> > out;
-      assert(! ((argc - 2) & 1));
-      in.resize((argc - 2) / 2);
-      out.resize((argc - 2) / 2);
-      int cnt(0);
-      for(int i = 2; i < argc; i ++) {
-        vector<SimpleMatrix<num_t> > work;
-        if(! loadp2or3<num_t>(work, argv[i])) continue;
-        if(! (i & 1)) {
-          assert(work.size() == 1);
-          out[i / 2 - 1] = move(work[0]);
-          cnt += out[i / 2 - 1].rows() * out[i / 2 - 1].cols();
-        } else {
-          in[i / 2 - 1] = move(work);
-          assert(in[i / 2 - 1].size() == 3);
-          assert(out[i / 2 - 1].rows() == in[i / 2 - 1][0].rows() &&
-                 out[i / 2 - 1].cols() == in[i / 2 - 1][0].cols());
-        }
-      }
-      assert(in.size() == out.size());
-      v.resize(1);
-      v[0].reserve(cnt);
-      for(int i = 0; i < in.size(); i ++)
-        for(int j = 0; j < out[i].rows(); j ++)
-          for(int k = 0; k < out[i].cols(); k ++) {
-            SimpleVector<num_t> work(4);
-            for(int m = 0; m < 3; m ++) work[m + 1] = in[i][m](j, k);
-            work[0] = out[i](j, k);
-            v[0].emplace_back(move(work));
-          }
-    } else {
-      const int ratio(atoi(&argv[1][1]));
-      assert(0 < ratio && 0 < atoi(argv[2]) );
-      v.resize(atoi(argv[2]) * atoi(argv[2]));
-      for(int i = 3; i < argc; i ++) {
-        vector<SimpleMatrix<num_t> > work;
-        if(! loadp2or3<num_t>(work, argv[i])) continue;
-        // N.B. we bet shrinked image is near distance when pixel offset
-        //      changed to increase vasty memory usage.
-        for(int j = 0; j < work.size(); j ++)
-         while(abs(atoi(argv[2])) <= work[j].rows() &&
-           abs(atoi(argv[2])) <= work[j].cols()) {
-          for(int i1 = 0; i1 <= work[j].rows() - abs(atoi(argv[2]));
-              i1 += ratio)
-            for(int j1 = 0; j1 <= work[j].cols() - abs(atoi(argv[2]));
-                j1 += ratio) {
-              SimpleMatrix<num_t> ww(work[j].subMatrix(i1, j1,
-                abs(atoi(argv[2])), abs(atoi(argv[2])) ));
-              SimpleMatrix<num_t> sw(ww.rows() / ratio, ww.cols() / ratio);
-              sw.O();
-              for(int k1 = 0; k1 < sw.rows(); k1 ++)
-                for(int m1 = 0; m1 < sw.cols(); m1 ++)
-                  for(int k2 = 0; k2 < ratio; k2 ++) for(int m2 = 0; m2 < ratio; m2 ++)
-                    sw(k1, m1) += ww(k1 * ratio + k2, m1 * ratio + m2);
-              sw /= num_t(ratio * ratio);
-              SimpleMatrix<num_t> Q(sw.QR());
-              SimpleMatrix<num_t> R(Q * sw);
-              SimpleVector<num_t> wv(Q.rows() * Q.cols() +
-                (R.rows() + 1) * (R.cols() + 2) / 2 + 1);
-              num_t MM(int(0));
-              for(int k1 = 0; k1 < R.rows(); k1 ++)
-                for(int m1 = 0; m1 < R.cols(); m1 ++)
-                  MM = max(MM, abs(R(k1, m1)));
-              if(SimpleMatrix<num_t>().epsilon() < abs(MM)) R /= MM;
-              wv.O();
-              for(int k1 = 0; k1 < Q.rows(); k1 ++)
-                wv.setVector(1 + k1 * Q.cols(), Q.row(k1));
-              for(int k1 = 0, m1 = 0; k1 < R.rows(); k1 ++) {
-                wv.setVector(1 + Q.rows() * Q.cols() + m1, R.row(k1).subVector(
-                  k1, R.cols() - k1) );
-                m1 += R.cols() - k1;
-              }
-              for(int k1 = 0; k1 < ww.rows(); k1 ++)
-                for(int m1 = 0; m1 < ww.cols(); m1 ++) {
-                  wv[0] = ww(k1, m1);
-                  v[k1 * ww.cols() + m1].emplace_back(offsetHalf<num_t>(wv));
-                }
-            }
-          SimpleMatrix<num_t> w2(work[j].rows() / 2, work[j].cols() / 2);
-          w2.O();
-          for(int i0 = 0; i0 < w2.rows(); i0 ++)
-            for(int j0 = 0; j0 < w2.cols(); j0 ++)
-              for(int i1 = 0; i1 < 2; i1 ++) for(int j1 = 0; j1 < 2; j1 ++)
-                w2(i0, j0) += work[j](min(i0 * 2 + i1, int(work[j].rows() - 1)),
-                  min(j0 + j1, int(work[j].cols() - 1) ));
-          work[j] = move(w2 /= num_t(int(4)));
-         }
-      }
-    }
-    for(int i0 = 0; i0 < v.size(); i0 ++) {
-      vector<pair<vector<SimpleVector<num_t> >, vector<int> > > c(
-        crush<num_t>(v[i0]) );
-      std::cout << "*" << endl;
-      for(int i = 0; i < c.size(); i ++) {
-        if(! c[i].first.size()) continue;
-        SimpleVector<num_t> vv(c[i].first[0]);
-        for(int j = 1; j < c[i].first.size(); j ++) vv += c[i].first[j];
-        vv /= num_t(c[i].first.size());
-        if(vv.dot(vv) != num_t(int(0))) std::cout << vv;
-      }
-      std::cout << endl;
-    }
-  } else if(m == 'p' || m == 'T') {
     vector<vector<SimpleMatrix<num_t> > > in;
-    in.reserve(argc - 1);
-    for(int i = 2; i < argc; i ++) {
+    in.reserve(argc);
+    for(int i = 3; i < argc; i ++) {
       vector<SimpleMatrix<num_t> > work;
       if(! loadp2or3<num_t>(work, argv[i])) continue;
       in.emplace_back(move(work));
     }
-    vector<SimpleMatrix<num_t> > p(m == 'T' ? predMatTangleLast<num_t, 20>(
-      move(in), 3, string(" ") + string(argv[0]) + string(" ") +
-        string(argv[1]) ) : predMat<num_t, 20>(move(in), 3, string(" ") +
-          string(argv[0]) + string(" ") + string(argv[1]) ) );
-    if(! savep2or3<num_t>("predg.ppm", m == 'T' ? p : normalize<num_t>(p) ) )
-      cerr << "failed to save." << endl;
+    vector<vector<SimpleVector<num_t> > > v(enlargePrep(atoi(&argv[1][1]),
+      atoi(&argv[1][1]), atoi(argv[2]), atoi(argv[2]), move(in)) );
+    for(int i0 = 0; i0 < v.size(); i0 ++) {
+      std::cout << "*" << endl;
+      for(int i = 0; i < v[i0].size(); i ++) std::cout << v[i0][i];
+      std::cout << endl;
+    }
+  } else if(m == 'p' || m == 'T') {
+    vector<vector<SimpleMatrix<num_t> > > in0;
+    in0.reserve(argc - 1);
+    for(int i = 2; i < argc; i ++) {
+      vector<SimpleMatrix<num_t> > work;
+      if(! loadp2or3<num_t>(work, argv[i])) continue;
+      in0.emplace_back(move(work));
+    }
+    if(m == 'T') {
+      if(! savep2or3<num_t>("testg.ppm", predMatTangleLast<num_t, 20>(
+        move(in0), 3, string(" ") + string(argv[0]) + string(" ") +
+          string(argv[1]) ) ) )
+        cerr << "failed to save." << endl;
+    } else {
+      vector<vector<SimpleMatrix<num_t> > > in;
+      in.reserve(in0.size());
+      int len(absceil(log(num_t(int(in0.size() / (2 + in0[0].size()) / 8))) /
+        log(num_t(int(2))) ));
+      int py(1);
+      int px(1);
+      int ppy(1);
+      int ppx(1);
+      for(int i = 1; i < max(in0[0][0].rows(), in0[0][0].cols()) || !py || !px;
+          i ++) {
+        ppy = py; ppx = px;
+        if(in0[0][0].rows() < in0[0][0].cols()) {
+          py = i * in0[0][0].rows() / in0[0][0].cols();
+          px = i;
+        } else {
+          py = i;
+          px = i * in0[0][0].cols() / in0[0][0].rows();
+        }
+        if(! (px * py <= len)) break;
+      }
+      py = ppy; px = ppx;
+      cerr << "(" << py << ", " << px << ")" << endl;
+      for(int i = 0; i < in0.size(); i ++) {
+        vector<SimpleMatrix<num_t> > work;
+        work.reserve(in0[i].size());
+        for(int j = 0; j < in0[i].size(); j ++) work.emplace_back( (
+          dftcache<num_t>(- py) * dftcache<num_t>(in0[i][j].rows()).subMatrix(0,
+            0, py, in0[i][j].rows()) * in0[i][j].template cast<complex(num_t)>(
+            ) * (dftcache<num_t>(- px) * dftcache<num_t>(in0[i][j].cols()
+              ).subMatrix(0, 0, px, in0[i][j].cols() )).transpose()
+                ).template real<num_t>());
+        in.emplace_back(move(work));
+      }
+      in0 = normalize<num_t>(in0);
+      in  = normalize<num_t>(in);
+      const int ry(in0[0][0].rows() / py);
+      const int rx(in0[0][0].cols() / px);
+      const int row(in0[0][0].rows());
+      const int col(in0[0][0].cols());
+      const int rowp(in[0][0].rows());
+      const int colp(in[0][0].cols());
+      if(! savep2or3<num_t>("predg.ppm", cutoffPred<num_t>(normalize<num_t>(
+        enlargeApply<num_t>(ry, rx, rowp, colp, normalize<num_t>(
+          predMat<num_t, 20>(move(in), 3, string(" ") + string(argv[0]) +
+            string(" ") + string(argv[1]) ) ), enlargeApply0<num_t>(
+              enlargePrep<num_t>(ry, rx, row, col, move(in0) )) ) )) ))
+        cerr << "failed to save." << endl;
+    }
   } else if(m == 'q') {
     for(int i0 = 2; i0 < argc; i0 ++) {
       vector<SimpleMatrix<num_t> > work;
@@ -565,10 +455,6 @@ int main(int argc, const char* argv[]) {
  usage:
   lieonnStaticDestroy();
   cerr << "Usage:" << endl;
-  cerr << "# copy color structure" << endl;
-  cerr << argv[0] << " + <in0out.pgm> <in0in.ppm> ... > cache.txt" << endl;
-  cerr << "# apply color structure" << endl;
-  cerr << argv[0] << " - <in0.ppm> ... < cache.txt" << endl;
   cerr << "# copy enlarge structure" << endl;
   cerr << argv[0] << " +<ratio> <pixels> <in0.ppm> ... > cache.txt" << endl;
   cerr << "# apply enlarge structure" << endl;
