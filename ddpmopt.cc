@@ -134,58 +134,58 @@ int main(int argc, const char* argv[]) {
       if(! loadp2or3<num_t>(work, argv[i])) continue;
       in0.emplace_back(move(work));
     }
+    vector<vector<SimpleMatrix<num_t> > > in;
+    in.reserve(in0.size());
+    int len(absceil(log(num_t(int(in0.size() ))) / log(num_t(int(2))) ));
+    int py(1);
+    int px(1);
+    int ppy(1);
+    int ppx(1);
+    for(int i = 1; i < max(in0[0][0].rows(), in0[0][0].cols()) || !py || !px;
+        i ++) {
+      ppy = py; ppx = px;
+      if(in0[0][0].rows() < in0[0][0].cols()) {
+        py = i * in0[0][0].rows() / in0[0][0].cols();
+        px = i;
+      } else {
+        py = i;
+        px = i * in0[0][0].cols() / in0[0][0].rows();
+      }
+      if(! (px * py <= len)) break;
+    }
+    py = ppy; px = ppx;
+    cerr << "internal(" << py << ", " << px << ")" << endl;
+    for(int i = 0; i < in0.size(); i ++) {
+      vector<SimpleMatrix<num_t> > work;
+      work.reserve(in0[i].size());
+      for(int j = 0; j < in0[i].size(); j ++) work.emplace_back( (
+        dftcache<num_t>(- py) * dftcache<num_t>(in0[i][j].rows()).subMatrix(0,
+          0, py, in0[i][j].rows()) * in0[i][j].template cast<complex(num_t)>(
+          ) * (dftcache<num_t>(- px) * dftcache<num_t>(in0[i][j].cols()
+            ).subMatrix(0, 0, px, in0[i][j].cols() )).transpose()
+              ).template real<num_t>());
+      in.emplace_back(move(work));
+    }
+    in0 = normalize<num_t>(in0);
+    in  = normalize<num_t>(in);
     if(m == 'T') {
       if(! savep2or3<num_t>("testg.ppm", predMatTangleLast<num_t, 20>(
-        move(in0), 3, string(" ") + string(argv[0]) + string(" ") +
+        move(in), 3, string(" ") + string(argv[0]) + string(" ") +
           string(argv[1]) ) ) )
         cerr << "failed to save." << endl;
     } else {
-      vector<vector<SimpleMatrix<num_t> > > in;
-      in.reserve(in0.size());
-      int len(absceil(log(num_t(int(in0.size() / (2 + in0[0].size()) / 8))) /
-        log(num_t(int(2))) ));
-      int py(1);
-      int px(1);
-      int ppy(1);
-      int ppx(1);
-      for(int i = 1; i < max(in0[0][0].rows(), in0[0][0].cols()) || !py || !px;
-          i ++) {
-        ppy = py; ppx = px;
-        if(in0[0][0].rows() < in0[0][0].cols()) {
-          py = i * in0[0][0].rows() / in0[0][0].cols();
-          px = i;
-        } else {
-          py = i;
-          px = i * in0[0][0].cols() / in0[0][0].rows();
-        }
-        if(! (px * py <= len)) break;
-      }
-      py = ppy; px = ppx;
-      cerr << "(" << py << ", " << px << ")" << endl;
-      for(int i = 0; i < in0.size(); i ++) {
-        vector<SimpleMatrix<num_t> > work;
-        work.reserve(in0[i].size());
-        for(int j = 0; j < in0[i].size(); j ++) work.emplace_back( (
-          dftcache<num_t>(- py) * dftcache<num_t>(in0[i][j].rows()).subMatrix(0,
-            0, py, in0[i][j].rows()) * in0[i][j].template cast<complex(num_t)>(
-            ) * (dftcache<num_t>(- px) * dftcache<num_t>(in0[i][j].cols()
-              ).subMatrix(0, 0, px, in0[i][j].cols() )).transpose()
-                ).template real<num_t>());
-        in.emplace_back(move(work));
-      }
-      in0 = normalize<num_t>(in0);
-      in  = normalize<num_t>(in);
       const int ry(in0[0][0].rows() / py);
       const int rx(in0[0][0].cols() / px);
       const int row(in0[0][0].rows());
       const int col(in0[0][0].cols());
       const int rowp(in[0][0].rows());
       const int colp(in[0][0].cols());
-      if(! savep2or3<num_t>("predg.ppm", cutoffPred<num_t>(normalize<num_t>(
+      if(! savep2or3<num_t>("predg.ppm", normalize<num_t>(stretchPred<num_t>(
         enlargeApply<num_t>(ry, rx, rowp, colp, normalize<num_t>(
           predMat<num_t, 20>(move(in), 3, string(" ") + string(argv[0]) +
             string(" ") + string(argv[1]) ) ), enlargeApply0<num_t>(
-              enlargePrep<num_t>(ry, rx, row, col, move(in0) )) ) )) ))
+              enlargePrep<num_t>(ry, rx, row, col, move(in0) )) ),
+                in[0].size() == 1 ? 15 : 5)) ))
         cerr << "failed to save." << endl;
     }
   } else if(m == 'q') {
