@@ -18,10 +18,6 @@
 #include <omp.h>
 #endif
 
-#if defined(_P_VULKAN_)
-#include <vulkan/vulkan.h>
-#endif
-
 #if defined(_MIMALLOC_)
 #define MIMALLOC_OVERRIDE_H
 #define MIMALLOC_NEW_DELETE_H
@@ -80,54 +76,7 @@ int main(int argc, const char* argv[]) {
   lieonnStaticInit();
   if(argc <= 1) goto usage;
   cerr << "Coherent: sqrt(2): " << sqrt<num_t>(Complex<num_t>(num_t(2))) << endl;
-  if(m == '-') {
-    vector<vector<SimpleVector<num_t> > > L;
-    string s;
-    for(int len = 0; 0 <= len && std::getline(std::cin, s, '\n'); ) {
-      if(s[0] == '*') {
-        L.emplace_back(vector<SimpleVector<num_t> >());
-        len ++;
-        continue;
-      } else if(! s.size()) continue;
-      SimpleVector<num_t> l;
-      stringstream ins(s);
-      ins >> l;
-      L[len - 1].emplace_back(move(l));
-    }
-    L = enlargeApply0<num_t>(move(L));
-    for(int i0 = 2; i0 < argc; i0 ++) {
-      cerr << i0 - 2 << " / " << argc - 2 << endl;
-      vector<SimpleMatrix<num_t> > in;
-      if(! loadp2or3<num_t>(in, argv[i0])) return - 1;
-      if(argv[1][1] == '\0' && in.size() != 3) {
-        cerr << argv[i0] << " doesn't include 3 colors" << endl;
-        continue;
-      }
-      int sq(sqrt(num_t(L.size() / in.size())));
-      if((sq + 1) * (sq + 1) == L.size()) sq ++;
-      vector<SimpleMatrix<num_t> > out(enlargeApply(atoi(&argv[1][1]),
-        atoi(&argv[1][1]), sq / atoi(&argv[1][1]), sq / atoi(&argv[1][1]),
-          sq, in, L));
-      if(! savep2or3<num_t>((string(argv[i0]) + string(".pgm")).c_str(), out) )
-        cerr << "failed to save." << endl;
-    }
-  } else if(m == '+') {
-    vector<vector<SimpleMatrix<num_t> > > in;
-    in.reserve(argc);
-    for(int i = 3; i < argc; i ++) {
-      vector<SimpleMatrix<num_t> > work;
-      if(! loadp2or3<num_t>(work, argv[i])) continue;
-      in.emplace_back(move(work));
-    }
-    vector<vector<SimpleVector<num_t> > > v(enlargePrep<num_t, 40>(
-      atoi(&argv[1][1]), atoi(&argv[1][1]), atoi(argv[2]), atoi(argv[2]),
-        move(in)) );
-    for(int i0 = 0; i0 < v.size(); i0 ++) {
-      std::cout << "*" << endl;
-      for(int i = 0; i < v[i0].size(); i ++) std::cout << v[i0][i];
-      std::cout << endl;
-    }
-  } else if(m == 'p' || m == 'T') {
+  if(m == 'p') {
     vector<vector<SimpleMatrix<num_t> > > in0;
     in0.reserve(argc - 1);
     for(int i = 2; i < argc; i ++) {
@@ -135,8 +84,6 @@ int main(int argc, const char* argv[]) {
       if(! loadp2or3<num_t>(work, argv[i])) continue;
       in0.emplace_back(move(work));
     }
-    vector<vector<SimpleMatrix<num_t> > > in;
-    in.reserve(in0.size());
     int len(absceil(log(num_t(int(in0.size() ))) / log(num_t(int(2))) ));
     int py(1);
     int px(1);
@@ -156,6 +103,8 @@ int main(int argc, const char* argv[]) {
     }
     py = ppy; px = ppx;
     cerr << "internal(" << py << ", " << px << ")" << endl;
+    vector<vector<SimpleMatrix<num_t> > > in;
+    in.reserve(in0.size());
     for(int i = 0; i < in0.size(); i ++) {
       vector<SimpleMatrix<num_t> > work;
       work.reserve(in0[i].size());
@@ -169,50 +118,74 @@ int main(int argc, const char* argv[]) {
     }
     in0 = normalize<num_t>(in0);
     in  = normalize<num_t>(in);
-    if(m == 'T') {
-      if(! savep2or3<num_t>("testg.ppm", predMatTangleLast<num_t, 20>(
-        move(in), 3, string(" ") + string(argv[0]) + string(" ") +
-          string(argv[1]) ) ) )
-        cerr << "failed to save." << endl;
-    } else {
-      const int ry(in0[0][0].rows() / py);
-      const int rx(in0[0][0].cols() / px);
-      const int row(in0[0][0].rows());
-      const int col(in0[0][0].cols());
-      const int rowp(in[0][0].rows());
-      const int colp(in[0][0].cols());
-      if(! savep2or3<num_t>("predg.ppm", normalize<num_t>(stretchPred<num_t>(
-        enlargeApply<num_t>(ry, rx, rowp, colp, col, normalize<num_t>(
-          predMat<num_t, 20>(move(in), 3, string(" ") + string(argv[0]) +
-            string(" ") + string(argv[1]) ) ), enlargeApply0<num_t>(
-              enlargePrep<num_t, 40>(ry, rx, row, col, move(in0) )) ),
-                in[0].size() == 1 ? 15 : 5)) ))
-        cerr << "failed to save." << endl;
-    }
+    vector<vector<SimpleMatrix<num_t> > > win(const_cast<vector<vector<
+      SimpleMatrix<num_t> > >&>(in));
+    if(! savep2or3<num_t>("testg.ppm", predMatTangleLast<num_t, 20, true>(
+      move(win), 3, string(" ") + string(argv[0]) + string(" ") +
+        string(argv[1]) ) ) )
+      cerr << "failed to save test." << endl;
+    win.resize(0);
+    const int ry(in0[0][0].rows() / py);
+    const int rx(in0[0][0].cols() / px);
+    const int row(in0[0][0].rows());
+    const int col(in0[0][0].cols());
+    const int rowp(in[0][0].rows());
+    const int colp(in[0][0].cols());
+    if(! savep2or3<num_t>("predg.ppm", normalize<num_t>(stretchPred<num_t>(
+      enlargeApply<num_t>(ry, rx, rowp, colp, col, normalize<num_t>(
+        predMat<num_t, 20>(move(in), 3, string(" ") + string(argv[0]) +
+          string(" ") + string(argv[1]) ) ), enlargeApply0<num_t>(
+            enlargePrep<num_t, 40>(ry, rx, row, col, move(in0) )) ),
+              in[0].size() == 1 ? 15 : 5)) ))
+      cerr << "failed to save whole pred." << endl;
   } else if(m == 'q') {
     for(int i0 = 2; i0 < argc; i0 ++) {
       vector<SimpleMatrix<num_t> > work;
       if(! loadp2or3<num_t>(work, argv[i0])) continue;
       work = normalize<num_t>(work);
+      int seed(loop22<num_t>() + infBase() + 1);
+      int seed1;
+      for(seed1 = 1;
+        seed1 <= int(log(num_t(seed + seed1)) / log(num_t(2))); seed1 ++) ;
+      seed += seed1;
+      const int u_step(work[0].rows() / seed / 2);
+      assert(0 < u_step);
+      const int px(absceil(log(num_t(u_step)) / log(int(2)) ));
+      assert(0 < px);
       SimpleVector<vector<SimpleVector<num_t> > > pwork(work[0].rows());
       for(int i = 0; i < pwork.size(); i ++) {
         pwork[i].reserve(work.size());
         for(int j = 0; j < work.size(); j ++)
-          pwork[i].emplace_back(work[j].row(i));
+          pwork[i].emplace_back(((dft<num_t>(- px) * dft<num_t>(work[j].cols()
+            ).subMatrix(0, 0, px, work[j].cols()) ) * work[j].row(i
+              ).template cast<complex(num_t)>() ).template real<num_t>());
       }
-      const int step(work[0].rows() / (loop22<num_t>() + infBase() + 1) );
-      vector<SimpleMatrix<num_t> > wwork;
-      wwork.resize(work.size(),
-        SimpleMatrix<num_t>(work[0].rows() + step, work[0].cols()).O());
-      for(int j = 0; j < wwork.size(); j ++)
-        wwork[j].setMatrix(0, 0, work[j]);
-      for(int j = 0; j < wwork[0].rows() - work[0].rows(); j ++) {
+      vector<SimpleMatrix<num_t> > pred;
+      pred.resize(work.size(),
+        SimpleMatrix<num_t>(u_step, pwork[0][0].size()).O());
+      for(int j = 0; j < pred[0].rows(); j ++) {
         SimpleVector<SimpleVector<num_t> > q(predVec<num_t, 20, true>(
           skipX<vector<SimpleVector<num_t> > >(pwork, j + 1), 2, to_string(j) +
-            string("/") + to_string(wwork[0].rows() - work[0].rows()) )  );
-        for(int i = 0; i < wwork.size(); i ++)
-          wwork[i].row(work[0].rows() + j) = move(q[i]);
+            string("/") + to_string(pred[0].rows()) ) );
+        for(int i = 0; i < pred.size(); i ++) pred[i].row(j) = move(q[i]);
       }
+      const int ry(1);
+      const int rx(work[0].cols() / px);
+      const int row(work[0].rows());
+      const int col(work[0].cols());
+      const int rowp(pred[0].rows());
+      const int colp(pred[0].cols());
+      vector<SimpleMatrix<num_t> > wwork(work.size());
+      for(int j = 0; j < wwork.size(); j ++)
+        wwork[j].resize(work[0].rows() + pred[0].rows(), work[0].cols()).O(
+          ).setMatrix(0, 0, work[j]);
+      vector<vector<SimpleMatrix<num_t> > > ww;
+      ww.resize(1, move(work));
+      pred = enlargeApply<num_t>(ry, rx, rowp, colp, col, normalize<num_t>(
+        pred), enlargeApply0<num_t>(enlargePrep<num_t, 40>(ry, rx, rowp, col,
+          move(ww) )) );
+      for(int j = 0; j < wwork.size(); j ++)
+        wwork[j].setMatrix(row + j, 0, pred[j]);
       if(! savep2or3<num_t>(argv[i0], move(wwork)) )
         cerr << "failed to save." << endl;
     }
@@ -310,18 +283,10 @@ int main(int argc, const char* argv[]) {
  usage:
   lieonnStaticDestroy();
   cerr << "Usage:" << endl;
-  cerr << "# copy enlarge structure" << endl;
-  cerr << argv[0] << " +<ratio> <pixels> <in0.ppm> ... > cache.txt" << endl;
-  cerr << "# apply enlarge structure" << endl;
-  cerr << argv[0] << " -<ratio> <in0.ppm> ... < cache.txt" << endl;
   cerr << "# predict following image" << endl;
   cerr << argv[0] << " p <in0.ppm> ..." << endl;
   cerr << "# predict down scanlines" << endl;
   cerr << argv[0] << " q <in0out.ppm> ..." << endl;
-  cerr << "# show continuity" << endl;
-  cerr << argv[0] << " [xyit] <in0.ppm> ..." << endl;
-  cerr << "# some of the volume curvature like transform" << endl;
-  cerr << argv[0] << " c <in0.ppm> ..." << endl;
   return - 1;
 }
 
