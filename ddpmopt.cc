@@ -107,7 +107,7 @@ int main(int argc, const char* argv[]) {
       if((sq + 1) * (sq + 1) == L.size()) sq ++;
       vector<SimpleMatrix<num_t> > out(enlargeApply(atoi(&argv[1][1]),
         atoi(&argv[1][1]), sq / atoi(&argv[1][1]), sq / atoi(&argv[1][1]),
-          in, L));
+          sq, in, L));
       if(! savep2or3<num_t>((string(argv[i0]) + string(".pgm")).c_str(), out) )
         cerr << "failed to save." << endl;
     }
@@ -119,8 +119,9 @@ int main(int argc, const char* argv[]) {
       if(! loadp2or3<num_t>(work, argv[i])) continue;
       in.emplace_back(move(work));
     }
-    vector<vector<SimpleVector<num_t> > > v(enlargePrep(atoi(&argv[1][1]),
-      atoi(&argv[1][1]), atoi(argv[2]), atoi(argv[2]), move(in)) );
+    vector<vector<SimpleVector<num_t> > > v(enlargePrep<num_t, 40>(
+      atoi(&argv[1][1]), atoi(&argv[1][1]), atoi(argv[2]), atoi(argv[2]),
+        move(in)) );
     for(int i0 = 0; i0 < v.size(); i0 ++) {
       std::cout << "*" << endl;
       for(int i = 0; i < v[i0].size(); i ++) std::cout << v[i0][i];
@@ -181,10 +182,10 @@ int main(int argc, const char* argv[]) {
       const int rowp(in[0][0].rows());
       const int colp(in[0][0].cols());
       if(! savep2or3<num_t>("predg.ppm", normalize<num_t>(stretchPred<num_t>(
-        enlargeApply<num_t>(ry, rx, rowp, colp, normalize<num_t>(
+        enlargeApply<num_t>(ry, rx, rowp, colp, col, normalize<num_t>(
           predMat<num_t, 20>(move(in), 3, string(" ") + string(argv[0]) +
             string(" ") + string(argv[1]) ) ), enlargeApply0<num_t>(
-              enlargePrep<num_t>(ry, rx, row, col, move(in0) )) ),
+              enlargePrep<num_t, 40>(ry, rx, row, col, move(in0) )) ),
                 in[0].size() == 1 ? 15 : 5)) ))
         cerr << "failed to save." << endl;
     }
@@ -215,99 +216,6 @@ int main(int argc, const char* argv[]) {
       if(! savep2or3<num_t>(argv[i0], move(wwork)) )
         cerr << "failed to save." << endl;
     }
-  } else if(m == 'x' || m == 'y' || m == 'i' || m == 't') {
-    vector<num_t> score;
-    score.resize(argc + 1, num_t(int(0)));
-    switch(argv[1][0]) {
-    case 'x':
-    case 'i':
-      for(int i0 = 2; i0 < argc; i0 ++) {
-        vector<SimpleMatrix<num_t> > work;
-        if(! loadp2or3<num_t>(work, argv[i0])) continue;
-        for(int i = 0; i < work.size(); i ++)
-          for(int ii = 0; ii < work[i].rows(); ii ++) {
-            idFeeder<num_t> w(3);
-            for(int jj = 0; jj < work[i].cols(); jj ++) {
-              if(w.full) {
-                const num_t pp(p0maxNext<num_t>(w.res));
-                score[i0] += (pp - work[i](ii, jj)) * (pp - work[i](ii, jj));
-              } 
-              w.next(work[i](ii, jj));
-            }
-          }
-        if(argv[1][0] == 'x')
-          score[i0] /= num_t(work[0].rows() * work[0].cols() * work.size());
-      }
-      if(argv[1][0] == 'x') break;
-    case 'y':
-      for(int i0 = 2; i0 < argc; i0 ++) {
-        vector<SimpleMatrix<num_t> > work;
-        if(! loadp2or3<num_t>(work, argv[i0])) continue;
-        for(int i = 0; i < work.size(); i ++)
-          for(int jj = 0; jj < work[i].cols(); jj ++) {
-            idFeeder<num_t> w(3);
-            for(int ii = 0; ii < work[i].rows(); ii ++) {
-              if(w.full) {
-                const num_t pp(p0maxNext<num_t>(w.res));
-                score[i0] += (pp - work[i](ii, jj)) * (pp - work[i](ii, jj));
-              } 
-              w.next(work[i](ii, jj));
-            }
-          }
-        score[i0] /= num_t(work[0].rows() * work[0].cols() * work.size());
-      }
-      break;
-    case 't':
-      {
-        vector<vector<SimpleMatrix<num_t> > > b;
-        b.resize(argc + 1);
-        for(int i = 2; i < argc; i ++) {
-          vector<SimpleMatrix<num_t> > work;
-          if(! loadp2or3<num_t>(work, argv[i])) continue;
-          b[i] = move(work);
-          assert(b[i].size() == b[2].size() &&
-            b[i][0].rows() == b[2][0].rows() &&
-            b[i][0].cols() == b[2][0].cols());
-        }
-        int cnt(0);
-        for(int i = 0; i < b[2][0].rows(); i ++)
-          for(int j = 0; j < b[2][0].cols(); j ++)
-            for(int k = 0; k < b[2].size(); k ++) {
-              idFeeder<num_t> w(3);
-              for(int ii = 2; ii < b.size(); ii ++, cnt ++) {
-                if(! b[ii].size()) continue;
-                if(w.full) {
-                  const num_t pp(p0maxNext<num_t>(w.res));
-                  score[0] += (pp - b[ii][k](i, j)) * (pp - b[ii][k](i, j));
-                }
-                w.next(b[ii][k](i, j));
-              }
-            }
-        score[0] /= num_t(cnt);
-      }
-      break;
-    }
-    if(argv[1][0] == 'x' || argv[1][0] == 'y' || argv[1][0] == 'i')
-      for(int i = 2; i < argc; i ++)
-        std::cout << sqrt(score[i]) << ", " << argv[i] << endl;
-    else
-      std::cout << sqrt(score[0]) << ", whole image index" << endl;
-    return 0;
-  } else if(m == 'c') {
-    vector<vector<SimpleMatrix<num_t> > > in;
-    in.reserve(argc - 2 + 1);
-    for(int i0 = 2; i0 < argc; i0 ++) {
-      vector<SimpleMatrix<num_t> > work;
-      if(! loadp2or3<num_t>(work, argv[i0])) continue;
-      in.emplace_back(move(work));
-      assert(in[0].size() == in[in.size() - 1].size() &&
-             in[0][0].rows() == in[in.size() - 1][0].rows() &&
-             in[0][0].cols() == in[in.size() - 1][0].cols() );
-    }
-    in = normalize<num_t>(zcollect<num_t>(in));
-    for(int i = 0; i < in.size(); i ++)
-      if(! savep2or3<num_t>((string(argv[i + 2]) + string("-c3.ppm")).c_str(), in[i]) )
-        cerr << "failed to save." << endl;
   } else if(m == 'h') {
     bool met(false);
     for(int i0 = 2; i0 < argc; i0 ++) {
@@ -395,59 +303,6 @@ int main(int argc, const char* argv[]) {
       }
       std::cout << ");" << endl << flush;
     }
-  } else if(m == '?' || m == '!') {
-    for(int i0 = 2; i0 < argc; i0 ++) {
-      vector<SimpleMatrix<num_t> > work;
-      if(! loadp2or3<num_t>(work, argv[i0])) continue;
-      num_t wavg(int(0));
-      num_t wavgn0(int(0));
-      num_t wavgn1(int(0));
-      for(int i = 0; i < work.size(); i ++) {
-        SimpleMatrix<complex(num_t) > lwork(dft<num_t>(work[i].rows()) *
-          work[i].template cast<complex(num_t) >() *
-            dft<num_t>(work[i].cols()).transpose() );
-        work[i].resize(work[i].rows(), work[i].cols() * 2);
-        for(int j = 0; j < work[i].rows(); j ++)
-          for(int k = 0; k < lwork.cols(); k ++) {
-            work[i](j, k) = abs(lwork(j, k));
-            work[i](j, k + lwork.cols()) = arg(lwork(j, k));
-          }
-        SimpleMatrix<num_t> llwork(work[i].subMatrix(0, 0, work[i].rows(), lwork.cols() ));
-        llwork.entity = normalizeS<num_t>(llwork.entity).first;
-        work[i].setMatrix(0, 0, llwork);
-        llwork = work[i].subMatrix(0, lwork.cols(), work[i].rows(), lwork.cols());
-        llwork.entity = normalizeS<num_t>(llwork.entity).first;
-        work[i].setMatrix(0, lwork.cols(), llwork);
-        for(int j = 0; j < work[i].rows(); j ++)
-          for(int k = 0; k < work[i].cols() / 2; k ++) {
-            const num_t weight(sqrt(num_t(abs(j - work[i].rows() / 2) *
-              abs(k - work[i].cols() / 4) ) /
-                num_t(work[i].rows() / 2 * work[i].cols() / 4) ));
-            wavg   += work[i](j, k) * weight;
-            wavgn0 += work[i](j, k) * work[i](j, k);
-            wavgn1 += weight * weight;
-          }
-        work[i].entity = offsetHalf<num_t>(work[i].entity);
-      }
-      std::cout << wavg / sqrt(wavgn0 * wavgn1) << endl;
-      if(! savep2or3<num_t>((string(argv[i0]) + string("-ex.ppm")).c_str(),
-        work) )  cerr << "failed to save." << endl;
-    }
-  } else if(m == 'L') {
-    vector<SimpleMatrix<num_t> > in, inc;
-    if(! loadp2or3<num_t>(in, argv[2])) return - 1;
-    if(! loadp2or3<num_t>(inc, argv[3])) return - 1;
-    assert(in.size() == 1 && inc.size() == 3);
-    vector<SimpleMatrix<num_t> > out(inc);
-    for(int i = 0; i < out[0].rows(); i ++)
-      for(int j = 0; j < out[0].cols(); j ++) {
-        num_t cavg(int(0));
-        for(int k = 0; k < inc.size(); k ++) cavg += inc[k](i, j);
-        cavg /= num_t(int(3));
-        for(int k = 0; k < inc.size(); k ++) inc[k](i, j) *= in[0](i, j) / cavg;
-      }
-    if(! savep2or3<num_t>((string(argv[2]) + string("-color.ppm")
-      ).c_str(), normalize<num_t>(out)) ) cerr << "failed to save." << endl;
   } else goto usage;
   cerr << "Done" << endl;
   lieonnStaticDestroy();
