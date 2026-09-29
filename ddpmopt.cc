@@ -135,8 +135,7 @@ int main(int argc, const char* argv[]) {
       enlargeApply<num_t>(ry, rx, rowp, colp, col, normalize<num_t>(
         predMat<num_t, 20>(move(in), 3, string(" ") + string(argv[0]) +
           string(" ") + string(argv[1]) ) ), enlargeApply0<num_t>(
-            enlargePrep<num_t, 40>(ry, rx, row, col, move(in0) )) ),
-              in[0].size() == 1 ? 15 : 5)) ))
+            enlargePrep<num_t, 40>(ry, rx, row, col, move(in0) )) ) )) ))
       cerr << "failed to save whole pred." << endl;
   } else if(m == 'q') {
     for(int i0 = 2; i0 < argc; i0 ++) {
