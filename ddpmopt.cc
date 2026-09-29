@@ -184,7 +184,7 @@ int main(int argc, const char* argv[]) {
         pred), enlargeApply0<num_t>(enlargePrep<num_t, 40>(ry, rx, rowp, col,
           move(ww) )) );
       for(int j = 0; j < wwork.size(); j ++)
-        wwork[j].setMatrix(row + j, 0, pred[j]);
+        wwork[j].setMatrix(row, 0, pred[j]);
       if(! savep2or3<num_t>(argv[i0], move(wwork)) )
         cerr << "failed to save." << endl;
     }
