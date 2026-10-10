@@ -14,22 +14,10 @@ Using this with mimalloc or so can increase memory usage with multi thread on so
 Implanted comments into lieonn.hh .
 
 # Usage:
-    # copy color structure
-    ./ddpmopt(mp)? + <in0out.pgm> <in0in.ppm> ... > cache.txt
-    # apply color structure
-    ./ddpmopt(mp)? - <in0.ppm> ... < cache.txt
     # predict following image
     ./ddpmopt(mp)? p <in0.ppm> ...
     # predict down scanlines
     ./ddpmopt(mp)? q <in0out.ppm> ...
-    # reverse with flavoured
-    ./ddpmopt(mp)? w <in0.ppm> <in0.ppm-4.ppm> ... <addition-4.ppm>
-    # show continuity
-    ./ddpmopt(mp)? [xyit] <in0.ppm> ...
-    # some of the volume curvature like transform
-    ./ddpmopt(mp)? c <in0.ppm> ...
-    # test input series of graphics predictable or not into test.ppm
-    ./ddpmopt(mp)? T <in0.ppm> ...
 
 # Leave
 2023/03/01

@@ -7,9 +7,9 @@ CXX=	clang++
 #CXX=	nvc++
 
 # compiler flags.
-CXXFLAGS+=	-Ofast -mtune=native -gfull
+#CXXFLAGS+=	-Ofast -mtune=native -gfull
 #CXXFLAGS+=	-O3 -mtune=native -g3
-#CXXFLAGS+=	-O2 -g3
+CXXFLAGS+=	-O2 -g3
 #CXXFLAGS+=	-O1 -gfull
 # This doesn't work, we need operator >>, operator << with ongoing stdlibc++.
 #CXXFLAGS+=	-I/usr/local/include -mlong-double-128
@@ -19,7 +19,7 @@ CXXFLAGS+=	-Ofast -mtune=native -gfull
 #CXXFLAGS+=	-mno-sse2 -mno-sse -mno-3dnow -mno-mmx -msoft-float -fno-omit-frame-pointer
 # XXX: this worse decreases multi thread performance.
 #CXXFLAGS+=	-pg
-#CXXFLAGS+=	--analyze
+#CXXFLAGS+=	-Wall -Wundef -Werror -Wshadow -ferror-limit=10000 #--analyze
 #CXXFLAGS+=      -D_LIBCPP_HARDENING_MODE_DEBUG
 MPFLAGS=	-I/usr/local/include -L/usr/local/lib -lomp -fopenmp
 #MPFLAGS=	-I/usr/local/include -L/usr/local/lib -lgomp -fopenmp
@@ -32,24 +32,16 @@ LDFLAGS+=	-lc++ -L/usr/local/lib
 
 # lieonn.hh compile options
 CXXFLAGS+=	-D_ARCFOUR_
-# N.B. this specify after to sum up results
-#CXXFLAGS+=	-D_P_NOWALK_
-# N.B. orthogonalize meaning
-#CXXFLAGS+=	-D_P_SEPARATE_
-# N.B. on disk datastream with cache = _P_ONDISK_ elements.
-#CXXFLAGS+=	-D_P_ONDISK_=4194304
-# N.B. GPGPU offloading
-#CXXFLAGS+=	-I/usr/local/include -D_P_VULKAN_
-#LDFLAGS+=	-L/usr/local/lib -lvulkan
+# N.B. raw prediction on pred...
+#CXXFLAGS+=	-D_P_RAW_
 # N.B. _SIMPLEALLOC_=align needs env VM_LIEONN=(mem usage MB).
 # XXX: pred function needs huge memory with this because resize(0) doesn't
 #      release the memory.
 #CXXFLAGS+=	-D_SIMPLEALLOC_=64
 # cf. src_alloc.c.diff
-CXXFLAGS+=	-I/usr/local/include -D_MIMALLOC_
-LDFLAGS+=	-L/usr/local/lib -lmimalloc
+MPFLAGS+=	-I/usr/local/include -D_MIMALLOC_
+MPFLAGS+=	-L/usr/local/lib -lmimalloc
 # N.B. _FLOAT_BITS_=bits for internal integer only calculation.
-# N.B. this is NOT compatible with _P_VULKAN_.
 #CXXFLAGS+=	-D_FLOAT_BITS_=32
 #CXXFLAGS+=	-D_FLOAT_BITS_=64
 #CXXFLAGS+=	-D_FLOAT_BITS_=128

@@ -83,6 +83,8 @@ int main(int argc, const char* argv[]) {
       vector<SimpleMatrix<num_t> > work;
       if(! loadp2or3<num_t>(work, argv[i])) continue;
       in0.emplace_back(move(work));
+      assert(in0[in0.size() - 1][0].rows() == in0[0][0].rows() &&
+        in0[in0.size() - 1][0].cols() == in0[0][0].cols());
     }
     int len(absceil(log(num_t(int(in0.size() ))) / log(num_t(int(2))) ));
     int py(1);
@@ -103,17 +105,33 @@ int main(int argc, const char* argv[]) {
     }
     py = ppy; px = ppx;
     cerr << "internal(" << py << ", " << px << ")" << endl;
+    assert(py && px);
     vector<vector<SimpleMatrix<num_t> > > in;
     in.reserve(in0.size());
+    pair<SimpleMatrix<num_t>, SimpleMatrix<num_t> > shrink;
+    shrink.first.resize( py, in0[0][0].rows()).O();
+    shrink.second.resize(px, in0[0][0].cols()).O();
+    for(int i = 0; i < shrink.first.rows(); i ++)
+      shrink.first.row(i) = taylor<num_t>(shrink.first.cols(),
+        (num_t(i) + num_t(int(1)) / num_t(int(2))) /
+          num_t(max(int(1), shrink.first.rows() - 1)) * num_t(max(int(1),
+            shrink.first.cols() - 1)),
+        (num_t(i) - num_t(int(1)) / num_t(int(2))) /
+          num_t(max(int(1), shrink.first.rows() - 1)) * num_t(max(int(1),
+            shrink.first.cols() - 1)) );
+    for(int i = 0; i < shrink.second.rows(); i ++)
+      shrink.second.row(i) = taylor<num_t>(shrink.second.cols(),
+        (num_t(i) + num_t(int(1)) / num_t(int(2))) /
+          num_t(max(int(1), shrink.second.rows() - 1)) * num_t(max(int(1),
+            shrink.second.cols() - 1)),
+        (num_t(i) - num_t(int(1)) / num_t(int(2))) /
+          num_t(max(int(1), shrink.second.rows() - 1)) * num_t(max(int(1),
+            shrink.second.cols() - 1)) );
     for(int i = 0; i < in0.size(); i ++) {
       vector<SimpleMatrix<num_t> > work;
       work.reserve(in0[i].size());
-      for(int j = 0; j < in0[i].size(); j ++) work.emplace_back( (
-        dftcache<num_t>(- py) * dftcache<num_t>(in0[i][j].rows()).subMatrix(0,
-          0, py, in0[i][j].rows()) * in0[i][j].template cast<complex(num_t)>(
-          ) * (dftcache<num_t>(- px) * dftcache<num_t>(in0[i][j].cols()
-            ).subMatrix(0, 0, px, in0[i][j].cols() )).transpose()
-              ).template real<num_t>());
+      for(int j = 0; j < in0[i].size(); j ++) work.emplace_back(
+        shrink.first * in0[i][j] * shrink.second.transpose());
       in.emplace_back(move(work));
     }
     in0 = normalize<num_t>(in0);
@@ -149,7 +167,7 @@ int main(int argc, const char* argv[]) {
       seed += seed1;
       const int u_step(work[0].rows() / seed / 2);
       assert(0 < u_step);
-      const int px(absceil(log(num_t(u_step)) / log(int(2)) ));
+      const int px(absceil(log(num_t(u_step)) / log(num_t(int(2))) ));
       assert(0 < px);
       SimpleVector<vector<SimpleVector<num_t> > > pwork(work[0].rows());
       for(int i = 0; i < pwork.size(); i ++) {
