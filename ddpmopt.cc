@@ -24,6 +24,10 @@
 #include <mimalloc.h>
 #endif
 
+#if defined(_P_VULKAN_)
+#include <vulkan/vulkan.h>
+#endif
+
 #if !defined(_OLDCPP_) && defined(_PERSISTENT_)
 # if !defined(_FLOAT_BITS_)
 #  define int ssize_t
@@ -56,6 +60,20 @@ template <typename T> SimpleMatrix<T> unOffsetHalf(const SimpleMatrix<T>& m) {
 template <typename T> vector<SimpleMatrix<T> > unOffsetHalf(const vector<SimpleMatrix<T> >& m) {
   vector<SimpleMatrix<T> > res(m);
   for(int i = 0; i < res.size(); i ++) res[i] = unOffsetHalf<T>(res[i]);
+  return res;
+}
+
+template <typename T> SimpleMatrix<T> resizeMat(const int& dst, const int& src) {
+  SimpleMatrix<T> res(dst, src);
+  res.O();
+  for(int i = 0; i < res.rows(); i ++)
+    res.row(i) = taylor<num_t>(res.cols(),
+      (num_t(i) + num_t(int(1)) / num_t(int(2))) /
+        num_t(max(int(1), res.rows() - 1)) * num_t(max(int(1),
+          res.cols() - 1)),
+      (num_t(i) - num_t(int(1)) / num_t(int(2))) /
+        num_t(max(int(1), res.rows() - 1)) * num_t(max(int(1),
+          res.cols() - 1)) );
   return res;
 }
 
@@ -106,33 +124,42 @@ int main(int argc, const char* argv[]) {
     py = ppy; px = ppx;
     cerr << "internal(" << py << ", " << px << ")" << endl;
     assert(py && px);
+    {
+      // N.B. each input image behaves like each eigenvector one to one.
+      //      we estimate cluster number is the upper bound of the whole pixel
+      //      ratio. talk with claude.ai (2026/10/24-25) concluded.
+      // N.B. talk with gemini (2026/10/25) estimates the upper limit of this
+      //      ratio condition cannot break entropy upper bound because the
+      //      pieogeon hole principle gives us the each categorize in enlarge
+      //      category we can separate exceeds also exceeded pigeon hole
+      //      behaves like it's into a attractor alike condition causes
+      //      single unique input is ratio is large enough in our enlarge
+      //      method. if we recursive apply this, the situation unchange
+      //      because they're f(large input, predicted output) condition caused
+      //      by predicted output pigeon hole.
+      const int ratio(absceil(sqrt(num_t(in0.size() * 2) / num_t(px * py * 3) )) );
+      const SimpleMatrix<num_t> left( resizeMat<num_t>(py * ratio, in0[0][0].rows()));
+      const SimpleMatrix<num_t> right(resizeMat<num_t>(px * ratio, in0[0][0].cols()));
+      for(int i = 0; i < in0.size(); i ++)
+        for(int j = 0; j < in0[i].size(); j ++)
+          in0[i][j] = left * in0[i][j] * right.transpose();
+    }
+    pair<vector<int>, vector<int> > seed(rowcolEncryptPrepare(
+      in0[0][0].rows(), in0[0][0].cols() ));
+    for(int i = 0; i < in0.size(); i ++)
+      in0[i] = encryptIdx<num_t>(in0[i], seed);
     vector<vector<SimpleMatrix<num_t> > > in;
     in.reserve(in0.size());
-    pair<SimpleMatrix<num_t>, SimpleMatrix<num_t> > shrink;
-    shrink.first.resize( py, in0[0][0].rows()).O();
-    shrink.second.resize(px, in0[0][0].cols()).O();
-    for(int i = 0; i < shrink.first.rows(); i ++)
-      shrink.first.row(i) = taylor<num_t>(shrink.first.cols(),
-        (num_t(i) + num_t(int(1)) / num_t(int(2))) /
-          num_t(max(int(1), shrink.first.rows() - 1)) * num_t(max(int(1),
-            shrink.first.cols() - 1)),
-        (num_t(i) - num_t(int(1)) / num_t(int(2))) /
-          num_t(max(int(1), shrink.first.rows() - 1)) * num_t(max(int(1),
-            shrink.first.cols() - 1)) );
-    for(int i = 0; i < shrink.second.rows(); i ++)
-      shrink.second.row(i) = taylor<num_t>(shrink.second.cols(),
-        (num_t(i) + num_t(int(1)) / num_t(int(2))) /
-          num_t(max(int(1), shrink.second.rows() - 1)) * num_t(max(int(1),
-            shrink.second.cols() - 1)),
-        (num_t(i) - num_t(int(1)) / num_t(int(2))) /
-          num_t(max(int(1), shrink.second.rows() - 1)) * num_t(max(int(1),
-            shrink.second.cols() - 1)) );
-    for(int i = 0; i < in0.size(); i ++) {
-      vector<SimpleMatrix<num_t> > work;
-      work.reserve(in0[i].size());
-      for(int j = 0; j < in0[i].size(); j ++) work.emplace_back(
-        shrink.first * in0[i][j] * shrink.second.transpose());
-      in.emplace_back(move(work));
+    {
+      const SimpleMatrix<num_t> left( resizeMat<num_t>(py, in0[0][0].rows()));
+      const SimpleMatrix<num_t> right(resizeMat<num_t>(px, in0[0][0].cols()));
+      for(int i = 0; i < in0.size(); i ++) {
+        vector<SimpleMatrix<num_t> > work;
+        work.reserve(in0[i].size());
+        for(int j = 0; j < in0[i].size(); j ++) work.emplace_back(
+          left * in0[i][j] * right.transpose());
+        in.emplace_back(move(work));
+      }
     }
     in0 = normalize<num_t>(in0);
     in  = normalize<num_t>(in);
@@ -140,7 +167,7 @@ int main(int argc, const char* argv[]) {
       SimpleMatrix<num_t> > >&>(in));
     if(! savep2or3<num_t>("testg.ppm", predMatTangleLast<num_t, 20, true>(
       move(win), 3, string(" ") + string(argv[0]) + string(" ") +
-        string(argv[1]) ) ) )
+        string(argv[1]) ) ));
       cerr << "failed to save test." << endl;
     win.resize(0);
     const int ry(in0[0][0].rows() / py);
@@ -149,11 +176,12 @@ int main(int argc, const char* argv[]) {
     const int col(in0[0][0].cols());
     const int rowp(in[0][0].rows());
     const int colp(in[0][0].cols());
-    if(! savep2or3<num_t>("predg.ppm", normalize<num_t>(stretchPred<num_t>(
-      enlargeApply<num_t>(ry, rx, rowp, colp, col, normalize<num_t>(
-        predMat<num_t, 20>(move(in), 3, string(" ") + string(argv[0]) +
-          string(" ") + string(argv[1]) ) ), enlargeApply0<num_t>(
-            enlargePrep<num_t, 40>(ry, rx, row, col, move(in0) )) ) )) ))
+    if(! savep2or3<num_t>("predg.ppm", decryptIdx<num_t>(normalize<num_t>(
+      stretchPred<num_t>(enlargeApply<num_t>(ry, rx, rowp, colp, col,
+        normalize<num_t>(predMat<num_t, 20>(move(in), 3, string(" ") +
+          string(argv[0]) + string(" ") + string(argv[1]) ) ),
+            enlargeApply0<num_t>(enlargePrep<num_t, 40>(ry, rx, row, col,
+              move(in0) )) ) )), seed) ))
       cerr << "failed to save whole pred." << endl;
   } else if(m == 'q') {
     for(int i0 = 2; i0 < argc; i0 ++) {
@@ -169,6 +197,11 @@ int main(int argc, const char* argv[]) {
       assert(0 < u_step);
       const int px(absceil(log(num_t(u_step)) / log(num_t(int(2))) ));
       assert(0 < px);
+      // N.B. suppose y-axis continuity is stronger than 'p' z-axis.
+      vector<int> eseed(colEncryptPrepare(work[0].cols()));
+      for(int i = 0; i < work.size(); i ++)
+        for(int j = 0; j < work[i].rows(); j ++)
+          work[i].row(j) = encryptIdxSingleCol<num_t>(work[i].row(j), eseed);
       SimpleVector<vector<SimpleVector<num_t> > > pwork(work[0].rows());
       for(int i = 0; i < pwork.size(); i ++) {
         pwork[i].reserve(work.size());
@@ -181,11 +214,14 @@ int main(int argc, const char* argv[]) {
       pred.resize(work.size(),
         SimpleMatrix<num_t>(u_step, pwork[0][0].size()).O());
       for(int j = 0; j < pred[0].rows(); j ++) {
-        SimpleVector<SimpleVector<num_t> > q(predVec<num_t, 20, true>(
-          skipX<vector<SimpleVector<num_t> > >(pwork, j + 1), 2, to_string(j) +
+        SimpleVector<SimpleVector<num_t> > q(predVec<num_t, 20, true>(skipX<
+          vector<SimpleVector<num_t> > >(pwork, j + 1), 2, to_string(j) +
             string("/") + to_string(pred[0].rows()) ) );
         for(int i = 0; i < pred.size(); i ++) pred[i].row(j) = move(q[i]);
       }
+      if((1LL << px) < work[0].cols())
+        cerr << "Image width is larger than expected(" << work[0].cols() <<
+          " > " << (1LL < px) << ")" << endl;
       const int ry(1);
       const int rx(work[0].cols() / px);
       const int row(work[0].rows());
@@ -201,8 +237,14 @@ int main(int argc, const char* argv[]) {
       pred = enlargeApply<num_t>(ry, rx, rowp, colp, col, normalize<num_t>(
         pred), enlargeApply0<num_t>(enlargePrep<num_t, 40>(ry, rx, rowp, col,
           move(ww) )) );
-      for(int j = 0; j < wwork.size(); j ++)
-        wwork[j].setMatrix(row, 0, pred[j]);
+      for(int j = 0; j < wwork.size(); j ++) {
+        for(int k = 0; k < row; k ++)
+          wwork[j].row(k) = decryptIdxSingleCol<num_t>(wwork[j].row(k), eseed);
+        for(int k = 0; k < pred[j].rows(); k ++)
+          wwork[j].row(row + k) =
+            decryptIdxSingleCol<num_t>(SimpleVector<num_t>(wwork[j].cols()
+              ).O().setVector(0, pred[j].row(k)), eseed);
+      }
       if(! savep2or3<num_t>(argv[i0], move(wwork)) )
         cerr << "failed to save." << endl;
     }

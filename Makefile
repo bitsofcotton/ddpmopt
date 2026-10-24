@@ -11,6 +11,7 @@ CXX=	clang++
 #CXXFLAGS+=	-O3 -mtune=native -g3
 CXXFLAGS+=	-O2 -g3
 #CXXFLAGS+=	-O1 -gfull
+#CXXFLAGS+=	-fno-inline -fno-strict-aliasing -fwrapv
 # This doesn't work, we need operator >>, operator << with ongoing stdlibc++.
 #CXXFLAGS+=	-I/usr/local/include -mlong-double-128
 #CXXFLAGS+=	-Oz -mtune=native -gfull
@@ -20,7 +21,7 @@ CXXFLAGS+=	-O2 -g3
 # XXX: this worse decreases multi thread performance.
 #CXXFLAGS+=	-pg
 #CXXFLAGS+=	-Wall -Wundef -Werror -Wshadow -ferror-limit=10000 #--analyze
-#CXXFLAGS+=      -D_LIBCPP_HARDENING_MODE_DEBUG
+CXXFLAGS+=      -D_LIBCPP_HARDENING_MODE_DEBUG
 MPFLAGS=	-I/usr/local/include -L/usr/local/lib -lomp -fopenmp
 #MPFLAGS=	-I/usr/local/include -L/usr/local/lib -lgomp -fopenmp
 CXXFLAGS+=	-std=c++11
@@ -34,6 +35,9 @@ LDFLAGS+=	-lc++ -L/usr/local/lib
 CXXFLAGS+=	-D_ARCFOUR_
 # N.B. raw prediction on pred...
 #CXXFLAGS+=	-D_P_RAW_
+# N.B. GPGPU offloading, not compatible with FLOAT_BITS, PERSISTENT.
+#CXXFLAGS+=	-D_P_VULKAN_ -I/usr/local/include
+#LDFLAGS+=	-L/usr/local/lib -lvulkan
 # N.B. _SIMPLEALLOC_=align needs env VM_LIEONN=(mem usage MB).
 # XXX: pred function needs huge memory with this because resize(0) doesn't
 #      release the memory.
