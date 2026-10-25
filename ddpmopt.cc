@@ -133,10 +133,17 @@ int main(int argc, const char* argv[]) {
       //      pieogeon hole principle gives us the each categorize in enlarge
       //      category we can separate exceeds also exceeded pigeon hole
       //      behaves like it's into a attractor alike condition causes
-      //      single unique input is ratio is large enough in our enlarge
+      //      single unique output if ratio is large enough in our enlarge
       //      method. if we recursive apply this, the situation unchange
       //      because they're f(large input, predicted output) condition caused
       //      by predicted output pigeon hole.
+      // N.B. talk with claude (2026/10/25) estimates if we apply taylor
+      //      enlarge then correct by learning residue condition can
+      //      significantly improve the look of the result, however the
+      //      information pattern / entropy meaning, it's also only a Ex
+      //      condition also causes same information amount output. so we drop
+      //      such of the ddpm alike implementation from this .cc file.
+      //      so we suppose getting full of the heat driven seed output.
       const int ratio(absceil(sqrt(num_t(in0.size() * 2) / num_t(px * py * 3) )) );
       const SimpleMatrix<num_t> left( resizeMat<num_t>(py * ratio, in0[0][0].rows()));
       const SimpleMatrix<num_t> right(resizeMat<num_t>(px * ratio, in0[0][0].cols()));
