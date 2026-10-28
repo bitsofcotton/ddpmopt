@@ -19,8 +19,6 @@
 #endif
 
 #if defined(_MIMALLOC_)
-#define MIMALLOC_OVERRIDE_H
-#define MIMALLOC_NEW_DELETE_H
 #include <mimalloc.h>
 #endif
 
@@ -63,20 +61,6 @@ template <typename T> vector<SimpleMatrix<T> > unOffsetHalf(const vector<SimpleM
   return res;
 }
 
-template <typename T> SimpleMatrix<T> resizeMat(const int& dst, const int& src) {
-  SimpleMatrix<T> res(dst, src);
-  res.O();
-  for(int i = 0; i < res.rows(); i ++)
-    res.row(i) = taylor<num_t>(res.cols(),
-      (num_t(i) + num_t(int(1)) / num_t(int(2))) /
-        num_t(max(int(1), res.rows() - 1)) * num_t(max(int(1),
-          res.cols() - 1)),
-      (num_t(i) - num_t(int(1)) / num_t(int(2))) /
-        num_t(max(int(1), res.rows() - 1)) * num_t(max(int(1),
-          res.cols() - 1)) );
-  return res;
-}
-
 #undef int
 int main(int argc, const char* argv[]) {
 #if !defined(_OLDCPP_) && defined(_PERSISTENT_)
@@ -104,91 +88,11 @@ int main(int argc, const char* argv[]) {
       assert(in0[in0.size() - 1][0].rows() == in0[0][0].rows() &&
         in0[in0.size() - 1][0].cols() == in0[0][0].cols());
     }
-    int len(absceil(log(num_t(int(in0.size() ))) / log(num_t(int(2))) ));
-    int py(1);
-    int px(1);
-    int ppy(1);
-    int ppx(1);
-    for(int i = 1; i < max(in0[0][0].rows(), in0[0][0].cols()) || !py || !px;
-        i ++) {
-      ppy = py; ppx = px;
-      if(in0[0][0].rows() < in0[0][0].cols()) {
-        py = i * in0[0][0].rows() / in0[0][0].cols();
-        px = i;
-      } else {
-        py = i;
-        px = i * in0[0][0].cols() / in0[0][0].rows();
-      }
-      if(! (px * py <= len)) break;
-    }
-    py = ppy; px = ppx;
-    cerr << "internal(" << py << ", " << px << ")" << endl;
-    assert(py && px);
-    {
-      // N.B. each input image behaves like each eigenvector one to one.
-      //      we estimate cluster number is the upper bound of the whole pixel
-      //      ratio. talk with claude.ai (2026/10/24-25) concluded.
-      // N.B. talk with gemini (2026/10/25) estimates the upper limit of this
-      //      ratio condition cannot break entropy upper bound because the
-      //      pieogeon hole principle gives us the each categorize in enlarge
-      //      category we can separate exceeds also exceeded pigeon hole
-      //      behaves like it's into a attractor alike condition causes
-      //      single unique output if ratio is large enough in our enlarge
-      //      method. if we recursive apply this, the situation unchange
-      //      because they're f(large input, predicted output) condition caused
-      //      by predicted output pigeon hole.
-      // N.B. talk with claude (2026/10/25) estimates if we apply taylor
-      //      enlarge then correct by learning residue condition can
-      //      significantly improve the look of the result, however the
-      //      information pattern / entropy meaning, it's also only a Ex
-      //      condition also causes same information amount output. so we drop
-      //      such of the ddpm alike implementation from this .cc file.
-      //      so we suppose getting full of the heat driven seed output.
-      const int ratio(absceil(sqrt(num_t(in0.size() * 2) / num_t(px * py * 3) )) );
-      const SimpleMatrix<num_t> left( resizeMat<num_t>(py * ratio, in0[0][0].rows()));
-      const SimpleMatrix<num_t> right(resizeMat<num_t>(px * ratio, in0[0][0].cols()));
-      for(int i = 0; i < in0.size(); i ++)
-        for(int j = 0; j < in0[i].size(); j ++)
-          in0[i][j] = left * in0[i][j] * right.transpose();
-    }
-    pair<vector<int>, vector<int> > seed(rowcolEncryptPrepare(
-      in0[0][0].rows(), in0[0][0].cols() ));
-    for(int i = 0; i < in0.size(); i ++)
-      in0[i] = encryptIdx<num_t>(in0[i], seed);
-    vector<vector<SimpleMatrix<num_t> > > in;
-    in.reserve(in0.size());
-    {
-      const SimpleMatrix<num_t> left( resizeMat<num_t>(py, in0[0][0].rows()));
-      const SimpleMatrix<num_t> right(resizeMat<num_t>(px, in0[0][0].cols()));
-      for(int i = 0; i < in0.size(); i ++) {
-        vector<SimpleMatrix<num_t> > work;
-        work.reserve(in0[i].size());
-        for(int j = 0; j < in0[i].size(); j ++) work.emplace_back(
-          left * in0[i][j] * right.transpose());
-        in.emplace_back(move(work));
-      }
-    }
-    in0 = normalize<num_t>(in0);
-    in  = normalize<num_t>(in);
-    vector<vector<SimpleMatrix<num_t> > > win(const_cast<vector<vector<
-      SimpleMatrix<num_t> > >&>(in));
-    if(! savep2or3<num_t>("testg.ppm", predMatTangleLast<num_t, 20, true>(
-      move(win), 3, string(" ") + string(argv[0]) + string(" ") +
-        string(argv[1]) ) ));
+    pair<vector<SimpleMatrix<num_t> >, vector<SimpleMatrix<num_t> > > pt(
+      predGfxResize<num_t, 20>(in0, string(argv[0])) );
+    if(! savep2or3<num_t>("testg.ppm", pt.first) );
       cerr << "failed to save test." << endl;
-    win.resize(0);
-    const int ry(in0[0][0].rows() / py);
-    const int rx(in0[0][0].cols() / px);
-    const int row(in0[0][0].rows());
-    const int col(in0[0][0].cols());
-    const int rowp(in[0][0].rows());
-    const int colp(in[0][0].cols());
-    if(! savep2or3<num_t>("predg.ppm", decryptIdx<num_t>(normalize<num_t>(
-      stretchPred<num_t>(enlargeApply<num_t>(ry, rx, rowp, colp, col,
-        normalize<num_t>(predMat<num_t, 20>(move(in), 3, string(" ") +
-          string(argv[0]) + string(" ") + string(argv[1]) ) ),
-            enlargeApply0<num_t>(enlargePrep<num_t, 40>(ry, rx, row, col,
-              move(in0) )) ) )), seed) ))
+    if(! savep2or3<num_t>("predg.ppm", pt.second) )
       cerr << "failed to save whole pred." << endl;
   } else if(m == 'q') {
     for(int i0 = 2; i0 < argc; i0 ++) {
@@ -234,14 +138,13 @@ int main(int argc, const char* argv[]) {
       const int row(work[0].rows());
       const int col(work[0].cols());
       const int rowp(pred[0].rows());
-      const int colp(pred[0].cols());
       vector<SimpleMatrix<num_t> > wwork(work.size());
       for(int j = 0; j < wwork.size(); j ++)
         wwork[j].resize(work[0].rows() + pred[0].rows(), work[0].cols()).O(
           ).setMatrix(0, 0, work[j]);
       vector<vector<SimpleMatrix<num_t> > > ww;
       ww.resize(1, move(work));
-      pred = enlargeApply<num_t>(ry, rx, rowp, colp, col, normalize<num_t>(
+      pred = enlargeApply<num_t>(ry, rx, rowp, px, col, normalize<num_t>(
         pred), enlargeApply0<num_t>(enlargePrep<num_t, 40>(ry, rx, rowp, col,
           move(ww) )) );
       for(int j = 0; j < wwork.size(); j ++) {
