@@ -90,7 +90,7 @@ int main(int argc, const char* argv[]) {
     }
     pair<vector<SimpleMatrix<num_t> >, vector<SimpleMatrix<num_t> > > pt(
       predGfxResize<num_t, 20>(in0, string(argv[0])) );
-    if(! savep2or3<num_t>("testg.ppm", pt.first) );
+    if(! savep2or3<num_t>("testg.ppm", pt.first) )
       cerr << "failed to save test." << endl;
     if(! savep2or3<num_t>("predg.ppm", pt.second) )
       cerr << "failed to save whole pred." << endl;
