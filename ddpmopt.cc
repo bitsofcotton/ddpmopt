@@ -61,6 +61,14 @@ template <typename T> vector<SimpleMatrix<T> > unOffsetHalf(const vector<SimpleM
   return res;
 }
 
+static inline int gcd0(const int& large, const int& small) {
+  return small ? gcd0(small, large % small) : large;
+}
+
+static inline int gcd(const int& large, const int& small) {
+  return gcd0(max(large, small), min(large, small));
+}
+
 #undef int
 int main(int argc, const char* argv[]) {
 #if !defined(_OLDCPP_) && defined(_PERSISTENT_)
@@ -88,8 +96,11 @@ int main(int argc, const char* argv[]) {
       assert(in0[in0.size() - 1][0].rows() == in0[0][0].rows() &&
         in0[in0.size() - 1][0].cols() == in0[0][0].cols());
     }
+    vector<vector<SimpleMatrix<num_t> > > in(in0);
     pair<vector<SimpleMatrix<num_t> >, vector<SimpleMatrix<num_t> > > pt(
-      predGfxResize<num_t, 20>(in0, string(argv[0])) );
+      predGfxResize<num_t, 2>(in, string(argv[0])) );
+    for(int i = 0; i < pt.second.size(); i ++)
+      pt.second[i] = normalize<num_t>(pt.second[i]);
     if(! savep2or3<num_t>("testg.ppm", pt.first) )
       cerr << "failed to save test." << endl;
     if(! savep2or3<num_t>("predg.ppm", pt.second) )
