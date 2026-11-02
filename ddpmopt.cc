@@ -88,11 +88,9 @@ int main(int argc, const char* argv[]) {
       assert(in0[in0.size() - 1][0].rows() == in0[0][0].rows() &&
         in0[in0.size() - 1][0].cols() == in0[0][0].cols());
     }
-    vector<vector<SimpleMatrix<num_t> > > in(in0);
     pair<vector<SimpleMatrix<num_t> >, vector<SimpleMatrix<num_t> > > pt(
-      predGfxResize<num_t, 2>(in, string(argv[0])) );
-    for(int i = 0; i < pt.second.size(); i ++)
-      pt.second[i] = normalize<num_t>(pt.second[i]);
+      predGfxResize<num_t, 20>(in0, string(argv[0]) + string(" ") +
+        string(argv[1]) ));
     if(! savep2or3<num_t>("testg.ppm", pt.first) )
       cerr << "failed to save test." << endl;
     if(! savep2or3<num_t>("predg.ppm", pt.second) )
