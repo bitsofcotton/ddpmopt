@@ -61,14 +61,6 @@ template <typename T> vector<SimpleMatrix<T> > unOffsetHalf(const vector<SimpleM
   return res;
 }
 
-static inline int gcd0(const int& large, const int& small) {
-  return small ? gcd0(small, large % small) : large;
-}
-
-static inline int gcd(const int& large, const int& small) {
-  return gcd0(max(large, small), min(large, small));
-}
-
 #undef int
 int main(int argc, const char* argv[]) {
 #if !defined(_OLDCPP_) && defined(_PERSISTENT_)
