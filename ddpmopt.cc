@@ -78,23 +78,30 @@ int main(int argc, const char* argv[]) {
   lieonnStaticInit();
   if(argc <= 1) goto usage;
   cerr << "Coherent: sqrt(2): " << sqrt<num_t>(Complex<num_t>(num_t(2))) << endl;
-  if(m == 'p') {
-    vector<vector<SimpleMatrix<num_t> > > in0;
-    in0.reserve(argc - 1);
+  if(m == 'p' || m == 'T') {
+    vector<vector<SimpleMatrix<num_t> > > in;
+    in.reserve(argc - 1);
     for(int i = 2; i < argc; i ++) {
       vector<SimpleMatrix<num_t> > work;
       if(! loadp2or3<num_t>(work, argv[i])) continue;
-      in0.emplace_back(move(work));
-      assert(in0[in0.size() - 1][0].rows() == in0[0][0].rows() &&
-        in0[in0.size() - 1][0].cols() == in0[0][0].cols());
+      in.emplace_back(move(work));
+      assert(in[in.size() - 1][0].rows() == in[0][0].rows() &&
+        in[in.size() - 1][0].cols() == in[0][0].cols());
     }
-    pair<vector<SimpleMatrix<num_t> >, vector<SimpleMatrix<num_t> > > pt(
-      predGfxResize<num_t, 20>(in0, string(argv[0]) + string(" ") +
-        string(argv[1]) ));
-    if(! savep2or3<num_t>("testg.ppm", pt.first) )
-      cerr << "failed to save test." << endl;
-    if(! savep2or3<num_t>("predg.ppm", pt.second) )
-      cerr << "failed to save whole pred." << endl;
+    if(in[0].size() == 3)
+      for(int i = 0; i < in.size(); i ++) in[i] = rgb2xyz<num_t>(in[i]);
+    in = normalize<num_t>(in);
+    if(in[0].size() == 3)
+      for(int i = 0; i < in.size(); i ++) in[i] = xyz2rgb<num_t>(in[i]);
+    if(m == 'T') {
+      if(! savep2or3<num_t>("testg.ppm", predMat<num_t, 20>(move(in), 3,
+        string(" test")) ))
+          cerr << "failed to save test." << endl;
+    } else {
+      if(! savep2or3<num_t>("predg.ppm", normalize<num_t>(stretchPred<num_t>(
+        normalize<num_t>(predMat<num_t, 20>(move(in), 3, string(" pred"))) )) ))
+          cerr << "failed to save whole pred." << endl;
+    }
   } else if(m == 'q') {
     for(int i0 = 2; i0 < argc; i0 ++) {
       vector<SimpleMatrix<num_t> > work;
@@ -105,56 +112,23 @@ int main(int argc, const char* argv[]) {
       for(seed1 = 1;
         seed1 <= int(log(num_t(seed + seed1)) / log(num_t(2))); seed1 ++) ;
       seed += seed1;
-      const int u_step(work[0].rows() / seed / 2);
-      assert(0 < u_step);
-      const int px(absceil(log(num_t(u_step)) / log(num_t(int(2))) ));
+      const int px(work[0].rows() / seed / 2);
       assert(0 < px);
-      // N.B. suppose y-axis continuity is stronger than 'p' z-axis.
-      vector<int> eseed(colEncryptPrepare(work[0].cols()));
-      for(int i = 0; i < work.size(); i ++)
-        for(int j = 0; j < work[i].rows(); j ++)
-          work[i].row(j) = encryptIdxSingleCol<num_t>(work[i].row(j), eseed);
-      SimpleVector<vector<SimpleVector<num_t> > > pwork(work[0].rows());
-      for(int i = 0; i < pwork.size(); i ++) {
-        pwork[i].reserve(work.size());
-        for(int j = 0; j < work.size(); j ++)
-          pwork[i].emplace_back(((dft<num_t>(- px) * dft<num_t>(work[j].cols()
-            ).subMatrix(0, 0, px, work[j].cols()) ) * work[j].row(i
-              ).template cast<complex(num_t)>() ).template real<num_t>());
-      }
-      vector<SimpleMatrix<num_t> > pred;
-      pred.resize(work.size(),
-        SimpleMatrix<num_t>(u_step, pwork[0][0].size()).O());
-      for(int j = 0; j < pred[0].rows(); j ++) {
-        SimpleVector<SimpleVector<num_t> > q(predVec<num_t, 20, true>(skipX<
-          vector<SimpleVector<num_t> > >(pwork, j + 1), 2, to_string(j) +
-            string("/") + to_string(pred[0].rows()) ) );
-        for(int i = 0; i < pred.size(); i ++) pred[i].row(j) = move(q[i]);
-      }
-      if((1LL << px) < work[0].cols())
-        cerr << "Image width is larger than expected(" << work[0].cols() <<
-          " > " << (1LL < px) << ")" << endl;
-      const int ry(1);
-      const int rx(work[0].cols() / px);
-      const int row(work[0].rows());
-      const int col(work[0].cols());
-      const int rowp(pred[0].rows());
       vector<SimpleMatrix<num_t> > wwork(work.size());
       for(int j = 0; j < wwork.size(); j ++)
-        wwork[j].resize(work[0].rows() + pred[0].rows(), work[0].cols()).O(
+        wwork[j].resize(work[0].rows() + px, work[0].cols()).O(
           ).setMatrix(0, 0, work[j]);
-      vector<vector<SimpleMatrix<num_t> > > ww;
-      ww.resize(1, move(work));
-      pred = enlargeApply<num_t>(ry, rx, rowp, px, col, normalize<num_t>(
-        pred), enlargeApply0<num_t>(enlargePrep<num_t, 40>(ry, rx, rowp, col,
-          move(ww) )) );
-      for(int j = 0; j < wwork.size(); j ++) {
-        for(int k = 0; k < row; k ++)
-          wwork[j].row(k) = decryptIdxSingleCol<num_t>(wwork[j].row(k), eseed);
-        for(int k = 0; k < pred[j].rows(); k ++)
-          wwork[j].row(row + k) =
-            decryptIdxSingleCol<num_t>(SimpleVector<num_t>(wwork[j].cols()
-              ).O().setVector(0, pred[j].row(k)), eseed);
+      SimpleVector<vector<SimpleVector<num_t> > > v(work[0].rows());
+      for(int i = 0; i < v.size(); i ++) {
+        v[i].resize(work.size());
+        for(int j = 0; j < v[i].size(); j ++) v[i][j] = move(work[j].row(i));
+      }
+      for(int j = 0; j < px; j ++) {
+        SimpleVector<SimpleVector<num_t> > q(predVec<num_t, 20, true>(skipX<
+          vector<SimpleVector<num_t> > >(v, j + 1), 2, to_string(j) +
+            string("/") + to_string(px) ) );
+        for(int i = 0; i < wwork.size(); i ++)
+          wwork[i].row(work[i].rows() + j) = move(q[i]);
       }
       if(! savep2or3<num_t>(argv[i0], move(wwork)) )
         cerr << "failed to save." << endl;
@@ -246,6 +220,20 @@ int main(int argc, const char* argv[]) {
       }
       std::cout << ");" << endl << flush;
     }
+  } else if(m == 'd') {
+    vector<SimpleMatrix<num_t> > in0;
+    vector<SimpleMatrix<num_t> > in1;
+    loadp2or3<num_t>(in0, argv[2]);
+    loadp2or3<num_t>(in1, argv[3]);
+    assert(in0.size() == in1.size());
+    for(int i = 0; i < in0.size(); i ++)
+      for(int j = 0; j < in0[i].rows(); j ++) {
+        for(int k = 0; k < in1[i].cols(); k ++)
+          in1[i](j, k) = sgn<num_t>(unOffsetHalf<num_t>(in1[i](j, k)));
+        in0[i].row(j) = offsetHalf<num_t>(unOffsetHalf<num_t>(in0[i].row(j)
+          ).tdot(in1[i].row(j)) );
+      }
+    savep2or3("tdot.ppm", in0);
   } else goto usage;
   cerr << "Done" << endl;
   lieonnStaticDestroy();
@@ -255,6 +243,8 @@ int main(int argc, const char* argv[]) {
   cerr << "Usage:" << endl;
   cerr << "# predict following image" << endl;
   cerr << argv[0] << " p <in0.ppm> ..." << endl;
+  cerr << "# check predict last image" << endl;
+  cerr << argv[0] << " T <in0.ppm> ..." << endl;
   cerr << "# predict down scanlines" << endl;
   cerr << argv[0] << " q <in0out.ppm> ..." << endl;
   return - 1;
