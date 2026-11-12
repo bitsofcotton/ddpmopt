@@ -35,26 +35,23 @@ LDFLAGS+=	-lc++ -L/usr/local/lib
 CXXFLAGS+=	-D_ARCFOUR_
 # N.B. raw prediction on pred...
 #CXXFLAGS+=	-D_P_RAW_
-# N.B. GPGPU offloading, not compatible with FLOAT_BITS, PERSISTENT.
-#CXXFLAGS+=	-D_P_VULKAN_ -I/usr/local/include
-#LDFLAGS+=	-L/usr/local/lib -lvulkan
 # N.B. _SIMPLEALLOC_=align needs env VM_LIEONN=(mem usage MB).
 # XXX: pred function needs huge memory with this because resize(0) doesn't
 #      release the memory.
 #CXXFLAGS+=	-D_SIMPLEALLOC_=64
-# cf. src_alloc.c.diff
+# cf. -DMI_OVERRIDE=off
 MPFLAGS+=	-I/usr/local/include -D_MIMALLOC_
 MPFLAGS+=	-L/usr/local/lib -lmimalloc
 # N.B. _FLOAT_BITS_=bits for internal integer only calculation.
 #CXXFLAGS+=	-D_FLOAT_BITS_=32
 #CXXFLAGS+=	-D_FLOAT_BITS_=64
 #CXXFLAGS+=	-D_FLOAT_BITS_=128
-# N.B. omit assertion, may have buggy but vasty speed up.
-#CXXFLAGS+=	-D_OMIT_ASSERT_
 # N.B. only use size_t and ssize_t for calculation on first order logic and
 #      first order arithmetic operator + however memory reference needs
 #      multiply sum operation on operator [].
 #CXXFLAGS+=	-D_PERSISTENT_
+# N.B. omit assertion, may have buggy but vasty speed up.
+#CXXFLAGS+=	-D_OMIT_ASSERT_
 # N.B. sed -e s/static\ inline//g | sed -e s/inline//g
 #CXXFLAGS+=	-D_OLDCPP_ -ftemplate-depth-99
 

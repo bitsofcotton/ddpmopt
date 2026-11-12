@@ -22,10 +22,6 @@
 #include <mimalloc.h>
 #endif
 
-#if defined(_P_VULKAN_)
-#include <vulkan/vulkan.h>
-#endif
-
 #if !defined(_OLDCPP_) && defined(_PERSISTENT_)
 # if !defined(_FLOAT_BITS_)
 #  define int ssize_t
@@ -78,7 +74,7 @@ int main(int argc, const char* argv[]) {
   lieonnStaticInit();
   if(argc <= 1) goto usage;
   cerr << "Coherent: sqrt(2): " << sqrt<num_t>(Complex<num_t>(num_t(2))) << endl;
-  if(m == 'p' || m == 'T') {
+  if(m == 'p') {
     vector<vector<SimpleMatrix<num_t> > > in;
     in.reserve(argc - 1);
     for(int i = 2; i < argc; i ++) {
@@ -93,15 +89,9 @@ int main(int argc, const char* argv[]) {
     in = normalize<num_t>(in);
     if(in[0].size() == 3)
       for(int i = 0; i < in.size(); i ++) in[i] = xyz2rgb<num_t>(in[i]);
-    if(m == 'T') {
-      if(! savep2or3<num_t>("testg.ppm", predMat<num_t, 20>(move(in), 3,
-        string(" test")) ))
-          cerr << "failed to save test." << endl;
-    } else {
-      if(! savep2or3<num_t>("predg.ppm", normalize<num_t>(stretchPred<num_t>(
-        normalize<num_t>(predMat<num_t, 20>(move(in), 3, string(" pred"))) )) ))
-          cerr << "failed to save whole pred." << endl;
-    }
+    if(! savep2or3<num_t>("predg.ppm", normalize<num_t>(stretchPred<num_t>(
+      normalize<num_t>(predMat<num_t, 20>(move(in), 3, string(" pred"))) )) ))
+        cerr << "failed to save whole pred." << endl;
   } else if(m == 'q') {
     for(int i0 = 2; i0 < argc; i0 ++) {
       vector<SimpleMatrix<num_t> > work;
@@ -220,6 +210,40 @@ int main(int argc, const char* argv[]) {
       }
       std::cout << ");" << endl << flush;
     }
+  } else if(m == 'm') {
+    vector<vector<SimpleMatrix<num_t> > > in;
+    in.reserve(argc - 1);
+    for(int i = 2; i < argc; i ++) {
+      vector<SimpleMatrix<num_t> > work;
+      if(! loadp2or3<num_t>(work, argv[i])) continue;
+      in.emplace_back(move(work));
+      assert(in[in.size() - 1][0].rows() == in[0][0].rows() &&
+        in[in.size() - 1][0].cols() == in[0][0].cols());
+    }
+    const int ch(in[0].size());
+    const int row(in[0][0].rows());
+    const int col(in[0][0].cols());
+    SimpleMatrix<num_t> mat(in.size(), ch * row * col);
+    mat.O();
+    for(int i = 0; i < mat.rows(); i ++) {
+      for(int j = 0; j < ch; j ++)
+        for(int k = 0; k < row; k ++)
+          mat.row(i).setVector((j * row + k) * col, in[i][j].row(k));
+      if(i && unOffsetHalf<num_t>(mat.row(0)).dot(unOffsetHalf<num_t>(
+        mat.row(i))) < num_t(int(0)))
+          mat.row(i) = offsetHalf<num_t>(- unOffsetHalf<num_t>(mat.row(i)));
+    }
+    vector<SimpleMatrix<num_t> > out(ch);
+    for(int i = 0; i < out.size(); i ++) out[i].resize(row, col).O();
+    for(int i = 0; i < mat.cols(); i ++) {
+      const SimpleVector<num_t> work0(mat.col(i));
+      vector<num_t> work;
+      work.reserve(work0.size());
+      for(int j = 0; j < work0.size(); j ++) work.emplace_back(work0[j]);
+      sort(work.begin(), work.end());
+      out[i / (row * col)]((i / col) % row, i % col) = work[work.size() / 2];
+    }
+    savep2or3("med.ppm", out);
   } else if(m == 'd') {
     vector<SimpleMatrix<num_t> > in0;
     vector<SimpleMatrix<num_t> > in1;
@@ -243,8 +267,6 @@ int main(int argc, const char* argv[]) {
   cerr << "Usage:" << endl;
   cerr << "# predict following image" << endl;
   cerr << argv[0] << " p <in0.ppm> ..." << endl;
-  cerr << "# check predict last image" << endl;
-  cerr << argv[0] << " T <in0.ppm> ..." << endl;
   cerr << "# predict down scanlines" << endl;
   cerr << argv[0] << " q <in0out.ppm> ..." << endl;
   return - 1;
