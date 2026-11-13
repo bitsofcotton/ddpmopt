@@ -89,9 +89,8 @@ int main(int argc, const char* argv[]) {
     in = normalize<num_t>(in);
     if(in[0].size() == 3)
       for(int i = 0; i < in.size(); i ++) in[i] = xyz2rgb<num_t>(in[i]);
-    if(! savep2or3<num_t>("predg.ppm", normalize<num_t>(stretchPred<num_t>(
-      normalize<num_t>(predMat<num_t, 20>(move(in), 3, string(" pred"))) )) ))
-        cerr << "failed to save whole pred." << endl;
+    if(! savep2or3<num_t>("predg.ppm", predMat<num_t, 20>(move(in), 3,
+      string(" pred")) )) cerr << "failed to save pred." << endl;
   } else if(m == 'q') {
     for(int i0 = 2; i0 < argc; i0 ++) {
       vector<SimpleMatrix<num_t> > work;
@@ -243,7 +242,8 @@ int main(int argc, const char* argv[]) {
       sort(work.begin(), work.end());
       out[i / (row * col)]((i / col) % row, i % col) = work[work.size() / 2];
     }
-    savep2or3("med.ppm", out);
+    savep2or3("med.ppm", normalize<num_t>(stretchPred<num_t>(
+      normalize<num_t>(out))) );
   } else if(m == 'd') {
     vector<SimpleMatrix<num_t> > in0;
     vector<SimpleMatrix<num_t> > in1;
