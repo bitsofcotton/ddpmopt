@@ -209,7 +209,7 @@ int main(int argc, const char* argv[]) {
       }
       std::cout << ");" << endl << flush;
     }
-  } else if(m == 'm' || m == 'M') {
+  } else if(m == 'm' || m == 'M' || m == 'k') {
     vector<vector<SimpleMatrix<num_t> > > in;
     in.reserve(argc - 1);
     for(int i = 2; i < argc; i ++) {
@@ -240,19 +240,26 @@ int main(int argc, const char* argv[]) {
       for(int j = 0; j < work.size(); j ++) pn[work[j].second] = num_t(j + 1);
       pn = unOffsetHalf<num_t>(pn / num_t(work.size()) );
       if(! i) p0 = move(pn);
-      else if(pn.dot(p0) < num_t(int(0)) )
-        p = offsetHalf<num_t>(- unOffsetHalf<num_t>(p));
-      avg += p;
+      else if(m == 'k')
+        std::cout << argv[i + 2] << " : " <<
+          p0.dot(pn) / sqrt(p0.dot(p0) * pn.dot(pn)) << endl;
+      else if(i) {
+        if(pn.dot(p0) < num_t(int(0)) )
+          p = offsetHalf<num_t>(- unOffsetHalf<num_t>(p));
+        avg += p;
+      }
     }
-    avg /= num_t(in.size());
-    vector<SimpleMatrix<num_t> > out(ch);
-    for(int i = 0; i < out.size(); i ++) {
-      out[i].resize(row, col).O();
-      for(int j = 0; j < out[i].rows(); j ++)
-        out[i].row(j) = avg.subVector((i * row + j) * col, col);
+    if(m != 'k') {
+      avg /= num_t(in.size());
+      vector<SimpleMatrix<num_t> > out(ch);
+      for(int i = 0; i < out.size(); i ++) {
+        out[i].resize(row, col).O();
+        for(int j = 0; j < out[i].rows(); j ++)
+          out[i].row(j) = avg.subVector((i * row + j) * col, col);
+      }
+      savep2or3("med.ppm", m == 'M' ? normalize<num_t>(stretchPred<num_t>(
+        normalize<num_t>(out))) : out);
     }
-    savep2or3("med.ppm", m == 'M' ? normalize<num_t>(stretchPred<num_t>(
-      normalize<num_t>(out))) : out);
   } else if(m == 'd') {
     vector<SimpleMatrix<num_t> > in0;
     vector<SimpleMatrix<num_t> > in1;
