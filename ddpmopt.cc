@@ -35,7 +35,7 @@
 #endif
 #include "lieonn.hh"
 typedef myfloat num_t;
-lieonn_t lieonn;
+int revert_acc_regression;
 
 using std::cerr;
 using std::endl;
@@ -276,10 +276,8 @@ int main(int argc, const char* argv[]) {
     savep2or3("tdot.ppm", in0);
   } else goto usage;
   cerr << "Done" << endl;
-  lieonnStaticDestroy();
   return 0;
  usage:
-  lieonnStaticDestroy();
   cerr << "Usage:" << endl;
   cerr << "# predict following image" << endl;
   cerr << argv[0] << " p <in0.ppm> ..." << endl;
