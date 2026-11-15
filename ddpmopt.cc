@@ -75,22 +75,43 @@ int main(int argc, const char* argv[]) {
   if(argc <= 1) goto usage;
   cerr << "Coherent: sqrt(2): " << sqrt<num_t>(Complex<num_t>(num_t(2))) << endl;
   if(m == 'p') {
-    vector<vector<SimpleMatrix<num_t> > > in;
-    in.reserve(argc - 1);
-    for(int i = 2; i < argc; i ++) {
+    const int loop(std::atoi(argv[2]));
+    SimpleVector<vector<SimpleMatrix<num_t> > > in;
+    in.entity.reserve(argc - 2);
+    for(int i = 3; i < argc; i ++) {
       vector<SimpleMatrix<num_t> > work;
       if(! loadp2or3<num_t>(work, argv[i])) continue;
-      in.emplace_back(move(work));
+      in.entity.emplace_back(move(work));
       assert(in[in.size() - 1][0].rows() == in[0][0].rows() &&
         in[in.size() - 1][0].cols() == in[0][0].cols());
     }
-    if(in[0].size() == 3)
-      for(int i = 0; i < in.size(); i ++) in[i] = rgb2xyz<num_t>(in[i]);
-    in = normalize<num_t>(in);
-    if(in[0].size() == 3)
-      for(int i = 0; i < in.size(); i ++) in[i] = xyz2rgb<num_t>(in[i]);
-    if(! savep2or3<num_t>("predg.ppm", predMat<num_t, 20>(move(in), 3,
-      string(" pred")) )) cerr << "failed to save pred." << endl;
+    const int n(in.size() / loop);
+    vector<SimpleMatrix<num_t> > p;
+    for(int i = 0; i < loop; i ++) {
+      // N.B. don't know why but test stream also behaves this is better even
+      //      on sign bit.
+      vector<SimpleMatrix<num_t> > q(normalize<num_t>(stretchPred<num_t>(
+        normalize<num_t>(predMat<num_t, 20>(skipX<vector<SimpleMatrix<
+          num_t> > >(in.subVector(in.size() - n * (i + 1), n * (i + 1)), i + 1
+            ), 3, string(" pred") ) ))) );
+      if(! i) p = move(q);
+      else {
+        SimpleVector<num_t> p0(p.size() * p[0].rows() * p[0].cols());
+        SimpleVector<num_t> p1(p.size() * p[0].rows() * p[0].cols());
+        p0.O(); p1.O();
+        for(int j = 0; j < p.size(); j ++)
+          for(int k = 0; k < p[j].rows(); k ++) {
+            p0.setVector((j * p[j].rows() + k) * p[j].cols(), p[j].row(k));
+            p1.setVector((j * p[j].rows() + k) * p[j].cols(), q[j].row(k));
+          }
+        const bool jdg(unOffsetHalf<num_t>(p0).dot(unOffsetHalf<num_t>(p1)) <
+          num_t(int(0)) );
+        for(int j = 0; j < p.size(); j ++) p[j] += jdg ? - q[j] : q[j];
+      }
+    }
+    for(int i = 0; i < p.size(); i ++) p[i] /= num_t(loop);
+    // N.B. needs entire reseed on next prediction.
+    if(! savep2or3<num_t>("predg.ppm", p) ) cerr << "failed to save." << endl;
   } else if(m == 'q') {
     for(int i0 = 2; i0 < argc; i0 ++) {
       vector<SimpleMatrix<num_t> > work;
@@ -232,13 +253,15 @@ int main(int argc, const char* argv[]) {
         p.setVector((j * row + k) * col, in[i][j].row(k));
       SimpleVector<num_t> pn(ch * row * col);
       pn.O();
-      vector<pair<num_t, int> > work;
-      work.reserve(ch * row * col);
-      for(int j = 0; j < p.size(); j ++)
-        work.emplace_back(make_pair(p[j], j));
-      sort(work.begin(), work.end());
-      for(int j = 0; j < work.size(); j ++) pn[work[j].second] = num_t(j + 1);
-      pn = unOffsetHalf<num_t>(pn / num_t(work.size()) );
+      if(argv[1][1] == '\0') {
+        vector<pair<num_t, int> > work;
+        work.reserve(ch * row * col);
+        for(int j = 0; j < p.size(); j ++)
+          work.emplace_back(make_pair(p[j], j));
+        sort(work.begin(), work.end());
+        for(int j = 0; j < work.size(); j ++) pn[work[j].second] = num_t(j + 1);
+        pn = unOffsetHalf<num_t>(pn / num_t(work.size()) );
+      } else pn = unOffsetHalf<num_t>(p);
       if(! i) p0 = move(pn);
       else if(m == 'k')
         std::cout << argv[i + 2] << " : " <<
