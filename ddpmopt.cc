@@ -106,7 +106,8 @@ int main(int argc, const char* argv[]) {
           }
         const bool jdg(unOffsetHalf<num_t>(p0).dot(unOffsetHalf<num_t>(p1)) <
           num_t(int(0)) );
-        for(int j = 0; j < p.size(); j ++) p[j] += jdg ? - q[j] : q[j];
+        for(int j = 0; j < p.size(); j ++) p[j].entity += jdg ?
+          offsetHalf<num_t>(- unOffsetHalf<num_t>(q[j].entity)) : q[j].entity;
       }
     }
     for(int i = 0; i < p.size(); i ++) p[i] /= num_t(loop);
