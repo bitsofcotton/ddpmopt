@@ -85,15 +85,15 @@ int main(int argc, const char* argv[]) {
       assert(in[in.size() - 1][0].rows() == in[0][0].rows() &&
         in[in.size() - 1][0].cols() == in[0][0].cols());
     }
-    const int n(in.size() / loop);
+    const int n(in.size() / (loop + 1));
     vector<SimpleMatrix<num_t> > p;
     for(int i = 0; i < loop; i ++) {
       // N.B. don't know why but test stream also behaves this is better even
       //      on sign bit.
       vector<SimpleMatrix<num_t> > q(normalize<num_t>(stretchPred<num_t>(
         normalize<num_t>(predMat<num_t, 20>(skipX<vector<SimpleMatrix<
-          num_t> > >(in.subVector(in.size() - n * (i + 1), n * (i + 1)), i + 1
-            ), 3, string(" pred") ) ))) );
+          num_t> > >(in.subVector(in.size() - n * (i + 1) - i, n * (i + 1)),
+            i + 1), 3, string(" pred") ) ))) );
       if(! i) p = move(q);
       else {
         SimpleVector<num_t> p0(p.size() * p[0].rows() * p[0].cols());
