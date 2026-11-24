@@ -75,50 +75,25 @@ int main(int argc, const char* argv[]) {
   if(argc <= 1) goto usage;
   cerr << "Coherent: sqrt(2): " << sqrt<num_t>(Complex<num_t>(num_t(2))) << endl;
   if(m == 'p') {
-    const int loop(std::atoi(argv[2]));
     SimpleVector<vector<SimpleMatrix<num_t> > > in;
     in.entity.reserve(argc - 2);
-    for(int i = 3; i < argc; i ++) {
+    for(int i = 2; i < argc; i ++) {
       vector<SimpleMatrix<num_t> > work;
       if(! loadp2or3<num_t>(work, argv[i])) continue;
       in.entity.emplace_back(move(work));
       assert(in[in.size() - 1][0].rows() == in[0][0].rows() &&
         in[in.size() - 1][0].cols() == in[0][0].cols());
     }
-    const int n((in.size() - loop) / loop);
-    vector<SimpleMatrix<num_t> > p;
-    for(int i = 0; i < loop; i ++) {
-      // N.B. don't know why but test stream also behaves this is better even
-      //      on sign bit.
-#if 0
-      vector<SimpleMatrix<num_t> > q(normalize<num_t>(stretchPred<num_t>(
-        normalize<num_t>(predMat<num_t, 20>(skipX<vector<SimpleMatrix<
-          num_t> > >(in.subVector(in.size() - n * (i + 1) - i, n * (i + 1)),
-            i + 1), 3, string(" pred") ) ))) );
-#else
-      vector<SimpleMatrix<num_t> > q(predMat<num_t, 20>(skipX<vector<
-        SimpleMatrix<num_t> > >(in.subVector(in.size() - n * (i + 1) - i,
-          n * (i + 1)), i + 1), 3, string(" pred") ) );
-#endif
-      if(! i) p = move(q);
-      else {
-        SimpleVector<num_t> p0(p.size() * p[0].rows() * p[0].cols());
-        SimpleVector<num_t> p1(p.size() * p[0].rows() * p[0].cols());
-        p0.O(); p1.O();
-        for(int j = 0; j < p.size(); j ++)
-          for(int k = 0; k < p[j].rows(); k ++) {
-            p0.setVector((j * p[j].rows() + k) * p[j].cols(), p[j].row(k));
-            p1.setVector((j * p[j].rows() + k) * p[j].cols(), q[j].row(k));
-          }
-        const bool jdg(unOffsetHalf<num_t>(p0).dot(unOffsetHalf<num_t>(p1)) <
-          num_t(int(0)) );
-        for(int j = 0; j < p.size(); j ++) p[j].entity += jdg ?
-          offsetHalf<num_t>(- unOffsetHalf<num_t>(q[j].entity)) : q[j].entity;
-      }
-    }
-    for(int i = 0; i < p.size(); i ++) p[i] /= num_t(loop);
+    // N.B. might be 3 is enough for internal states LoEM after to take maj.
+    const int loop(argv[1][1] == '1' ? int(1) :
+      min(int(3), int(in.size() / 21) ));
+    const int n((in.size() - loop + 1) / loop);
+    for(int i = 0; i < loop; i ++)
+      savep2or3<num_t>(argv[1][1] == '1' ? "predg.ppm" : (string("predg") +
+        to_string(i) + string(".ppm")).c_str(), predMat<num_t, 20>(skipX<
+          vector<SimpleMatrix<num_t> > >(in.subVector(in.size() - n * (i + 1)
+            - i, n * (i + 1)), i + 1), 3, string(" pred") ) );
     // N.B. needs entire reseed on next prediction.
-    if(! savep2or3<num_t>("predg.ppm", p) ) cerr << "failed to save." << endl;
   } else if(m == 'q') {
     for(int i0 = 2; i0 < argc; i0 ++) {
       vector<SimpleMatrix<num_t> > work;
@@ -237,7 +212,7 @@ int main(int argc, const char* argv[]) {
       }
       std::cout << ");" << endl << flush;
     }
-  } else if(m == 'm' || m == 'M' || m == 'k') {
+  } else if(m == 'k') {
     vector<vector<SimpleMatrix<num_t> > > in;
     in.reserve(argc - 1);
     for(int i = 2; i < argc; i ++) {
@@ -269,26 +244,9 @@ int main(int argc, const char* argv[]) {
         for(int j = 0; j < work.size(); j ++) pn[work[j].second] = num_t(j + 1);
         pn = unOffsetHalf<num_t>(pn / num_t(work.size()) );
       } else pn = unOffsetHalf<num_t>(p);
-      if(! i) p0 = move(pn);
-      else if(m == 'k')
-        std::cout << argv[i + 2] << " : " <<
-          p0.dot(pn) / sqrt(p0.dot(p0) * pn.dot(pn)) << endl;
-      else if(i) {
-        if(pn.dot(p0) < num_t(int(0)) )
-          p = offsetHalf<num_t>(- unOffsetHalf<num_t>(p));
-        avg += p;
-      }
-    }
-    if(m != 'k') {
-      avg /= num_t(in.size());
-      vector<SimpleMatrix<num_t> > out(ch);
-      for(int i = 0; i < out.size(); i ++) {
-        out[i].resize(row, col).O();
-        for(int j = 0; j < out[i].rows(); j ++)
-          out[i].row(j) = avg.subVector((i * row + j) * col, col);
-      }
-      savep2or3("med.ppm", m == 'M' ? normalize<num_t>(stretchPred<num_t>(
-        normalize<num_t>(out))) : out);
+      if(! i) { avg += (p0 = move(pn)); }
+      else std::cout << argv[i + 2] << " : " <<
+        p0.dot(pn) / sqrt(p0.dot(p0) * pn.dot(pn)) << endl;
     }
   } else if(m == 'd') {
     vector<SimpleMatrix<num_t> > in0;

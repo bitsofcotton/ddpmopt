@@ -1,4 +1,4 @@
-# usage: awk -v excl=1 -v tol=1e-4 -f all.awk out.txt
+# usage: awk -v excl=0 -v tol=1e-4 -f all.awk out.txt   (default excl=0: keep blocks where rand63 is constant)
 #
 # 1 block = 111 lines:
 #   v[0..3]   rank   orig target : med avg rand63 last
@@ -7,9 +7,9 @@
 #   v[11..13] offset replaced target : med avg rand63
 #   v[14..109] 16 sign patterns t=0..15, each: rank(med avg rand63) offset(med avg rand63)
 #   last line "x, 4, 5" (x = sign mean of rand63; |x|=1 -> constant, excluded if excl=1)
- 
+
 function abs(x) { return x < 0 ? -x : x }
- 
+
 # mid-rank position of val among the 16 |c_t| (share below val, ties count half); larger = |obs| larger than null
 function midp(col, pred, val,    u, w, g, e) {
   g = 0; e = 0
@@ -20,7 +20,7 @@ function midp(col, pred, val,    u, w, g, e) {
   }
   return (g + 0.5 * e) / 16
 }
- 
+
 function block(    col, pred, p, t, cc, obs, rep, a, s, q, ea, es, va, vs, sm, sm2, mpt, vmp, mpo, mpr, ok, dd, d, ed, qd, vd, od, L) {
   nblk++
   for (col = 0; col < 2; col++) {
@@ -43,7 +43,7 @@ function block(    col, pred, p, t, cc, obs, rep, a, s, q, ea, es, va, vs, sm, s
       vmp = sm2 / 16 - (sm / 16) * (sm / 16)
       mpo = midp(col, pred, abs(obs))
       mpr = midp(col, pred, abs(rep))
- 
+
       n[col, pred]++
       so[col, pred] += abs(obs)
       sE[col, pred] += ea
@@ -58,11 +58,11 @@ function block(    col, pred, p, t, cc, obs, rep, a, s, q, ea, es, va, vs, sm, s
       dd = abs(obs) - abs(rep)
       d1[col, pred] += dd
       d2[col, pred] += dd * dd
- 
+
       ok = 0
       for (t = 0; t < 16; t++) if (abs(ct[col, pred, t] - obs) <= tol) ok = 1
       mat[col, pred] += ok
- 
+
       for (t = 0; t < 16; t++) {
         cc = ct[col, pred, t]
         if (n[col, pred] == 1) { mn[col, pred, t] = cc; mx[col, pred, t] = cc }
@@ -91,16 +91,16 @@ function block(    col, pred, p, t, cc, obs, rep, a, s, q, ea, es, va, vs, sm, s
     if (abs(L) > 0.999) l1[col]++
   }
 }
- 
+
 BEGIN {
   if (tol == "") tol = 1e-4
-  if (excl == "") excl = 1
+  if (excl == "") excl = 0
   cn[0] = "rank"; cn[1] = "offset"
   pn[0] = "med"; pn[1] = "avg"; pn[2] = "rand63"
 }
- 
+
 /^(med|avg|rand_pgm|last_rand)/ { v[c++] = $NF + 0; next }
- 
+
 /, 4, 5$/ {
   x = $1 + 0
   if (c != 110) { nbad++; printf "warn: skip block (%d values)\n", c > "/dev/stderr" }
@@ -108,7 +108,7 @@ BEGIN {
   else block()
   c = 0
 }
- 
+
 END {
   printf "blocks used=%d  excluded(rand63 const)=%d  bad=%d  tol=%g\n\n", nblk, nex, nbad, tol
   if (nblk == 0) exit
@@ -154,6 +154,5 @@ END {
   print "match = share of blocks whose observed cos equals one of the 16 pattern cos (should be ~100%)"
   print "cal_*  = same z on the replaced (independent) target: should look like N(0,1)"
 }
- 
-# Claude generated at (2026/11/23)
 
+# Claude.ai (2026/11/24) generated.
