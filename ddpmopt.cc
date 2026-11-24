@@ -84,7 +84,7 @@ int main(int argc, const char* argv[]) {
       assert(in[in.size() - 1][0].rows() == in[0][0].rows() &&
         in[in.size() - 1][0].cols() == in[0][0].cols());
     }
-    // N.B. might be 3 is enough for internal states LoEM after to take maj.
+    // N.B. if we cannot predict at all, 3 candidates of them could take one.
     const int loop(argv[1][1] == '1' ? int(1) :
       min(int(3), int(in.size() / 21) ));
     const int n((in.size() - loop + 1) / loop);
