@@ -148,3 +148,6 @@ END {
   print "match = share of blocks whose observed cos equals one of the 16 pattern cos (should be ~100%)"
   print "cal_*  = same z on the replaced (independent) target: should look like N(0,1)"
 }
+
+# Claude.ai (2026/11/25) generated, somehow claude output omits them.
+
