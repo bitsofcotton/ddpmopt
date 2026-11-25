@@ -86,11 +86,11 @@ int main(int argc, const char* argv[]) {
     }
     // N.B. if we cannot predict at all, 3 candidates of them could take one.
     const int loop(argv[1][1] == '1' ? int(1) :
-      min(int(3), int(in.size() / 21) ));
+      min(int(3), int(in.size() / 40) ));
     const int n((in.size() - loop + 1) / loop);
     for(int i = 0; i < loop; i ++)
       savep2or3<num_t>(argv[1][1] == '1' ? "predg.ppm" : (string("predg") +
-        to_string(i) + string(".ppm")).c_str(), predMat<num_t, 20>(skipX<
+        to_string(i) + string(".ppm")).c_str(), predMat<num_t, 2>(skipX<
           vector<SimpleMatrix<num_t> > >(in.subVector(in.size() - n * (i + 1)
             - i, n * (i + 1)), i + 1), 3, string(" pred") ) );
     // N.B. needs entire reseed on next prediction.
@@ -116,7 +116,7 @@ int main(int argc, const char* argv[]) {
         for(int j = 0; j < v[i].size(); j ++) v[i][j] = move(work[j].row(i));
       }
       for(int j = 0; j < px; j ++) {
-        SimpleVector<SimpleVector<num_t> > q(predVec<num_t, 20, true>(skipX<
+        SimpleVector<SimpleVector<num_t> > q(predVec<num_t, 2, true>(skipX<
           vector<SimpleVector<num_t> > >(v, j + 1), 2, to_string(j) +
             string("/") + to_string(px) ) );
         for(int i = 0; i < wwork.size(); i ++)
@@ -226,27 +226,15 @@ int main(int argc, const char* argv[]) {
     const int row(in[0][0].rows());
     const int col(in[0][0].cols());
     SimpleVector<num_t> p0(ch * row * col);
-    SimpleVector<num_t> avg(ch * row * col);
-    p0.O(); avg.O();
+    p0.O();
     for(int i = 0; i < in.size(); i ++) {
       SimpleVector<num_t> p(ch * row * col);
       p.O();
       for(int j = 0; j < ch; j ++) for(int k = 0; k < row; k ++)
-        p.setVector((j * row + k) * col, in[i][j].row(k));
-      SimpleVector<num_t> pn(ch * row * col);
-      pn.O();
-      if(argv[1][1] == '\0') {
-        vector<pair<num_t, int> > work;
-        work.reserve(ch * row * col);
-        for(int j = 0; j < p.size(); j ++)
-          work.emplace_back(make_pair(p[j], j));
-        sort(work.begin(), work.end());
-        for(int j = 0; j < work.size(); j ++) pn[work[j].second] = num_t(j + 1);
-        pn = unOffsetHalf<num_t>(pn / num_t(work.size()) );
-      } else pn = unOffsetHalf<num_t>(p);
-      if(! i) { avg += (p0 = move(pn)); }
+        p.setVector((j * row + k) * col, unOffsetHalf<num_t>(in[i][j].row(k)));
+      if(! i) p0 = move(p);
       else std::cout << argv[i + 2] << " : " <<
-        p0.dot(pn) / sqrt(p0.dot(p0) * pn.dot(pn)) << endl;
+        p0.dot(p) / sqrt(p0.dot(p0) * p.dot(p)) << endl;
     }
   } else if(m == 'd') {
     vector<SimpleMatrix<num_t> > in0;

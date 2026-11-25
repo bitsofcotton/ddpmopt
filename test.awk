@@ -7,6 +7,7 @@
 #   last line "x, 4, 5"  (x = sign mean of rand63; |x|=1 -> constant, excluded if excl=1)
 
 function abs(x) { return x < 0 ? -x : x }
+function sgn(x) { return x > tol ? 1 : (x < -tol ? -1 : 0) }
 
 # mid-rank position of val among the 16 |c_t| (ties count half)
 function midp(pred, val,    u, w, g, e) {
@@ -19,19 +20,19 @@ function midp(pred, val,    u, w, g, e) {
   return (g + 0.5 * e) / 16
 }
 
-function block(    pred, p, t, cc, obs, rep, a, s, q, ea, es, va, vs, sm, sm2, mpt, vmp, mpo, mpr, ok, dd, d, ed, qd, vd, od, L) {
+function block(    pred, p, t, cc, obs, rep, a, s, q, ea, es, va, vs, sm, sm2, mpt, vmp, mpo, mpr, ok, dd, d, ed, qd, vd, od, L, s2, dg) {
   nblk++
   for (pred = 0; pred < 3; pred++) {
     obs = v[pred]
     rep = v[4 + pred]
-    a = 0; s = 0; q = 0
+    a = 0; s = 0; q = 0; s2 = 0
     for (t = 0; t < 16; t++) {
       cc = v[7 + 3 * t + pred]
       ct[pred, t] = cc
-      a += abs(cc); s += cc; q += cc * cc
+      a += abs(cc); s += sgn(cc); s2 += sgn(cc) * sgn(cc); q += cc * cc
     }
     ea = a / 16; es = s / 16; q = q / 16
-    va = q - ea * ea; vs = q - es * es
+    va = q - ea * ea; vs = s2 / 16 - es * es
     sm = 0; sm2 = 0
     for (t = 0; t < 16; t++) {
       mpt = midp(pred, abs(ct[pred, t]))
@@ -46,12 +47,14 @@ function block(    pred, p, t, cc, obs, rep, a, s, q, ea, es, va, vs, sm, sm2, m
     sE[pred] += ea
     da[pred] += abs(obs) - ea
     Va[pred] += va
-    ds[pred] += obs - es
+    ds[pred] += sgn(obs) - es
     Vs[pred] += vs
     dm[pred] += mpo - 0.5
     Vm[pred] += vmp
     dr[pred] += abs(rep) - ea
     dmr[pred] += mpr - 0.5
+    dsr[pred] += sgn(rep) - es
+    dg = sgn(obs) - sgn(rep); dg1[pred] += dg; dg2[pred] += dg * dg
     dd = abs(obs) - abs(rep)
     d1[pred] += dd
     d2[pred] += dd * dd
@@ -68,6 +71,7 @@ function block(    pred, p, t, cc, obs, rep, a, s, q, ea, es, va, vs, sm, sm2, m
         if (cc > mx[pred, t]) mx[pred, t] = cc
       }
     }
+    if (pred == 0) printf "%d %+.3f %+.3f\n", nblk, sgn(rep) - es, vs > "/dev/stderr"
   }
   # paired differences: med - avg, med - rand63 (same target => enumerate jointly)
   for (p = 1; p < 3; p++) {
@@ -145,9 +149,16 @@ END {
       (sp < tol ? "   <-- CONSTANT across blocks (carries no per-block information)" : "")
   }
   printf "last: mean=%+.3f  mean|.|=%.3f  frac(|last|=1)=%.3f\n", ls / nblk, las / nblk, l1 / nblk
+  print ""
+  print "[5] sgn: cal_sgn (replaced target, should be N(0,1)) and model-free mean(sgn(obs)-sgn(repl)) +- se"
+  for (pred = 0; pred < 3; pred++) {
+    N = n[pred]; m = dg1[pred] / N
+    v2 = (N > 1) ? (dg2[pred] / N - m * m) / (N - 1) : 0
+    printf "%-6s cal_sgn=%7s  %+8.4f +- %.4f\n", pn[pred], (Vs[pred] > 0 ? sprintf("%+.2f", dsr[pred] / sqrt(Vs[pred])) : "NA"), m, (v2 > 0 ? sqrt(v2) : 0)
+  }
   print "match = share of blocks whose observed cos equals one of the 16 pattern cos (should be ~100%)"
   print "cal_*  = same z on the replaced (independent) target: should look like N(0,1)"
 }
 
-# Claude.ai (2026/11/25) generated, somehow claude output omits them.
+# Conversation with claude.ai generated at (2026/11/26)
 
