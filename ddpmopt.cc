@@ -85,6 +85,11 @@ int main(int argc, const char* argv[]) {
         in[in.size() - 1][0].cols() == in[0][0].cols());
     }
     // N.B. if we cannot predict at all, 3 candidates of them could take one.
+    //      we're betting 0 << |integrate (prediction tensor dot target)|,
+    //      however they're not stable on each of the index even reseed they
+    //      often get almost the same quality result.
+    //      if there's many much of the calculation time order, we can get each
+    //      whole context driven result also brute force loop#.
     const int loop(argv[1][1] == '1' ? int(1) :
       min(int(3), int(in.size() / 40) ));
     const int n((in.size() - loop + 1) / loop);
@@ -93,8 +98,7 @@ int main(int argc, const char* argv[]) {
         to_string(i) + string(".ppm")).c_str(), predMat<num_t, 2>(skipX<
           vector<SimpleMatrix<num_t> > >(in.subVector(in.size() - n * (i + 1)
             - i, n * (i + 1)), i + 1), 3, string(" pred") ) );
-    // N.B. needs entire reseed on next prediction.
-  } else if(m == 'q') {
+  } else if(m == 'q')
     for(int i0 = 2; i0 < argc; i0 ++) {
       vector<SimpleMatrix<num_t> > work;
       if(! loadp2or3<num_t>(work, argv[i0])) continue;
@@ -122,10 +126,13 @@ int main(int argc, const char* argv[]) {
         for(int i = 0; i < wwork.size(); i ++)
           wwork[i].row(work[i].rows() + j) = move(q[i]);
       }
+      for(int j = 0; j < wwork.size(); j ++)
+        wwork[j].setMatrix(work[j].rows(), 0, normalize<num_t>(
+          wwork[j].subMatrix(work[j].rows(), 0, px, work[j].cols()) ));
       if(! savep2or3<num_t>(argv[i0], move(wwork)) )
         cerr << "failed to save." << endl;
     }
-  } else if(m == 'h') {
+  else if(m == 'h') {
     bool met(false);
     for(int i0 = 2; i0 < argc; i0 ++) {
       vector<SimpleMatrix<num_t> > work;
@@ -236,20 +243,6 @@ int main(int argc, const char* argv[]) {
       else std::cout << argv[i + 2] << " : " <<
         p0.dot(p) / sqrt(p0.dot(p0) * p.dot(p)) << endl;
     }
-  } else if(m == 'd') {
-    vector<SimpleMatrix<num_t> > in0;
-    vector<SimpleMatrix<num_t> > in1;
-    loadp2or3<num_t>(in0, argv[2]);
-    loadp2or3<num_t>(in1, argv[3]);
-    assert(in0.size() == in1.size());
-    for(int i = 0; i < in0.size(); i ++)
-      for(int j = 0; j < in0[i].rows(); j ++) {
-        for(int k = 0; k < in1[i].cols(); k ++)
-          in1[i](j, k) = sgn<num_t>(unOffsetHalf<num_t>(in1[i](j, k)));
-        in0[i].row(j) = offsetHalf<num_t>(unOffsetHalf<num_t>(in0[i].row(j)
-          ).tdot(in1[i].row(j)) );
-      }
-    savep2or3("tdot.ppm", in0);
   } else goto usage;
   cerr << "Done" << endl;
   return 0;
