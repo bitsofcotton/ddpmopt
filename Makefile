@@ -35,6 +35,8 @@ LDFLAGS+=	-lc++ -L/usr/local/lib
 CXXFLAGS+=	-D_ARCFOUR_
 # N.B. raw prediction on pred...
 #CXXFLAGS+=	-D_P_RAW_
+# N.B. ddpmopt test
+#CXXFLAGS+=	-D_P_TEST_
 # cf. -DMI_OVERRIDE=off
 MPFLAGS+=	-I/usr/local/include -D_MIMALLOC_
 MPFLAGS+=	-L/usr/local/lib -lmimalloc
